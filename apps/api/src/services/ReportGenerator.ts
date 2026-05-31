@@ -1,5 +1,5 @@
 import * as dbModule from '../db.js';
-import { reportingRecords, workOrders, alerts } from '../db/schema.js';
+import { anomalies } from '../db/schema.js';
 import { gte, lte, and } from 'drizzle-orm';
 import * as cron from 'node-cron';
 import Groq from 'groq-sdk';

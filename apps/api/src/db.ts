@@ -1,5 +1,5 @@
 import { eq, and, desc, gte, lte } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/mysql2";
+import { drizzle } from "drizzle-orm/postgres";
 import mysql from "mysql2/promise";
 import { 
   InsertUser, users, 

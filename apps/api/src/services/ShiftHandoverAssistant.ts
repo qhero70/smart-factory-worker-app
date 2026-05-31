@@ -1,5 +1,5 @@
 import * as dbModule from '../db.js';
-import { reportingRecords, workOrders, alerts, machines } from '../db/schema.js';
+import { anomalies } from '../db/schema.js';
 import { eq, gte, lte, and } from 'drizzle-orm';
 import Groq from 'groq-sdk';
 import { LineNotificationService } from './LineNotificationService';
