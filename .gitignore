@@ -1,0 +1,51 @@
+# Expo
+.expo/
+.expo-shared/
+dist/
+npm-debug.*
+
+# Node
+node_modules/
+.pnp
+.pnp.js
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Build
+build/
+.next/
+out/
+.turbo/
+dist/
+
+# Database
+*.db
+*.sqlite
+drizzle/
+
+# Logs
+logs/
+*.log
+
+# Testing
+coverage/
+.nyc_output/
+
+# Docker
+.dockerignore
+Dockerfile.local
+
+# OS
+Thumbs.db
+.DS_Store

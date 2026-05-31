@@ -1,0 +1,43 @@
+{
+  "name": "smart-factory-worker-app",
+  "version": "1.0.0",
+  "description": "Production-ready mobile PWA for smart factory workers (Taiwan)",
+  "private": true,
+  "workspaces": [
+    "apps/mobile",
+    "apps/api"
+  ],
+  "scripts": {
+    "setup": "npm ci && npm run db:migrate && npm run seed",
+    "dev": "npm run dev -w apps/api & npm run dev -w apps/mobile",
+    "dev:api": "npm run dev -w apps/api",
+    "dev:mobile": "npm run dev -w apps/mobile",
+    "build": "npm run build -w apps/api && npm run build -w apps/mobile",
+    "test": "npm test -w apps/api && npm test -w apps/mobile",
+    "typecheck": "npm run typecheck -w apps/api && npm run typecheck -w apps/mobile",
+    "lint": "npm run lint -w apps/api && npm run lint -w apps/mobile",
+    "db:migrate": "npm run migrate -w apps/api",
+    "seed": "npm run seed -w apps/api"
+  },
+  "keywords": [
+    "smart-factory",
+    "mobile",
+    "pwa",
+    "react-native",
+    "expo",
+    "manufacturing"
+  ],
+  "author": "qhero70",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0",
+    "husky": "^9.0.0",
+    "lint-staged": "^15.0.0",
+    "prettier": "^3.0.0",
+    "eslint": "^8.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "turbo": "^2.0.0"
+  }
+}
