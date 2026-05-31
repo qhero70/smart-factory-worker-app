@@ -1,10 +1,10 @@
-import * as dbModule from '../db.js';
+import { db } from '../db.js';
 import { anomalies } from '../db/schema.js';
 import { gte, lte, and } from 'drizzle-orm';
 import * as cron from 'node-cron';
 import Groq from 'groq-sdk';
-import { LineNotificationService } from './LineNotificationService';
-import logger from '../utils/logger';
+import { LineNotificationService } from './LineNotificationService.js';
+import logger from '../utils/logger.js';
 
 interface DailyReport {
   date: Date;

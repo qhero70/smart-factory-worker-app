@@ -1,4 +1,4 @@
-import * as dbModule from '../db.js';
+import { db } from '../db.js';
 import { workOrders, reports, users } from '../db/schema.js';
 import { eq, and, gte, lte } from 'drizzle-orm';
 import { getLineBot } from './LineBot';

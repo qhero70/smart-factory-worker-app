@@ -4,8 +4,8 @@ import * as path from 'path';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import { google } from 'googleapis';
-import { LineNotificationService } from './LineNotificationService';
-import logger from '../utils/logger';
+import { LineNotificationService } from './LineNotificationService.js';
+import logger from '../utils/logger.js';
 
 const execAsync = promisify(exec);
 

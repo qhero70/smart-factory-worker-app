@@ -1,7 +1,7 @@
 import * as Sentry from '@sentry/node';
 import rateLimit from 'express-rate-limit';
-import { LineNotificationService } from './LineNotificationService';
-import logger from '../utils/logger';
+import { LineNotificationService } from './LineNotificationService.js';
+import logger from '../utils/logger.js';
 
 class MonitoringService {
   private lineService: LineNotificationService;

@@ -1,5 +1,5 @@
 import { getGoogleAuth } from '../config/google.js';
-import * as dbModule from '../db.js';
+import { db } from '../db.js';
 import { users, products, machines, workstations, schedules } from '../db/schema.js';
 import { eq } from 'drizzle-orm';
 import * as crypto from 'crypto';

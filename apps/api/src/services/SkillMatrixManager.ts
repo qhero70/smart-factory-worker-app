@@ -1,8 +1,8 @@
-import * as dbModule from '../db.js';
+import { db } from '../db.js';
 import { personnel, machines, skillMatrix } from '../db/schema.js';
 import { eq, and } from 'drizzle-orm';
-import { LineNotificationService } from './LineNotificationService';
-import logger from '../utils/logger';
+import { LineNotificationService } from './LineNotificationService.js';
+import logger from '../utils/logger.js';
 
 interface SkillLevel {
   machineId: number;

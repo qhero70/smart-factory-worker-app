@@ -1,10 +1,10 @@
 import Groq from 'groq-sdk';
 import * as cron from 'node-cron';
-import * as dbModule from '../db.js';
-import { toolAlerts } from '../db/schema.js';
+import { db } from '../db.js';
+import { toolAlerts, workOrders } from '../db/schema.js';
 import { eq } from 'drizzle-orm';
-import { LineNotificationService } from './LineNotificationService';
-import logger from '../utils/logger';
+import { LineNotificationService } from './LineNotificationService.js';
+import logger from '../utils/logger.js';
 
 interface ToolLifeData {
   toolId: number;
