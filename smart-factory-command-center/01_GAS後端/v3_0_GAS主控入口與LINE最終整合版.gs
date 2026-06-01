@@ -1,10 +1,10 @@
 /**
- * v3.1.0 GAS 主控入口與 LINE Webhook 最終整合版
- * 用途：統一 GitHub Pages 前端 API、LINE Webhook、健康檢查、初始化、系統總檢查與 v1.0~v3.1 功能路由。
+ * v3.2.0 GAS 主控入口與 LINE Webhook 最終整合版
+ * 用途：統一 GitHub Pages 前端 API、LINE Webhook、健康檢查、初始化、系統總檢查與 v1.0~v3.2 功能路由。
  * 使用方式：放在同一個 Apps Script 專案中。若專案已有 doGet / doPost，請以本檔為最終入口，避免重複定義。
  */
 
-const V3_0_系統版本 = 'v3.1.0';
+const V3_0_系統版本 = 'v3.2.0';
 
 function doGet(e) {
   const action = e && e.parameter ? (e.parameter.action || '健康檢查') : '健康檢查';
@@ -52,7 +52,12 @@ function 呼叫既有函數_v3_0_(action, p) {
 
   if (p.工作表名稱 !== undefined && p.資料 !== undefined) return fn(p.工作表名稱, p.資料);
   if (p.工作表名稱 !== undefined) return fn(p.工作表名稱);
-  if (p.修補編號 !== undefined) return fn(p.修補編號, p.新狀態, p.處理紀錄, p.負責人);
+
+  // v3.2 GitHub / Commit 對照：必須放在一般修補狀態更新之前
+  if (p.修補編號 !== undefined && p.CommitSHA !== undefined) return fn(p.修補編號, p.CommitSHA, p.備註);
+  if (p.修補編號 !== undefined && p.新狀態 !== undefined) return fn(p.修補編號, p.新狀態, p.處理紀錄, p.負責人);
+  if (p.修補編號 !== undefined) return fn(p.修補編號);
+
   if (p.任務編號 !== undefined) return fn(p.任務編號, p.新狀態, p.處理紀錄, p.負責人);
   if (p.共用素材編號 !== undefined && p.到貨數量 !== undefined) return fn(p.共用素材編號, p.到貨數量);
   if (p.目標ID !== undefined) return fn(p.目標ID);
@@ -80,16 +85,17 @@ function 初始化_v3_0_正式上線() {
     '升級_v2_4_共用素材主檔與紀錄表',
     '升級_v2_6_跨部門待辦任務表',
     '升級_v2_9_任務自動推播設定表',
-    '升級_v3_1_上線測試錯誤表'
+    '升級_v3_1_上線測試錯誤表',
+    '升級_v3_2_修補GitHub與重測表'
   ].forEach(call);
-  return { 成功: true, 版本: V3_0_系統版本, 訊息: 'v3.1 正式上線初始化已執行', steps };
+  return { 成功: true, 版本: V3_0_系統版本, 訊息: 'v3.2 正式上線初始化已執行', steps };
 }
 
 function 系統總檢查_v3_0_() {
   const requiredSheets = [
     '00_系統設定','01_人員主檔','02_產品主檔','03_機台主檔','04_工站主檔','10_工單主檔','10_排程需求池',
     '10_共用素材主檔','10_共用素材到貨紀錄','10_鎖料分配歷史','10_跨部門待辦任務','00_任務自動推播設定',
-    '00_上線測試錯誤回報','00_上線修補任務'
+    '00_上線測試錯誤回報','00_上線修補任務','00_修補GitHub對照','00_修補重測清單'
   ];
   const ss = 取得試算表_();
   const sheets = ss.getSheets().map(s => s.getName());
@@ -97,7 +103,7 @@ function 系統總檢查_v3_0_() {
   const requiredFunctions = [
     '取得主檔管理資料','新增或更新主檔','取得KPI戰情','取得AI摘要','產生LINE回覆訊息_v3_0_',
     '取得_v2_7_任務統計儀表板資料','取得_v2_8_任務負責人績效統計','取得_v2_9_任務週月完成率統計',
-    '取得_v3_1_上線修補總覽','回報_v3_1_上線測試錯誤'
+    '取得_v3_1_上線修補總覽','回報_v3_1_上線測試錯誤','取得_v3_2_修補GitHub總覽','產生_v3_2_修補建議'
   ];
   const 函數狀態 = requiredFunctions.map(name => ({ 函數: name, 狀態: (typeof globalThis !== 'undefined' && typeof globalThis[name] === 'function') || typeof this[name] === 'function' ? '已載入' : '缺少' }));
   return {
