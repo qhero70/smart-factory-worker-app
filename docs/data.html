@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>智慧製造資料管理</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC','Segoe UI',sans-serif;background:#07111f;color:#ecfeff}.玻璃{background:rgba(15,23,42,.78);border:1px solid rgba(148,163,184,.22);backdrop-filter:blur(18px)}.卡{border-radius:22px;box-shadow:0 18px 45px rgba(0,0,0,.28)}.按鈕{border-radius:16px;padding:.8rem 1rem;font-weight:900}input,select,textarea{background:#0f172a!important;border:1px solid #334155!important;color:#fff!important;border-radius:14px!important;padding:.75rem!important;width:100%}label{font-size:.82rem;color:#a7f3d0;font-weight:800}th,td{white-space:nowrap;vertical-align:top}.頁籤.active{background:#14b8a6;color:#042f2e}
+  </style>
+</head>
+<body>
+<main class="max-w-7xl mx-auto p-4 pb-24">
+  <section class="玻璃 卡 p-5 mb-4">
+    <div class="flex flex-wrap justify-between items-center gap-3">
+      <div>
+        <p class="text-teal-200 font-black text-sm">智慧製造中央作戰指揮中心 v1.3.0</p>
+        <h1 class="text-2xl md:text-4xl font-black">正式資料管理</h1>
+        <p id="狀態文字" class="text-slate-300 mt-1">尚未連線</p>
+      </div>
+      <div class="flex gap-2"><a class="按鈕 bg-slate-700" href="./app.html">回戰情室</a><button class="按鈕 bg-teal-400 text-slate-950" onclick="載入資料()">重新整理</button></div>
+    </div>
+  </section>
+
+  <section class="玻璃 卡 p-4 mb-4">
+    <label>GAS Web App URL</label>
+    <div class="grid md:grid-cols-[1fr_auto_auto] gap-2 mt-1">
+      <input id="GAS網址" placeholder="貼上 https://script.google.com/macros/s/.../exec">
+      <button class="按鈕 bg-teal-500 text-slate-950" onclick="儲存設定()">儲存</button>
+      <button class="按鈕 bg-cyan-300 text-slate-950" onclick="測試連線()">測試</button>
+    </div>
+  </section>
+
+  <nav class="grid grid-cols-2 md:grid-cols-6 gap-2 mb-4">
+    <button class="頁籤 active 按鈕 玻璃" onclick="切換表('01_人員主檔',this)">人員</button>
+    <button class="頁籤 按鈕 玻璃" onclick="切換表('02_產品主檔',this)">產品</button>
+    <button class="頁籤 按鈕 玻璃" onclick="切換表('03_機台主檔',this)">機台</button>
+    <button class="頁籤 按鈕 玻璃" onclick="切換表('04_工站主檔',this)">工站</button>
+    <button class="頁籤 按鈕 玻璃" onclick="切換表('10_工單主檔',this)">工單</button>
+    <button class="頁籤 按鈕 玻璃" onclick="切換表('11_檢具主檔',this)">檢具</button>
+  </nav>
+
+  <section class="grid lg:grid-cols-[420px_1fr] gap-4">
+    <div class="玻璃 卡 p-4">
+      <h2 class="font-black text-xl mb-3">新增 / 更新資料</h2>
+      <p class="text-slate-300 text-sm mb-3">主鍵相同會更新，主鍵不存在會新增。</p>
+      <div id="表單區" class="grid gap-3"></div>
+      <button class="按鈕 bg-teal-400 text-slate-950 w-full mt-4" onclick="送出資料()">儲存主檔資料</button>
+      <button class="按鈕 bg-red-300 text-slate-950 w-full mt-2" onclick="停用資料()">停用目前主鍵資料</button>
+    </div>
+
+    <div class="玻璃 卡 p-4 overflow-hidden">
+      <div class="flex flex-wrap justify-between gap-2 mb-3">
+        <h2 id="目前表名" class="font-black text-xl">資料表</h2>
+        <div class="flex gap-2"><button class="按鈕 bg-amber-300 text-slate-950" onclick="下載CSV模板()">下載CSV模板</button><button class="按鈕 bg-cyan-300 text-slate-950" onclick="顯示匯入區()">CSV匯入</button></div>
+      </div>
+      <div id="匯入區" class="hidden mb-4 bg-slate-950/70 p-3 rounded-2xl">
+        <label>貼上 CSV 文字</label>
+        <textarea id="CSV文字" rows="8" placeholder="第一列必須是欄位名稱"></textarea>
+        <div class="flex gap-2 mt-2"><button class="按鈕 bg-fuchsia-300 text-slate-950" onclick="匯入CSV(false)">追加匯入</button><button class="按鈕 bg-red-300 text-slate-950" onclick="匯入CSV(true)">覆蓋匯入</button></div>
+      </div>
+      <div id="資料表區" class="overflow-auto max-h-[65vh]"></div>
+    </div>
+  </section>
+</main>
+<script>
+const 主鍵對照={'01_人員主檔':'工號','02_產品主檔':'產品編號','03_機台主檔':'機台編號','04_工站主檔':'工站代碼','10_工單主檔':'工單編號','11_檢具主檔':'檢具編號'};
+let 目前表='01_人員主檔',目前欄位=[],目前資料=[];
+function GAS(){return localStorage.getItem('GAS網址')||''}
+async function 呼叫API(action,data={}){const url=GAS();if(!url)throw new Error('請先貼上 GAS Web App URL');const r=await fetch(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action,...data})});return r.json()}
+function 儲存設定(){localStorage.setItem('GAS網址',document.getElementById('GAS網址').value.trim());alert('已儲存')}
+async function 測試連線(){try{const r=await 呼叫API('健康檢查');document.getElementById('狀態文字').textContent=`已連線｜${r.版本}`;alert(JSON.stringify(r,null,2))}catch(e){alert(e.message)}}
+function 切換表(表名,btn){目前表=表名;document.querySelectorAll('.頁籤').forEach(x=>x.classList.remove('active'));btn.classList.add('active');載入資料()}
+async function 載入資料(){try{const r=await 呼叫API('取得主檔管理資料',{工作表名稱:目前表});if(!r.成功)throw new Error(r.訊息);目前欄位=r.欄位;目前資料=r.資料||[];document.getElementById('目前表名').textContent=`${目前表}｜主鍵：${r.主鍵欄位}`;document.getElementById('狀態文字').textContent=`已載入 ${目前表}，共 ${目前資料.length} 筆`;渲染表單();渲染資料表()}catch(e){document.getElementById('狀態文字').textContent=e.message}}
+function 渲染表單(資料={}){document.getElementById('表單區').innerHTML=目前欄位.map(h=>`<div><label>${h}</label><input id="欄_${h}" value="${資料[h]??''}" ${h==='更新時間'?'readonly':''}></div>`).join('')}
+function 渲染資料表(){if(!目前資料.length){document.getElementById('資料表區').innerHTML='<p class="text-slate-300">尚無資料</p>';return}document.getElementById('資料表區').innerHTML=`<table class="w-full text-sm"><thead><tr><th class="p-2 text-left text-teal-200">操作</th>${目前欄位.map(h=>`<th class="p-2 text-left text-teal-200">${h}</th>`).join('')}</tr></thead><tbody>${目前資料.map((r,i)=>`<tr class="border-t border-slate-700"><td class="p-2"><button class="px-3 py-1 rounded-xl bg-cyan-300 text-slate-950 font-black" onclick="編輯第幾筆(${i})">編輯</button></td>${目前欄位.map(h=>`<td class="p-2">${r[h]??''}</td>`).join('')}</tr>`).join('')}</tbody></table>`}
+function 編輯第幾筆(i){渲染表單(目前資料[i]);scrollTo({top:0,behavior:'smooth'})}
+async function 送出資料(){try{const obj={};目前欄位.forEach(h=>obj[h]=document.getElementById('欄_'+h).value);const r=await 呼叫API('新增或更新主檔',{工作表名稱:目前表,資料:obj});alert(r.訊息||JSON.stringify(r));載入資料()}catch(e){alert(e.message)}}
+async function 停用資料(){try{const key=主鍵對照[目前表];const val=document.getElementById('欄_'+key)?.value;if(!val)return alert('請先填入或選擇主鍵：'+key);if(!confirm('確定停用 '+val+'？'))return;const r=await 呼叫API('停用主檔資料',{工作表名稱:目前表,主鍵值:val});alert(r.訊息||JSON.stringify(r));載入資料()}catch(e){alert(e.message)}}
+function 顯示匯入區(){document.getElementById('匯入區').classList.toggle('hidden')}
+function 下載CSV模板(){const csv=目前欄位.join(',')+'\n';const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=目前表+'_CSV模板.csv';a.click();URL.revokeObjectURL(a.href)}
+async function 匯入CSV(覆蓋){try{const csv=document.getElementById('CSV文字').value;if(!csv.trim())return alert('請先貼上 CSV 文字');if(覆蓋&&!confirm('覆蓋會清空原資料列，確定？'))return;const r=await 呼叫API('匯入CSV主檔',{工作表名稱:目前表,CSV文字:csv,覆蓋:覆蓋?'是':'否'});alert(r.訊息||JSON.stringify(r));載入資料()}catch(e){alert(e.message)}}
+document.getElementById('GAS網址').value=GAS();載入資料();
+</script>
+</body>
+</html>
