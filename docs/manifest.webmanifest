@@ -1,0 +1,10 @@
+{
+  "name": "智慧製造中央作戰指揮中心",
+  "short_name": "製造戰情室",
+  "start_url": "./app.html",
+  "display": "standalone",
+  "background_color": "#07111f",
+  "theme_color": "#0f766e",
+  "lang": "zh-Hant",
+  "orientation": "portrait-primary"
+}
