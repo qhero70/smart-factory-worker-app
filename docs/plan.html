@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>生產計畫清洗與工單生成</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC','Segoe UI',sans-serif;background:#07111f;color:#ecfeff}.玻璃{background:rgba(15,23,42,.78);border:1px solid rgba(148,163,184,.22);backdrop-filter:blur(18px)}.卡{border-radius:22px;box-shadow:0 18px 45px rgba(0,0,0,.28)}.按鈕{border-radius:16px;padding:.8rem 1rem;font-weight:900}input,select,textarea{background:#0f172a!important;border:1px solid #334155!important;color:#fff!important;border-radius:14px!important;padding:.75rem!important;width:100%}label{font-size:.82rem;color:#a7f3d0;font-weight:800}th,td{white-space:nowrap;vertical-align:top}.紅{color:#fca5a5}.黃{color:#fde68a}.綠{color:#86efac}
+  </style>
+</head>
+<body>
+<main class="max-w-7xl mx-auto p-4 pb-24">
+  <section class="玻璃 卡 p-5 mb-4">
+    <div class="flex flex-wrap justify-between items-center gap-3">
+      <div>
+        <p class="text-teal-200 font-black text-sm">智慧製造中央作戰指揮中心 v1.4.0</p>
+        <h1 class="text-2xl md:text-4xl font-black">生產計畫清洗與工單生成</h1>
+        <p id="狀態文字" class="text-slate-300 mt-1">先貼標準計畫 CSV，再產生工單與排程需求。</p>
+      </div>
+      <div class="flex gap-2"><a class="按鈕 bg-slate-700" href="./app.html">回戰情室</a><a class="按鈕 bg-amber-300 text-slate-950" href="./data.html">資料管理</a></div>
+    </div>
+  </section>
+
+  <section class="玻璃 卡 p-4 mb-4">
+    <label>GAS Web App URL</label>
+    <div class="grid md:grid-cols-[1fr_auto_auto] gap-2 mt-1">
+      <input id="GAS網址" placeholder="貼上 https://script.google.com/macros/s/.../exec">
+      <button class="按鈕 bg-teal-500 text-slate-950" onclick="儲存設定()">儲存</button>
+      <button class="按鈕 bg-cyan-300 text-slate-950" onclick="測試連線()">測試</button>
+    </div>
+  </section>
+
+  <section class="grid lg:grid-cols-[420px_1fr] gap-4">
+    <div class="玻璃 卡 p-4">
+      <h2 class="font-black text-xl mb-3">標準計畫 CSV</h2>
+      <p class="text-slate-300 text-sm leading-7 mb-3">第一列欄位需包含：產品編號、品名、計畫量、交期。其他欄位可選填：客戶品號、工站名稱、建議機台、需求人力、優先級、來源、備註。</p>
+      <textarea id="CSV文字" rows="14" placeholder="產品編號,品名,計畫量,交期,工站名稱,建議機台,需求人力,優先級,來源,備註&#10;A900200000,ASSY 測試成品,100,2026-06-05,A5 精車站,1064,1,高,5月計畫表,測試"></textarea>
+      <div class="grid grid-cols-2 gap-2 mt-3">
+        <button class="按鈕 bg-amber-300 text-slate-950" onclick="載入範例()">載入範例</button>
+        <button class="按鈕 bg-teal-400 text-slate-950" onclick="清洗計畫()">清洗計畫</button>
+        <button class="按鈕 bg-cyan-300 text-slate-950" onclick="下載模板()">下載模板</button>
+        <button class="按鈕 bg-fuchsia-300 text-slate-950" onclick="寫入工單()">寫入工單</button>
+      </div>
+      <button class="按鈕 bg-lime-300 text-slate-950 w-full mt-2" onclick="下載排程需求CSV()">下載排程需求池 CSV</button>
+    </div>
+
+    <div class="space-y-4">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3" id="統計區"></div>
+      <div class="玻璃 卡 p-4 overflow-hidden"><h2 class="font-black text-xl mb-3">清洗結果</h2><div id="清洗結果" class="overflow-auto max-h-[42vh]"></div></div>
+      <div class="玻璃 卡 p-4 overflow-hidden"><h2 class="font-black text-xl mb-3">檢查訊息</h2><div id="檢查訊息" class="space-y-2"></div></div>
+    </div>
+  </section>
+</main>
+<script>
+let 清洗資料=[],排程資料=[];
+function GAS(){return localStorage.getItem('GAS網址')||''}
+async function 呼叫API(action,data={}){const url=GAS();if(!url)throw new Error('請先貼上 GAS Web App URL');const r=await fetch(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action,...data})});return r.json()}
+function 儲存設定(){localStorage.setItem('GAS網址',document.getElementById('GAS網址').value.trim());alert('已儲存')}
+async function 測試連線(){try{const r=await 呼叫API('健康檢查');document.getElementById('狀態文字').textContent='已連線｜'+r.版本;alert(JSON.stringify(r,null,2))}catch(e){alert(e.message)}}
+function 載入範例(){document.getElementById('CSV文字').value='產品編號,品名,計畫量,交期,工站名稱,建議機台,需求人力,優先級,來源,備註\nA900200000,ASSY 測試成品,100,2026-06-05,A5 精車站,1064,1,高,5月計畫表,測試\nA900200008,ASSY 測試半成品,200,2026-06-06,A5 精車站,1083,1,一般,5月計畫表,測試';}
+function 解析CSV(text){const rows=[];let row=[],cur='',q=false;for(let i=0;i<text.length;i++){const c=text[i],n=text[i+1];if(c==='"'&&q&&n==='"'){cur+='"';i++;continue}if(c==='"'){q=!q;continue}if(c===','&&!q){row.push(cur);cur='';continue}if((c==='\n'||c==='\r')&&!q){if(c==='\r'&&n==='\n')i++;row.push(cur);if(row.some(v=>v.trim()!==''))rows.push(row);row=[];cur='';continue}cur+=c}row.push(cur);if(row.some(v=>v.trim()!==''))rows.push(row);return rows}
+function 清洗計畫(){const rows=解析CSV(document.getElementById('CSV文字').value.trim());const msg=[];清洗資料=[];排程資料=[];if(rows.length<2){顯示訊息(['CSV 至少需要表頭與一筆資料'],true);return}const h=rows[0].map(x=>x.trim());const 必填=['產品編號','品名','計畫量','交期'];必填.forEach(x=>{if(!h.includes(x))msg.push('缺少必填欄位：'+x)});if(msg.length){顯示訊息(msg,true);return}rows.slice(1).forEach((r,i)=>{const o={};h.forEach((k,idx)=>o[k]=(r[idx]||'').trim());const 缺=[];必填.forEach(k=>{if(!o[k])缺.push(k)});const qty=Number(o['計畫量']||0);if(!qty||qty<=0)缺.push('計畫量必須大於0');if(缺.length){msg.push(`第 ${i+2} 列跳過：${缺.join('、')}`);return}const 工單編號=o['工單編號']||`MO-${日期碼()}-${String(i+1).padStart(3,'0')}`;const 工單={工單編號,產品編號:o['產品編號'],品名:o['品名'],計畫量:qty,已完成量:0,不良量:0,開始日:o['開始日']||今天(),預計完工日:o['交期'],優先級:o['優先級']||'一般',狀態:'待生產',備註:o['備註']||''};清洗資料.push(工單);排程資料.push({需求編號:`REQ-${工單編號}`,來源:o['來源']||'計畫清洗',產品編號:o['產品編號'],品名:o['品名'],需求量:qty,交期:o['交期'],建議工站:o['工站名稱']||'',建議機台:o['建議機台']||'',需求人力:o['需求人力']||'',狀態:'待排程',更新時間:new Date().toISOString()});});顯示結果();顯示訊息(msg.length?msg:['清洗完成，沒有重大錯誤'],msg.length>0)}
+function 今天(){return new Date().toISOString().slice(0,10)}function 日期碼(){const d=new Date();return d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')}
+function 顯示結果(){document.getElementById('統計區').innerHTML=[['工單筆數',清洗資料.length],['計畫總量',清洗資料.reduce((s,x)=>s+Number(x.計畫量||0),0)],['需求池筆數',排程資料.length],['狀態','待寫入']].map(x=>`<div class="玻璃 卡 p-4"><p class="text-slate-400 text-xs">${x[0]}</p><p class="text-3xl font-black">${x[1]}</p></div>`).join('');document.getElementById('清洗結果').innerHTML=表格(清洗資料)}
+function 顯示訊息(list,warning){document.getElementById('檢查訊息').innerHTML=list.map(x=>`<div class="${warning?'bg-amber-500/20 border-amber-300':'bg-emerald-500/20 border-emerald-300'} border rounded-2xl p-3">${x}</div>`).join('')}
+function 表格(rows){if(!rows.length)return '<p class="text-slate-300">尚無資料</p>';const hs=Object.keys(rows[0]);return `<table class="w-full text-sm"><thead><tr>${hs.map(h=>`<th class="text-left p-2 text-teal-200">${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr class="border-t border-slate-700">${hs.map(h=>`<td class="p-2">${r[h]??''}</td>`).join('')}</tr>`).join('')}</tbody></table>`}
+async function 寫入工單(){if(!清洗資料.length)return alert('請先清洗計畫');if(!confirm(`確定寫入 ${清洗資料.length} 筆工單？`))return;let ok=0,fail=0;for(const x of 清洗資料){try{const r=await 呼叫API('新增或更新主檔',{工作表名稱:'10_工單主檔',資料:x});r.成功?ok++:fail++}catch(e){fail++}}alert(`工單寫入完成：成功 ${ok}，失敗 ${fail}`)}
+function 轉CSV(rows){if(!rows.length)return '';const hs=Object.keys(rows[0]);const esc=v=>`"${String(v??'').replace(/"/g,'""')}"`;return hs.join(',')+'\n'+rows.map(r=>hs.map(h=>esc(r[h])).join(',')).join('\n')}
+function 下載CSV模板(){const h='產品編號,品名,計畫量,交期,工站名稱,建議機台,需求人力,優先級,來源,備註\n';下載('生產計畫標準匯入模板.csv',h)}
+function 下載排程需求CSV(){if(!排程資料.length)return alert('請先清洗計畫');下載('10_排程需求池_匯入資料.csv',轉CSV(排程資料))}
+function 下載(name,text){const blob=new Blob(['\ufeff'+text],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();URL.revokeObjectURL(a.href)}
+document.getElementById('GAS網址').value=GAS();載入範例();
+</script>
+</body>
+</html>
