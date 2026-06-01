@@ -6,7 +6,7 @@
   <title>主管會議摘要</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC','Segoe UI',sans-serif;background:#07111f;color:#ecfeff}.玻璃{background:rgba(15,23,42,.78);border:1px solid rgba(148,163,184,.22);backdrop-filter:blur(18px)}.卡{border-radius:22px;box-shadow:0 18px 45px rgba(0,0,0,.28)}.按鈕{border-radius:16px;padding:.8rem 1rem;font-weight:900}input,textarea{background:#0f172a!important;border:1px solid #334155!important;color:#fff!important;border-radius:14px!important;padding:.75rem!important;width:100%}label{font-size:.82rem;color:#a7f3d0;font-weight:800}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC','Segoe UI',sans-serif;background:#07111f;color:#ecfeff}.玻璃{background:rgba(15,23,42,.78);border:1px solid rgba(148,163,184,.22);backdrop-filter:blur(18px)}.卡{border-radius:22px;box-shadow:0 18px 45px rgba(0,0,0,.28)}.按鈕{border-radius:16px;padding:.8rem 1rem;font-weight:900}input,select,textarea{background:#0f172a!important;border:1px solid #334155!important;color:#fff!important;border-radius:14px!important;padding:.75rem!important;width:100%}label{font-size:.82rem;color:#a7f3d0;font-weight:800}
   </style>
 </head>
 <body>
@@ -14,11 +14,11 @@
   <section class="玻璃 卡 p-5 mb-4">
     <div class="flex flex-wrap justify-between items-center gap-3">
       <div>
-        <p class="text-teal-200 font-black text-sm">智慧製造中央作戰指揮中心 v1.6.0</p>
+        <p class="text-teal-200 font-black text-sm">智慧製造中央作戰指揮中心 v1.8.0</p>
         <h1 class="text-2xl md:text-4xl font-black">主管會議摘要</h1>
-        <p id="狀態文字" class="text-slate-300 mt-1">抓取 KPI 與 AI 摘要，整理成主管會議可貼文字。</p>
+        <p id="狀態文字" class="text-slate-300 mt-1">支援日報、週報、月報摘要，可複製給主管或會議記錄。</p>
       </div>
-      <div class="flex gap-2"><a class="按鈕 bg-slate-700" href="./app.html">回戰情室</a><a class="按鈕 bg-lime-300 text-slate-950" href="./plan.html">計畫清洗</a></div>
+      <div class="flex gap-2"><a class="按鈕 bg-slate-700" href="./app.html">回戰情室</a><a class="按鈕 bg-purple-300 text-slate-950" href="./schedule.html">排程看板</a></div>
     </div>
   </section>
   <section class="玻璃 卡 p-4 mb-4">
@@ -32,14 +32,16 @@
   <section class="grid md:grid-cols-2 gap-4">
     <div class="玻璃 卡 p-4">
       <h2 class="font-black text-xl mb-3">摘要設定</h2>
-      <label>會議對象</label><input id="會議對象" value="執行長 / 副總經理">
+      <label>摘要模式</label><select id="摘要模式"><option>日報</option><option>週報</option><option>月報</option></select>
+      <label class="mt-3 block">會議對象</label><input id="會議對象" value="執行長 / 副總經理">
       <label class="mt-3 block">報告人</label><input id="報告人" value="製造部">
-      <label class="mt-3 block">補充說明</label><textarea id="補充說明" rows="8" placeholder="可填今日現場補充，例如待料、設備、品質狀況"></textarea>
+      <label class="mt-3 block">本期重點</label><textarea id="本期重點" rows="5" placeholder="例如：本週重點處理逾期工單、A5區機台停機、某產品不良率"></textarea>
+      <label class="mt-3 block">補充說明</label><textarea id="補充說明" rows="7" placeholder="可填今日現場補充，例如待料、設備、品質狀況"></textarea>
       <button class="按鈕 bg-amber-300 text-slate-950 w-full mt-3" onclick="複製摘要()">複製摘要</button>
     </div>
     <div class="玻璃 卡 p-4">
       <h2 class="font-black text-xl mb-3">主管會議摘要</h2>
-      <textarea id="摘要結果" rows="24" placeholder="按產生摘要後會出現在這裡"></textarea>
+      <textarea id="摘要結果" rows="29" placeholder="按產生摘要後會出現在這裡"></textarea>
     </div>
   </section>
 </main>
@@ -48,7 +50,9 @@ function GAS(){return localStorage.getItem('GAS網址')||''}
 async function 呼叫API(action,data={}){const url=GAS();if(!url)throw new Error('請先貼上 GAS Web App URL');const r=await fetch(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action,...data})});return r.json()}
 function 儲存設定(){localStorage.setItem('GAS網址',document.getElementById('GAS網址').value.trim());alert('已儲存')}
 function 今天(){return new Date().toISOString().slice(0,10)}
-async function 產生摘要(){try{const k=await 呼叫API('取得KPI戰情');const ai=await 呼叫API('取得AI摘要');const x=k.KPI||{};const 補充=document.getElementById('補充說明').value.trim();const text=`【智慧製造中央作戰指揮中心｜主管會議摘要】\n\n日期：${k.作業日||今天()}\n會議對象：${document.getElementById('會議對象').value}\n報告單位：${document.getElementById('報告人').value}\n\n一、今日整體戰情\n1. 總計畫量：${x.總計畫 ?? 0}\n2. 總完成量：${x.總完成 ?? 0}\n3. 總達成率：${x.達成率 ?? 0}%\n4. 今日良品：${x.今日良品 ?? 0}\n5. 今日不良：${x.今日不良 ?? 0}\n6. 今日不良率：${x.不良率 ?? 0}%\n7. 今日停機分鐘：${x.今日停機分鐘 ?? 0}\n8. 逾期工單數：${x.逾期工單數 ?? 0}\n\n二、AI 風險判斷\n風險等級：${ai.風險等級 || '未產生'}\n摘要：${ai.摘要 || ''}\n\n三、建議動作\n${(ai.建議||[]).map((v,i)=>`${i+1}. ${v}`).join('\n')}\n\n四、現場補充\n${補充 || '無補充。'}\n\n五、請主管協助事項\n1. 若有逾期工單，請協助確認交期優先順序。\n2. 若有停機偏高，請協助設備 / 生技 / 製造跨部門處理。\n3. 若有不良率偏高，請協助品質與製程共同追蹤。`;document.getElementById('摘要結果').value=text;document.getElementById('狀態文字').textContent='摘要已產生'}catch(e){alert(e.message)}}
+function 模式標題(mode){if(mode==='週報')return '週報摘要';if(mode==='月報')return '月報摘要';return '日報摘要'}
+function 模式說明(mode){if(mode==='週報')return '本摘要聚焦本週累積風險、待排程需求、交期與跨部門協調事項。';if(mode==='月報')return '本摘要聚焦本月整體達成率、交期風險、停機與品質改善方向。';return '本摘要聚焦今日產出、停機、不良與逾期工單。'}
+async function 產生摘要(){try{const k=await 呼叫API('取得KPI戰情');const ai=await 呼叫API('取得AI摘要');const x=k.KPI||{};const mode=document.getElementById('摘要模式').value;const 補充=document.getElementById('補充說明').value.trim();const 重點=document.getElementById('本期重點').value.trim();const text=`【智慧製造中央作戰指揮中心｜${模式標題(mode)}】\n\n日期：${k.作業日||今天()}\n會議對象：${document.getElementById('會議對象').value}\n報告單位：${document.getElementById('報告人').value}\n摘要模式：${mode}\n\n一、摘要定位\n${模式說明(mode)}\n\n二、整體戰情\n1. 總計畫量：${x.總計畫 ?? 0}\n2. 總完成量：${x.總完成 ?? 0}\n3. 總達成率：${x.達成率 ?? 0}%\n4. 今日良品：${x.今日良品 ?? 0}\n5. 今日不良：${x.今日不良 ?? 0}\n6. 今日不良率：${x.不良率 ?? 0}%\n7. 今日停機分鐘：${x.今日停機分鐘 ?? 0}\n8. 逾期工單數：${x.逾期工單數 ?? 0}\n\n三、AI 風險判斷\n風險等級：${ai.風險等級 || '未產生'}\n摘要：${ai.摘要 || ''}\n\n四、建議動作\n${(ai.建議||[]).map((v,i)=>`${i+1}. ${v}`).join('\n')}\n\n五、本期重點\n${重點 || '尚未填寫本期重點。'}\n\n六、現場補充\n${補充 || '無補充。'}\n\n七、請主管協助事項\n1. 若有逾期工單，請協助確認交期優先順序。\n2. 若有停機偏高，請協助設備 / 生技 / 製造跨部門處理。\n3. 若有不良率偏高，請協助品質與製程共同追蹤。\n4. 若待排程需求過多，請協助生管、業務、採購確認接單與物料狀況。`;document.getElementById('摘要結果').value=text;document.getElementById('狀態文字').textContent=mode+'已產生'}catch(e){alert(e.message)}}
 async function 複製摘要(){const text=document.getElementById('摘要結果').value;if(!text.trim())return alert('尚未產生摘要');await navigator.clipboard.writeText(text);alert('已複製摘要')}
 document.getElementById('GAS網址').value=GAS();
 </script>
