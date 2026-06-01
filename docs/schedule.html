@@ -6,7 +6,7 @@
   <title>排程需求池看板</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC','Segoe UI',sans-serif;background:#07111f;color:#ecfeff}.玻璃{background:rgba(15,23,42,.78);border:1px solid rgba(148,163,184,.22);backdrop-filter:blur(18px)}.卡{border-radius:22px;box-shadow:0 18px 45px rgba(0,0,0,.28)}.按鈕{border-radius:16px;padding:.75rem .9rem;font-weight:900}input,select,textarea{background:#0f172a!important;border:1px solid #334155!important;color:#fff!important;border-radius:14px!important;padding:.75rem!important;width:100%}label{font-size:.82rem;color:#a7f3d0;font-weight:800}.需求卡{border-radius:18px;border:1px solid rgba(148,163,184,.25);background:rgba(2,6,23,.72);padding:12px;margin-bottom:10px}.小字{font-size:.78rem;color:#94a3b8}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC','Segoe UI',sans-serif;background:#07111f;color:#ecfeff}.玻璃{background:rgba(15,23,42,.78);border:1px solid rgba(148,163,184,.22);backdrop-filter:blur(18px)}.卡{border-radius:22px;box-shadow:0 18px 45px rgba(0,0,0,.28)}.按鈕{border-radius:16px;padding:.75rem .9rem;font-weight:900}input,select,textarea{background:#0f172a!important;border:1px solid #334155!important;color:#fff!important;border-radius:14px!important;padding:.75rem!important;width:100%}label{font-size:.82rem;color:#a7f3d0;font-weight:800}.需求卡{border-radius:18px;border:1px solid rgba(148,163,184,.25);background:rgba(2,6,23,.72);padding:12px;margin-bottom:10px}.逾期{border-color:#f87171;background:rgba(127,29,29,.34)}.即將到期{border-color:#facc15;background:rgba(113,63,18,.28)}.完成{opacity:.72}.小字{font-size:.78rem;color:#94a3b8}.紅{color:#fca5a5}.黃{color:#fde68a}.綠{color:#86efac}
   </style>
 </head>
 <body>
@@ -14,9 +14,9 @@
   <section class="玻璃 卡 p-5 mb-4">
     <div class="flex flex-wrap justify-between items-center gap-3">
       <div>
-        <p class="text-teal-200 font-black text-sm">智慧製造中央作戰指揮中心 v1.7.0</p>
+        <p class="text-teal-200 font-black text-sm">智慧製造中央作戰指揮中心 v1.8.0</p>
         <h1 class="text-2xl md:text-4xl font-black">排程需求池狀態看板</h1>
-        <p id="狀態文字" class="text-slate-300 mt-1">待排程 → 已排程 → 生產中 → 完成。</p>
+        <p id="狀態文字" class="text-slate-300 mt-1">待排程 → 已排程 → 生產中 → 完成。逾期紅色、3 天內到期黃色。</p>
       </div>
       <div class="flex gap-2"><a class="按鈕 bg-slate-700" href="./plan.html">計畫清洗</a><a class="按鈕 bg-amber-300 text-slate-950" href="./data.html">資料管理</a></div>
     </div>
@@ -30,15 +30,19 @@
       <button class="按鈕 bg-cyan-300 text-slate-950" onclick="載入需求池()">同步</button>
       <button class="按鈕 bg-lime-300 text-slate-950" onclick="產生摘要()">產生摘要</button>
     </div>
+    <div class="grid md:grid-cols-3 gap-2 mt-3">
+      <input id="搜尋字" placeholder="搜尋需求編號 / 品名 / 產品 / 機台" oninput="渲染()">
+      <select id="排序方式" onchange="渲染()"><option value="交期由近到遠">交期由近到遠</option><option value="交期由遠到近">交期由遠到近</option><option value="需求量大到小">需求量大到小</option><option value="更新時間新到舊">更新時間新到舊</option></select>
+      <select id="只看風險" onchange="渲染()"><option value="全部">全部需求</option><option value="逾期">只看逾期</option><option value="即將到期">只看3天內到期</option><option value="未完成">只看未完成</option></select>
+    </div>
   </section>
 
   <section class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4" id="統計區"></section>
-
   <section class="grid lg:grid-cols-5 gap-4" id="看板區"></section>
 
   <section class="玻璃 卡 p-4 mt-4">
     <h2 class="font-black text-xl mb-3">排程摘要</h2>
-    <textarea id="摘要結果" rows="10" placeholder="按產生摘要後會出現在這裡"></textarea>
+    <textarea id="摘要結果" rows="12" placeholder="按產生摘要後會出現在這裡"></textarea>
     <button class="按鈕 bg-amber-300 text-slate-950 mt-3" onclick="複製摘要()">複製摘要</button>
   </section>
 </main>
@@ -49,10 +53,13 @@ function GAS(){return localStorage.getItem('GAS網址')||''}
 async function 呼叫API(action,data={}){const url=GAS();if(!url)throw new Error('請先貼上 GAS Web App URL');const r=await fetch(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action,...data})});return r.json()}
 function 儲存設定(){localStorage.setItem('GAS網址',document.getElementById('GAS網址').value.trim());alert('已儲存')}
 async function 載入需求池(){try{const r=await 呼叫API('取得主檔管理資料',{工作表名稱:'10_排程需求池'});if(!r.成功)throw new Error(r.訊息);需求=r.資料||[];document.getElementById('狀態文字').textContent=`已載入排程需求池，共 ${需求.length} 筆`;渲染()}catch(e){document.getElementById('狀態文字').textContent=e.message}}
-function 渲染(){const count={};狀態清單.forEach(s=>count[s]=0);需求.forEach(x=>{const s=x.狀態||'待排程';count[s]=(count[s]||0)+1});document.getElementById('統計區').innerHTML=狀態清單.map(s=>`<div class="玻璃 卡 p-4"><p class="小字">${s}</p><p class="text-3xl font-black">${count[s]||0}</p></div>`).join('');document.getElementById('看板區').innerHTML=狀態清單.map(s=>`<div class="玻璃 卡 p-3 min-h-[300px]"><h2 class="font-black text-lg mb-3">${s}</h2>${需求.filter(x=>(x.狀態||'待排程')===s).map(需求卡).join('')||'<p class="text-slate-400 text-sm">目前無資料</p>'}</div>`).join('')}
-function 需求卡(x){return `<div class="需求卡"><div class="flex justify-between gap-2"><b>${x.需求編號||''}</b><span class="小字">${x.交期||''}</span></div><p class="mt-1">${x.品名||''}</p><p class="小字">產品：${x.產品編號||''}</p><p class="小字">數量：${x.需求量||''}｜工站：${x.建議工站||''}</p><p class="小字">機台：${x.建議機台||''}｜人力：${x.需求人力||''}</p><div class="grid grid-cols-2 gap-2 mt-3">${狀態清單.map(s=>`<button class="按鈕 bg-slate-700 text-xs" onclick="更新狀態('${x.需求編號}','${s}')">${s}</button>`).join('')}</div></div>`}
+function 日期差(交期){if(!交期)return 99999;const today=new Date();today.setHours(0,0,0,0);const d=new Date(交期);if(isNaN(d))return 99999;d.setHours(0,0,0,0);return Math.round((d-today)/86400000)}
+function 風險(x){const s=x.狀態||'待排程';if(s==='完成')return '完成';const diff=日期差(x.交期);if(diff<0)return '逾期';if(diff<=3)return '即將到期';return '正常'}
+function 篩選排序(list){const q=(document.getElementById('搜尋字').value||'').toLowerCase();const risk=document.getElementById('只看風險').value;let out=list.filter(x=>{const text=`${x.需求編號||''} ${x.品名||''} ${x.產品編號||''} ${x.建議機台||''} ${x.建議工站||''}`.toLowerCase();if(q&&!text.includes(q))return false;const r=風險(x);if(risk==='逾期'&&r!=='逾期')return false;if(risk==='即將到期'&&r!=='即將到期')return false;if(risk==='未完成'&&(x.狀態||'待排程')==='完成')return false;return true});const sort=document.getElementById('排序方式').value;out.sort((a,b)=>{if(sort==='交期由遠到近')return 日期差(b.交期)-日期差(a.交期);if(sort==='需求量大到小')return Number(b.需求量||0)-Number(a.需求量||0);if(sort==='更新時間新到舊')return new Date(b.更新時間||0)-new Date(a.更新時間||0);return 日期差(a.交期)-日期差(b.交期)});return out}
+function 渲染(){const view=篩選排序(需求);const count={};狀態清單.forEach(s=>count[s]=0);view.forEach(x=>{const s=x.狀態||'待排程';count[s]=(count[s]||0)+1});const overdue=view.filter(x=>風險(x)==='逾期').length;const soon=view.filter(x=>風險(x)==='即將到期').length;document.getElementById('統計區').innerHTML=狀態清單.map(s=>`<div class="玻璃 卡 p-4"><p class="小字">${s}</p><p class="text-3xl font-black">${count[s]||0}</p></div>`).join('')+`<div class="玻璃 卡 p-4"><p class="小字">逾期 / 3天內</p><p class="text-2xl font-black"><span class="紅">${overdue}</span> / <span class="黃">${soon}</span></p></div>`;document.getElementById('看板區').innerHTML=狀態清單.map(s=>`<div class="玻璃 卡 p-3 min-h-[300px]"><h2 class="font-black text-lg mb-3">${s}</h2>${view.filter(x=>(x.狀態||'待排程')===s).map(需求卡).join('')||'<p class="text-slate-400 text-sm">目前無資料</p>'}</div>`).join('')}
+function 需求卡(x){const r=風險(x);const cls=r==='逾期'?'逾期':r==='即將到期'?'即將到期':r==='完成'?'完成':'';const diff=日期差(x.交期);const due=r==='逾期'?`逾期 ${Math.abs(diff)} 天`:r==='即將到期'?`${diff} 天內到期`:r==='完成'?'已完成':'正常';return `<div class="需求卡 ${cls}"><div class="flex justify-between gap-2"><b>${x.需求編號||''}</b><span class="小字">${x.交期||''}</span></div><div class="小字 ${r==='逾期'?'紅':r==='即將到期'?'黃':'綠'}">${due}</div><p class="mt-1 font-bold">${x.品名||''}</p><p class="小字">產品：${x.產品編號||''}</p><p class="小字">數量：${x.需求量||''}｜工站：${x.建議工站||''}</p><p class="小字">機台：${x.建議機台||''}｜人力：${x.需求人力||''}</p><div class="grid grid-cols-2 gap-2 mt-3">${狀態清單.map(s=>`<button class="按鈕 bg-slate-700 text-xs" onclick="更新狀態('${x.需求編號}','${s}')">${s}</button>`).join('')}</div></div>`}
 async function 更新狀態(需求編號,新狀態){const item=需求.find(x=>String(x.需求編號)===String(需求編號));if(!item)return alert('找不到需求');const data={...item,狀態:新狀態,更新時間:new Date().toISOString()};delete data.__列號;try{const r=await 呼叫API('新增或更新主檔',{工作表名稱:'10_排程需求池',資料:data});if(!r.成功)throw new Error(r.訊息);await 載入需求池()}catch(e){alert(e.message)}}
-function 產生摘要(){const total=需求.length;const count={};狀態清單.forEach(s=>count[s]=需求.filter(x=>(x.狀態||'待排程')===s).length);const urgent=需求.filter(x=>(x.狀態||'待排程')!=='完成' && x.交期 && new Date(x.交期)<new Date()).length;const text=`【排程需求池狀態摘要】\n\n總需求筆數：${total}\n待排程：${count['待排程']}\n已排程：${count['已排程']}\n生產中：${count['生產中']}\n完成：${count['完成']}\n暫停：${count['暫停']}\n逾期未完成：${urgent}\n\n建議動作：\n1. 先處理逾期未完成需求。\n2. 待排程需求需確認產品、工站、機台與人力。\n3. 生產中需求需每日回報良品、不良、停機。`;document.getElementById('摘要結果').value=text}
+function 產生摘要(){const view=篩選排序(需求);const total=view.length;const count={};狀態清單.forEach(s=>count[s]=view.filter(x=>(x.狀態||'待排程')===s).length);const overdue=view.filter(x=>風險(x)==='逾期');const soon=view.filter(x=>風險(x)==='即將到期');const top=overdue.concat(soon).slice(0,8).map((x,i)=>`${i+1}. ${x.需求編號}｜${x.品名}｜交期 ${x.交期}｜${風險(x)}`).join('\n')||'目前無高風險需求。';const text=`【排程需求池狀態摘要】\n\n總需求筆數：${total}\n待排程：${count['待排程']}\n已排程：${count['已排程']}\n生產中：${count['生產中']}\n完成：${count['完成']}\n暫停：${count['暫停']}\n逾期未完成：${overdue.length}\n3天內到期：${soon.length}\n\n高風險需求：\n${top}\n\n建議動作：\n1. 先處理逾期未完成需求。\n2. 3天內到期需求需確認機台、人力、物料是否已到位。\n3. 生產中需求需每日回報良品、不良、停機。`;document.getElementById('摘要結果').value=text}
 async function 複製摘要(){const text=document.getElementById('摘要結果').value;if(!text.trim())return alert('尚未產生摘要');await navigator.clipboard.writeText(text);alert('已複製摘要')}
 document.getElementById('GAS網址').value=GAS();載入需求池();
 </script>
