@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>排程需求池看板</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC','Segoe UI',sans-serif;background:#07111f;color:#ecfeff}.玻璃{background:rgba(15,23,42,.78);border:1px solid rgba(148,163,184,.22);backdrop-filter:blur(18px)}.卡{border-radius:22px;box-shadow:0 18px 45px rgba(0,0,0,.28)}.按鈕{border-radius:16px;padding:.75rem .9rem;font-weight:900}input,select,textarea{background:#0f172a!important;border:1px solid #334155!important;color:#fff!important;border-radius:14px!important;padding:.75rem!important;width:100%}label{font-size:.82rem;color:#a7f3d0;font-weight:800}.需求卡{border-radius:18px;border:1px solid rgba(148,163,184,.25);background:rgba(2,6,23,.72);padding:12px;margin-bottom:10px}.小字{font-size:.78rem;color:#94a3b8}
+  </style>
+</head>
+<body>
+<main class="max-w-7xl mx-auto p-4 pb-24">
+  <section class="玻璃 卡 p-5 mb-4">
+    <div class="flex flex-wrap justify-between items-center gap-3">
+      <div>
+        <p class="text-teal-200 font-black text-sm">智慧製造中央作戰指揮中心 v1.7.0</p>
+        <h1 class="text-2xl md:text-4xl font-black">排程需求池狀態看板</h1>
+        <p id="狀態文字" class="text-slate-300 mt-1">待排程 → 已排程 → 生產中 → 完成。</p>
+      </div>
+      <div class="flex gap-2"><a class="按鈕 bg-slate-700" href="./plan.html">計畫清洗</a><a class="按鈕 bg-amber-300 text-slate-950" href="./data.html">資料管理</a></div>
+    </div>
+  </section>
+
+  <section class="玻璃 卡 p-4 mb-4">
+    <label>GAS Web App URL</label>
+    <div class="grid md:grid-cols-[1fr_auto_auto_auto] gap-2 mt-1">
+      <input id="GAS網址" placeholder="貼上 https://script.google.com/macros/s/.../exec">
+      <button class="按鈕 bg-teal-500 text-slate-950" onclick="儲存設定()">儲存</button>
+      <button class="按鈕 bg-cyan-300 text-slate-950" onclick="載入需求池()">同步</button>
+      <button class="按鈕 bg-lime-300 text-slate-950" onclick="產生摘要()">產生摘要</button>
+    </div>
+  </section>
+
+  <section class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4" id="統計區"></section>
+
+  <section class="grid lg:grid-cols-5 gap-4" id="看板區"></section>
+
+  <section class="玻璃 卡 p-4 mt-4">
+    <h2 class="font-black text-xl mb-3">排程摘要</h2>
+    <textarea id="摘要結果" rows="10" placeholder="按產生摘要後會出現在這裡"></textarea>
+    <button class="按鈕 bg-amber-300 text-slate-950 mt-3" onclick="複製摘要()">複製摘要</button>
+  </section>
+</main>
+<script>
+const 狀態清單=['待排程','已排程','生產中','完成','暫停'];
+let 需求=[];
+function GAS(){return localStorage.getItem('GAS網址')||''}
+async function 呼叫API(action,data={}){const url=GAS();if(!url)throw new Error('請先貼上 GAS Web App URL');const r=await fetch(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action,...data})});return r.json()}
+function 儲存設定(){localStorage.setItem('GAS網址',document.getElementById('GAS網址').value.trim());alert('已儲存')}
+async function 載入需求池(){try{const r=await 呼叫API('取得主檔管理資料',{工作表名稱:'10_排程需求池'});if(!r.成功)throw new Error(r.訊息);需求=r.資料||[];document.getElementById('狀態文字').textContent=`已載入排程需求池，共 ${需求.length} 筆`;渲染()}catch(e){document.getElementById('狀態文字').textContent=e.message}}
+function 渲染(){const count={};狀態清單.forEach(s=>count[s]=0);需求.forEach(x=>{const s=x.狀態||'待排程';count[s]=(count[s]||0)+1});document.getElementById('統計區').innerHTML=狀態清單.map(s=>`<div class="玻璃 卡 p-4"><p class="小字">${s}</p><p class="text-3xl font-black">${count[s]||0}</p></div>`).join('');document.getElementById('看板區').innerHTML=狀態清單.map(s=>`<div class="玻璃 卡 p-3 min-h-[300px]"><h2 class="font-black text-lg mb-3">${s}</h2>${需求.filter(x=>(x.狀態||'待排程')===s).map(需求卡).join('')||'<p class="text-slate-400 text-sm">目前無資料</p>'}</div>`).join('')}
+function 需求卡(x){return `<div class="需求卡"><div class="flex justify-between gap-2"><b>${x.需求編號||''}</b><span class="小字">${x.交期||''}</span></div><p class="mt-1">${x.品名||''}</p><p class="小字">產品：${x.產品編號||''}</p><p class="小字">數量：${x.需求量||''}｜工站：${x.建議工站||''}</p><p class="小字">機台：${x.建議機台||''}｜人力：${x.需求人力||''}</p><div class="grid grid-cols-2 gap-2 mt-3">${狀態清單.map(s=>`<button class="按鈕 bg-slate-700 text-xs" onclick="更新狀態('${x.需求編號}','${s}')">${s}</button>`).join('')}</div></div>`}
+async function 更新狀態(需求編號,新狀態){const item=需求.find(x=>String(x.需求編號)===String(需求編號));if(!item)return alert('找不到需求');const data={...item,狀態:新狀態,更新時間:new Date().toISOString()};delete data.__列號;try{const r=await 呼叫API('新增或更新主檔',{工作表名稱:'10_排程需求池',資料:data});if(!r.成功)throw new Error(r.訊息);await 載入需求池()}catch(e){alert(e.message)}}
+function 產生摘要(){const total=需求.length;const count={};狀態清單.forEach(s=>count[s]=需求.filter(x=>(x.狀態||'待排程')===s).length);const urgent=需求.filter(x=>(x.狀態||'待排程')!=='完成' && x.交期 && new Date(x.交期)<new Date()).length;const text=`【排程需求池狀態摘要】\n\n總需求筆數：${total}\n待排程：${count['待排程']}\n已排程：${count['已排程']}\n生產中：${count['生產中']}\n完成：${count['完成']}\n暫停：${count['暫停']}\n逾期未完成：${urgent}\n\n建議動作：\n1. 先處理逾期未完成需求。\n2. 待排程需求需確認產品、工站、機台與人力。\n3. 生產中需求需每日回報良品、不良、停機。`;document.getElementById('摘要結果').value=text}
+async function 複製摘要(){const text=document.getElementById('摘要結果').value;if(!text.trim())return alert('尚未產生摘要');await navigator.clipboard.writeText(text);alert('已複製摘要')}
+document.getElementById('GAS網址').value=GAS();載入需求池();
+</script>
+</body>
+</html>
