@@ -45,27 +45,31 @@ function 處理API請求_v3_0_(data) {
 }
 
 function 呼叫既有函數_v3_0_(action, p) {
-  const fn = this[action];
-  if (typeof fn === 'function') {
-    const keys = Object.keys(p || {}).filter(k => k !== 'action');
-    if (keys.length === 0) return fn();
-    if (p.資料 !== undefined) return fn(p.資料);
-    if (p.工作表名稱 !== undefined && p.資料 !== undefined) return fn(p.工作表名稱, p.資料);
-    if (p.任務編號 !== undefined) return fn(p.任務編號, p.新狀態, p.處理紀錄, p.負責人);
-    if (p.共用素材編號 !== undefined && p.到貨數量 !== undefined) return fn(p.共用素材編號, p.到貨數量);
-    if (p.目標ID !== undefined) return fn(p.目標ID);
-    if (p.摘要文字 !== undefined) return fn(p.摘要文字);
-    if (p.關鍵字 !== undefined) return fn(p.關鍵字);
-    return fn(p);
-  }
-  return { 成功: false, 版本: V3_0_系統版本, 訊息: '找不到 action 或函數：' + action };
+  const fn = (typeof globalThis !== 'undefined' && typeof globalThis[action] === 'function') ? globalThis[action] : this[action];
+  if (typeof fn !== 'function') return { 成功: false, 版本: V3_0_系統版本, 訊息: '找不到 action 或函數：' + action };
+  const keys = Object.keys(p || {}).filter(k => k !== 'action');
+  if (keys.length === 0) return fn();
+
+  // 常用主檔 API
+  if (p.工作表名稱 !== undefined && p.資料 !== undefined) return fn(p.工作表名稱, p.資料);
+  if (p.工作表名稱 !== undefined) return fn(p.工作表名稱);
+
+  // 任務 / 素材 / 匯出等多參數 API
+  if (p.任務編號 !== undefined) return fn(p.任務編號, p.新狀態, p.處理紀錄, p.負責人);
+  if (p.共用素材編號 !== undefined && p.到貨數量 !== undefined) return fn(p.共用素材編號, p.到貨數量);
+  if (p.目標ID !== undefined) return fn(p.目標ID);
+  if (p.摘要文字 !== undefined) return fn(p.摘要文字);
+  if (p.關鍵字 !== undefined) return fn(p.關鍵字);
+  if (p.資料 !== undefined) return fn(p.資料);
+  return fn(p);
 }
 
 function 初始化_v3_0_正式上線() {
   const steps = [];
   const call = (name) => {
     try {
-      if (typeof this[name] === 'function') steps.push({ 函數: name, 結果: this[name]() });
+      const fn = (typeof globalThis !== 'undefined' && typeof globalThis[name] === 'function') ? globalThis[name] : this[name];
+      if (typeof fn === 'function') steps.push({ 函數: name, 結果: fn() });
       else steps.push({ 函數: name, 結果: '未載入，略過' });
     } catch (err) {
       steps.push({ 函數: name, 錯誤: err.message });
@@ -94,7 +98,7 @@ function 系統總檢查_v3_0_() {
     '取得主檔管理資料','新增或更新主檔','取得KPI戰情','取得AI摘要','產生LINE回覆訊息_v3_0_',
     '取得_v2_7_任務統計儀表板資料','取得_v2_8_任務負責人績效統計','取得_v2_9_任務週月完成率統計'
   ];
-  const 函數狀態 = requiredFunctions.map(name => ({ 函數: name, 狀態: typeof this[name] === 'function' ? '已載入' : '缺少' }));
+  const 函數狀態 = requiredFunctions.map(name => ({ 函數: name, 狀態: (typeof globalThis !== 'undefined' && typeof globalThis[name] === 'function') || typeof this[name] === 'function' ? '已載入' : '缺少' }));
   return {
     成功: 缺少工作表.length === 0 && 函數狀態.every(x => x.狀態 === '已載入'),
     版本: V3_0_系統版本,
