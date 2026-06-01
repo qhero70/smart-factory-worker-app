@@ -103,7 +103,9 @@ function 產生LINE回覆訊息_v2_7_(文字) {
   const t = String(文字 || '').trim();
   if (t === '任務摘要' || t === '任務圖卡' || t === '三方任務') return [產生LINE_任務摘要Flex_()];
   if (t === '任務週報' || t === '三方週報') return [{ type: 'text', text: 產生_v2_7_任務週報文字() }];
-  return 產生LINE回覆訊息_v2_6 ? 產生LINE回覆訊息_v2_6_(文字) : 產生LINE回覆訊息_v2_5_(文字);
+  if (typeof 產生LINE回覆訊息_v2_6_ === 'function') return 產生LINE回覆訊息_v2_6_(文字);
+  if (typeof 產生LINE回覆訊息_v2_5_ === 'function') return 產生LINE回覆訊息_v2_5_(文字);
+  return [{ type: 'text', text: '尚未載入前一版 LINE 回覆函數。' }];
 }
 
 function v2_7_是否逾期_(x) {
