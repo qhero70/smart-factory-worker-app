@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>正式上線檢查</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC','Segoe UI',sans-serif;background:#07111f;color:#ecfeff}.玻璃{background:rgba(15,23,42,.78);border:1px solid rgba(148,163,184,.22);backdrop-filter:blur(18px)}.卡{border-radius:22px;box-shadow:0 18px 45px rgba(0,0,0,.28)}.按鈕{border-radius:16px;padding:.8rem 1rem;font-weight:900}input,textarea{background:#0f172a!important;border:1px solid #334155!important;color:#fff!important;border-radius:14px!important;padding:.75rem!important;width:100%}label{font-size:.82rem;color:#a7f3d0;font-weight:800}.項目{border:1px solid rgba(148,163,184,.25);border-radius:18px;padding:12px;background:rgba(2,6,23,.62)}.完成{background:rgba(20,184,166,.16);border-color:#2dd4bf}.警示{background:rgba(251,191,36,.13);border-color:#fbbf24}.失敗{background:rgba(248,113,113,.14);border-color:#f87171}.小字{font-size:.8rem;color:#94a3b8}
+  </style>
+</head>
+<body>
+<main class="max-w-7xl mx-auto p-4 pb-24">
+  <section class="玻璃 卡 p-5 mb-4">
+    <div class="flex flex-wrap justify-between items-center gap-3">
+      <div>
+        <p class="text-teal-200 font-black text-sm">智慧製造中央作戰指揮中心 v2.0.0</p>
+        <h1 class="text-2xl md:text-4xl font-black">正式上線檢查頁</h1>
+        <p id="狀態文字" class="text-slate-300 mt-1">上線前逐項檢查 GitHub Pages、GAS、資料表、主檔、LINE Bot。</p>
+      </div>
+      <div class="flex gap-2"><a class="按鈕 bg-slate-700" href="./index.html">首頁</a><a class="按鈕 bg-teal-300 text-slate-950" href="./app.html">戰情室</a></div>
+    </div>
+  </section>
+
+  <section class="玻璃 卡 p-4 mb-4">
+    <label>GAS Web App URL</label>
+    <div class="grid md:grid-cols-[1fr_auto_auto_auto] gap-2 mt-1">
+      <input id="GAS網址" placeholder="貼上 https://script.google.com/macros/s/.../exec">
+      <button class="按鈕 bg-teal-500 text-slate-950" onclick="儲存設定()">儲存</button>
+      <button class="按鈕 bg-cyan-300 text-slate-950" onclick="執行檢查()">執行檢查</button>
+      <button class="按鈕 bg-amber-300 text-slate-950" onclick="複製報告()">複製報告</button>
+    </div>
+  </section>
+
+  <section class="grid md:grid-cols-4 gap-3 mb-4" id="統計區"></section>
+  <section class="grid lg:grid-cols-2 gap-4" id="檢查區"></section>
+
+  <section class="玻璃 卡 p-4 mt-4">
+    <h2 class="font-black text-xl mb-3">上線檢查報告</h2>
+    <textarea id="報告" rows="18" placeholder="執行檢查後會產生報告"></textarea>
+  </section>
+</main>
+<script>
+const 固定檢查=[
+  ['GitHub Pages 首頁','檢查此頁是否可開啟，代表 Pages 基本正常','手動'],
+  ['GAS Web App URL','必須貼上 /exec 網址','自動'],
+  ['GAS 健康檢查','呼叫 健康檢查 API','自動'],
+  ['工作表初始化','呼叫 取得首頁資料，確認資料表可讀取','自動'],
+  ['主檔完整性','呼叫 檢查主檔完整性，確認主鍵空白與重複','自動'],
+  ['KPI 戰情','呼叫 取得KPI戰情，確認戰情 API 正常','自動'],
+  ['資料管理頁','確認 docs/data.html 可開啟','手動'],
+  ['計畫清洗頁','確認 docs/plan.html 可開啟','手動'],
+  ['排程看板頁','確認 docs/schedule.html 可開啟','手動'],
+  ['LINE Bot Token','主後端 系統設定.LINE_CHANNEL_ACCESS_TOKEN 必須填入','手動'],
+  ['LINE Webhook','LINE Developers Webhook URL 指向 GAS Web App','手動'],
+  ['LINE 主選單','輸入「選單」應回傳 Flex Message','手動']
+];
+let 結果=[];
+function GAS(){return localStorage.getItem('GAS網址')||''}
+function 儲存設定(){localStorage.setItem('GAS網址',document.getElementById('GAS網址').value.trim());alert('已儲存')}
+async function 呼叫API(action,data={}){const url=GAS();if(!url)throw new Error('請先貼上 GAS Web App URL');const r=await fetch(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action,...data})});return r.json()}
+function 加結果(項目,狀態,說明){結果.push({項目,狀態,說明})}
+async function 執行檢查(){結果=[];加結果('GitHub Pages 首頁','需人工確認','目前已能開啟本檢查頁則代表 Pages 至少可讀取 docs。');if(!GAS()){加結果('GAS Web App URL','失敗','尚未貼上 GAS Web App URL。');渲染();return}else 加結果('GAS Web App URL','完成','已填入 GAS Web App URL。');try{const h=await 呼叫API('健康檢查');加結果('GAS 健康檢查',h.成功?'完成':'失敗',h.版本||h.訊息||JSON.stringify(h));}catch(e){加結果('GAS 健康檢查','失敗',e.message)}try{const home=await 呼叫API('取得首頁資料');加結果('工作表初始化',home.成功?'完成':'失敗',home.成功?`作業日：${home.作業日}`:home.訊息);}catch(e){加結果('工作表初始化','失敗',e.message)}try{const m=await 呼叫API('檢查主檔完整性');const bad=(m.結果||[]).filter(x=>x.狀態!=='正常');加結果('主檔完整性',bad.length?'警示':'完成',bad.length?`需處理 ${bad.length} 張主檔`:'主鍵檢查正常');}catch(e){加結果('主檔完整性','警示','可能尚未使用 v1.5.0 以上後端或未初始化：'+e.message)}try{const k=await 呼叫API('取得KPI戰情');加結果('KPI 戰情',k.成功?'完成':'失敗',k.成功?`達成率 ${k.KPI.達成率}%｜逾期 ${k.KPI.逾期工單數}`:k.訊息);}catch(e){加結果('KPI 戰情','失敗',e.message)}['資料管理頁','計畫清洗頁','排程看板頁','LINE Bot Token','LINE Webhook','LINE 主選單'].forEach(x=>加結果(x,'需人工確認','請依上線檢查清單確認。'));渲染()}
+function 渲染(){const 完成=結果.filter(x=>x.狀態==='完成').length,警示=結果.filter(x=>x.狀態==='警示'||x.狀態==='需人工確認').length,失敗=結果.filter(x=>x.狀態==='失敗').length;document.getElementById('統計區').innerHTML=[['完成',完成],['警示/人工',警示],['失敗',失敗],['總項目',結果.length]].map(x=>`<div class="玻璃 卡 p-4"><p class="小字">${x[0]}</p><p class="text-3xl font-black">${x[1]}</p></div>`).join('');document.getElementById('檢查區').innerHTML=結果.map(x=>`<div class="項目 ${x.狀態==='完成'?'完成':x.狀態==='失敗'?'失敗':'警示'}"><div class="font-black">${x.項目}</div><div class="小字 mt-1">狀態：${x.狀態}</div><p class="mt-2 text-sm whitespace-pre-wrap">${x.說明}</p></div>`).join('');產生報告()}
+function 產生報告(){const lines=['【智慧製造中央作戰指揮中心｜正式上線檢查報告】','日期：'+new Date().toLocaleString('zh-TW'),''];結果.forEach((x,i)=>lines.push(`${i+1}. ${x.項目}｜${x.狀態}\n   ${x.說明}`));document.getElementById('報告').value=lines.join('\n')}
+async function 複製報告(){const text=document.getElementById('報告').value;if(!text.trim())return alert('尚未產生報告');await navigator.clipboard.writeText(text);alert('已複製報告')}
+document.getElementById('GAS網址').value=GAS();結果=固定檢查.map(x=>({項目:x[0],狀態:x[2]==='自動'?'待檢查':'需人工確認',說明:x[1]}));渲染();
+</script>
+</body>
+</html>
