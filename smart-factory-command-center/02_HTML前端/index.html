@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f766e" />
+  <title>智慧製造中央作戰指揮中心</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC','Segoe UI',sans-serif;background:#07111f;color:#ecfeff}
+    .玻璃{background:rgba(15,23,42,.76);backdrop-filter:blur(18px);border:1px solid rgba(148,163,184,.22)}
+    .卡{border-radius:22px;box-shadow:0 18px 45px rgba(0,0,0,.28)}
+    .按鈕{border-radius:16px;padding:.85rem 1rem;font-weight:800}
+    input,select,textarea{background:#0f172a!important;border:1px solid #334155!important;color:#fff!important;border-radius:14px!important;padding:.8rem!important;width:100%}
+    label{font-size:.85rem;color:#a7f3d0;font-weight:700}.頁籤.active{background:#14b8a6;color:#042f2e}.頁面{display:none}.頁面.active{display:block}
+  </style>
+</head>
+<body>
+  <main class="max-w-6xl mx-auto p-4 pb-24">
+    <section class="玻璃 卡 p-5 mb-4">
+      <div class="flex items-center justify-between gap-3">
+        <div>
+          <p class="text-teal-200 text-sm font-bold">智慧製造中央作戰指揮中心</p>
+          <h1 class="text-2xl md:text-4xl font-black">製造部行動戰情室</h1>
+          <p id="作業日文字" class="text-slate-300 mt-1">尚未連線</p>
+        </div>
+        <button onclick="同步資料()" class="按鈕 bg-teal-500 text-slate-950">同步</button>
+      </div>
+    </section>
+
+    <nav class="grid grid-cols-4 md:grid-cols-8 gap-2 mb-4 text-sm">
+      <button class="頁籤 active 按鈕 玻璃" onclick="切換頁面('首頁',this)">首頁</button>
+      <button class="頁籤 按鈕 玻璃" onclick="切換頁面('報工',this)">報工</button>
+      <button class="頁籤 按鈕 玻璃" onclick="切換頁面('停機',this)">停機</button>
+      <button class="頁籤 按鈕 玻璃" onclick="切換頁面('換刀',this)">換刀</button>
+      <button class="頁籤 按鈕 玻璃" onclick="切換頁面('不良',this)">不良</button>
+      <button class="頁籤 按鈕 玻璃" onclick="切換頁面('工單',this)">工單</button>
+      <button class="頁籤 按鈕 玻璃" onclick="切換頁面('AI',this)">AI</button>
+      <button class="頁籤 按鈕 玻璃" onclick="切換頁面('設定',this)">設定</button>
+    </nav>
+
+    <section id="首頁" class="頁面 active">
+      <div class="grid grid-cols-2 md:grid-cols-6 gap-3 mb-4" id="指標區"></div>
+      <div class="grid md:grid-cols-2 gap-4">
+        <div class="玻璃 卡 p-4"><h2 class="font-black text-xl mb-3">今日產出</h2><canvas id="產出圖"></canvas></div>
+        <div class="玻璃 卡 p-4"><h2 class="font-black text-xl mb-3">異常警示</h2><div id="警示區" class="space-y-2"></div></div>
+      </div>
+      <div class="玻璃 卡 p-4 mt-4"><h2 class="font-black text-xl mb-3">最近報工</h2><div id="最近報工" class="overflow-x-auto"></div></div>
+    </section>
+
+    <section id="報工" class="頁面"><div id="報工表單"></div></section>
+    <section id="停機" class="頁面"><div id="停機表單"></div></section>
+    <section id="換刀" class="頁面"><div id="換刀表單"></div></section>
+    <section id="不良" class="頁面"><div id="不良表單"></div></section>
+    <section id="工單" class="頁面"><div id="工單表單"></div><div class="玻璃 卡 p-4 mt-4"><h2 class="font-black text-xl mb-3">工單清單</h2><div id="工單清單"></div></div></section>
+    <section id="AI" class="頁面"><div class="玻璃 卡 p-4"><h2 class="font-black text-xl mb-3">AI 製造洞察</h2><button class="按鈕 bg-cyan-400 text-slate-950" onclick="取得AI摘要()">產生 AI 摘要</button><pre id="AI結果" class="mt-4 whitespace-pre-wrap bg-slate-950 p-4 rounded-2xl"></pre></div></section>
+    <section id="設定" class="頁面"><div class="玻璃 卡 p-4"><h2 class="font-black text-xl mb-3">系統設定</h2><label>GAS Web App URL</label><input id="GAS網址" placeholder="貼上 https://script.google.com/macros/s/.../exec"><button class="按鈕 bg-teal-500 text-slate-950 mt-3" onclick="儲存設定()">儲存設定</button><p class="text-slate-300 mt-3">若此 HTML 放在 GAS 專案內，可留空；若放 GitHub Pages，請貼 GAS 部署網址。</p></div></section>
+  </main>
+
+<script>
+let 主檔={人員:[],產品:[],機台:[],工站:[],共用:[]}; let 首頁資料=null; let 圖表=null;
+const 欄位設定={
+報工:[['工號'],['姓名'],['班別'],['區域'],['機台編號'],['產品編號'],['品名'],['工站名稱'],['工單編號'],['良品數','number'],['不良數','number'],['停機分鐘','number'],['停機原因'],['換刀次數','number'],['備註','textarea']],
+停機:[['工號'],['姓名'],['機台編號'],['工單編號'],['停機開始','datetime-local'],['停機結束','datetime-local'],['停機分鐘','number'],['原因類別'],['原因說明','textarea']],
+換刀:[['工號'],['姓名'],['機台編號'],['產品編號'],['工單編號'],['刀具名稱'],['更換次數','number'],['原因'],['備註','textarea']],
+不良:[['工號'],['姓名'],['產品編號'],['品名'],['機台編號'],['工單編號'],['不良代碼'],['不良名稱'],['不良數量','number'],['責任歸屬'],['說明','textarea'],['照片網址']],
+工單:[['工單編號'],['產品編號'],['品名'],['計畫量','number'],['開始日','date'],['預計完工日','date'],['優先級'],['狀態'],['備註','textarea']]
+};
+function GAS(){return localStorage.getItem('GAS網址')||''}
+async function 呼叫API(action,data={}){const url=GAS(); if(typeof google!=='undefined'&&google.script){return new Promise((res,rej)=>google.script.run.withSuccessHandler(res).withFailureHandler(rej).處理前端請求(action,data));} if(!url)throw new Error('請先到設定貼上 GAS Web App URL'); const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,...data})}); return r.json();}
+function 切換頁面(id,btn){document.querySelectorAll('.頁面').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.頁籤').forEach(x=>x.classList.remove('active'));btn.classList.add('active')}
+function 建立表單(id,action){const box=document.getElementById(id+'表單'); const f=欄位設定[id]; box.innerHTML=`<div class="玻璃 卡 p-4"><h2 class="font-black text-xl mb-3">${id}作業</h2><div class="grid md:grid-cols-2 gap-3">${f.map(([n,t])=>`<div><label>${n}</label>${t==='textarea'?`<textarea id="${id}_${n}" rows="3"></textarea>`:`<input id="${id}_${n}" type="${t||'text'}">`}</div>`).join('')}</div><button class="按鈕 bg-teal-500 text-slate-950 mt-4 w-full" onclick="送出表單('${id}','${action}')">送出${id}</button></div>`}
+async function 送出表單(id,action){const data={}; 欄位設定[id].forEach(([n])=>data[n]=document.getElementById(id+'_'+n).value); const r=await 呼叫API(action,data); alert(r.訊息||JSON.stringify(r)); if(r.成功){同步資料();}}
+function 儲存設定(){localStorage.setItem('GAS網址',document.getElementById('GAS網址').value.trim());alert('已儲存')}
+async function 同步資料(){try{首頁資料=await 呼叫API('取得首頁資料'); 主檔=await 呼叫API('取得主檔資料'); 渲染首頁(); 載入工單();}catch(e){document.getElementById('作業日文字').textContent='尚未連線：'+e.message}}
+function 渲染首頁(){if(!首頁資料||!首頁資料.成功)return; document.getElementById('作業日文字').textContent='作業日：'+首頁資料.作業日; const m=首頁資料.指標; document.getElementById('指標區').innerHTML=Object.entries(m).map(([k,v])=>`<div class="玻璃 卡 p-4"><p class="text-slate-300 text-xs">${k}</p><p class="text-3xl font-black">${v}</p></div>`).join(''); document.getElementById('警示區').innerHTML=(首頁資料.異常警示||[]).length?首頁資料.異常警示.map(x=>`<div class="bg-red-500/20 border border-red-400 rounded-2xl p-3">${x.訊息}｜${x.工單編號||''}</div>`).join(''):'<p class="text-emerald-300">目前無重大警示</p>'; document.getElementById('最近報工').innerHTML=表格(首頁資料.最近報工||[]); const ctx=document.getElementById('產出圖'); if(圖表)圖表.destroy(); 圖表=new Chart(ctx,{type:'doughnut',data:{labels:['良品','不良'],datasets:[{data:[m.今日良品,m.今日不良]}]}})}
+function 表格(rows){if(!rows.length)return '<p class="text-slate-300">尚無資料</p>'; const hs=Object.keys(rows[0]); return `<table class="w-full text-sm"><thead><tr>${hs.map(h=>`<th class="text-left p-2 text-teal-200">${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr class="border-t border-slate-700">${hs.map(h=>`<td class="p-2 whitespace-nowrap">${r[h]??''}</td>`).join('')}</tr>`).join('')}</tbody></table>`}
+async function 載入工單(){try{const r=await 呼叫API('取得工單清單');document.getElementById('工單清單').innerHTML=表格(r.資料||[])}catch(e){}}
+async function 取得AI摘要(){const r=await 呼叫API('取得AI摘要');document.getElementById('AI結果').textContent=JSON.stringify(r,null,2)}
+['報工','停機','換刀','不良','工單'].forEach(x=>建立表單(x,{'報工':'新增報工','停機':'新增停機','換刀':'新增換刀','不良':'新增不良','工單':'新增工單'}[x])); document.getElementById('GAS網址').value=GAS(); 同步資料(); if('serviceWorker'in navigator)navigator.serviceWorker.register('service-worker.js').catch(()=>{});
+</script>
+</body>
+</html>
