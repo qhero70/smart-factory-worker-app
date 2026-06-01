@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>缺漏主檔補齊工具</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC','Segoe UI',sans-serif;background:#07111f;color:#ecfeff}.玻璃{background:rgba(15,23,42,.78);border:1px solid rgba(148,163,184,.22);backdrop-filter:blur(18px)}.卡{border-radius:22px;box-shadow:0 18px 45px rgba(0,0,0,.28)}.按鈕{border-radius:16px;padding:.8rem 1rem;font-weight:900}input,textarea{background:#0f172a!important;border:1px solid #334155!important;color:#fff!important;border-radius:14px!important;padding:.75rem!important;width:100%}label{font-size:.82rem;color:#a7f3d0;font-weight:800}th,td{white-space:nowrap;vertical-align:top}
+  </style>
+</head>
+<body>
+<main class="max-w-7xl mx-auto p-4 pb-24">
+  <section class="玻璃 卡 p-5 mb-4">
+    <div class="flex flex-wrap justify-between items-center gap-3">
+      <div>
+        <p class="text-teal-200 font-black text-sm">智慧製造中央作戰指揮中心 v1.6.0</p>
+        <h1 class="text-2xl md:text-4xl font-black">缺漏主檔補齊工具</h1>
+        <p class="text-slate-300 mt-1">把計畫清洗頁看到的缺產品、缺工站、缺機台貼進來，產生可匯入資料管理頁的 CSV 草稿。</p>
+      </div>
+      <div class="flex gap-2"><a class="按鈕 bg-slate-700" href="./plan.html">回計畫清洗</a><a class="按鈕 bg-amber-300 text-slate-950" href="./data.html">資料管理</a></div>
+    </div>
+  </section>
+
+  <section class="grid lg:grid-cols-3 gap-4">
+    <div class="玻璃 卡 p-4">
+      <h2 class="font-black text-xl mb-3">缺產品</h2>
+      <label>產品編號，一行一筆或用逗號分隔</label>
+      <textarea id="缺產品" rows="10" placeholder="A900200000&#10;A900200008"></textarea>
+      <button class="按鈕 bg-teal-400 text-slate-950 w-full mt-3" onclick="產生產品CSV()">產生產品主檔草稿</button>
+    </div>
+    <div class="玻璃 卡 p-4">
+      <h2 class="font-black text-xl mb-3">缺工站</h2>
+      <label>工站名稱，一行一筆或用逗號分隔</label>
+      <textarea id="缺工站" rows="10" placeholder="A5 精車站&#10;清洗站"></textarea>
+      <button class="按鈕 bg-lime-300 text-slate-950 w-full mt-3" onclick="產生工站CSV()">產生工站主檔草稿</button>
+    </div>
+    <div class="玻璃 卡 p-4">
+      <h2 class="font-black text-xl mb-3">缺機台</h2>
+      <label>機台編號，一行一筆或用逗號分隔</label>
+      <textarea id="缺機台" rows="10" placeholder="1064&#10;1083"></textarea>
+      <button class="按鈕 bg-cyan-300 text-slate-950 w-full mt-3" onclick="產生機台CSV()">產生機台主檔草稿</button>
+    </div>
+  </section>
+
+  <section class="玻璃 卡 p-4 mt-4">
+    <h2 class="font-black text-xl mb-3">CSV 草稿</h2>
+    <div class="grid md:grid-cols-3 gap-2 mb-3">
+      <button class="按鈕 bg-teal-400 text-slate-950" onclick="下載目前CSV()">下載目前 CSV</button>
+      <button class="按鈕 bg-amber-300 text-slate-950" onclick="複製CSV()">複製 CSV</button>
+      <button class="按鈕 bg-slate-600 text-white" onclick="清空()">清空</button>
+    </div>
+    <textarea id="CSV結果" rows="16" placeholder="這裡會產生可貼到資料管理頁匯入的 CSV"></textarea>
+  </section>
+</main>
+<script>
+let 目前檔名='主檔草稿.csv';
+function 分割(text){return text.split(/[\n,，、\s]+/).map(x=>x.trim()).filter(Boolean).filter((x,i,a)=>a.indexOf(x)===i)}
+function 產品分類(料號){const m=String(料號).slice(-1);if(m==='0')return '成品';if(m==='1')return '素材';if(m==='8')return '半成品';return '未分類'}
+function 產生產品CSV(){const list=分割(document.getElementById('缺產品').value);const rows=['產品編號,客戶品號,品名,分類,標準工時_秒,標準產能_班,啟用,備註,更新時間'];list.forEach(x=>rows.push(`${x},,待補品名,${產品分類(x)},0,0,是,系統缺漏草稿,`));輸出('02_產品主檔_缺漏補齊草稿.csv',rows.join('\n'))}
+function 產生工站CSV(){const list=分割(document.getElementById('缺工站').value);const rows=['工站代碼,工站名稱,產品編號,機台編號清單,標準人力,標準產能_班,啟用,備註,更新時間'];list.forEach((x,i)=>rows.push(`WS-DRAFT-${String(i+1).padStart(3,'0')},${x},,,1,0,是,系統缺漏草稿,`));輸出('04_工站主檔_缺漏補齊草稿.csv',rows.join('\n'))}
+function 產生機台CSV(){const list=分割(document.getElementById('缺機台').value);const rows=['機台編號,機台名稱,區域,組別,型號,加工材質,另裝配備,狀態,啟用,更新時間'];list.forEach(x=>rows.push(`${x},機台-${x},待補區域,待補組別,待補型號,待補材質,,可生產,是,`));輸出('03_機台主檔_缺漏補齊草稿.csv',rows.join('\n'))}
+function 輸出(name,text){目前檔名=name;document.getElementById('CSV結果').value=text}
+function 下載目前CSV(){const text=document.getElementById('CSV結果').value;if(!text.trim())return alert('尚未產生 CSV');const blob=new Blob(['\ufeff'+text],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=目前檔名;a.click();URL.revokeObjectURL(a.href)}
+async function 複製CSV(){const text=document.getElementById('CSV結果').value;if(!text.trim())return alert('尚未產生 CSV');await navigator.clipboard.writeText(text);alert('已複製 CSV，可貼到資料管理頁的 CSV 匯入')}
+function 清空(){document.getElementById('CSV結果').value=''}
+</script>
+</body>
+</html>
