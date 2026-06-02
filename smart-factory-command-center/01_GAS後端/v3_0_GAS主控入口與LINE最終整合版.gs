@@ -1,10 +1,10 @@
 /**
- * v3.2.0 GAS 主控入口與 LINE Webhook 最終整合版
- * 用途：統一 GitHub Pages 前端 API、LINE Webhook、健康檢查、初始化、系統總檢查與 v1.0~v3.2 功能路由。
+ * v3.3.0 GAS 主控入口與 LINE Webhook 最終整合版
+ * 用途：統一 GitHub Pages 前端 API、LINE Webhook、健康檢查、初始化、系統總檢查與 v1.0~v3.3 功能路由。
  * 使用方式：放在同一個 Apps Script 專案中。若專案已有 doGet / doPost，請以本檔為最終入口，避免重複定義。
  */
 
-const V3_0_系統版本 = 'v3.2.0';
+const V3_0_系統版本 = 'v3.3.0';
 
 function doGet(e) {
   const action = e && e.parameter ? (e.parameter.action || '健康檢查') : '健康檢查';
@@ -53,6 +53,9 @@ function 呼叫既有函數_v3_0_(action, p) {
   if (p.工作表名稱 !== undefined && p.資料 !== undefined) return fn(p.工作表名稱, p.資料);
   if (p.工作表名稱 !== undefined) return fn(p.工作表名稱);
 
+  // v3.3 重測狀態更新
+  if (p.重測編號 !== undefined) return fn(p.重測編號, p.重測狀態, p.重測結果, p.備註);
+
   // v3.2 GitHub / Commit 對照：必須放在一般修補狀態更新之前
   if (p.修補編號 !== undefined && p.CommitSHA !== undefined) return fn(p.修補編號, p.CommitSHA, p.備註);
   if (p.修補編號 !== undefined && p.新狀態 !== undefined) return fn(p.修補編號, p.新狀態, p.處理紀錄, p.負責人);
@@ -88,7 +91,7 @@ function 初始化_v3_0_正式上線() {
     '升級_v3_1_上線測試錯誤表',
     '升級_v3_2_修補GitHub與重測表'
   ].forEach(call);
-  return { 成功: true, 版本: V3_0_系統版本, 訊息: 'v3.2 正式上線初始化已執行', steps };
+  return { 成功: true, 版本: V3_0_系統版本, 訊息: 'v3.3 正式上線初始化已執行', steps };
 }
 
 function 系統總檢查_v3_0_() {
@@ -103,7 +106,8 @@ function 系統總檢查_v3_0_() {
   const requiredFunctions = [
     '取得主檔管理資料','新增或更新主檔','取得KPI戰情','取得AI摘要','產生LINE回覆訊息_v3_0_',
     '取得_v2_7_任務統計儀表板資料','取得_v2_8_任務負責人績效統計','取得_v2_9_任務週月完成率統計',
-    '取得_v3_1_上線修補總覽','回報_v3_1_上線測試錯誤','取得_v3_2_修補GitHub總覽','產生_v3_2_修補建議'
+    '取得_v3_1_上線修補總覽','回報_v3_1_上線測試錯誤','取得_v3_2_修補GitHub總覽','產生_v3_2_修補建議',
+    '取得_v3_3_修補完成率儀表板資料','更新_v3_3_重測狀態','產生_v3_3_上線修補週報','產生_v3_3_上線修補月報'
   ];
   const 函數狀態 = requiredFunctions.map(name => ({ 函數: name, 狀態: (typeof globalThis !== 'undefined' && typeof globalThis[name] === 'function') || typeof this[name] === 'function' ? '已載入' : '缺少' }));
   return {
@@ -142,6 +146,8 @@ function 產生LINE回覆訊息_v3_0_(文字) {
   if (t === '健康檢查' || t === '系統狀態') return [{ type: 'text', text: JSON.stringify(健康檢查_v3_0_(), null, 2) }];
   if (t === '總檢查' || t === '上線檢查') return [{ type: 'text', text: JSON.stringify(系統總檢查_v3_0_(), null, 2).slice(0, 4900) }];
   if (t === '修補報告' || t === '上線修補') return [{ type: 'text', text: typeof 產生_v3_1_上線修補報告 === 'function' ? 產生_v3_1_上線修補報告() : '尚未載入 v3.1 修補工具。' }];
+  if (t === '修補週報') return [{ type: 'text', text: typeof 產生_v3_3_上線修補週報 === 'function' ? 產生_v3_3_上線修補週報() : '尚未載入 v3.3 修補週報工具。' }];
+  if (t === '修補月報') return [{ type: 'text', text: typeof 產生_v3_3_上線修補月報 === 'function' ? 產生_v3_3_上線修補月報() : '尚未載入 v3.3 修補月報工具。' }];
   if (typeof 產生LINE回覆訊息_v2_8_ === 'function') return 產生LINE回覆訊息_v2_8_(文字);
   if (typeof 產生LINE回覆訊息_v2_7_ === 'function') return 產生LINE回覆訊息_v2_7_(文字);
   if (typeof 產生LINE回覆訊息_v2_5_ === 'function') return 產生LINE回覆訊息_v2_5_(文字);
