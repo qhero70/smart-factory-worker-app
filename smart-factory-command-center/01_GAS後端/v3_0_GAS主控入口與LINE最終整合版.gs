@@ -1,17 +1,18 @@
 /**
- * v3.7.3 GAS 主控入口與 LINE Webhook 最終整合版
+ * v3.7.4 GAS 主控入口與 LINE Webhook 最終整合版
  * 檔案定位：v3 路由模組，不直接宣告 doGet(e) / doPost(e)。
  * 正式入口：保留在「智慧製造中央作戰指揮中心.gs」。
- * 本版重點：把可手動執行的三個測試函數放在最上方，讓 Apps Script 下拉選單優先看得到。
+ * 重要修正：Apps Script 下拉選單不顯示尾端底線 _ 的函數，所以手動執行函數一律不以 _ 結尾。
  */
 
-const V3_0_系統版本 = 'v3.7.3';
+const V3_0_系統版本 = 'v3.7.4';
 const V3_0_LINE文字上限 = 4900;
 
 /**
  * ① 下拉選單測試用：健康檢查。
+ * 注意：這個名稱不以 _ 結尾，所以 Apps Script 下拉選單會顯示。
  */
-function 健康檢查_v3_0_() {
+function 健康檢查_v3_0() {
   const 設定 = 取得系統設定_v3_0_();
   return {
     成功: true,
@@ -27,13 +28,13 @@ function 健康檢查_v3_0_() {
 
 /**
  * ② 下拉選單測試用：模組自我檢查。
+ * 注意：這個名稱不以 _ 結尾，所以 Apps Script 下拉選單會顯示。
  */
-function 模組自我檢查_v3_0_() {
+function 模組自我檢查_v3_0() {
   const 函數清單 = [
-    '健康檢查_v3_0_',
-    '模組自我檢查_v3_0_',
+    '健康檢查_v3_0',
+    '模組自我檢查_v3_0',
     '系統總檢查_v3_0',
-    '系統總檢查_v3_0_',
     'V3_0_主控入口_doGet',
     'V3_0_主控入口_doPost',
     '處理API請求_v3_0_',
@@ -71,10 +72,9 @@ function 系統總檢查_v3_0() {
   ];
 
   const 核心函數 = [
-    '健康檢查_v3_0_',
-    '模組自我檢查_v3_0_',
+    '健康檢查_v3_0',
+    '模組自我檢查_v3_0',
     '系統總檢查_v3_0',
-    '系統總檢查_v3_0_',
     'V3_0_主控入口_doGet',
     'V3_0_主控入口_doPost',
     '處理API請求_v3_0_',
@@ -118,8 +118,16 @@ function 系統總檢查_v3_0() {
 }
 
 /**
- * 舊版相容：尾端多底線也可用。
+ * 以下三個是舊版相容入口。因為尾端是 _，Apps Script 下拉選單可能不會顯示，這是正常現象。
  */
+function 健康檢查_v3_0_() {
+  return 健康檢查_v3_0();
+}
+
+function 模組自我檢查_v3_0_() {
+  return 模組自我檢查_v3_0();
+}
+
 function 系統總檢查_v3_0_() {
   return 系統總檢查_v3_0();
 }
@@ -154,9 +162,16 @@ function 處理API請求_v3_0_(data) {
   try {
     switch (action) {
       case '健康檢查':
+      case '健康檢查_v3_0':
+      case '健康檢查_v3_0_':
       case 'health':
       case '系統狀態':
-        return 健康檢查_v3_0_();
+        return 健康檢查_v3_0();
+
+      case '模組自我檢查_v3_0':
+      case '模組自我檢查_v3_0_':
+      case '自我檢查':
+        return 模組自我檢查_v3_0();
 
       case '系統總檢查_v3_0':
       case '系統總檢查_v3_0_':
@@ -166,11 +181,6 @@ function 處理API請求_v3_0_(data) {
 
       case '初始化_v3_0_正式上線':
         return 初始化_v3_0_正式上線();
-
-      case '模組自我檢查_v3_0':
-      case '模組自我檢查_v3_0_':
-      case '自我檢查':
-        return 模組自我檢查_v3_0_();
 
       case '檢查入口衝突_v3_0':
       case '入口檢查':
@@ -264,7 +274,7 @@ function 產生LINE回覆訊息_v3_0_(文字) {
 
   if (!t || t === '指令' || t === 'help' || t === '說明') return [{ type: 'text', text: 取得LINE指令說明文字_v3_0_() }];
   if (t === '版本' || t === '系統版本') return [{ type: 'text', text: '智慧製造中央作戰指揮中心 ' + V3_0_系統版本 }];
-  if (t === '健康檢查' || t === '系統狀態') return [{ type: 'text', text: 限制文字長度_v3_0_(JSON.stringify(健康檢查_v3_0_(), null, 2)) }];
+  if (t === '健康檢查' || t === '系統狀態') return [{ type: 'text', text: 限制文字長度_v3_0_(JSON.stringify(健康檢查_v3_0(), null, 2)) }];
   if (t === '總檢查' || t === '上線檢查' || t === '系統總檢查') return [{ type: 'text', text: 限制文字長度_v3_0_(JSON.stringify(系統總檢查_v3_0(), null, 2)) }];
   if (t === '入口檢查') return [{ type: 'text', text: 限制文字長度_v3_0_(JSON.stringify(檢查入口衝突_v3_0_(), null, 2)) }];
   if (t.indexOf('戰情') >= 0 || t.indexOf('狀況') >= 0) return [{ type: 'text', text: 產生戰情回覆文字_v3_0_() }];
