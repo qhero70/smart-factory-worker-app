@@ -32,7 +32,7 @@ function 處理API請求_v3_0_(data) {
       case 'health':
         return 健康檢查_v3_0_();
       case '系統總檢查_v3_0':
-        return 系統總檢查_v3_0_();
+        return 系統總檢查_v3_0();
       case '初始化_v3_0_正式上線':
         return 初始化_v3_0_正式上線();
       default:
@@ -111,7 +111,7 @@ function 初始化_v3_0_正式上線() {
   return { 成功: true, 版本: V3_0_系統版本, 訊息: 'v3.7 正式上線初始化已執行', steps };
 }
 
-function 系統總檢查_v3_0_() {
+function 系統總檢查_v3_0() {
   const requiredSheets = [
     '00_系統設定','01_人員主檔','02_產品主檔','03_機台主檔','04_工站主檔','10_工單主檔','10_排程需求池',
     '10_共用素材主檔','10_共用素材到貨紀錄','10_鎖料分配歷史','10_跨部門待辦任務','00_任務自動推播設定',
@@ -143,6 +143,11 @@ function 系統總檢查_v3_0_() {
   };
 }
 
+// 相容舊版：保留尾端底線版本，避免既有 action / LINE 指令失效。
+function 系統總檢查_v3_0_() {
+  return 系統總檢查_v3_0();
+}
+
 function 健康檢查_v3_0_() {
   return {
     成功: true,
@@ -167,7 +172,7 @@ function 產生LINE回覆訊息_v3_0_(文字) {
   const t = String(文字 || '').trim();
   if (t === '版本' || t === '系統版本') return [{ type: 'text', text: '智慧製造中央作戰指揮中心 ' + V3_0_系統版本 }];
   if (t === '健康檢查' || t === '系統狀態') return [{ type: 'text', text: JSON.stringify(健康檢查_v3_0_(), null, 2) }];
-  if (t === '總檢查' || t === '上線檢查') return [{ type: 'text', text: JSON.stringify(系統總檢查_v3_0_(), null, 2).slice(0, 4900) }];
+  if (t === '總檢查' || t === '上線檢查') return [{ type: 'text', text: JSON.stringify(系統總檢查_v3_0(), null, 2).slice(0, 4900) }];
   if (t === '修補報告' || t === '上線修補') return [{ type: 'text', text: typeof 產生_v3_1_上線修補報告 === 'function' ? 產生_v3_1_上線修補報告() : '尚未載入 v3.1 修補工具。' }];
   if (t === '修補週報') return [{ type: 'text', text: typeof 產生_v3_3_上線修補週報 === 'function' ? 產生_v3_3_上線修補週報() : '尚未載入 v3.3 修補週報工具。' }];
   if (t === '修補月報') return [{ type: 'text', text: typeof 產生_v3_3_上線修補月報 === 'function' ? 產生_v3_3_上線修補月報() : '尚未載入 v3.3 修補月報工具。' }];
