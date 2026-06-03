@@ -1,20 +1,131 @@
 /**
- * v3.7.2 GAS 主控入口與 LINE Webhook 最終整合版
+ * v3.7.3 GAS 主控入口與 LINE Webhook 最終整合版
  * 檔案定位：v3 路由模組，不直接宣告 doGet(e) / doPost(e)。
  * 正式入口：保留在「智慧製造中央作戰指揮中心.gs」。
- * 修正重點：
- * 1. 避免 doGet / doPost 重複入口衝突。
- * 2. 修正 系統總檢查_v3_0 與 系統總檢查_v3_0_ 底線相容問題。
- * 3. 全部函數加上安全檢查，缺少主檔或延伸模組時不直接中斷。
- * 4. LINE Webhook 支援版本、健康檢查、總檢查、戰情、AI摘要、指令說明。
+ * 本版重點：把可手動執行的三個測試函數放在最上方，讓 Apps Script 下拉選單優先看得到。
  */
 
-const V3_0_系統版本 = 'v3.7.2';
+const V3_0_系統版本 = 'v3.7.3';
 const V3_0_LINE文字上限 = 4900;
 
 /**
+ * ① 下拉選單測試用：健康檢查。
+ */
+function 健康檢查_v3_0_() {
+  const 設定 = 取得系統設定_v3_0_();
+  return {
+    成功: true,
+    版本: V3_0_系統版本,
+    系統名稱: 設定.系統名稱 || '智慧製造中央作戰指揮中心',
+    模式: 'v3 路由模組',
+    正式入口: '智慧製造中央作戰指揮中心.gs 的 doGet / doPost',
+    本檔入口: ['V3_0_主控入口_doGet(e)', 'V3_0_主控入口_doPost(e)'],
+    訊息: '健康檢查正常：本檔沒有宣告重複 doGet / doPost',
+    時間: new Date()
+  };
+}
+
+/**
+ * ② 下拉選單測試用：模組自我檢查。
+ */
+function 模組自我檢查_v3_0_() {
+  const 函數清單 = [
+    '健康檢查_v3_0_',
+    '模組自我檢查_v3_0_',
+    '系統總檢查_v3_0',
+    '系統總檢查_v3_0_',
+    'V3_0_主控入口_doGet',
+    'V3_0_主控入口_doPost',
+    '處理API請求_v3_0_',
+    '呼叫既有函數_v3_0_',
+    '初始化_v3_0_正式上線',
+    '檢查入口衝突_v3_0_',
+    '處理LINEWebhook_v3_0_',
+    '產生LINE回覆訊息_v3_0_',
+    '回覆LINE訊息陣列_v3_0_',
+    '輸出JSON_v3_0_',
+    '解析POST內容_v3_0_',
+    '取得全域函數_v3_0_'
+  ];
+  const 狀態 = 建立函數狀態_v3_0_(函數清單);
+  return {
+    成功: 狀態.every(x => x.狀態 === '已載入'),
+    版本: V3_0_系統版本,
+    檢查項目: 'v3 模組內部函數',
+    函數狀態: 狀態,
+    檢查時間: new Date()
+  };
+}
+
+/**
+ * ③ 下拉選單測試用：系統總檢查。
+ */
+function 系統總檢查_v3_0() {
+  const ss = 取得試算表安全_v3_0_();
+  const 工作表名稱清單 = ss ? ss.getSheets().map(s => s.getName()) : [];
+
+  const 核心工作表 = [
+    '00_系統設定', '01_人員主檔', '02_產品主檔', '03_機台主檔', '04_工站主檔',
+    '09_報工紀錄', '10_工單主檔', '10_排程需求池', '11_檢具主檔', '12_AI分析紀錄',
+    'LINE_指令設定', '系統_操作紀錄'
+  ];
+
+  const 核心函數 = [
+    '健康檢查_v3_0_',
+    '模組自我檢查_v3_0_',
+    '系統總檢查_v3_0',
+    '系統總檢查_v3_0_',
+    'V3_0_主控入口_doGet',
+    'V3_0_主控入口_doPost',
+    '處理API請求_v3_0_',
+    '呼叫既有函數_v3_0_',
+    '初始化_v3_0_正式上線',
+    '檢查入口衝突_v3_0_',
+    '處理LINEWebhook_v3_0_',
+    '產生LINE回覆訊息_v3_0_',
+    '回覆LINE訊息陣列_v3_0_',
+    '輸出JSON_v3_0_',
+    '解析POST內容_v3_0_',
+    '取得全域函數_v3_0_'
+  ];
+
+  const 主系統函數 = [
+    'doGet', 'doPost', '取得試算表_', '處理API請求_', '取得主檔管理資料_', '新增或更新主檔_',
+    '取得KPI戰情_', '產生AI摘要_', '檢查主檔完整性_', '寫入排程需求池_', '記錄操作_'
+  ];
+
+  const 缺少核心工作表 = ss ? 核心工作表.filter(name => !工作表名稱清單.includes(name)) : 核心工作表;
+  const 核心函數狀態 = 建立函數狀態_v3_0_(核心函數);
+  const 主系統函數狀態 = 建立函數狀態_v3_0_(主系統函數);
+  const 入口檢查 = 檢查入口衝突_v3_0_();
+
+  const 缺少核心函數 = 核心函數狀態.filter(x => x.狀態 !== '已載入').map(x => x.函數);
+  const 核心成功 = !!ss && 缺少核心函數.length === 0;
+
+  return {
+    成功: 核心成功,
+    版本: V3_0_系統版本,
+    模式: 'v3 路由模組，不宣告 doGet / doPost',
+    試算表名稱: ss ? ss.getName() : '無法取得試算表',
+    核心成功,
+    缺少核心工作表,
+    核心函數狀態,
+    主系統函數狀態,
+    入口檢查,
+    建議: 產生總檢查建議_v3_0_(!!ss, 缺少核心工作表, 缺少核心函數, 入口檢查),
+    檢查時間: new Date()
+  };
+}
+
+/**
+ * 舊版相容：尾端多底線也可用。
+ */
+function 系統總檢查_v3_0_() {
+  return 系統總檢查_v3_0();
+}
+
+/**
  * 手動測試入口：不取代正式 doGet。
- * 若主入口需要轉呼叫 v3，可呼叫此函數。
  */
 function V3_0_主控入口_doGet(e) {
   const 參數 = e && e.parameter ? e.parameter : {};
@@ -24,7 +135,6 @@ function V3_0_主控入口_doGet(e) {
 
 /**
  * 手動測試入口：不取代正式 doPost。
- * 若主入口需要轉呼叫 v3，可呼叫此函數。
  */
 function V3_0_主控入口_doPost(e) {
   try {
@@ -37,9 +147,6 @@ function V3_0_主控入口_doPost(e) {
   }
 }
 
-/**
- * v3 API 路由中心。
- */
 function 處理API請求_v3_0_(data) {
   const 內容 = data || {};
   const action = String(內容.action || 內容.動作 || '健康檢查').trim();
@@ -61,6 +168,7 @@ function 處理API請求_v3_0_(data) {
         return 初始化_v3_0_正式上線();
 
       case '模組自我檢查_v3_0':
+      case '模組自我檢查_v3_0_':
       case '自我檢查':
         return 模組自我檢查_v3_0_();
 
@@ -82,10 +190,6 @@ function 處理API請求_v3_0_(data) {
   }
 }
 
-/**
- * 呼叫同一 Apps Script 專案中的既有函數。
- * 目的：v3 入口只做路由，不硬綁單一資料結構。
- */
 function 呼叫既有函數_v3_0_(action, p) {
   const fn = 取得全域函數_v3_0_(action);
   if (typeof fn !== 'function') return { 成功: false, 版本: V3_0_系統版本, 訊息: '找不到 action 或函數：' + action };
@@ -94,46 +198,12 @@ function 呼叫既有函數_v3_0_(action, p) {
   const keys = Object.keys(參數).filter(k => k !== 'action' && k !== '動作' && k !== 'parameter');
   if (keys.length === 0) return fn();
 
-  // 常用主檔管理 API
   if (參數.工作表名稱 !== undefined && 參數.資料 !== undefined) return fn(參數.工作表名稱, 參數.資料);
   if (參數.工作表名稱 !== undefined) return fn(參數.工作表名稱);
-
-  // v3.7 Release API
-  if (參數.資料 !== undefined && String(action).indexOf('v3_7') >= 0) return fn(參數.資料);
-
-  // v3.5 handoff / lock API
-  if (參數.交接編號 !== undefined) return fn(參數.交接編號, 參數.交接狀態, 參數.負責人, 參數.處理紀錄, 參數.備註);
-  if (參數.封版編號 !== undefined) return fn(參數.封版編號);
-  if (參數.手冊編號 !== undefined) return fn(參數.手冊編號);
-
-  // v3.4 Commit / Issue / Release API
-  if (參數.BaseSHA !== undefined && 參數.HeadSHA !== undefined) return fn(參數.BaseSHA, 參數.HeadSHA);
-  if (參數.CommitSHA !== undefined && 參數.修補編號 === undefined) return fn(參數.CommitSHA);
-  if (參數.Issue編號 !== undefined) return fn(參數.Issue編號);
-
-  // v3.3 重測狀態更新
-  if (參數.重測編號 !== undefined) return fn(參數.重測編號, 參數.重測狀態, 參數.重測結果, 參數.備註);
-
-  // v3.2 GitHub / Commit 對照：必須放在一般修補狀態更新之前
-  if (參數.修補編號 !== undefined && 參數.CommitSHA !== undefined) return fn(參數.修補編號, 參數.CommitSHA, 參數.備註);
-  if (參數.修補編號 !== undefined && 參數.新狀態 !== undefined) return fn(參數.修補編號, 參數.新狀態, 參數.處理紀錄, 參數.負責人);
-  if (參數.修補編號 !== undefined) return fn(參數.修補編號);
-
-  // 其他通用參數
-  if (參數.任務編號 !== undefined) return fn(參數.任務編號, 參數.新狀態, 參數.處理紀錄, 參數.負責人);
-  if (參數.共用素材編號 !== undefined && 參數.到貨數量 !== undefined) return fn(參數.共用素材編號, 參數.到貨數量);
-  if (參數.目標ID !== undefined) return fn(參數.目標ID);
-  if (參數.摘要文字 !== undefined) return fn(參數.摘要文字);
-  if (參數.關鍵字 !== undefined) return fn(參數.關鍵字);
   if (參數.資料 !== undefined) return fn(參數.資料);
-
   return fn(參數);
 }
 
-/**
- * 逐步執行已存在的初始化 / 升級函數。
- * 缺少函數不視為失敗，只回報略過。
- */
 function 初始化_v3_0_正式上線() {
   const steps = [];
   const 函數清單 = [
@@ -165,113 +235,6 @@ function 初始化_v3_0_正式上線() {
   return { 成功: true, 版本: V3_0_系統版本, 訊息: 'v3 正式上線初始化流程已執行', steps };
 }
 
-/**
- * 正式總檢查函數：名稱無尾端底線。
- */
-function 系統總檢查_v3_0() {
-  const ss = 取得試算表安全_v3_0_();
-  const 工作表名稱清單 = ss ? ss.getSheets().map(s => s.getName()) : [];
-
-  const 核心工作表 = [
-    '00_系統設定','01_人員主檔','02_產品主檔','03_機台主檔','04_工站主檔',
-    '09_報工紀錄','10_工單主檔','10_排程需求池','11_檢具主檔','12_AI分析紀錄',
-    'LINE_指令設定','系統_操作紀錄'
-  ];
-
-  const 延伸工作表 = [
-    '10_共用素材主檔','10_共用素材到貨紀錄','10_鎖料分配歷史','10_跨部門待辦任務','00_任務自動推播設定',
-    '00_上線測試錯誤回報','00_上線修補任務','00_修補GitHub對照','00_修補重測清單','00_Commit影響範圍',
-    '00_正式上線封版報告','00_正式部署手冊紀錄','00_版本鎖定紀錄','00_正式上線交接清單','00_正式交付總包紀錄',
-    '00_部署後健康檢查排程','00_部署後健康檢查紀錄','00_GitHubRelease對照','00_部署後7日觀察報告','00_健康異常修補紀錄'
-  ];
-
-  const 核心函數 = [
-    'V3_0_主控入口_doGet','V3_0_主控入口_doPost','處理API請求_v3_0_','呼叫既有函數_v3_0_',
-    '系統總檢查_v3_0','系統總檢查_v3_0_','健康檢查_v3_0_','處理LINEWebhook_v3_0_',
-    '產生LINE回覆訊息_v3_0_','回覆LINE訊息陣列_v3_0_','輸出JSON_v3_0_','解析POST內容_v3_0_'
-  ];
-
-  const 主系統函數 = [
-    '取得試算表_','處理API請求_','取得主檔管理資料_','新增或更新主檔_','取得KPI戰情_','產生AI摘要_',
-    '檢查主檔完整性_','寫入排程需求池_','記錄操作_'
-  ];
-
-  const 延伸函數 = [
-    '取得_v2_7_任務統計儀表板資料','取得_v2_8_任務負責人績效統計','取得_v2_9_任務週月完成率統計',
-    '取得_v3_1_上線修補總覽','回報_v3_1_上線測試錯誤','取得_v3_2_修補GitHub總覽','產生_v3_2_修補建議',
-    '取得_v3_3_修補完成率儀表板資料','更新_v3_3_重測狀態','產生_v3_3_上線修補週報','產生_v3_3_上線修補月報',
-    '重測失敗_v3_4_再開修補任務','同步_v3_4_全部GitHubIssue狀態','比對_v3_4_單一Commit影響範圍','產生_v3_4_正式上線封版報告',
-    '產生_v3_5_正式部署手冊','匯出_v3_5_封版報告PDF','鎖定_v3_5_封版版本','建立_v3_5_正式上線交接清單','取得_v3_5_正式交接總覽',
-    '匯出_v3_6_正式部署手冊與封版報告合併PDF','匯出_v3_6_交接清單PDF','產生_v3_6_正式上線總包ZIP','建立_v3_6_部署後每日健康檢查排程','執行_v3_6_部署後每日健康檢查','取得_v3_6_正式交付總包總覽',
-    '建立_v3_7_GitHubReleaseTag','產生_v3_7_部署後7日觀察報告','掃描_v3_7_健康異常自動建立修補任務','取得_v3_7_Release觀察總覽'
-  ];
-
-  const 缺少核心工作表 = ss ? 核心工作表.filter(name => !工作表名稱清單.includes(name)) : 核心工作表;
-  const 缺少延伸工作表 = ss ? 延伸工作表.filter(name => !工作表名稱清單.includes(name)) : 延伸工作表;
-  const 核心函數狀態 = 建立函數狀態_v3_0_(核心函數);
-  const 主系統函數狀態 = 建立函數狀態_v3_0_(主系統函數);
-  const 延伸函數狀態 = 建立函數狀態_v3_0_(延伸函數);
-  const 入口檢查 = 檢查入口衝突_v3_0_();
-
-  const 缺少核心函數 = 核心函數狀態.filter(x => x.狀態 !== '已載入').map(x => x.函數);
-  const 核心成功 = !!ss && 缺少核心函數.length === 0;
-
-  return {
-    成功: 核心成功,
-    版本: V3_0_系統版本,
-    模式: 'v3 路由模組，不宣告 doGet / doPost',
-    試算表名稱: ss ? ss.getName() : '無法取得試算表',
-    核心成功,
-    缺少核心工作表,
-    缺少延伸工作表,
-    核心函數狀態,
-    主系統函數狀態,
-    延伸函數缺少數: 延伸函數狀態.filter(x => x.狀態 !== '已載入').length,
-    延伸函數狀態,
-    入口檢查,
-    建議: 產生總檢查建議_v3_0_(!!ss, 缺少核心工作表, 缺少核心函數, 入口檢查),
-    檢查時間: new Date()
-  };
-}
-
-/**
- * 舊版相容：尾端多底線也可用。
- */
-function 系統總檢查_v3_0_() {
-  return 系統總檢查_v3_0();
-}
-
-function 健康檢查_v3_0_() {
-  const 設定 = 取得系統設定_v3_0_();
-  return {
-    成功: true,
-    版本: V3_0_系統版本,
-    系統名稱: 設定.系統名稱 || '智慧製造中央作戰指揮中心',
-    模式: 'v3 路由模組',
-    正式入口: '智慧製造中央作戰指揮中心.gs 的 doGet / doPost',
-    本檔入口: ['V3_0_主控入口_doGet(e)', 'V3_0_主控入口_doPost(e)'],
-    訊息: 'v3 模組正常，未宣告重複 doGet / doPost',
-    時間: new Date()
-  };
-}
-
-function 模組自我檢查_v3_0_() {
-  const 函數清單 = [
-    'V3_0_主控入口_doGet','V3_0_主控入口_doPost','處理API請求_v3_0_','呼叫既有函數_v3_0_',
-    '初始化_v3_0_正式上線','系統總檢查_v3_0','系統總檢查_v3_0_','健康檢查_v3_0_',
-    '處理LINEWebhook_v3_0_','產生LINE回覆訊息_v3_0_','回覆LINE訊息陣列_v3_0_',
-    '輸出JSON_v3_0_','記錄錯誤_v3_0_','解析POST內容_v3_0_','取得全域函數_v3_0_'
-  ];
-  const 狀態 = 建立函數狀態_v3_0_(函數清單);
-  return {
-    成功: 狀態.every(x => x.狀態 === '已載入'),
-    版本: V3_0_系統版本,
-    檢查項目: 'v3 模組內部函數',
-    函數狀態: 狀態,
-    檢查時間: new Date()
-  };
-}
-
 function 檢查入口衝突_v3_0_() {
   const doGet存在 = typeof 取得全域函數_v3_0_('doGet') === 'function';
   const doPost存在 = typeof 取得全域函數_v3_0_('doPost') === 'function';
@@ -299,39 +262,15 @@ function 處理LINEWebhook_v3_0_(body) {
 function 產生LINE回覆訊息_v3_0_(文字) {
   const t = String(文字 || '').trim();
 
-  if (!t || t === '指令' || t === 'help' || t === '說明') {
-    return [{ type: 'text', text: 取得LINE指令說明文字_v3_0_() }];
-  }
+  if (!t || t === '指令' || t === 'help' || t === '說明') return [{ type: 'text', text: 取得LINE指令說明文字_v3_0_() }];
+  if (t === '版本' || t === '系統版本') return [{ type: 'text', text: '智慧製造中央作戰指揮中心 ' + V3_0_系統版本 }];
+  if (t === '健康檢查' || t === '系統狀態') return [{ type: 'text', text: 限制文字長度_v3_0_(JSON.stringify(健康檢查_v3_0_(), null, 2)) }];
+  if (t === '總檢查' || t === '上線檢查' || t === '系統總檢查') return [{ type: 'text', text: 限制文字長度_v3_0_(JSON.stringify(系統總檢查_v3_0(), null, 2)) }];
+  if (t === '入口檢查') return [{ type: 'text', text: 限制文字長度_v3_0_(JSON.stringify(檢查入口衝突_v3_0_(), null, 2)) }];
+  if (t.indexOf('戰情') >= 0 || t.indexOf('狀況') >= 0) return [{ type: 'text', text: 產生戰情回覆文字_v3_0_() }];
+  if (t === 'AI' || t.indexOf('AI摘要') >= 0 || t.indexOf('AI 摘要') >= 0) return [{ type: 'text', text: 產生AI回覆文字_v3_0_() }];
+  if (t.indexOf('主檔') >= 0 && t.indexOf('檢查') >= 0) return [{ type: 'text', text: 產生主檔檢查回覆文字_v3_0_() }];
 
-  if (t === '版本' || t === '系統版本') {
-    return [{ type: 'text', text: '智慧製造中央作戰指揮中心 ' + V3_0_系統版本 }];
-  }
-
-  if (t === '健康檢查' || t === '系統狀態') {
-    return [{ type: 'text', text: 限制文字長度_v3_0_(JSON.stringify(健康檢查_v3_0_(), null, 2)) }];
-  }
-
-  if (t === '總檢查' || t === '上線檢查' || t === '系統總檢查') {
-    return [{ type: 'text', text: 限制文字長度_v3_0_(JSON.stringify(系統總檢查_v3_0(), null, 2)) }];
-  }
-
-  if (t === '入口檢查') {
-    return [{ type: 'text', text: 限制文字長度_v3_0_(JSON.stringify(檢查入口衝突_v3_0_(), null, 2)) }];
-  }
-
-  if (t.indexOf('戰情') >= 0 || t.indexOf('狀況') >= 0) {
-    return [{ type: 'text', text: 產生戰情回覆文字_v3_0_() }];
-  }
-
-  if (t === 'AI' || t.indexOf('AI摘要') >= 0 || t.indexOf('AI 摘要') >= 0) {
-    return [{ type: 'text', text: 產生AI回覆文字_v3_0_() }];
-  }
-
-  if (t.indexOf('主檔') >= 0 && t.indexOf('檢查') >= 0) {
-    return [{ type: 'text', text: 產生主檔檢查回覆文字_v3_0_() }];
-  }
-
-  // 舊版 LINE 回覆模組相容。
   const 舊版候選 = ['產生LINE回覆訊息_v2_8_', '產生LINE回覆訊息_v2_7_', '產生LINE回覆訊息_v2_5_', '產生LINE回覆訊息_v2_4_', '產生LINE回覆訊息_', '產生LINE回覆_'];
   for (let i = 0; i < 舊版候選.length; i++) {
     const fn = 取得全域函數_v3_0_(舊版候選[i]);
