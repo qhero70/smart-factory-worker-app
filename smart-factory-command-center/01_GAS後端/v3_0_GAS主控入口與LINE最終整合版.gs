@@ -1,18 +1,19 @@
 /**
- * v3.7.0 GAS 主控入口與 LINE Webhook 最終整合版
- * 用途：統一 GitHub Pages 前端 API、LINE Webhook、健康檢查、初始化、系統總檢查與 v1.0~v3.7 功能路由。
- * 使用方式：放在同一個 Apps Script 專案中。若專案已有 doGet / doPost，請以本檔為最終入口，避免重複定義。
+ * v3.7.1 GAS 主控入口與 LINE Webhook 最終整合版
+ * 用途：提供 GitHub Pages 前端 API、LINE Webhook、健康檢查、初始化、系統總檢查與 v1.0~v3.7 功能路由。
+ * 修正：本檔不再直接宣告 doGet(e) / doPost(e)，避免與「智慧製造中央作戰指揮中心.gs」重複入口衝突。
+ * 使用方式：目前正式入口保留在「智慧製造中央作戰指揮中心.gs」。本檔改為 v3 路由模組，需要時可由主入口轉呼叫 V3_0_主控入口_doGet(e) / V3_0_主控入口_doPost(e)。
  */
 
-const V3_0_系統版本 = 'v3.7.0';
+const V3_0_系統版本 = 'v3.7.1';
 
-function doGet(e) {
+function V3_0_主控入口_doGet(e) {
   const action = e && e.parameter ? (e.parameter.action || '健康檢查') : '健康檢查';
   const result = 處理API請求_v3_0_({ action, parameter: e ? e.parameter : {} });
   return 輸出JSON_v3_0_(result);
 }
 
-function doPost(e) {
+function V3_0_主控入口_doPost(e) {
   try {
     const body = e && e.postData && e.postData.contents ? e.postData.contents : '';
     const data = body ? JSON.parse(body) : {};
