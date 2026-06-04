@@ -1,0 +1,3 @@
+function testMasterCheck() {
+  return 'ok';
+}
