@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>04 工站正式對接</title>
+<style>body{font-family:Arial,'Noto Sans TC',sans-serif;background:#07111f;color:#ecfeff;padding:16px}.card{background:#111c2f;border:1px solid #27405f;border-radius:18px;padding:16px;margin:12px 0}input,button{font-size:16px;padding:12px;border-radius:12px;width:100%;margin-top:8px}button{background:#22d3ee;color:#06202a;font-weight:900;border:0}.kpi{background:#0f2238;border-radius:16px;padding:14px;margin:10px 0}.num{font-size:32px;font-weight:900}.ok{color:#86efac}.bad{color:#fca5a5}table{width:100%;border-collapse:collapse;min-width:900px}th,td{padding:8px;border-bottom:1px solid #203850;text-align:left;font-size:13px}th{background:#0b1728;color:#67e8f9}.box{overflow:auto;max-height:60vh}.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.tab{background:#132640;color:#dff}.active{background:#67e8f9!important;color:#05202d!important}</style>
+</head>
+<body>
+<h1>04 工站資料正式對接</h1>
+<div id="status" class="card">尚未讀取。請貼上 GAS Web App /exec 網址。</div>
+<div class="card"><input id="url" placeholder="貼上 GAS Web App /exec 網址"><button onclick="saveUrl()">儲存網址</button><button onclick="loadData()">同步正式資料</button></div>
+<div id="kpis"></div>
+<div class="card"><div class="tabs"><button class="tab active" onclick="setType('工站產品關聯',this)">產品關聯</button><button class="tab" onclick="setType('工站機台關聯',this)">機台關聯</button><button class="tab" onclick="setType('工站班別產能',this)">班別產能</button></div><input id="q" placeholder="搜尋產品、工站、機台" oninput="renderTable()"></div>
+<div class="card"><b id="count">0 筆</b><div id="table" class="box">尚未讀取資料</div></div>
+<script>
+const KEY='GAS網址';let DATA=null;let TYPE='工站產品關聯';const EXPECT={工站產品關聯:259,工站機台關聯:282,工站班別產能:259};
+const COLS={工站產品關聯:['關聯編號','產品編號','客戶品號','品名','工序','工站代碼','工站名稱','製程順序','是否主要工站','啟用'],工站機台關聯:['關聯編號','工站代碼','工站名稱','產品編號','客戶品號','品名','工序','工序類型','區域','機台編號','解析狀態'],工站班別產能:['產能編號','產品編號','客戶品號','品名','工序','工站代碼','工站名稱','班別','標準工時_秒','8小時標準產能','需求人力']};
+document.getElementById('url').value=localStorage.getItem(KEY)||'';function status(t){document.getElementById('status').textContent=t}function saveUrl(){const u=document.getElementById('url').value.trim();if(!u)return alert('請貼上網址');localStorage.setItem(KEY,u);status('已儲存 GAS 網址')}
+async function loadData(){const u=(localStorage.getItem(KEY)||document.getElementById('url').value.trim()).trim();if(!u)return alert('請貼上 GAS Web App /exec 網址');localStorage.setItem(KEY,u);status('正式資料同步中...');try{const r=await fetch(u+'?action='+encodeURIComponent('取得04工站API資料')+'&t='+Date.now());const data=await r.json();if(!data.成功)throw new Error(data.訊息||'API失敗');DATA=data.資料||{};renderKpi(data.筆數||{});renderTable();status('正式對接成功：PWA 已讀取 04 工站資料')}catch(e){status('正式對接失敗：'+e.message);alert(e.message)}}
+function renderKpi(nums){document.getElementById('kpis').innerHTML=Object.keys(EXPECT).map(k=>{const n=Number(nums[k]||0);const ok=n===EXPECT[k];return `<div class="kpi"><div>${k}</div><div class="num">${n}</div><div class="${ok?'ok':'bad'}">${ok?'正常':'異常'}｜標準 ${EXPECT[k]}</div></div>`}).join('')}
+function setType(t,b){TYPE=t;document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));b.classList.add('active');renderTable()}
+function renderTable(){if(!DATA)return;const q=document.getElementById('q').value.trim().toLowerCase();let rows=DATA[TYPE]||[];if(q)rows=rows.filter(x=>JSON.stringify(x).toLowerCase().includes(q));document.getElementById('count').textContent=TYPE+'｜'+rows.length+' 筆';const cols=COLS[TYPE];document.getElementById('table').innerHTML='<table><thead><tr>'+cols.map(c=>'<th>'+c+'</th>').join('')+'</tr></thead><tbody>'+rows.slice(0,300).map(r=>'<tr>'+cols.map(c=>'<td>'+(r[c]??'')+'</td>').join('')+'</tr>').join('')+'</tbody></table>'}
+if(localStorage.getItem(KEY))loadData();
+</script>
+</body>
+</html>
