@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>04 工站 API 測試</title>
+<style>
+body{font-family:Arial,'Noto Sans TC',sans-serif;background:#0f172a;color:#fff;padding:16px}
+input,button{font-size:16px;padding:12px;border-radius:10px;margin:4px 0;width:100%}
+button{background:#22d3ee;color:#06202a;font-weight:bold;border:0}
+.card{background:#1e293b;border-radius:16px;padding:14px;margin:10px 0}
+pre{white-space:pre-wrap;background:#020617;padding:12px;border-radius:12px;max-height:55vh;overflow:auto}
+</style>
+</head>
+<body>
+<h1>04 工站 API 測試</h1>
+<p>測試 action=取得04工站API資料 是否成功。</p>
+<input id="url" placeholder="貼上 GAS Web App /exec 網址">
+<button onclick="saveUrl()">儲存網址</button>
+<button onclick="loadData()">讀取 04 工站 API</button>
+<div class="card" id="status">尚未讀取</div>
+<pre id="result"></pre>
+<script>
+const key='GAS網址';
+document.getElementById('url').value=localStorage.getItem(key)||'';
+function saveUrl(){localStorage.setItem(key,document.getElementById('url').value.trim());document.getElementById('status').textContent='已儲存網址';}
+async function loadData(){
+  const url=localStorage.getItem(key)||document.getElementById('url').value.trim();
+  if(!url){alert('請先貼上 GAS Web App /exec 網址');return;}
+  document.getElementById('status').textContent='讀取中...';
+  try{
+    const r=await fetch(url+'?action='+encodeURIComponent('取得04工站API資料'));
+    const data=await r.json();
+    document.getElementById('result').textContent=JSON.stringify({成功:data.成功,訊息:data.訊息,筆數:data.筆數,第一筆:data.資料&&data.資料.工站產品關聯?data.資料.工站產品關聯[0]:null},null,2);
+    document.getElementById('status').textContent=data.成功?'讀取成功':'讀取失敗';
+  }catch(e){document.getElementById('status').textContent='錯誤：'+e.message;}
+}
+</script>
+</body>
+</html>
