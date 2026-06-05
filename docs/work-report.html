@@ -3,37 +3,6 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>中英文合併版報工頁</title>
+<title>智慧報工選單</title>
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:Arial,'Noto Sans TC',sans-serif;background:#07111f;color:#ecfeff}.wrap{max-width:960px;margin:auto;padding:16px 16px 90px}.card{background:#111c2f;border:1px solid #27405f;border-radius:22px;padding:18px;margin:12px 0;box-shadow:0 16px 40px #0007}.title{font-size:28px;font-weight:900}.sub{color:#a7c7d9}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.label{font-weight:900;margin:12px 0 6px}.hint{font-size:12px;color:#93a9bd;margin-top:4px}input,select,textarea,button{font-size:16px;padding:13px;border-radius:14px;border:1px solid #31506f;background:#0f172a;color:#fff;width:100%}button{background:#22d3ee;color:#06202a;font-weight:900;border:0}.ghost{background:#132640;color:#dff;border:1px solid #2e5678}.ok{color:#86efac}.bad{color:#fca5a5}.pill{display:inline-block;border-radius:999px;padding:3px 9px;background:#1e3a5f;color:#bfdbfe;font-size:12px;font-weight:900}.footer{position:fixed;left:0;right:0;bottom:0;background:#020617dd;border-top:1px solid #1f3a56;padding:10px 16px;backdrop-filter:blur(10px)}@media(max-width:760px){.grid{grid-template-columns:1fr}.title{font-size:23px}}
-</style>
-</head>
-<body>
-<div class="wrap">
-<section class="card"><span class="pill">Production Report</span><div class="title">中英文合併版報工頁</div><p class="sub">所有選單由 GAS API 與 04 工站關聯資料產生，避免人工選錯產品、工站、機台。</p></section>
-<section class="card"><div class="grid"><div><div class="label">GAS 網址 / GAS Web App URL</div><input id="GAS網址" placeholder="貼上 /exec 網址"></div><div style="display:flex;gap:8px;align-items:end"><button onclick="儲存網址()">儲存 / Save</button><button class="ghost" onclick="同步資料()">同步 / Sync</button></div></div><p id="狀態" class="sub">尚未同步 / Not synced</p></section>
-<section class="card"><div class="grid"><div><div class="label">作業員 / Operator</div><select id="作業員"></select><div class="hint">來源：01_人員主檔</div></div><div><div class="label">班別 / Shift</div><select id="班別"></select><div class="hint">來源：04_工站班別產能</div></div></div></section>
-<section class="card"><div class="label">產品 / Product</div><select id="產品" onchange="產品變更()"></select><div class="hint">格式：產品編號｜客戶品號｜品名</div><div class="grid"><div><div class="label">工站 / Workstation</div><select id="工站" onchange="工站變更()"></select><div class="hint">依產品自動過濾</div></div><div><div class="label">機台 / Machine</div><select id="機台"></select><div class="hint">依產品與工站自動過濾</div></div></div></section>
-<section class="card"><div class="grid"><div><div class="label">良品數 / Good Qty</div><input id="良品數" type="number" min="0" inputmode="numeric" placeholder="0"></div><div><div class="label">不良數 / NG Qty</div><input id="不良數" type="number" min="0" inputmode="numeric" placeholder="0"></div></div><div class="label">備註 / Remark</div><textarea id="備註" rows="3" placeholder="異常、換線、停機、刀具、補充說明"></textarea></section>
-<section class="card"><button onclick="產生報工預覽()">產生報工預覽 / Preview</button><pre id="預覽" style="white-space:pre-wrap;background:#020617;border-radius:14px;padding:14px;min-height:120px"></pre><button class="ghost" onclick="複製預覽()">複製預覽 / Copy</button></section>
-</div><div class="footer"><span id="底部狀態">等待同步 / Waiting</span></div>
-<script>
-const KEY='GAS網址';let 主檔=null;let 目前產品=null;let 目前工站=null;document.getElementById('GAS網址').value=localStorage.getItem(KEY)||'';
-function 設狀態(t,ok=true){document.getElementById('狀態').innerHTML='<span class="'+(ok?'ok':'bad')+'">'+t+'</span>';document.getElementById('底部狀態').textContent=t}
-function 儲存網址(){const u=document.getElementById('GAS網址').value.trim();if(!u)return alert('請貼上 GAS Web App /exec 網址');localStorage.setItem(KEY,u);設狀態('已儲存 / Saved')}
-async function 呼叫API(action){const u=(localStorage.getItem(KEY)||document.getElementById('GAS網址').value.trim()).trim();if(!u)throw new Error('請先貼上 GAS Web App /exec 網址');localStorage.setItem(KEY,u);const r=await fetch(u+'?action='+encodeURIComponent(action)+'&t='+Date.now());return r.json()}
-async function 同步資料(){try{設狀態('同步中 / Syncing');const data=await 呼叫API('取得主檔資料');if(!data.成功)throw new Error(data.訊息||'API 回傳失敗');主檔=data;建立作業員選單();建立產品選單();建立班別選單();設狀態('同步完成 / Synced：產品 '+(data.工站產品關聯||[]).length+'，機台 '+(data.工站機台關聯||[]).length)}catch(e){設狀態('同步失敗 / Failed：'+e.message,false);alert(e.message)}}
-function opt(v,t){const o=document.createElement('option');o.value=v;o.textContent=t;return o}
-function 建立作業員選單(){const s=document.getElementById('作業員');s.innerHTML='';s.appendChild(opt('','請選擇 / Select'));(主檔.人員||[]).filter(x=>x.啟用!=='否').forEach(x=>s.appendChild(opt(x.姓名||x.工號,(x.姓名||'')+' / '+(x.工號||'')+'｜'+(x.部門||'')+'｜'+(x.班別||''))))}
-function 建立產品選單(){const s=document.getElementById('產品');s.innerHTML='';s.appendChild(opt('','請選擇產品 / Select Product'));const seen={};(主檔.工站產品關聯||[]).forEach(x=>{const k=[x.產品編號,x.客戶品號,x.品名].join('|');if(seen[k])return;seen[k]=1;s.appendChild(opt(k,(x.產品編號||'')+'｜'+(x.客戶品號||'')+'｜'+(x.品名||'')))})}
-function 建立班別選單(){const s=document.getElementById('班別');s.innerHTML='';['早班 / Day Shift','中班 / Swing Shift','夜班 / Night Shift','加班 / Overtime'].forEach(x=>s.appendChild(opt(x,x)))}
-function 產品變更(){const v=document.getElementById('產品').value;const a=v.split('|');目前產品={產品編號:a[0]||'',客戶品號:a[1]||'',品名:a[2]||''};建立工站選單();建立機台選單()}
-function 建立工站選單(){const s=document.getElementById('工站');s.innerHTML='';s.appendChild(opt('','請選擇工站 / Select Workstation'));if(!目前產品)return;const seen={};(主檔.工站產品關聯||[]).filter(x=>x.產品編號===目前產品.產品編號&&x.客戶品號===目前產品.客戶品號&&x.品名===目前產品.品名).forEach(x=>{const k=[x.工站代碼,x.工站名稱,x.工序].join('|');if(seen[k])return;seen[k]=1;s.appendChild(opt(k,(x.工站代碼||'')+'｜'+(x.工站名稱||'')+'｜'+(x.工序||'')))})}
-function 工站變更(){const v=document.getElementById('工站').value;const a=v.split('|');目前工站={工站代碼:a[0]||'',工站名稱:a[1]||'',工序:a[2]||''};建立機台選單()}
-function 建立機台選單(){const s=document.getElementById('機台');s.innerHTML='';s.appendChild(opt('','請選擇機台 / Select Machine'));if(!目前產品)return;let rows=(主檔.工站機台關聯||[]).filter(x=>x.產品編號===目前產品.產品編號&&x.客戶品號===目前產品.客戶品號&&x.品名===目前產品.品名);if(目前工站&&目前工站.工站代碼)rows=rows.filter(x=>x.工站代碼===目前工站.工站代碼);rows.forEach(x=>s.appendChild(opt(x.機台編號||x.設備名稱,(x.機台編號||x.設備名稱||'')+'｜'+(x.區域||'')+'｜'+(x.機台型號||'')+'｜'+(x.工站名稱||''))))}
-function 產生報工預覽(){const p=document.getElementById('產品').selectedOptions[0]?.textContent||'';const w=document.getElementById('工站').selectedOptions[0]?.textContent||'';const m=document.getElementById('機台').selectedOptions[0]?.textContent||'';const op=document.getElementById('作業員').selectedOptions[0]?.textContent||'';const sh=document.getElementById('班別').value;const good=document.getElementById('良品數').value||0;const ng=document.getElementById('不良數').value||0;const note=document.getElementById('備註').value||'';const text=['📋 報工預覽 / Production Report Preview','作業員 Operator：'+op,'班別 Shift：'+sh,'產品 Product：'+p,'工站 Workstation：'+w,'機台 Machine：'+m,'良品數 Good Qty：'+good,'不良數 NG Qty：'+ng,'備註 Remark：'+note,'時間 Time：'+new Date().toLocaleString()].join('\n');document.getElementById('預覽').textContent=text}
-async function 複製預覽(){const t=document.getElementById('預覽').textContent;if(!t.trim())return alert('尚未產生預覽');await navigator.clipboard.writeText(t);alert('已複製 / Copied')}
-if(localStorage.getItem(KEY))同步資料();
-</script>
-</body>
-</html>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,'Noto Sans TC',sans-serif;background:#07111f;color:#ecfeff}.wrap{max-width:1100px;margin:auto;padding:14px 14px 90px}.card{background:#111c2f;border:1px solid #27405f;border-radius:22px;padding:16px;margin:12px 0;box-shadow:0 16px 40px #0007}.title{font-size:28
