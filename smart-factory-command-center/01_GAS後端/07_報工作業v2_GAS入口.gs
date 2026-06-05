@@ -10,11 +10,21 @@ function 開啟報工作業v2() {
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
+/**
+ * 由 Google Sheets 右側側邊欄開啟報工作業 v2。
+ * 這個函數適合在 Apps Script 編輯器手動執行測試。
+ */
+function 顯示報工作業v2側邊欄() {
+  const 畫面 = HtmlService
+    .createHtmlOutputFromFile('07_報工作業v2')
+    .setTitle('報工作業 v2');
+
+  SpreadsheetApp.getUi().showSidebar(畫面);
+}
+
+/**
+ * 測試入口函數是否已正確載入。
+ */
 function 測試開啟報工作業v2入口() {
   return {
-    成功: true,
-    訊息: '報工作業 v2 入口函數已載入',
-    函數: '開啟報工作業v2',
-    時間: new Date()
-  };
-}
+    成功
