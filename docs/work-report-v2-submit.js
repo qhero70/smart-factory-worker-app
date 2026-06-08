@@ -1,0 +1,5 @@
+function v(id){return document.getElementById(id).value.trim()}
+function out(t){document.getElementById('結果').textContent=t}
+async function saveUrl(){localStorage.setItem('GAS網址',v('GAS網址'));out('已儲存GAS網址')}
+async function submitReport(){try{var u=localStorage.getItem('GAS網址')||v('GAS網址');if(!u)throw new Error('請先貼GAS網址');var d={action:'新增報工',來源:'07_報工作業v2'};['工號','姓名','班別','區域','機台編號','產品編號','品名','工站名稱','工單編號','良品數','不良數','停機分鐘','停機原因','換刀次數','備註'].forEach(function(k){d[k]=v(k)});out('送出中...');var r=await fetch(u,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(d)});out(JSON.stringify(await r.json(),null,2))}catch(e){out('錯誤：'+e.message)}}
+window.addEventListener('load',function(){document.getElementById('GAS網址').value=localStorage.getItem('GAS網址')||''});
