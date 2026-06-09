@@ -1,18 +1,18 @@
 /**
  * 智慧製造中央作戰指揮中心 正式主入口
- * 版本：正式完整版_v1.5.2｜主入口轉接 v3.7.4｜補齊 Web API 別名
+ * 版本：正式完整版_v1.5.3｜報工作業v2化新班別版分流
  * 技術：Google Apps Script + Google Sheets + HTML5 PWA + LINE Bot
  *
  * 重要規則：
  * 1. 本檔是唯一正式 doGet / doPost 入口。
  * 2. v3_0_GAS主控入口與LINE最終整合版.gs 不可再宣告 doGet / doPost。
  * 3. 健康檢查、總檢查、LINE 指令會優先轉給 v3 模組。
- * 4. Web App action=戰情 / AI摘要 / 主檔檢查 直接轉成主系統正式函數。
+ * 4. Web App action=戰情 / AI摘要 / 主檔檢查 / 寫入報工作業v2_化新班別版 直接轉成主系統正式函數。
  */
 
 const 系統設定 = {
   系統名稱: '智慧製造中央作戰指揮中心',
-  版本: '正式完整版_v1.5.2_主入口轉接v3.7.4_補齊WebAPI別名',
+  版本: '正式完整版_v1.5.3_報工作業v2化新班別版分流',
   時區: 'Asia/Taipei',
   主資料庫ID: '',
   LINE_CHANNEL_ACCESS_TOKEN: '',
@@ -98,6 +98,7 @@ function 處理API請求_(動作, 參數) {
       '取得工單清單': () => 取得工單清單_(p),
       '新增工單': () => 新增工單_(p),
       '新增報工': () => 新增報工_(p),
+      '寫入報工作業v2_化新班別版': () => 寫入報工作業v2_化新班別版(p),
       '新增停機': () => 新增停機_(p),
       '新增換刀': () => 新增換刀_(p),
       '新增不良': () => 新增不良_(p),
@@ -181,6 +182,14 @@ function 取得作業日_() {
   const d = new Date(now);
   if (hour < 6 || (hour === 6 && minute < 10)) d.setDate(d.getDate() - 1);
   return Utilities.formatDate(d, 系統設定.時區, 'yyyy-MM-dd');
+}
+
+function 判斷化新班別_() {
+  const now = new Date();
+  const hm = Number(Utilities.formatDate(now, 系統設定.時區, 'HHmm'));
+  if (hm >= 750 && hm < 1650) return '早班';
+  if (hm >= 1650 || hm < 110) return '中班';
+  return '夜班';
 }
 
 function 產生流水號_(前綴) {
@@ -283,6 +292,28 @@ function 取得工單清單_(p) {
 
 function 新增工單_(p) {
   return 新增或更新主檔_({ 工作表名稱: '10_工單主檔', 資料: { '工單編號': p.工單編號 || 產生流水號_('MO'), '產品編號': p.產品編號 || '', '品名': p.品名 || '', '計畫量': Number(p.計畫量 || 0), '已完成量': Number(p.已完成量 || 0), '不良量': Number(p.不良量 || 0), '開始日': p.開始日 || 取得作業日_(), '預計完工日': p.預計完工日 || '', '優先級': p.優先級 || '一般', '狀態': p.狀態 || '待生產', '備註': p.備註 || '' } });
+}
+
+function 寫入報工作業v2_化新班別版(p) {
+  p = p || {};
+  if (!p.工號 && !p.姓名) throw new Error('請填工號或姓名');
+  if (!p.產品編號) throw new Error('請填產品編號');
+  if (!p.工站名稱) throw new Error('請填工站名稱');
+  if (!p.機台編號) throw new Error('請填機台編號');
+  const 良品數 = Number(p.良品數 || 0);
+  const 不良數 = Number(p.不良數 || 0);
+  if (良品數 + 不良數 <= 0) throw new Error('良品數+不良數必須大於0');
+  const 資料 = Object.assign({}, p, {
+    班別: p.班別 || 判斷化新班別_(),
+    作業日: p.作業日 || 取得作業日_(),
+    來源: '07_報工作業v2_化新班別版',
+    良品數,
+    不良數,
+    停機分鐘: Number(p.停機分鐘 || 0),
+    換刀次數: Number(p.換刀次數 || 0)
+  });
+  const 結果 = 新增報工_(資料);
+  return { 成功: true, 訊息: '報工作業v2化新班別版寫入完成', 後端函數: '寫入報工作業v2_化新班別版', 作業日: 資料.作業日, 班別: 資料.班別, 資料: 結果.資料 };
 }
 
 function 新增報工_(p) {
