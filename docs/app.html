@@ -1,1 +1,55 @@
-<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>製造部行動戰情室</title></head><body><h1>製造部行動戰情室</h1><p>07_報工作業v2 主線已整理，請從下方入口進入。</p><p><a href="./work-report-v2.html">開啟 07_報工作業v2</a></p><p><a href="./index.html">返回智慧製造中央入口</a></p></body></html>
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <title>製造部行動戰情室</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <style>
+    :root{--bg:#07111f;--card:#0f172acc;--line:#334155;--text:#ecfeff;--sub:#a7b4c8;--blue:#38bdf8;--green:#34d399;--amber:#fbbf24;--red:#fb7185}
+    *{box-sizing:border-box}body{margin:0;background:linear-gradient(135deg,#06111f,#0b2a3d);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC','Microsoft JhengHei',sans-serif}.wrap{max-width:720px;margin:0 auto;padding:18px 14px 90px}.hero{padding:22px;border:1px solid rgba(148,163,184,.28);border-radius:26px;background:rgba(15,23,42,.78);box-shadow:0 22px 60px rgba(0,0,0,.35);backdrop-filter:blur(12px)}h1{font-size:30px;margin:8px 0 6px}.tag{font-weight:900;color:#67e8f9}.sub{color:var(--sub);line-height:1.7}.card{margin-top:14px;padding:16px;border:1px solid rgba(148,163,184,.25);border-radius:22px;background:rgba(15,23,42,.72)}label{display:block;font-weight:900;margin:8px 0 6px}input{width:100%;border:1px solid var(--line);border-radius:16px;background:#020617;color:var(--text);font-size:15px;padding:13px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.btn{border:0;border-radius:17px;padding:14px 10px;font-weight:900;font-size:15px;text-align:center;text-decoration:none;display:block;color:#03101d}.blue{background:var(--blue)}.green{background:var(--green)}.amber{background:var(--amber)}.dark{background:#1e293b;color:var(--text);border:1px solid var(--line)}pre{white-space:pre-wrap;background:#020617;border:1px solid var(--line);border-radius:18px;padding:12px;line-height:1.6;min-height:70px;color:#dff7ff}.note{font-size:13px;color:#cbd5e1;line-height:1.6}@media(max-width:520px){.grid{grid-template-columns:1fr}h1{font-size:25px}}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="hero">
+      <div class="tag">智慧製造中央作戰指揮中心｜PWA 正式入口</div>
+      <h1>製造部行動戰情室</h1>
+      <p class="sub">v1.6.1 乾淨正式版。報工 V2 與 LINE Bot 都由同一支 GAS 主後端提供服務。</p>
+    </section>
+
+    <section class="card">
+      <label>GAS Web App URL</label>
+      <input id="gasUrl" placeholder="貼上 https://script.google.com/macros/s/.../exec">
+      <div class="grid">
+        <button class="btn green" onclick="saveUrl()">儲存 GAS URL</button>
+        <button class="btn blue" onclick="healthCheck()">後端健康檢查</button>
+        <button class="btn amber" onclick="openReport()">開啟報工作業 V2</button>
+        <a class="btn dark" href="./index.html">返回中央入口</a>
+      </div>
+      <p class="note">報工正式網址會自動組合為：GAS Web App URL + <b>?page=07_報工作業V2</b></p>
+      <pre id="result">請先貼上 GAS Web App URL，按「儲存 GAS URL」。</pre>
+    </section>
+
+    <section class="card">
+      <h2>正式保留功能</h2>
+      <p class="note">LINE Bot Webhook 使用同一個 GAS URL，不加參數。報工頁使用同一個 GAS URL 加上 <b>?page=07_報工作業V2</b>。</p>
+      <pre>LINE Bot：/exec
+報工 V2：/exec?page=07_報工作業V2
+API 健康檢查：/exec?action=健康檢查</pre>
+    </section>
+  </main>
+<script>
+const KEY='智慧製造_GAS_WEB_APP_URL';
+function $(id){return document.getElementById(id)}
+function out(x){$('result').textContent=typeof x==='string'?x:JSON.stringify(x,null,2)}
+function norm(u){return String(u||'').trim().replace(/\?.*$/,'')}
+function saveUrl(){const u=norm($('gasUrl').value);if(!u){out('請先貼上 GAS Web App URL');return}localStorage.setItem(KEY,u);$('gasUrl').value=u;out('✅ 已儲存 GAS URL\n'+u)}
+function getUrl(){return norm(localStorage.getItem(KEY)||$('gasUrl').value)}
+function openReport(){const u=getUrl();if(!u){out('請先儲存 GAS URL');return}window.open(u+'?page=07_報工作業V2','_blank')}
+async function healthCheck(){try{const u=getUrl();if(!u){out('請先儲存 GAS URL');return}out('檢查中...');const r=await fetch(u+'?action=健康檢查');out(await r.json())}catch(e){out('健康檢查失敗：'+e.message)}}
+window.addEventListener('load',()=>{$('gasUrl').value=localStorage.getItem(KEY)||''});
+if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(()=>{});}
+</script>
+</body>
+</html>
