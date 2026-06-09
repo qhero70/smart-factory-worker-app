@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<base target="_top">
+<title>報工作業 v2</title>
+<style>
+:root{--藍:#0b74ff;--深藍:#0753bd;--淺藍:#eaf3ff;--底:#f3f7fc;--卡:#fff;--線:#d8e2f0;--字:#172033;--淡:#6b7688;--紅:#d93025;--綠:#188038;--橘:#f29900;--陰:0 10px 28px rgba(20,40,80,.14)}
+*{box-sizing:border-box}body{margin:0;background:var(--底);color:var(--字);font-family:Arial,'Noto Sans TC',sans-serif;font-size:15px}.外框{max-width:620px;margin:0 auto;padding:12px 12px 96px}.頁首{position:sticky;top:0;z-index:10;margin:-12px -12px 12px;padding:14px;background:linear-gradient(135deg,#0062ff,#48b5ff);color:#fff;box-shadow:var(--陰)}.標題列{display:flex;align-items:center;justify-content:space-between;gap:10px}.標題{font-size:24px;font-weight:900}.副標{font-size:12px;opacity:.95;margin-top:4px;line-height:1.5}.圓鈕{width:40px;height:40px;border:0;border-radius:14px;background:rgba(255,255,255,.22);color:#fff;font-size:18px;font-weight:900}.狀態卡{margin-top:12px;background:rgba(0,0,0,.3);border-radius:16px;padding:10px 12px;font-weight:900;line-height:1.65}.分頁{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}.分頁 button{border:1px solid var(--線);background:#fff;color:#30405b;border-radius:18px;padding:10px 4px;font-weight:900}.分頁 button.active{background:var(--藍);color:#fff;border-color:var(--藍);box-shadow:0 8px 18px rgba(11,116,255,.22)}.卡片{background:var(--卡);border:1px solid var(--線);border-radius:22px;padding:14px;margin:12px 0;box-shadow:0 6px 20px rgba(18,38,76,.07)}.區標{font-size:21px;font-weight:900;margin-bottom:12px;display:flex;gap:8px;align-items:center}.小字{font-size:12px;color:var(--淡);line-height:1.45}label{display:block;font-weight:900;margin:10px 0 6px}.必填:after{content:' *';color:var(--紅)}select,input,textarea{width:100%;border:1px solid #c9d5e6;border-radius:14px;padding:12px;background:#fff;font-size:15px;color:var(--字)}textarea{min-height:84px;resize:vertical}.兩欄{display:grid;grid-template-columns:1fr 1fr;gap:10px}.三欄{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}.照片卡{display:flex;align-items:center;gap:12px;border:1px dashed #c9d8eb;border-radius:18px;background:#fbfdff;padding:10px;min-height:96px}.照片卡 img{width:86px;height:86px;border-radius:16px;object-fit:cover;background:#e9eef6}.無圖{width:86px;height:86px;border-radius:16px;background:var(--淺藍);display:flex;align-items:center;justify-content:center;font-weight:900;color:#245}.名稱大{font-size:20px;font-weight:900}.工號強調{display:inline-block;margin-top:6px;padding:8px 12px;border-radius:14px;background:#e8f0fe;color:#174ea6;font-size:22px;font-weight:900;letter-spacing:1px}.機台格{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.機台卡{border:1px solid var(--線);border-radius:18px;background:#fff;padding:10px}.機台卡 img{width:100%;height:96px;border-radius:14px;object-fit:cover;background:#e9eef6}.機台卡 .無機圖{height:96px;border-radius:14px;background:#e8eef7;display:flex;align-items:center;justify-content:center;color:#627084;font-weight:900}.機台號{font-size:23px;font-weight:900;color:#0b57d0;margin-top:6px}.摘要{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.數字卡{background:#f7fbff;border:1px solid #dbe8f7;border-radius:16px;padding:10px;text-align:center}.數字卡 b{display:block;font-size:25px;color:#0b57d0}.預覽{white-space:pre-wrap;background:#101827;color:#e7efff;border-radius:18px;padding:14px;font-family:monospace;font-size:13px;line-height:1.55}.隱藏{display:none!important}.底部{position:fixed;left:0;right:0;bottom:0;z-index:20;background:rgba(245,248,252,.96);backdrop-filter:blur(10px);border-top:1px solid var(--線);padding:10px 12px;display:grid;grid-template-columns:1fr 1fr;gap:10px}.主按鈕,.次按鈕{border:0;border-radius:16px;padding:14px 10px;font-size:16px;font-weight:900}.主按鈕{background:var(--藍);color:#fff}.主按鈕:disabled{background:#9ebee6}.次按鈕{background:#fff;color:#0b57d0;border:1px solid #bfd2ef}.浮訊{position:fixed;left:12px;right:12px;bottom:86px;background:#101827;color:#fff;border-radius:18px;padding:12px 14px;box-shadow:var(--陰);z-index:40}.載入{position:fixed;inset:0;background:rgba(245,248,252,.88);display:flex;align-items:center;justify-content:center;z-index:50}.載入 div{background:#fff;border-radius:22px;padding:22px;box-shadow:var(--陰);font-weight:900}.照片上傳預覽{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}.照片上傳預覽 img{width:100%;height:88px;object-fit:cover;border-radius:14px;border:1px solid var(--線)}.搜尋框{margin-bottom:8px}@media(max-width:430px){.兩欄,.三欄{grid-template-columns:1fr}.機台格{grid-template-columns:1fr}.標題{font-size:20px}.摘要{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div id="載入" class="載入"><div>資料讀取中...</div></div>
+<div class="外框">
+<header class="頁首">
+  <div class="標題列"><div><div class="標題">🏭 報工作業 v2</div><div class="副標">智慧製造中央作戰指揮中心｜正式讀取 08_工站途程機台主檔</div></div><button class="圓鈕" onclick="重新載入資料()">↻</button></div>
+  <div id="狀態卡" class="狀態卡">正在連線主資料庫...</div>
+</header>
+<nav class="分頁">
+  <button id="頁籤_人員" class="active" onclick="切換頁籤('人員')">👤<br>人員</button>
+  <button id="頁籤_工件" onclick="切換頁籤('工件')">🔧<br>工件</button>
+  <button id="頁籤_產出" onclick="切換頁籤('產出')">📊<br>產出</button>
+  <button id="頁籤_品質" onclick="切換頁籤('品質')">🔍<br>品質</button>
+</nav>
+<section id="頁面_人員" class="頁面">
+  <div class="卡片"><div class="區標">👤 人員資訊 <span class="小字">Operator Info</span></div>
+    <div id="人員照片卡" class="照片卡"><div class="無圖">選人員</div><div><div class="名稱大">尚未選擇</div><div class="小字">選擇作業員後顯示頭像</div></div></div>
+    <label class="必填">作業員 / Operator</label><select id="作業員" onchange="作業員變更()"></select>
+    <label>工號 / Employee ID</label><input id="工號" readonly><div id="工號強調" class="工號強調">未輸入</div>
+    <div class="兩欄"><div><label>姓名 / Name</label><input id="姓名" readonly></div><div><label>班別 / Shift</label><select id="班別"></select></div></div>
+    <div class="兩欄"><div><label>是否加班 / Overtime</label><select id="是否加班"><option value="否">否 / No</option><option value="是">是 / Yes</option></select></div><div><label>加班類型 / OT Type</label><select id="加班類型"><option value="無">無 / None</option><option value="平日加班">平日加班</option><option value="休息日加班">休息日加班</option><option value="例假日加班">例假日加班</option></select></div></div>
+  </div>
+</section>
+<section id="頁面_工件" class="頁面 隱藏">
+  <div class="卡片"><div class="區標">🔧 工件與工站 <span class="小字">Product / Workstation</span></div>
+    <div id="產品照片卡" class="照片卡"><div class="無圖">產品</div><div><div class="名稱大">尚未選產品</div><div class="小字">選擇產品後顯示產品照片</div></div></div>
+    <label>搜尋產品 / Search Product</label><input id="產品搜尋" class="搜尋框" placeholder="輸入產品編號、客戶品號、品名" oninput="建立產品選單()">
+    <label class="必填">產品 / Product</label><select id="產品" onchange="產品變更()"></select>
+    <div class="兩欄"><div><label>產品編號</label><input id="產品編號" readonly></div><div><label>客戶品號</label><input id="客戶品號" readonly></div></div><label>品名</label><input id="品名" readonly>
+    <label class="必填">報工工站 / Workstation</label><select id="工站" onchange="工站變更()"></select>
+    <div class="三欄"><div><label>工序範圍</label><input id="工序範圍" readonly></div><div><label>標準產能</label><input id="標準產能" readonly></div><div><label>標準工時_秒</label><input id="標準工時秒" readonly></div></div>
+    <label>主機台 / Main Machine</label><select id="主機台" onchange="主機台變更()"></select><div id="機台清單卡" class="機台格"></div>
+  </div>
+</section>
+<section id="頁面_產出" class="頁面 隱藏">
+  <div class="卡片"><div class="區標">📊 產出數量 <span class="小字">Output Qty</span></div>
+    <div class="兩欄"><div><label class="必填">今日共做數 / Total Qty</label><input id="今日共做數" type="number" min="0" inputmode="numeric" oninput="計算數量()"></div><div><label>不良數 / NG Qty</label><input id="不良數" type="number" min="0" value="0" inputmode="numeric" oninput="計算數量()"></div></div>
+    <div class="摘要"><div class="數字卡"><span>今日共做</span><b id="顯示今日共做">0</b></div><div class="數字卡"><span>不良</span><b id="顯示不良">0</b></div><div class="數字卡"><span>實際良品</span><b id="顯示實際良品">0</b></div></div>
+    <div class="兩欄"><div><label>開始時間</label><input id="開始時間" type="datetime-local" onchange="計算工時()"></div><div><label>結束時間</label><input id="結束時間" type="datetime-local" onchange="計算工時()"></div></div><label>實際工時 / Working Hours</label><input id="實際工時" readonly>
+  </div>
+</section>
+<section id="頁面_品質" class="頁面 隱藏">
+  <div class="卡片"><div class="區標">🔍 品質與照片 <span class="小字">Quality / Photos</span></div>
+    <div class="兩欄"><div><label>不良類別</label><select id="不良類別" onchange="不良類別變更()"><option value="無">無 / None</option><option value="Z">Z 素材 / 外觀</option><option value="Y">Y 加工 / 尺寸</option></select></div><div><label>不良原因</label><select id="不良原因" onchange="更新預覽()"></select></div></div>
+    <label>異常類型 / Abnormal Type</label><select id="異常類型" onchange="更新預覽()"></select>
+    <label>現場照片 / Defect or Field Photos</label><input id="照片檔案" type="file" accept="image/*" multiple onchange="照片變更(event)"><div id="照片上傳預覽" class="照片上傳預覽"></div>
+    <label>備註 / Remarks</label><textarea id="備註" placeholder="輸入異常描述、備註事項..." oninput="更新預覽()"></textarea>
+    <label>報工預覽 / Preview</label><div id="報工預覽" class="預覽">尚未產生預覽</div>
+  </div>
+</section>
+</div>
+<div class="底部"><button class="次按鈕" onclick="上一步()">← 上一步</button><button id="主操作鈕" class="主按鈕" onclick="下一步或送出()">下一步 →</button></div>
+<div id="浮訊" class="浮訊 隱藏"></div>
+<script>
+let 全域資料={人員:[],報工工站群組:[],途程工站群組:[],班別清單:[],不良原因:{Z:[],Y:[]},異常類型:[]};
+let 狀態={頁籤:'人員',作業員:null,產品群組清單:[],目前產品群組:null,目前工站:null,現場照片清單:[]};
+const 頁序=['人員','工件','產出','品質'];
+window.addEventListener('load',()=>{設定預設時間();重新載入資料();});
+function 重新載入資料(){顯示載入(true);呼叫後端('取得報工作業v2初始資料',null,資料載入完成,e=>{顯示載入(false);提示('讀取失敗：'+(e.message||e),true);});}
+function 呼叫後端(fn,arg,ok,fail){try{if(typeof google==='undefined'||!google.script||!google.script.run)throw new Error('請在 Apps Script 側邊欄開啟本頁');let r=google.script.run.withSuccessHandler(ok).withFailureHandler(fail||function(e){提示(e.message||String(e),true)});arg===null?r[fn]():r[fn](arg);}catch(e){(fail||提示)(e,true);}}
+function 資料載入完成(data){顯示載入(false);if(!data||!data.成功){提示((data&&data.訊息)||'資料讀取失敗',true);return}全域資料=data;全域資料.報工工站群組=(data.報工工站群組||data.途程工站群組||[]).map(標準化群組);全域資料.途程工站群組=全域資料.報工工站群組;填入狀態卡();建立人員選單();建立班別選單();建立產品選單();建立品質選單();提示('資料已載入：報工工站群組 '+全域資料.報工工站群組.length+' 筆');}
+function 標準化群組(g){g=g||{};if(typeof g.機台清單==='string'){try{g.機台清單=JSON.parse(g.機台清單)}catch(e){g.機台清單=[]}}if(!Array.isArray(g.機台清單))g.機台清單=[];if(!Array.isArray(g.工序清單))g.工序清單=String(g.工序清單||g.工序||'').split(/[、,，;；\s]+/).filter(Boolean);g.報工工站名稱=g.報工工站名稱||g.工站名稱||'';g.顯示名稱=g.顯示名稱||[g.報工工站名稱,g.工序範圍||g.工序,g.機台編號清單?g.機台編號清單.join?g.機台編號清單.join('、'):g.機台編號清單:''].filter(Boolean).join('｜');return g;}
+function 填入狀態卡(){let p=全域資料.筆數||{};document.getElementById('狀態卡').innerHTML='🟢 資料已載入｜人員：'+(p.人員||全域資料.人員.length)+' 筆｜報工工站群組：'+(p.報工工站群組||全域資料.報工工站群組.length)+' 筆｜機台：'+(p.工站機台關聯||0)+' 筆｜照片索引：'+(p.照片索引||0)+' 筆';}
+function 建立人員選單(){let s=取('作業員');s.innerHTML='<option value="">請選擇 / Select</option>';全域資料.人員.forEach((r,i)=>{if(r.啟用==='否')return;s.add(new Option((r.姓名||'')+'｜'+(r.工號||'')+'｜'+(r.班別||''),i));});}
+function 建立班別選單(){let s=取('班別');s.innerHTML='';(全域資料.班別清單||[]).forEach(x=>s.add(new Option(x.名稱||x.值,x.值||x.名稱)));if(!s.options.length)['自動判斷','早班','中班','大夜班','加班'].forEach(x=>s.add(new Option(x,x)));}
+function 建立產品選單(){let s=取('產品');let kw=(值('產品搜尋')||'').toUpperCase();let map={};全域資料.報工工站群組.forEach(g=>{let key=(g.產品編號||'')+'|'+(g.品名||'');let text=[g.產品編號,g.客戶品號,g.品名].join(' ').toUpperCase();if(kw&&text.indexOf(kw)<0)return;if(!map[key])map[key]=g;});s.innerHTML='<option value="">請選擇產品 / Select Product</option>';Object.keys(map).sort((a,b)=>(map[a].品名||'').localeCompare(map[b].品名||'')).forEach(key=>{let g=map[key];s.add(new Option([g.產品編號,g.客戶品號,g.品名].filter(Boolean).join('｜'),key));});}
+function 建立品質選單(){let a=取('異常類型');a.innerHTML='';(全域資料.異常類型||[]).forEach(x=>a.add(new Option(x,x)));if(!a.options.length)['無異常 / Normal','機台停機 / Machine Down','待料 / Waiting Material','換刀 / Tool Change','品質確認 / Quality Check','其他 / Others'].forEach(x=>a.add(new Option(x,x)));不良類別變更();}
+function 作業員變更(){let i=值('作業員');狀態.作業員=i===''?null:全域資料.人員[Number(i)];let r=狀態.作業員||{};值('工號',r.工號||'');值('姓名',r.姓名||'');if(r.班別)值('班別',推估班別(r.班別));取('工號強調').textContent=r.工號||'未輸入';取('人員照片卡').innerHTML=圖片HTML(r.縮圖網址||r.照片網址,'無頭像')+'<div><div class="名稱大">'+安全文字(r.姓名||'尚未選擇')+'</div><div class="小字">'+安全文字([r.工號,r.部門,r.班別].filter(Boolean).join('｜'))+'</div></div>';更新預覽();}
+function 推估班別(v){let t=String(v||'');if(t.includes('中'))return'中班';if(t.includes('夜'))return'大夜班';if(t.includes('加班'))return'加班';return'早班';}
+function 產品變更(){let key=值('產品');let parts=key.split('|');let pid=parts[0]||'', name=parts.slice(1).join('|')||'';狀態.產品群組清單=全域資料.報工工站群組.filter(g=>(g.產品編號||'')===pid&&(g.品名||'')===name);狀態.目前產品群組=狀態.產品群組清單[0]||null;let g=狀態.目前產品群組||{};值('產品編號',g.產品編號||'');值('客戶品號',g.客戶品號||'');值('品名',g.品名||'');顯示產品照片(g);建立工站選單();更新預覽();}
+function 顯示產品照片(g){取('產品照片卡').innerHTML=圖片HTML((g&&g.產品縮圖網址)||(g&&g.產品照片網址),'無產品照')+'<div><div class="名稱大">'+安全文字(g&&g.品名?g.品名:'尚未選產品')+'</div><div class="小字">'+安全文字([g&&g.產品編號,g&&g.客戶品號].filter(Boolean).join('｜'))+'</div></div>';}
+function 建立工站選單(){let s=取('工站');s.innerHTML='<option value="">請選擇報工工站</option>';狀態.產品群組清單.forEach((g,i)=>s.add(new Option(g.顯示名稱||[g.報工工站名稱,g.工序範圍,g.主機台].filter(Boolean).join('｜'),i)));清空工站欄位();}
+function 工站變更(){let i=值('工站');狀態.目前工站=i===''?null:狀態.產品群組清單[Number(i)];let g=狀態.目前工站||{};值('工序範圍',g.工序範圍||g.工序||'');值('標準產能',g.標準產能||'');值('標準工時秒',g.標準工時_秒||'');建立主機台選單(g.機台清單||[]);顯示機台卡(g.機台清單||[]);更新預覽();}
+function 清空工站欄位(){狀態.目前工站=null;值('工序範圍','');值('標準產能','');值('標準工時秒','');取('主機台').innerHTML='';取('機台清單卡').innerHTML='';}
+function 建立主機台選單(list){let s=取('主機台');s.innerHTML='';if(!list.length){s.add(new Option('無固定機台 / None',''));return}list.forEach(m=>s.add(new Option([m.機台編號,m.區域,m.機台型號].filter(Boolean).join('｜'),m.機台編號||'')));}
+function 顯示機台卡(list){let box=取('機台清單卡');if(!list.length){box.innerHTML='<div class="小字">此工站無固定機台或為委外 / 人工作業</div>';return}box.innerHTML=list.map(m=>'<div class="機台卡">'+(m.縮圖網址||m.照片網址?'<img src="'+安全屬性(m.縮圖網址||m.照片網址)+'" onerror="this.outerHTML=\'<div class=無機圖>無機台照</div>\'">':'<div class="無機圖">無機台照</div>')+'<div class="機台號">'+安全文字(m.機台編號||'')+'</div><div class="小字">'+安全文字([m.區域,m.機台型號,m.設備名稱].filter(Boolean).join('｜'))+'</div></div>').join('');}
+function 主機台變更(){更新預覽();}
+function 計算數量(){let total=數字('今日共做數'),ng=數字('不良數');if(ng>total&&total>0){值('不良數',total);ng=total}let good=Math.max(total-ng,0);取('顯示今日共做').textContent=total;取('顯示不良').textContent=ng;取('顯示實際良品').textContent=good;更新預覽();}
+function 計算工時(){let a=值('開始時間'),b=值('結束時間');if(a&&b){let h=(new Date(b)-new Date(a))/3600000;值('實際工時',h>0?h.toFixed(2):'');}更新預覽();}
+function 不良類別變更(){let t=值('不良類別');let s=取('不良原因');s.innerHTML='<option value="">無 / None</option>';if(t==='無')return;(全域資料.不良原因[t]||[]).forEach(x=>s.add(new Option((x.代碼||'')+'｜'+(x.名稱||''),(x.代碼||'')+'｜'+(x.名稱||''))));更新預覽();}
+function 照片變更(e){狀態.現場照片清單=[];let files=[...e.target.files].slice(0,6);let box=取('照片上傳預覽');box.innerHTML='';files.forEach(file=>{let reader=new FileReader();reader.onload=ev=>{let data=String(ev.target.result);box.innerHTML+='<img src="'+data+'">';狀態.現場照片清單.push({照片類型:值('不良類別')==='無'?'現場照片':'不良照片',檔案名稱:file.name,MIME類型:file.type,Base64:data.split(',')[1]||'',備註:值('備註')});更新預覽();};reader.readAsDataURL(file);});}
+function 組合報工資料(){let op=狀態.作業員||{},g=狀態.目前工站||狀態.目前產品群組||{},total=數字('今日共做數'),ng=數字('不良數'),machines=g.機台清單||[];return{工號:op.工號||值('工號'),姓名:op.姓名||值('姓名'),班別:值('班別'),是否加班:值('是否加班'),加班類型:值('加班類型'),作業員照片網址:op.照片網址||'',作業員縮圖網址:op.縮圖網址||'',作業員照片檔案ID:op.Google檔案ID||'',產品編號:g.產品編號||值('產品編號'),客戶品號:g.客戶品號||值('客戶品號'),品名:g.品名||值('品名'),產品照片網址:g.產品照片網址||'',產品縮圖網址:g.產品縮圖網址||'',產品照片檔案ID:g.產品照片檔案ID||'',工站名稱:g.工站名稱||'',報工工站名稱:g.報工工站名稱||g.工站名稱||'',工序:Array.isArray(g.工序清單)?g.工序清單.join(','):(g.工序||''),工序清單:Array.isArray(g.工序清單)?g.工序清單.join(','):(g.工序||''),機台清單:machines.map(m=>m.機台編號).filter(Boolean).join(','),主機台:值('主機台'),機台照片清單:machines,今日共做數:total,不良數:ng,實際良品數:Math.max(total-ng,0),不良率:total>0?ng/total:0,開始時間:值('開始時間'),結束時間:值('結束時間'),實際工時:值('實際工時'),不良類別:值('不良類別'),不良代碼:(值('不良原因').split('｜')[0]||''),不良原因:值('不良原因'),異常類型:值('異常類型'),備註:值('備註'),現場照片清單:狀態.現場照片清單};}
+function 更新預覽(){let d=組合報工資料();取('報工預覽').textContent='📋 報工預覽 / Production Report Preview\n作業員 Operator：'+(d.姓名||'')+' / '+(d.工號||'')+'｜'+(d.班別||'')+'\n產品 Product：'+(d.產品編號||'')+'｜'+(d.客戶品號||'')+'｜'+(d.品名||'')+'\n工站 Workstation：'+(d.報工工站名稱||'')+'｜'+(d.工序||'')+'\n機台 Machine：'+(d.機台清單||'')+'｜主機台 '+(d.主機台||'')+'\n今日共做 Total：'+d.今日共做數+'\n不良 NG：'+d.不良數+'\n實際良品 Good：'+d.實際良品數+'\n不良原因 Defect：'+(d.不良原因||'無')+'\n現場照片 Photos：'+(d.現場照片清單||[]).length+' 張\n備註 Remark：'+(d.備註||'');}
+function 驗證報工(d){if(!d.工號)return'請選擇作業員';if(!d.產品編號&&!d.品名)return'請選擇產品';if(!d.報工工站名稱)return'請選擇報工工站';if(d.今日共做數<=0)return'今日共做數必須大於 0';if(d.不良數<0)return'不良數不可小於 0';if(d.不良數>d.今日共做數)return'不良數不可大於今日共做數';return'';}
+function 送出報工(){let d=組合報工資料();let err=驗證報工(d);if(err){提示(err,true);return}更新預覽();if(!confirm('確認送出報工？\n實際良品：'+d.實際良品數+' pcs'))return;取('主操作鈕').disabled=true;提示('報工送出中...');呼叫後端('寫入報工作業v2',d,res=>{取('主操作鈕').disabled=false;if(res&&res.成功){提示('報工完成：'+res.報工編號);清空報工數量();}else提示((res&&res.訊息)||'寫入失敗',true);},err=>{取('主操作鈕').disabled=false;提示('寫入失敗：'+(err.message||err),true);});}
+function 切換頁籤(name){狀態.頁籤=name;頁序.forEach(p=>{取('頁面_'+p).classList.toggle('隱藏',p!==name);取('頁籤_'+p).classList.toggle('active',p===name);});取('主操作鈕').textContent=name==='品質'?'預覽並送出':'下一步 →';更新預覽();}
+function 下一步或送出(){let i=頁序.indexOf(狀態.頁籤);if(i<頁序.length-1)切換頁籤(頁序[i+1]);else送出報工();}
+function 上一步(){let i=頁序.indexOf(狀態.頁籤);if(i>0)切換頁籤(頁序[i-1]);}
+function 設定預設時間(){let now=new Date(),local=new Date(now.getTime()-now.getTimezoneOffset()*60000).toISOString().slice(0,16);值('開始時間',local);值('結束時間',local);}
+function 清空報工數量(){值('今日共做數','');值('不良數','0');狀態.現場照片清單=[];取('照片檔案').value='';取('照片上傳預覽').innerHTML='';計算數量();}
+function 取(id){return document.getElementById(id)}function 值(id,v){let el=取(id);if(v===undefined)return el?el.value:'';if(el)el.value=v;}
+function 數字(id){let n=Number(值(id));return isNaN(n)?0:n;}function 安全文字(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+function 安全屬性(s){return 安全文字(s).replace(/\n/g,'');}function 圖片HTML(url,text){return url?'<img src="'+安全屬性(url)+'" onerror="this.outerHTML=\'<div class=無圖>'+text+'</div>\'">':'<div class="無圖">'+text+'</div>';}
+function 顯示載入(show){取('載入').classList.toggle('隱藏',!show);}function 提示(msg,isErr){let el=取('浮訊');el.textContent=msg&&msg.message?msg.message:String(msg);el.classList.remove('隱藏');el.style.background=isErr?'#b3261e':'#101827';clearTimeout(window.__toast);window.__toast=setTimeout(()=>el.classList.add('隱藏'),3200);}
+</script>
+</body>
+</html>
+
+
