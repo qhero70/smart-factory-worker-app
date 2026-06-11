@@ -13,3 +13,25 @@ window.PWA_CONFIG = {
     手動重刷_主檔照片: '手動重刷_主檔照片'
   }
 };
+
+(function(){
+  'use strict';
+  if(!location.pathname.includes('work-report-v2.html')) return;
+  if(window.__報工V2補強載入器已啟動) return;
+  window.__報工V2補強載入器已啟動 = true;
+
+  const 腳本清單 = [
+    './work-report-v2-photo-fallback.js',
+    './work-report-v2-dom-fix.js'
+  ];
+
+  function 載入腳本(src){
+    if(document.querySelector('script[src="' + src + '"]')) return;
+    const script = document.createElement('script');
+    script.src = src + '?v=122';
+    script.defer = true;
+    document.head.appendChild(script);
+  }
+
+  腳本清單.forEach(載入腳本);
+})();
