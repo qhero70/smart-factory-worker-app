@@ -1,4 +1,4 @@
-const 快取版本 = 'v1.2.5_班別主程式攔截修正';
+const 快取版本 = 'v1.2.6_無中班強制早班修正';
 const 快取名稱 = `製造部智慧製造應用總部-${快取版本}`;
 const 必要檔案 = [
   './',
@@ -11,7 +11,7 @@ const 必要檔案 = [
   './gas-bridge.js',
   './work-report-v2-photo-fallback.js',
   './work-report-v2-dom-fix.js',
-  './work-report-v2-shift-fix-v124.js',
+  './work-report-v2-shift-fix-v126.js',
   './assets/icons/智慧製造圖示.svg'
 ];
 
@@ -31,10 +31,17 @@ self.addEventListener('activate', event => {
 
 function 修正報工主頁(html) {
   let out = String(html || '');
+
+  // 目前現場主檔只有早班、大夜班。前端若看到中班，是舊班別判斷誤判。
   const 舊函數 = "function shiftNorm(v){const t=T(v);if(!t)return'';if(t.includes('中')||t.includes('16:50')||t.includes('1650'))return'中班';if(t.includes('大夜')||t.includes('夜')||t.includes('23:00')||t.includes('2300')||t.includes('03:15')||t.includes('315'))return'大夜班';if(t.includes('加班'))return'加班';if(t.includes('早')||t.includes('08:00')||t.includes('0800'))return'早班';return t}";
-  const 新函數 = "function shiftNorm(v){const t=T(v);if(!t)return'';const c=String(t).replace(/\\s+/g,'').toUpperCase();if(t.includes('早')||c.includes('DAY')||c.includes('0800')||c.includes('08:00'))return'早班';if(t.includes('大夜')||t.includes('夜')||c.includes('NIGHT')||c.includes('2300')||c.includes('23:00')||c.includes('0315')||c.includes('03:15')||c.includes('3150'))return'大夜班';if(t.includes('中')||c.includes('MID')||c.includes('SWING')||(c.includes('1650')&&!c.includes('0800')))return'中班';if(t.includes('加班'))return'加班';return t}";
+  const 新函數 = "function shiftNorm(v){const t=T(v);if(!t)return'早班';const c=String(t).replace(/\\s+/g,'').toUpperCase();if(t.includes('大夜')||t.includes('夜')||c.includes('NIGHT')||c.includes('2300')||c.includes('23:00')||c.includes('0315')||c.includes('03:15')||c.includes('3150')||c.includes('0750'))return'大夜班';return'早班'}";
   out = out.replace(舊函數, 新函數);
-  out = out.replace("v1.2.0_靜態完整正式版_不空白", "v1.2.5_班別主程式修正");
+  out = out.replace("v1.2.0_靜態完整正式版_不空白", "v1.2.6_無中班強制早班修正");
+
+  // 強制掛上全新檔名，避免 Safari 吃舊 v124。
+  if (!out.includes('work-report-v2-shift-fix-v126.js')) {
+    out = out.replace('</body>', '<script src="./work-report-v2-shift-fix-v126.js?v=126-sw"></script></body>');
+  }
   return out;
 }
 
