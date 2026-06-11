@@ -1,25 +1,13 @@
 /**
  * ZZZZZZZ_主檔照片直掛讀取正式版
- * 版本：v1.1.0｜照片改為直接掛在主檔 + 主檔照片資料夾同步
+ * 版本：v1.1.1｜主檔照片直掛 + 資料夾同步 + 停用舊前端補強注入
  *
  * 架構原則：
  * 1. 人員照片直接讀 01_人員主檔。
  * 2. 產品照片與三視圖直接讀 02_產品主檔。
  * 3. 機台照片直接讀 03_機台主檔。
- * 4. 06_照片資料庫 改為停用封存，不再作為報工 V2 主要照片來源。
- * 5. 不修改 07_報工作業V2.html UI。
- *
- * 資料夾來源：
- * - 人員照片：1oYX85iFPwhjiFTsDYtO3v2c4fesshRgf
- * - 產品照片：131gz5CgXYATgdhUDe7cUxCECzHS3TnuG
- * - 機台照片：1hosm3_uUopyO3AnjnDA3qmkCYZZ4bAtE
- *
- * 使用方式：
- * - 手動重刷全部：手動重刷_主檔照片()
- * - 人員照片：同步_主檔照片_人員照片資料夾()
- * - 產品照片：同步_主檔照片_產品照片資料夾()
- * - 機台照片：同步_主檔照片_機台照片資料夾()
- * - 安裝每15分鐘自動同步：安裝_主檔照片自動同步()
+ * 4. 06_照片資料庫 已停用封存，不再作為報工 V2 主要照片來源。
+ * 5. 報工 V2 前端邏輯以 07_報工作業V2.html 本體為準，不再由後端注入舊 JS。
  */
 
 const 主檔照片_設定_ = {
@@ -29,6 +17,14 @@ const 主檔照片_設定_ = {
   產品照片資料夾ID: '131gz5CgXYATgdhUDe7cUxCECzHS3TnuG',
   機台照片資料夾ID: '1hosm3_uUopyO3AnjnDA3qmkCYZZ4bAtE'
 };
+
+/**
+ * 安全覆寫：主後端目前仍有舊版前端補強函數名稱。
+ * 這裡回傳空字串，避免舊 JS 再覆蓋 07_報工作業V2.html 本體的班別、時間、圖片邏輯。
+ */
+function 取得報工作業V2前端保護補強JS_() {
+  return '';
+}
 
 function 手動重刷_主檔照片() {
   const result = {
@@ -154,7 +150,8 @@ function 主檔照片_同步主檔照片_(sh, files, spec) {
   });
 
   files.forEach(function(file) {
-    const key = 主檔照片_Key_(spec.檔名取主鍵(file.name));
+    const rawKey = spec.檔名取主鍵(file.name);
+    const key = 主檔照片_Key_(rawKey);
     if (!key) return;
     fileKeys.add(key);
     const hit = rowMap.get(key);
@@ -162,8 +159,7 @@ function 主檔照片_同步主檔照片_(sh, files, spec) {
       unmatched++;
       return;
     }
-    const photoKey = spec.檔名取主鍵(file.name);
-    const obj = 主檔照片_建立主檔照片欄位值_(file, photoKey, spec.類型 + '照片資料夾', now);
+    const obj = 主檔照片_建立主檔照片欄位值_(file, rawKey, spec.類型 + '照片資料夾', now);
     主檔照片_寫入照片欄位_(hit.row, col, spec.欄位, obj);
     updated++;
   });
@@ -212,7 +208,10 @@ function 主檔照片_同步產品照片_(sh, files) {
     const key = 主檔照片_Key_(parsed.產品主鍵);
     if (!key) return;
     const hit = rowMap.get(key);
-    if (!hit) { unmatched++; return; }
+    if (!hit) {
+      unmatched++;
+      return;
+    }
 
     const f = 主檔照片_建立主檔照片欄位值_(file, parsed.產品主鍵, '產品照片資料夾', now);
     hit.row[col['產品照片主鍵']] = parsed.產品主鍵;
@@ -306,7 +305,9 @@ function 主檔照片_讀取圖片資料夾_(folderId) {
 function 主檔照片_確保欄位_(sh, required) {
   const lastCol = Math.max(sh.getLastColumn(), 1);
   let header = sh.getRange(1, 1, 1, lastCol).getValues()[0].map(主檔照片_文字_);
-  required.forEach(function(h) { if (header.indexOf(h) < 0) header.push(h); });
+  required.forEach(function(h) {
+    if (header.indexOf(h) < 0) header.push(h);
+  });
   if (header.length > sh.getLastColumn()) sh.insertColumnsAfter(sh.getLastColumn(), header.length - sh.getLastColumn());
   sh.getRange(1, 1, 1, header.length).setValues([header]);
   sh.setFrozenRows(1);
