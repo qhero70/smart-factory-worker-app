@@ -3,91 +3,134 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-  <meta name="theme-color" content="#0A66E5">
+  <meta name="theme-color" content="#0b74ff">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="報工PWA">
-  <title>報工PWA｜智慧製造中央作戰指揮中心</title>
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="icon" href="./assets/icons/智慧製造圖示.svg" type="image/svg+xml">
+  <title>報工PWA｜原版報工作業全功能載入中</title>
   <style>
-    :root{--primary:#0a66e5;--primary-light:#e6f0fd;--bg:#f2f6fa;--surface:#fff;--surface-alt:#f8fafc;--text:#0f172a;--sub:#64748b;--border:#e2e8f0;--danger:#dc2626;--danger-bg:#fef2f2;--success:#16a34a;--warning:#ea580c;--warning-bg:#fff7ed;--shift-day:#2563eb;--shift-day-bg:#eff6ff;--shift-swing:#d97706;--shift-swing-bg:#fffbeb;--shift-night:#7c3aed;--shift-night-bg:#f5f3ff;--radius:18px;--shadow:0 8px 24px rgba(15,23,42,.08);--safe-bottom:env(safe-area-inset-bottom,16px)}
-    @media(prefers-color-scheme:dark){:root{--primary:#60a5fa;--primary-light:rgba(96,165,250,.16);--bg:#0b0f19;--surface:#151b28;--surface-alt:#1e2536;--text:#f8fafc;--sub:#94a3b8;--border:#2e3c54;--danger:#ef4444;--danger-bg:rgba(239,68,68,.12);--warning-bg:rgba(249,115,22,.12);--shift-day-bg:rgba(37,99,235,.16);--shift-swing-bg:rgba(217,119,6,.16);--shift-night-bg:rgba(124,58,237,.16);--shadow:0 8px 24px rgba(0,0,0,.42)}}
-    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,'Noto Sans TC','Microsoft JhengHei',sans-serif;font-size:16px;line-height:1.5;-webkit-tap-highlight-color:transparent}.外框{max-width:760px;margin:0 auto;padding:12px 16px 148px}.頁首{position:sticky;top:0;z-index:30;margin:-12px -16px 16px;padding:env(safe-area-inset-top,12px) 16px 12px;background:rgba(255,255,255,.92);border-bottom:1px solid var(--border);box-shadow:0 2px 8px rgba(15,23,42,.05);backdrop-filter:blur(12px)}@media(prefers-color-scheme:dark){.頁首{background:rgba(21,27,40,.9)}}.標題列{display:flex;align-items:center;justify-content:space-between;gap:12px}.標題{font-size:20px;font-weight:900;display:flex;align-items:center;gap:8px}.副標{font-size:11px;color:var(--sub);margin-top:2px}.頭部右列{display:flex;gap:8px}.圓鈕{width:40px;height:40px;border:1px solid var(--border);border-radius:50%;background:var(--surface-alt);color:var(--text);font-size:16px}.狀態卡{margin-top:10px;background:var(--primary-light);color:var(--primary);border-radius:12px;padding:8px 12px;font-weight:900;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.PWA提示{margin-top:8px;color:var(--sub);font-size:12px;line-height:1.45}.分頁{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:16px 0;background:var(--surface-alt);padding:6px;border-radius:24px;border:1px solid var(--border)}.分頁 button{border:0;background:transparent;color:var(--sub);border-radius:16px;padding:10px 4px;font-weight:900;font-size:13px;display:flex;flex-direction:column;align-items:center;gap:4px}.分頁 button.active{background:var(--surface);color:var(--primary);box-shadow:0 2px 8px rgba(15,23,42,.05)}.卡片{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:20px;margin:12px 0;box-shadow:var(--shadow)}.區標{font-size:18px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:8px}.區標 .en{font-size:12px;color:var(--sub);font-weight:700;background:var(--surface-alt);padding:2px 8px;border-radius:20px}.小字{font-size:12px;color:var(--sub)}label{display:block;font-weight:900;margin:16px 0 6px;font-size:14px}.必填:after{content:' *';color:var(--danger)}select,input,textarea{width:100%;border:1.5px solid var(--border);border-radius:16px;padding:14px 16px;background:var(--surface-alt);font-size:16px;font-weight:700;color:var(--text);font-family:inherit}select:focus,input:focus,textarea:focus{outline:none;border-color:var(--primary);background:var(--surface);box-shadow:0 0 0 4px rgba(10,102,229,.18)}textarea{min-height:100px;resize:vertical}input[readonly]{background:var(--bg);color:var(--sub)}.兩欄{display:grid;grid-template-columns:1fr 1fr;gap:12px}.三欄{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}.隱藏{display:none!important}.掃碼鈕{width:100%;border:2px dashed var(--primary);background:var(--primary-light);border-radius:24px;padding:18px;font-weight:900;font-size:16px;color:var(--primary)}.搜尋框{margin:12px 0;border-radius:24px;background:var(--surface);padding-left:18px}.人員網格{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-height:480px;overflow-y:auto;padding:4px}.人員卡片{border:1.5px solid var(--border);border-radius:16px;padding:16px 10px;text-align:center;cursor:pointer;background:var(--surface);position:relative;display:flex;flex-direction:column;align-items:center;gap:8px}.人員卡片.選中,.產品卡片.選中{border-color:var(--primary)!important;background:var(--primary-light)!important;box-shadow:var(--shadow)}.班早{border-left:4px solid var(--shift-day)!important}.班中{border-left:4px solid var(--shift-swing)!important}.班夜{border-left:4px solid var(--shift-night)!important}.班標{position:absolute;top:8px;left:8px;font-size:10px;font-weight:900;padding:2px 6px;border-radius:6px;background:var(--surface-alt);color:var(--sub)}.選取標記{display:none;position:absolute;top:-8px;right:-8px;background:var(--primary);color:#fff;border-radius:50%;width:24px;height:24px;font-size:14px;font-weight:900;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.22)}.人員卡片.選中 .選取標記{display:flex}.頭像圈{width:72px;height:72px;border-radius:50%;overflow:hidden;background:var(--surface-alt);font-size:28px;font-weight:900;display:flex;align-items:center;justify-content:center;color:var(--sub);border:2px solid var(--border)}.頭像圈 img{width:100%;height:100%;object-fit:cover}.人名{font-weight:900;font-size:15px}.人工號{font-size:12px;color:var(--sub);font-weight:700}.產品網格{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;max-height:440px;overflow-y:auto;padding:4px}.產品卡片{border:1.5px solid var(--border);border-radius:16px;overflow:hidden;cursor:pointer;background:var(--surface);display:flex;flex-direction:column}.產品縮圖{width:100%;aspect-ratio:4/3;background:var(--surface-alt);display:flex;align-items:center;justify-content:center;font-size:24px}.產品縮圖 img{width:100%;height:100%;object-fit:cover}.產品名稱大{font-weight:900;font-size:15px;text-align:center;padding:12px 8px 4px}.產品編號小{font-size:12px;color:var(--sub);font-weight:700;text-align:center;padding-bottom:8px}.機台格{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px}.機台卡{border:1px solid var(--border);border-radius:16px;background:var(--surface-alt);padding:12px}.機台卡 img{width:100%;height:100px;border-radius:10px;object-fit:cover}.無機圖,.無產品圖,.無圖{height:100px;border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center;color:var(--sub);font-weight:800;font-size:14px}.機台號{font-size:18px;font-weight:900;color:var(--primary);margin-top:8px}.摘要{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}.數字卡{background:var(--surface-alt);border:1px solid var(--border);border-radius:16px;padding:16px 10px;text-align:center}.數字卡 b{display:block;font-size:32px;font-weight:900;line-height:1.2}.數字卡 span{font-size:13px;color:var(--sub);font-weight:800}.數字卡.high-light{border-color:var(--primary);background:var(--primary-light)}.數字卡.high-light b{color:var(--primary)}.不良分配行{display:flex;align-items:center;gap:10px;background:var(--warning-bg);border:1px solid var(--warning);border-radius:16px;padding:12px;margin-bottom:12px}.不良分配行 select{flex:1;min-width:0;background:var(--surface);border-color:var(--warning)}.不良分配行 input.數量欄{flex:0 0 110px;width:110px;background:var(--surface);border-color:var(--warning);text-align:center;font-size:18px;font-weight:900;color:var(--warning)}.刪除分配{width:44px;height:44px;border:0;border-radius:10px;background:var(--danger-bg);color:var(--danger);font-size:18px;font-weight:900}.添加分配鈕{width:100%;border:1.5px dashed var(--warning);background:transparent;color:var(--warning);border-radius:16px;padding:14px;font-weight:900}.預覽,.訊息{white-space:pre-wrap;background:#020617;color:#dff7ff;border-radius:16px;padding:14px;line-height:1.6;overflow:auto}.預覽{max-height:260px}.訊息{min-height:120px}.預覽摘要{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}.預覽摘要 div{background:var(--surface-alt);border:1px solid var(--border);border-radius:14px;padding:10px}.預覽摘要 b{display:block;color:var(--primary);font-size:18px}.底部{position:fixed;left:0;right:0;bottom:0;z-index:40;background:rgba(255,255,255,.92);border-top:1px solid var(--border);padding:10px 16px calc(10px + var(--safe-bottom));display:grid;grid-template-columns:110px 1fr 110px;gap:10px;backdrop-filter:blur(12px)}@media(prefers-color-scheme:dark){.底部{background:rgba(21,27,40,.92)}}.主按鈕,.次按鈕{border:0;border-radius:18px;padding:15px;font-weight:900;font-size:16px}.主按鈕{background:var(--primary);color:#fff;box-shadow:0 10px 20px rgba(10,102,229,.20)}.次按鈕{background:var(--surface-alt);color:var(--text);border:1px solid var(--border)}.重新鈕{background:var(--warning-bg);color:var(--warning);border:1px solid var(--warning);border-radius:18px;font-weight:900}.空狀態{text-align:center;color:var(--sub);padding:24px}.載入{position:fixed;inset:0;z-index:999;background:var(--surface);display:none;align-items:center;justify-content:center}.載入.顯示{display:flex}.旋轉圈{width:44px;height:44px;border-radius:50%;border:4px solid var(--border);border-top-color:var(--primary);animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}@media(max-width:560px){.人員網格{grid-template-columns:repeat(2,1fr)}.產品網格{grid-template-columns:1fr}.兩欄,.三欄,.摘要,.預覽摘要{grid-template-columns:1fr}.底部{grid-template-columns:82px 1fr 82px}.不良分配行{gap:6px}.不良分配行 input.數量欄{flex-basis:74px;width:74px;padding:12px 6px}.外框{padding-left:12px;padding-right:12px}.頁首{margin-left:-12px;margin-right:-12px}}
+    html,body{height:100%;margin:0;background:#060d18;color:#e2e8f0;font-family:system-ui,-apple-system,'Noto Sans TC','Microsoft JhengHei',sans-serif;}
+    .載入畫面{height:100%;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;}
+    .卡{width:min(520px,100%);border:1px solid rgba(96,165,250,.35);border-radius:28px;background:rgba(15,23,42,.86);box-shadow:0 24px 80px rgba(0,0,0,.45);padding:28px;}
+    .標{font-size:26px;font-weight:900;margin-bottom:8px}.副{font-size:14px;color:#94a3b8;line-height:1.7}.進度{height:8px;background:#1e293b;border-radius:99px;overflow:hidden;margin-top:22px}.進度 div{height:100%;width:42%;border-radius:99px;background:linear-gradient(90deg,#22c55e,#3b82f6,#f59e0b);animation:run 1.4s linear infinite}@keyframes run{0%{transform:translateX(-120%)}100%{transform:translateX(260%)}}
+    .錯誤{color:#fecaca;white-space:pre-wrap;text-align:left;background:#450a0a;border:1px solid #991b1b;border-radius:16px;padding:14px;margin-top:18px;display:none}
   </style>
 </head>
 <body>
-  <div id="載入" class="載入"><div><div class="旋轉圈"></div><p class="小字" style="margin-top:12px">載入報工 PWA 資料中...</p></div></div>
-  <main class="外框">
-    <header class="頁首">
-      <div class="標題列">
-        <div><div class="標題">🏭 報工PWA</div><div class="副標">智慧製造中央作戰指揮中心｜GitHub Pages 正式版｜09_報工</div></div>
-        <div class="頭部右列"><button class="圓鈕" id="重新載入" title="重新載入">↻</button></div>
-      </div>
-      <div id="頂部狀態" class="狀態卡">🟡 正在連線 GAS API...</div>
-      <div class="PWA提示"><b>目前模式：</b>GitHub Pages PWA → gas-bridge.js → GAS Web App API → 09_報工 / 09_不良紀錄。<br><span id="版本標籤">版本讀取中...</span></div>
-    </header>
+  <div class="載入畫面">
+    <div class="卡">
+      <div class="標">🏭 報工 PWA</div>
+      <div class="副">正在載入 07_報工作業原版完整 UI。<br>本頁不再使用精簡版，會保留原本報工.txt 的掃碼、常用人員、產出、不良分配、異常時間、照片、預覽與送出流程。</div>
+      <div class="進度"><div></div></div>
+      <div id="錯誤" class="錯誤"></div>
+    </div>
+  </div>
 
-    <nav class="分頁">
-      <button class="active" data-tab="人員"><span style="font-size:18px">👤</span>人員<br><span style="font-size:10px;opacity:.7">Step 1</span></button>
-      <button data-tab="工件"><span style="font-size:18px">🔧</span>工件<br><span style="font-size:10px;opacity:.7">Step 2</span></button>
-      <button data-tab="產出"><span style="font-size:18px">📊</span>產出<br><span style="font-size:10px;opacity:.7">Step 3</span></button>
-      <button data-tab="品質"><span style="font-size:18px">🔍</span>品質<br><span style="font-size:10px;opacity:.7">Step 4</span></button>
-    </nav>
+  <script>
+  (async function(){
+    const 原版網址 = 'https://raw.githubusercontent.com/qhero70/smart-factory-worker-app/main/smart-factory-command-center/02_HTML%E5%89%8D%E7%AB%AF/07_%E5%A0%B1%E5%B7%A5%E4%BD%9C%E6%A5%ADV2.html';
+    const 版本 = 'v1.1.0_原版報工TXT全功能PWA';
 
-    <section class="分頁內容" data-page="人員">
-      <button class="掃碼鈕" type="button" onclick="document.getElementById('搜尋人員').focus()">🔎 搜尋 / 掃碼輸入工號</button>
-      <input id="搜尋人員" class="搜尋框" placeholder="搜尋姓名、工號、班別...">
-      <div id="人員列表" class="人員網格"></div>
-      <div class="卡片">
-        <div class="區標">👤 選定人員 <span class="en">Operator Info</span></div>
-        <div class="兩欄"><div><label>班別 / Shift</label><select id="班別"></select></div><div><label>作業日 / Work Date</label><input readonly id="作業日顯示" value="自動判斷"></div></div>
-      </div>
-    </section>
+    function 顯示錯誤(err){
+      const el = document.getElementById('錯誤');
+      el.style.display = 'block';
+      el.textContent = '載入原版報工 UI 失敗：\n' + (err && err.stack ? err.stack : String(err));
+    }
 
-    <section class="分頁內容 隱藏" data-page="工件">
-      <div class="卡片">
-        <div class="區標">🔧 工件與工站 <span class="en">Product Info</span></div>
-        <button class="掃碼鈕" type="button" onclick="document.getElementById('搜尋工件').focus()">🔎 搜尋 / 掃碼輸入產品</button>
-        <input id="搜尋工件" class="搜尋框" placeholder="搜尋品名、產品編號、客戶品號、工站、機台...">
-        <div id="工件列表" class="產品網格"></div>
-        <label style="margin-top:20px">機台照片 / Machine Photos</label>
-        <div id="機台清單" class="機台格"></div>
-      </div>
-    </section>
+    function 轉PWA原版(html){
+      html = String(html || '');
+      html = html.replace(/<base\s+target=["']_top["']\s*>/i, '');
+      html = html.replace(/<title>.*?<\/title>/i, '<title>報工PWA｜07_報工作業原版全功能</title>');
+      html = html.replace('</head>', '<link rel="manifest" href="./manifest.webmanifest"><meta name="theme-color" content="#0b74ff"><meta name="apple-mobile-web-app-capable" content="yes"></head>');
+      html = html.replace('</body>', '\n<script src="./pwa-config.js"><\\/script>\n<script src="./gas-bridge.js"><\\/script>\n<script>\n' + PWA橋接程式碼() + '\n<\\/script>\n</body>');
+      return html;
+    }
 
-    <section class="分頁內容 隱藏" data-page="產出">
-      <div class="卡片">
-        <div class="區標">📊 產出數量 <span class="en">Production Output</span></div>
-        <label class="必填">今日共做數 / Total Qty</label>
-        <input id="今日共做數" type="number" min="0" inputmode="numeric" placeholder="請輸入本次產出數量" style="font-size:24px;font-weight:900;color:var(--primary)">
-        <div class="兩欄"><div><label>開始時間 / Start</label><input id="開始時間" type="datetime-local"></div><div><label>結束時間 / End</label><input id="結束時間" type="datetime-local"></div></div>
-        <div class="摘要"><div class="數字卡"><span>📦 總共做</span><b id="預覽產出">0</b></div><div class="數字卡" style="border-color:var(--danger-bg);background:var(--danger-bg)"><span>❌ 不良</span><b id="預覽不良" style="color:var(--danger)">0</b></div><div class="數字卡 high-light"><span>✅ 實際良品</span><b id="預覽良品">0</b></div></div>
-      </div>
-    </section>
+    function PWA橋接程式碼(){
+      return `
+(function(){
+  'use strict';
+  const PWA版本 = '${版本}';
+  const 原呼叫後端 = window.呼叫後端;
+  function 正規化回傳(res){
+    if(!res) return {成功:false, 訊息:'GAS 無回傳資料'};
+    if(res.成功 !== undefined) return res;
+    if(res.success !== undefined){
+      const data = res.data || res.資料 || {};
+      const out = Object.assign({}, data, res, {成功:!!res.success, 訊息:res.message || res.訊息 || res.error || ''});
+      if(res.data && typeof res.data === 'object'){
+        Object.keys(res.data).forEach(k => { out[k] = res.data[k]; });
+      }
+      if(!out.筆數 && out.meta && out.meta.筆數) out.筆數 = out.meta.筆數;
+      if(!out.不良原因 && Array.isArray(out.不良代號)) out.不良原因 = 不良代號轉群組(out.不良代號);
+      return out;
+    }
+    return Object.assign({成功:true, 訊息:'OK'}, res);
+  }
+  function 不良代號轉群組(list){
+    const g = {Y:[], Z:[]};
+    (list || []).forEach(x => {
+      const code = String(x.不良代號 || x.不良代碼 || x.代碼 || '').trim();
+      const key = String(x.分類 || code.charAt(0) || 'Z').toUpperCase();
+      if(!g[key]) g[key] = [];
+      g[key].push({代碼:code, 名稱:x.不良名稱 || x.中文名稱 || x.名稱 || '', 英文名稱:x.英文名稱 || x.英文 || '', 備註:x.備註 || ''});
+    });
+    return g;
+  }
+  function 正規化送出Payload(payload){
+    const p = Object.assign({}, payload || {});
+    if(Array.isArray(p.不良行清單) && !p.不良分配){
+      p.不良分配 = p.不良行清單.map(x => ({分類:x.類別, 不良代號:x.代碼, 不良名稱:x.名稱, 英文名稱:x.英文名稱, 數量:x.數量}));
+    }
+    if(p.現場照片清單 && Array.isArray(p.現場照片清單)){
+      p.照片數量 = p.現場照片清單.length;
+    }
+    return p;
+  }
+  window.呼叫後端 = function(fn, arg, ok, fail){
+    try{
+      if(!window.GAS橋接器 || !window.GAS橋接器.呼叫) throw new Error('gas-bridge.js 尚未載入');
+      const action = fn;
+      const payload = 正規化送出Payload(arg || {});
+      const method = /^寫入|^新增|^更新|^刪除/.test(String(action)) ? 'POST' : 'GET';
+      window.GAS橋接器.呼叫(action, payload, {method}).then(res => {
+        const data = 正規化回傳(res);
+        if(typeof ok === 'function') ok(data);
+      }).catch(err => {
+        if(typeof fail === 'function') fail(err);
+        else if(window.Roar) window.Roar('❌','PWA API 錯誤', err.message || String(err), '錯誤');
+        else alert(err.message || String(err));
+      });
+    }catch(err){
+      if(typeof fail === 'function') fail(err);
+      else if(typeof 原呼叫後端 === 'function') return 原呼叫後端(fn,arg,ok,fail);
+      else alert(err.message || String(err));
+    }
+  };
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      try{
+        const card = document.getElementById('狀態卡');
+        if(card && !card.textContent.includes(PWA版本)) card.innerHTML += '<br>📱 GitHub Pages PWA｜' + PWA版本;
+        if('serviceWorker' in navigator) navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+      }catch(e){}
+    }, 300);
+  });
+})();`;
+    }
 
-    <section class="分頁內容 隱藏" data-page="品質">
-      <div class="卡片">
-        <div class="區標">🔍 品質與不良 <span class="en">Quality & Defects</span></div>
-        <div style="background:var(--surface-alt);padding:16px;border-radius:24px;border:1px solid var(--border)">
-          <label style="margin-top:0">📋 不良原因數量分配 <span class="小字">（合計不可大於今日共做數）</span></label>
-          <div id="不良分配區"></div>
-          <button id="新增不良" class="添加分配鈕" type="button">＋ 新增不良分配項目</button>
-        </div>
-        <label style="margin-top:24px">異常類型 / Abnormal Type</label><select id="異常類型"></select>
-        <label style="margin-top:24px">照片備註 / Photo Note</label><textarea id="照片備註" placeholder="輸入異常描述、照片說明、現場備註..."></textarea>
-        <label style="margin-top:24px">報工預覽 / Report Preview</label>
-        <div class="預覽摘要"><div>工號<b id="預覽工號">-</b></div><div>產品<b id="預覽產品">-</b></div><div>工站<b id="預覽工站">-</b></div></div>
-        <pre id="報工預覽JSON" class="預覽">尚未產生預覽...</pre>
-      </div>
-      <div class="卡片"><div class="區標">🧾 系統訊息 <span class="en">System Message</span></div><pre id="系統訊息" class="訊息">初始化中...</pre></div>
-    </section>
-  </main>
-
-  <div class="底部"><button id="上一步" class="次按鈕" type="button">← 上一步</button><button id="送出報工" class="主按鈕" type="button">確認送出</button><button id="下一步" class="重新鈕" type="button">下一步 →</button></div>
-
-  <script src="./pwa-config.js"></script>
-  <script src="./gas-bridge.js"></script>
-  <script src="./work-report-v2-submit.js"></script>
-  <script>document.getElementById('作業日顯示').value = new Date().toISOString().slice(0,10);</script>
+    try{
+      const response = await fetch(原版網址 + '?v=' + Date.now(), {cache:'no-store'});
+      if(!response.ok) throw new Error('HTTP ' + response.status + '：無法讀取原版報工檔');
+      const html = await response.text();
+      const transformed = 轉PWA原版(html);
+      document.open();
+      document.write(transformed);
+      document.close();
+    }catch(err){
+      顯示錯誤(err);
+    }
+  })();
+  </script>
 </body>
 </html>
