@@ -23,14 +23,14 @@ window.PWA_CONFIG = {
   const 腳本清單 = [
     './work-report-v2-photo-fallback.js',
     './work-report-v2-dom-fix.js',
-    './work-report-v2-shift-fix-v124.js'
+    './work-report-v2-shift-fix-v126.js'
   ];
 
   function 載入腳本(src){
     const 檔名 = src.split('/').pop();
     if(Array.from(document.scripts).some(s => String(s.src || '').includes(檔名))) return;
     const script = document.createElement('script');
-    script.src = src + '?v=124';
+    script.src = src + '?v=126-' + Date.now();
     script.defer = true;
     document.head.appendChild(script);
   }
