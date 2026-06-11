@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  const 版本 = 'v1.2.3_DOM補強_人員照片班別工站';
+  const 版本 = 'v1.2.4_DOM補強_班別早中夜修正';
   let 主檔 = null;
   const 文字 = v => String(v ?? '').trim();
   const 清字 = v => 文字(v).replace(/\s+/g, '').toUpperCase();
@@ -27,12 +27,30 @@
     return s;
   }
 
-  function 班別(v){
-    const t = 文字(v);
-    if(!t) return '';
-    if(t.includes('中') || t.includes('1650') || t.includes('16:50')) return '中班';
-    if(t.includes('大夜') || t.includes('夜') || t.includes('2300') || t.includes('23:00') || t.includes('0315') || t.includes('03:15')) return '大夜班';
-    if(t.includes('早') || t.includes('0800') || t.includes('08:00')) return '早班';
+  function 班別(rowOrValue){
+    let t = '';
+    if(rowOrValue && typeof rowOrValue === 'object'){
+      const name = 文字(取值(rowOrValue, ['班別名稱','標準班別','顯示班別']));
+      const code = 清字(取值(rowOrValue, ['班別代碼','班別CODE','shiftCode']));
+      const raw = 文字(取值(rowOrValue, ['班別','班次','工作班別','原始班別','班別時間']));
+      if(name.includes('早')) return '早班';
+      if(name.includes('中')) return '中班';
+      if(name.includes('大夜') || name.includes('夜')) return '大夜班';
+      if(code === 'DAY' || code === 'D') return '早班';
+      if(code === 'NIGHT' || code === 'N') return '大夜班';
+      if(code === 'MID' || code === 'M' || code === 'SWING') return '中班';
+      t = raw;
+    }else{
+      t = 文字(rowOrValue);
+    }
+
+    const compact = 清字(t);
+    if(!compact) return '';
+
+    // 重要：化新早班(0800~1650) 是早班，不能因為包含 1650 被誤判中班。
+    if(t.includes('早') || compact.includes('0800') || compact.includes('08:00') || compact.includes('0800~1650') || compact.includes('0800-1650')) return '早班';
+    if(t.includes('大夜') || t.includes('夜') || compact.includes('2300') || compact.includes('23:00') || compact.includes('0315') || compact.includes('03:15') || compact.includes('3150')) return '大夜班';
+    if(t.includes('中') || compact.includes('1650') || compact.includes('16:50')) return '中班';
     if(t.includes('加班')) return '加班';
     return t;
   }
@@ -50,19 +68,9 @@
     return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0,16);
   }
 
-  function 資料區(){
-    return 主檔?.data || 主檔?.資料 || 主檔 || {};
-  }
-
-  function 人員清單(){
-    const d = 資料區();
-    return d.人員 || d.人員主檔 || d.staff || [];
-  }
-
-  function 群組清單(){
-    const d = 資料區();
-    return d.報工工站群組 || d.途程工站群組 || d.workItems || [];
-  }
+  function 資料區(){ return 主檔?.data || 主檔?.資料 || 主檔 || {}; }
+  function 人員清單(){ const d = 資料區(); return d.人員 || d.人員主檔 || d.staff || []; }
+  function 群組清單(){ const d = 資料區(); return d.報工工站群組 || d.途程工站群組 || d.workItems || []; }
 
   async function 載入主檔(){
     if(主檔 || !window.GAS橋接器 || !window.GAS橋接器.取得報工初始資料) return 主檔;
@@ -85,20 +93,8 @@
 
   function 人員照片(row){
     return 圖片(取值(row, [
-      '人員照片網址',
-      '人員縮圖網址',
-      '人員照片縮圖網址',
-      '人員照片',
-      '照片網址',
-      '縮圖網址',
-      '作業員照片網址',
-      '作業員縮圖網址',
-      '頭像網址',
-      '圖片網址',
-      '人員照片檔案ID',
-      'Google檔案ID',
-      '照片檔案ID',
-      '檔案ID'
+      '人員照片網址','人員縮圖網址','人員照片縮圖網址','人員照片','照片網址','縮圖網址',
+      '作業員照片網址','作業員縮圖網址','頭像網址','圖片網址','人員照片檔案ID','Google檔案ID','照片檔案ID','檔案ID'
     ]));
   }
 
@@ -116,15 +112,33 @@
     });
   }
 
+  function 設卡片班別(card, shift){
+    if(!card || !shift) return;
+    const tag = card.querySelector('.班標');
+    if(tag) tag.textContent = shift;
+    card.classList.remove('班早','班中','班夜');
+    if(shift === '早班') card.classList.add('班早');
+    else if(shift === '中班') card.classList.add('班中');
+    else if(shift === '大夜班') card.classList.add('班夜');
+  }
+
+  function 修正人員卡片班別(){
+    const list = 人員清單();
+    if(!list.length) return;
+    $$('.人員卡片').forEach(card => {
+      const p = 找人員(card);
+      if(!p) return;
+      const s = 班別(p) || 現在班別();
+      設卡片班別(card, s);
+    });
+  }
+
   function 補班別選項(){
     const select = $('班別');
     if(!select) return;
     ['早班','中班','大夜班','加班'].forEach(s => {
       if(!Array.from(select.options).some(o => o.value === s || o.textContent === s)){
-        const opt = document.createElement('option');
-        opt.value = s;
-        opt.textContent = s;
-        select.appendChild(opt);
+        const opt = document.createElement('option'); opt.value = s; opt.textContent = s; select.appendChild(opt);
       }
     });
   }
@@ -136,20 +150,14 @@
     const selected = document.querySelector('.人員卡片.選中');
     let s = '';
     if(selected){
-      const tag = selected.querySelector('.班標');
-      s = 班別(tag ? tag.textContent : '');
-      if(!s){
-        const p = 找人員(selected);
-        s = 班別(取值(p, ['班別','班次','工作班別','班別名稱','原始班別']));
-      }
+      const p = 找人員(selected);
+      s = 班別(p) || 班別(selected.querySelector('.班標')?.textContent || '');
+      設卡片班別(selected, s);
     }
     if(!s && (select.value === '自動判斷' || !select.value)) s = 現在班別();
     if(!s) return;
     if(!Array.from(select.options).some(o => o.value === s || o.textContent === s)){
-      const opt = document.createElement('option');
-      opt.value = s;
-      opt.textContent = s;
-      select.appendChild(opt);
+      const opt = document.createElement('option'); opt.value = s; opt.textContent = s; select.appendChild(opt);
     }
     if(select.value !== s){
       select.value = s;
@@ -171,13 +179,9 @@
     });
   }
 
-  function 產品鍵(g){
-    return [g?.產品編號, g?.客戶品號, g?.品名, g?.產品名稱].map(文字).filter(Boolean);
-  }
-
-  function 工站標籤(g){
-    return [g?.工站名稱 || g?.報工工站名稱, g?.工序 || g?.工序範圍, g?.主機台].filter(Boolean).map(文字).join('｜') || '未指定工站';
-  }
+  function 產品鍵(g){ return [g?.產品編號, g?.客戶品號, g?.品名, g?.產品名稱].map(文字).filter(Boolean); }
+  function 工站標籤(g){ return [g?.工站名稱 || g?.報工工站名稱, g?.工序 || g?.工序範圍, g?.主機台].filter(Boolean).map(文字).join('｜') || '未指定工站'; }
+  function 建群組Key(g){ return [g?.產品編號, g?.客戶品號, g?.品名, g?.工站名稱 || g?.報工工站名稱, g?.工序 || g?.工序範圍, g?.主機台].map(文字).join('|'); }
 
   function 找目前產品群組(){
     const chosen = document.querySelector('.產品卡片.選中');
@@ -196,24 +200,6 @@
     box.style.margin = '12px 0';
     box.innerHTML = '<label>工站選擇 / Station Select</label><select id="工站補強選單"><option value="">請先選擇產品</option></select><div class="小字" id="工站補強提示" style="margin-top:6px">選產品後可切換同產品工站。</div>';
     parent.insertBefore(box, label || parent.firstChild);
-    $('工站補強選單').addEventListener('change', function(){
-      const key = this.value;
-      if(!key) return;
-      const g = 群組清單().find(x => 建群組Key(x) === key);
-      if(!g) return;
-      const labelText = 工站標籤(g);
-      const pKeys = 產品鍵(g).map(清字);
-      const candidates = $$('.產品卡片');
-      const card = candidates.find(c => {
-        const txt = 清字(c.textContent);
-        return pKeys.some(k => k && txt.includes(k)) && 清字(labelText).split('｜').filter(Boolean).some(t => txt.includes(t));
-      }) || candidates.find(c => pKeys.some(k => k && 清字(c.textContent).includes(k)));
-      if(card) card.click();
-    });
-  }
-
-  function 建群組Key(g){
-    return [g?.產品編號, g?.客戶品號, g?.品名, g?.工站名稱 || g?.報工工站名稱, g?.工序 || g?.工序範圍, g?.主機台].map(文字).join('|');
   }
 
   function 更新工站區(){
@@ -221,11 +207,7 @@
     if(!sel) return;
     const hit = 找目前產品群組();
     if(!hit) return;
-    const rows = 群組清單().filter(g => {
-      return (hit.產品編號 && g.產品編號 === hit.產品編號) ||
-             (hit.客戶品號 && g.客戶品號 === hit.客戶品號) ||
-             (hit.品名 && g.品名 === hit.品名);
-    });
+    const rows = 群組清單().filter(g => (hit.產品編號 && g.產品編號 === hit.產品編號) || (hit.客戶品號 && g.客戶品號 === hit.客戶品號) || (hit.品名 && g.品名 === hit.品名));
     sel.innerHTML = rows.map(g => '<option value="' + 建群組Key(g).replace(/"/g,'&quot;') + '">' + 工站標籤(g) + '</option>').join('') || '<option value="">此產品沒有其他工站</option>';
     const currentKey = 建群組Key(hit);
     if(Array.from(sel.options).some(o => o.value === currentKey)) sel.value = currentKey;
@@ -236,6 +218,7 @@
   async function 執行(){
     await 載入主檔();
     補人員照片();
+    修正人員卡片班別();
     補選人班別();
     補時間();
     建工站區();
