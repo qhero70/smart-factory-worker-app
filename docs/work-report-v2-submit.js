@@ -1,7 +1,7 @@
 (function(){
   'use strict';
 
-  const 版本 = 'v1.0.1_GAS07欄位邏輯對齊';
+  const 版本 = 'v1.0.2_照片班別修正';
   const 狀態 = {
     原始資料:null,
     人員:[],
@@ -44,9 +44,20 @@
     return 文字(value).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   }
 
+  function 本地日期文字(date){
+    const d = date || new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,'0');
+    const day = String(d.getDate()).padStart(2,'0');
+    return `${y}-${m}-${day}`;
+  }
+
   function 取圖片網址(value){
-    const s = 文字(value);
+    let s = 文字(value);
     if(!s) return '';
+    s = s.replace(/^=IMAGE\(/i,'').replace(/["'()]/g,'').trim();
+    const urlHit = s.match(/https?:\/\/[^\s,，;；]+/i);
+    if(urlHit) s = urlHit[0];
     if(s.indexOf('data:image/') === 0) return s;
     const m = s.match(/[-\w]{25,}/);
     if(s.indexOf('drive.google.com') >= 0 && m) return 'https://drive.google.com/thumbnail?id=' + m[0] + '&sz=w800';
@@ -56,9 +67,10 @@
 
   function 圖片HTML(url, text, className){
     const src = 取圖片網址(url);
+    const cls = className || '無圖';
     const safe = 安全HTML(text || '無圖');
-    if(!src) return `<div class="${className || '無圖'}">${safe}</div>`;
-    return `<img src="${安全HTML(src)}" alt="${safe}" loading="lazy" onerror="this.outerHTML='<div class=${className || '無圖'}>${safe}</div>'">`;
+    if(!src) return `<div class="${cls}">${safe}</div>`;
+    return `<img src="${安全HTML(src)}" alt="${safe}" loading="lazy" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=&quot;${cls}&quot;>${safe}</div>'">`;
   }
 
   function 顯示訊息(message, detail){
@@ -77,7 +89,7 @@
     const d = new Date(now);
     const hm = now.getHours() * 100 + now.getMinutes();
     if(hm < 610) d.setDate(d.getDate() - 1);
-    return d.toISOString().slice(0,10);
+    return 本地日期文字(d);
   }
 
   function 判斷班別(){
@@ -90,7 +102,8 @@
 
   function 標準化班別(value){
     const t = 文字(value);
-    if(!t || t === '自動判斷') return 判斷班別();
+    if(!t) return '';
+    if(t === '自動判斷') return '自動判斷';
     if(t.includes('中') || t.includes('1650') || t.includes('16:50')) return '中班';
     if(t.includes('大夜') || t.includes('夜') || t.includes('2300') || t.includes('23:00') || t.includes('315') || t.includes('03:15')) return '大夜班';
     if(t.includes('加班')) return '加班';
@@ -98,34 +111,56 @@
     return t;
   }
 
+  function 取得送出班別(){
+    const selected = 文字($('班別')?.value);
+    if(selected && selected !== '自動判斷') return 標準化班別(selected);
+    return 標準化班別(狀態.選取人員?.班別) || 判斷班別();
+  }
+
   function 班別樣式(班別){
-    const b = 標準化班別(班別);
+    const b = 標準化班別(班別) || 判斷班別();
     if(b === '早班') return '班早';
     if(b === '中班') return '班中';
     if(b === '大夜班') return '班夜';
     return '班早';
   }
 
+  function 補班別選項(value){
+    const v = 標準化班別(value);
+    if(!v) return;
+    if(!狀態.班別清單.includes(v)) 狀態.班別清單.push(v);
+    const select = $('班別');
+    if(select && !Array.from(select.options).some(o => o.value === v)){
+      const opt = document.createElement('option');
+      opt.value = v;
+      opt.textContent = v;
+      select.appendChild(opt);
+    }
+  }
+
   function 正規化初始資料(raw){
     const data = raw?.data || raw?.資料 || raw || {};
     狀態.原始資料 = raw;
-    狀態.人員 = 轉陣列(data, ['人員','人員主檔','staff','persons']).map(r => ({
-      ...r,
-      工號: 文字(取欄(r, ['工號','員工編號','員工工號','id'])),
-      姓名: 文字(取欄(r, ['姓名','中文名','名字','name'])),
-      部門: 文字(取欄(r, ['部門','單位','dept'])),
-      組別: 文字(取欄(r, ['組別','班組','group'])),
-      職稱: 文字(取欄(r, ['職稱','職位','title'])),
-      班別: 標準化班別(取欄(r, ['班別','班次','工作班別','班別名稱'])),
-      照片網址: 取圖片網址(取欄(r, ['人員照片','照片網址','縮圖網址','作業員照片網址','作業員縮圖網址','圖片網址','頭像網址'])),
-      縮圖網址: 取圖片網址(取欄(r, ['縮圖網址','人員縮圖','作業員縮圖網址','照片網址','人員照片'])),
-      Google檔案ID: 文字(取欄(r, ['Google檔案ID','照片檔案ID','作業員照片檔案ID','檔案ID']))
-    })).filter(r => r.工號 || r.姓名);
+    狀態.人員 = 轉陣列(data, ['人員','人員主檔','staff','persons']).map(r => {
+      const 班別值 = 標準化班別(取欄(r, ['班別','班次','工作班別','班別名稱','原始班別'])) || 判斷班別();
+      return {
+        ...r,
+        工號: 文字(取欄(r, ['工號','員工編號','員工工號','id'])),
+        姓名: 文字(取欄(r, ['姓名','中文名','名字','name'])),
+        部門: 文字(取欄(r, ['部門','單位','dept'])),
+        組別: 文字(取欄(r, ['組別','班組','group'])),
+        職稱: 文字(取欄(r, ['職稱','職位','title'])),
+        班別: 班別值,
+        照片網址: 取圖片網址(取欄(r, ['人員照片','照片網址','縮圖網址','作業員照片網址','作業員縮圖網址','圖片網址','頭像網址'])),
+        縮圖網址: 取圖片網址(取欄(r, ['縮圖網址','人員縮圖','作業員縮圖網址','照片網址','人員照片'])),
+        Google檔案ID: 文字(取欄(r, ['Google檔案ID','照片檔案ID','作業員照片檔案ID','檔案ID']))
+      };
+    }).filter(r => r.工號 || r.姓名);
 
     const groups = 轉陣列(data, ['報工工站群組','途程工站群組','工件工站','workItems']);
-    const products = 轉陣列(data, ['產品','產品主檔','products']);
+    const products = 轉陣列(data, ['產品','產品主檔','products']).map(正規化產品);
     const stations = 轉陣列(data, ['工站','工站主檔','stations']);
-    const machines = 轉陣列(data, ['機台','機台主檔','machines']);
+    const machines = 轉陣列(data, ['機台','機台主檔','machines']).map(正規化機台);
     狀態.產品 = products;
     狀態.工站 = stations;
     狀態.機台 = machines;
@@ -145,44 +180,89 @@
       }, {Y:[],Z:[]});
     }
 
-    狀態.班別清單 = 轉陣列(data, ['班別清單','shifts']).map(x => typeof x === 'string' ? x : (x.值 || x.名稱)).filter(Boolean);
-    if(!狀態.班別清單.length) 狀態.班別清單 = ['自動判斷','早班','中班','大夜班','加班'];
+    狀態.班別清單 = 轉陣列(data, ['班別清單','shifts']).map(x => typeof x === 'string' ? x : (x.值 || x.名稱)).map(標準化班別).filter(Boolean);
+    ['自動判斷','早班','中班','大夜班','加班'].forEach(x => { if(!狀態.班別清單.includes(x)) 狀態.班別清單.push(x); });
+    狀態.人員.forEach(p => 補班別選項(p.班別));
+
     狀態.異常類型 = 轉陣列(data, ['異常類型','abnormalTypes']).map(x => typeof x === 'string' ? x : (x.值 || x.名稱)).filter(Boolean);
     if(!狀態.異常類型.length) 狀態.異常類型 = ['無異常 / Normal','設備異常','機台停機 / Machine Down','待料 / Waiting Material','換刀 / Tool Change','品質確認 / Quality Check','其他 / Others'];
   }
 
-  function 正規化報工工站群組(r){
-    const 機台清單Raw = Array.isArray(r.機台清單) ? r.機台清單 : [];
-    const 機台字串 = 文字(取欄(r, ['機台清單','機台編號清單','機台編號','主機台']));
-    const ids = 機台清單Raw.length ? 機台清單Raw.map(x => 文字(x.機台編號 || x.主機台 || x)) : 機台字串.split(/[、,，;；\s]+/).filter(Boolean);
-    const machines = ids.map(id => {
-      const found = 狀態.機台.find(m => 文字(取欄(m,['機台編號','機台代號','設備編號'])) === id) || {};
-      return {
-        機台編號:id,
-        設備名稱: 文字(取欄(found, ['機台名稱','設備名稱','名稱'])) || 文字(取欄(r, ['機台名稱','設備名稱'])) || id,
-        區域: 文字(取欄(found, ['區域','位置'])) || 文字(取欄(r, ['區域','區域清單'])),
-        機台型號: 文字(取欄(found, ['型號','機台型號'])),
-        照片網址: 取圖片網址(取欄(found, ['機台照片','照片網址','縮圖網址','機台照片網址'])) || 取圖片網址(取欄(r, ['機台照片網址','照片網址'])),
-        縮圖網址: 取圖片網址(取欄(found, ['縮圖網址','機台縮圖網址','照片網址']))
-      };
-    });
-    const 工站名稱 = 文字(取欄(r, ['報工工站名稱','工站名稱','名稱'])) || 文字(取欄(r, ['工站編號','工站代碼']));
-    const 工序 = 文字(取欄(r, ['工序','工序範圍','工序清單','工站代碼']));
+  function 正規化產品(r){
+    const 產品編號 = 文字(取欄(r, ['產品編號','料號','品號','產品料號','productNo']));
+    const 主圖 = 取圖片網址(取欄(r, ['產品主圖','產品照片網址','產品縮圖網址','照片網址','縮圖網址','圖片網址','主圖','產品圖片網址']));
+    const 三視圖 = 取圖片網址(取欄(r, ['產品三視圖','三視圖','三視圖網址','產品三視圖網址']));
     return {
       ...r,
-      產品編號: 文字(取欄(r, ['產品編號','料號','品號','productNo'])),
+      產品編號,
       客戶品號: 文字(取欄(r, ['客戶品號','客戶料號'])),
       品名: 文字(取欄(r, ['品名','產品名稱','name'])),
-      產品照片網址: 取圖片網址(取欄(r, ['產品照片網址','產品主圖','照片網址','圖片網址'])),
-      產品縮圖網址: 取圖片網址(取欄(r, ['產品縮圖網址','縮圖網址','產品照片網址','產品主圖'])),
-      產品照片檔案ID: 文字(取欄(r, ['產品照片檔案ID','Google檔案ID','照片檔案ID'])),
+      產品照片網址: 主圖,
+      產品縮圖網址: 主圖,
+      產品主圖: 主圖,
+      產品三視圖: 三視圖,
+      產品照片檔案ID: 文字(取欄(r, ['產品照片檔案ID','Google檔案ID','照片檔案ID','檔案ID']))
+    };
+  }
+
+  function 正規化機台(r){
+    const 機台編號 = 文字(取欄(r, ['機台編號','機台代號','設備編號','machineId']));
+    const 圖 = 取圖片網址(取欄(r, ['機台照片','機台照片網址','照片網址','縮圖網址','機台縮圖網址','圖片網址']));
+    return {
+      ...r,
+      機台編號,
+      機台名稱: 文字(取欄(r, ['機台名稱','設備名稱','名稱','machineName'])) || 機台編號,
+      工站編號: 文字(取欄(r, ['工站編號','工站代碼','工站代號','工站名稱'])),
+      區域: 文字(取欄(r, ['區域','位置','area'])),
+      型號: 文字(取欄(r, ['型號','機台型號'])),
+      照片網址: 圖,
+      縮圖網址: 圖,
+      機台照片: 圖
+    };
+  }
+
+  function 正規化報工工站群組(r){
+    const 產品編號 = 文字(取欄(r, ['產品編號','料號','品號','productNo']));
+    const product = 狀態.產品.find(p => p.產品編號 === 產品編號 || (p.客戶品號 && p.客戶品號 === 取欄(r,['客戶品號'])) || (p.品名 && p.品名 === 取欄(r,['品名','產品名稱']))) || {};
+    const 機台清單Raw = Array.isArray(r.機台清單) ? r.機台清單 : [];
+    const 機台字串 = 文字(取欄(r, ['機台清單','機台編號清單','機台編號','主機台']));
+    let ids = 機台清單Raw.length ? 機台清單Raw.map(x => 文字(x.機台編號 || x.主機台 || x)) : 機台字串.split(/[、,，;；\s]+/).filter(Boolean);
+    const 工站名稱 = 文字(取欄(r, ['報工工站名稱','工站名稱','名稱'])) || 文字(取欄(r, ['工站編號','工站代碼']));
+    const 工站代碼 = 文字(取欄(r, ['工站編號','工站代碼','工站代號']));
+    if(!ids.length){
+      ids = 狀態.機台.filter(m => [m.工站編號, m.工站名稱].some(v => 文字(v) && [工站代碼, 工站名稱].includes(文字(v)))).map(m => m.機台編號);
+    }
+    const machines = ids.map(id => {
+      const found = 狀態.機台.find(m => m.機台編號 === id) || {};
+      const rawMachine = 機台清單Raw.find(x => 文字(x.機台編號 || x.主機台 || x) === id) || {};
+      return {
+        機台編號:id,
+        設備名稱: found.機台名稱 || 文字(取欄(rawMachine, ['設備名稱','機台名稱','名稱'])) || id,
+        區域: found.區域 || 文字(取欄(rawMachine, ['區域','位置'])) || 文字(取欄(r, ['區域','區域清單'])),
+        機台型號: found.型號 || 文字(取欄(rawMachine, ['型號','機台型號'])),
+        照片網址: found.照片網址 || 取圖片網址(取欄(rawMachine, ['機台照片','機台照片網址','照片網址','縮圖網址'])) || 取圖片網址(取欄(r, ['機台照片網址','照片網址'])),
+        縮圖網址: found.縮圖網址 || found.照片網址 || 取圖片網址(取欄(rawMachine, ['縮圖網址','機台縮圖網址','照片網址']))
+      };
+    });
+    const 工序 = 文字(取欄(r, ['工序','工序範圍','工序清單','工站代碼']));
+    const productPhoto = 取圖片網址(取欄(r, ['產品照片網址','產品縮圖網址','產品主圖','照片網址','圖片網址'])) || product.產品照片網址 || product.產品主圖 || product.產品縮圖網址;
+    return {
+      ...r,
+      產品編號,
+      客戶品號: 文字(取欄(r, ['客戶品號','客戶料號'])) || product.客戶品號 || '',
+      品名: 文字(取欄(r, ['品名','產品名稱','name'])) || product.品名 || '',
+      產品照片網址: productPhoto,
+      產品縮圖網址: productPhoto,
+      產品主圖: productPhoto,
+      產品三視圖: 取圖片網址(取欄(r, ['產品三視圖','三視圖'])) || product.產品三視圖 || '',
+      產品照片檔案ID: 文字(取欄(r, ['產品照片檔案ID','Google檔案ID','照片檔案ID'])) || product.產品照片檔案ID || '',
       工站名稱,
       報工工站名稱: 工站名稱,
       工序,
       工序範圍: 文字(取欄(r, ['工序範圍'])) || 工序,
       工序清單: Array.isArray(r.工序清單) ? r.工序清單 : (工序 ? 工序.split(/[、,，;；\s]+/).filter(Boolean) : []),
-      標準產能: 文字(取欄(r, ['標準產能','標準產能_班','8小時標準產能'])),
-      標準工時_秒: 文字(取欄(r, ['標準工時_秒','標準工時'])),
+      標準產能: 文字(取欄(r, ['標準產能','標準產能_班','8小時標準產能'])) || product['8小時標準產能'] || '',
+      標準工時_秒: 文字(取欄(r, ['標準工時_秒','標準工時'])) || product.標準工時_秒 || '',
       機台清單: machines,
       主機台: 文字(取欄(r, ['主機台'])) || (machines[0] ? machines[0].機台編號 : ''),
       顯示名稱: [工站名稱, 工序, machines.map(m => m.機台編號).join('、')].filter(Boolean).join('｜')
@@ -193,8 +273,16 @@
     if(stations.length){
       return stations.map(s => {
         const productNo = 文字(取欄(s,['產品編號','料號','品號']));
-        const p = products.find(x => 文字(取欄(x,['產品編號','料號','品號'])) === productNo) || {};
-        return {...s, 產品編號:productNo, 客戶品號:取欄(s,['客戶品號']) || 取欄(p,['客戶品號']), 品名:取欄(s,['品名']) || 取欄(p,['品名','產品名稱'])};
+        const p = products.find(x => x.產品編號 === productNo) || {};
+        return {
+          ...s,
+          產品編號: productNo,
+          客戶品號: 取欄(s,['客戶品號']) || p.客戶品號 || '',
+          品名: 取欄(s,['品名','產品名稱']) || p.品名 || '',
+          產品照片網址: 取圖片網址(取欄(s,['產品照片網址','產品主圖','照片網址'])) || p.產品照片網址 || p.產品主圖 || '',
+          產品縮圖網址: 取圖片網址(取欄(s,['產品縮圖網址','縮圖網址','產品照片網址'])) || p.產品縮圖網址 || p.產品照片網址 || p.產品主圖 || '',
+          產品三視圖: 取圖片網址(取欄(s,['產品三視圖','三視圖'])) || p.產品三視圖 || ''
+        };
       });
     }
     return products.map(p => ({...p, 報工工站名稱:'未指定工站', 工站名稱:'未指定工站'}));
@@ -218,18 +306,25 @@
       const raw = await window.GAS橋接器.取得報工初始資料();
       正規化初始資料(raw);
       渲染全部();
-      設定狀態(`PWA 已連線｜人員:${狀態.人員.length}｜工站:${狀態.報工工站群組.length}｜目標:09_報工`);
-      顯示訊息('✅ 主檔載入完成', {人員:狀態.人員.length, 報工工站群組:狀態.報工工站群組.length, 不良代號:狀態.不良清單.length});
+      設定狀態(`PWA 已連線｜人員:${狀態.人員.length}｜工站:${狀態.報工工站群組.length}｜照片:${統計照片數()}｜目標:09_報工`);
+      顯示訊息('✅ 主檔載入完成', {人員:狀態.人員.length, 報工工站群組:狀態.報工工站群組.length, 產品照片:狀態.報工工站群組.filter(x=>x.產品照片網址).length, 機台照片:狀態.報工工站群組.reduce((s,g)=>s+(g.機台清單||[]).filter(m=>m.照片網址||m.縮圖網址).length,0), 不良代號:狀態.不良清單.length});
     }catch(e){
       設定狀態('PWA 載入失敗');
       顯示訊息('❌ 初始資料載入失敗：' + e.message);
     }
   }
 
+  function 統計照片數(){
+    const p = 狀態.報工工站群組.filter(x => x.產品照片網址 || x.產品縮圖網址).length;
+    const m = 狀態.報工工站群組.reduce((s,g)=>s+(g.機台清單||[]).filter(x=>x.照片網址||x.縮圖網址).length,0);
+    return `產品${p}/機台${m}`;
+  }
+
   function 渲染全部(){
     $('版本標籤').textContent = `${window.PWA_CONFIG?.VERSION || 'v1.0.0'}｜${版本}`;
+    $('作業日顯示').value = 作業日();
     $('班別').innerHTML = 狀態.班別清單.map(x => `<option value="${安全HTML(x)}">${安全HTML(x)}</option>`).join('');
-    $('班別').value = 狀態.班別清單.includes('自動判斷') ? '自動判斷' : 判斷班別();
+    $('班別').value = '自動判斷';
     $('異常類型').innerHTML = 狀態.異常類型.map(x => `<option value="${安全HTML(x)}">${安全HTML(x)}</option>`).join('');
     渲染人員();
     渲染工站();
@@ -242,9 +337,9 @@
     const q = 文字($('搜尋人員')?.value).toLowerCase();
     const box = $('人員列表');
     const rows = 狀態.人員.filter(p => !q || [p.工號,p.姓名,p.部門,p.組別,p.班別].join(' ').toLowerCase().includes(q));
-    box.innerHTML = rows.map((p,idx) => {
+    box.innerHTML = rows.map(p => {
       const selected = 狀態.選取人員 && 狀態.選取人員.工號 === p.工號;
-      const avatar = p.照片網址 || p.縮圖網址;
+      const avatar = p.縮圖網址 || p.照片網址;
       return `<button type="button" class="人員卡片 ${班別樣式(p.班別)} ${selected?'選中':''}" data-id="${安全HTML(p.工號)}">
         <span class="班標">${安全HTML(p.班別 || '')}</span><span class="選取標記">✓</span>
         <div class="頭像圈">${avatar ? 圖片HTML(avatar,p.姓名) : 安全HTML((p.姓名 || p.工號 || '?').charAt(0))}</div>
@@ -257,10 +352,10 @@
     const q = 文字($('搜尋工件')?.value).toLowerCase();
     const box = $('工件列表');
     const rows = 狀態.報工工站群組.filter(g => !q || [g.產品編號,g.客戶品號,g.品名,g.報工工站名稱,g.工序,g.主機台].join(' ').toLowerCase().includes(q));
-    box.innerHTML = rows.map((g,idx) => {
+    box.innerHTML = rows.map(g => {
       const key = 工站Key(g);
       const selected = 狀態.選取工站 && 工站Key(狀態.選取工站) === key;
-      const photo = g.產品縮圖網址 || g.產品照片網址;
+      const photo = g.產品縮圖網址 || g.產品照片網址 || g.產品主圖;
       return `<button type="button" class="產品卡片 ${selected?'選中':''}" data-key="${安全HTML(key)}">
         <div class="產品縮圖">${photo ? 圖片HTML(photo,g.品名,'無產品圖') : '<span>📦</span>'}</div>
         <div class="產品名稱大">${安全HTML(g.品名 || g.產品編號 || '未命名產品')}</div>
@@ -343,7 +438,7 @@
     const 不良數 = 不良分配.reduce((s,x)=>s+數字(x.數量),0);
     const 實際良品數 = Math.max(今日共做數 - 不良數,0);
     const firstNg = 不良分配[0] || {};
-    const 班別 = 標準化班別($('班別').value || p.班別);
+    const 班別 = 取得送出班別();
     const 開始時間 = $('開始時間').value || '';
     const 結束時間 = $('結束時間').value || '';
     const 實際工時 = 計算工時();
@@ -363,8 +458,8 @@
       產品編號:g.產品編號 || '',
       客戶品號:g.客戶品號 || '',
       品名:g.品名 || '',
-      產品照片網址:g.產品照片網址 || '',
-      產品縮圖網址:g.產品縮圖網址 || g.產品照片網址 || '',
+      產品照片網址:g.產品照片網址 || g.產品主圖 || '',
+      產品縮圖網址:g.產品縮圖網址 || g.產品照片網址 || g.產品主圖 || '',
       產品照片檔案ID:g.產品照片檔案ID || '',
       工站名稱:g.工站名稱 || g.報工工站名稱 || '',
       報工工站名稱:g.報工工站名稱 || g.工站名稱 || '',
@@ -415,6 +510,7 @@
 
   function 更新預覽(){
     const payload = 收集Payload();
+    $('作業日顯示').value = payload.作業日 || 作業日();
     $('預覽工號').textContent = payload.工號 || '-';
     $('預覽產品').textContent = payload.品名 || payload.產品編號 || '-';
     $('預覽工站').textContent = payload.報工工站名稱 || '-';
@@ -472,6 +568,7 @@
     const local = new Date(now.getTime() - now.getTimezoneOffset()*60000).toISOString().slice(0,16);
     if($('開始時間') && !$('開始時間').value) $('開始時間').value = local;
     if($('結束時間') && !$('結束時間').value) $('結束時間').value = local;
+    if($('作業日顯示')) $('作業日顯示').value = 作業日();
   }
 
   function 綁定事件(){
@@ -481,7 +578,12 @@
       const card = e.target.closest('.人員卡片');
       if(!card) return;
       狀態.選取人員 = 狀態.人員.find(p => p.工號 === card.dataset.id) || null;
-      if(狀態.選取人員 && $('班別').value === '自動判斷') $('班別').value = '自動判斷';
+      if(狀態.選取人員?.班別){
+        補班別選項(狀態.選取人員.班別);
+        $('班別').value = 狀態.選取人員.班別;
+      }else{
+        $('班別').value = '自動判斷';
+      }
       渲染人員(); 更新預覽();
     });
     $('工件列表').addEventListener('click', e => {
