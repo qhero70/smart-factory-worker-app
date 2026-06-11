@@ -19,10 +19,11 @@
 <script>
 (function(){
   const 原版網址='https://raw.githubusercontent.com/qhero70/smart-factory-worker-app/main/smart-factory-command-center/02_HTML%E5%89%8D%E7%AB%AF/07_%E5%A0%B1%E5%B7%A5%E4%BD%9C%E6%A5%ADV2.html';
-  const 版本='v1.1.1_iframe原版報工TXT全功能PWA';
+  const 版本='v1.1.2_Blob原版報工TXT全功能PWA';
   const 載入=document.getElementById('載入畫面');
   const 錯誤=document.getElementById('錯誤');
   const 主框=document.getElementById('主框');
+  let 目前BlobURL='';
   function 顯示錯誤(err){錯誤.style.display='block';錯誤.textContent='載入原版報工 UI 失敗：\n'+(err&&err.stack?err.stack:String(err));}
   function 橋接程式(){return `
 (function(){
@@ -33,8 +34,8 @@
   window.呼叫後端=function(fn,arg,ok,fail){try{if(!window.GAS橋接器||!window.GAS橋接器.呼叫)throw new Error('gas-bridge.js 尚未載入');const method=/^寫入|^新增|^更新|^刪除/.test(String(fn))?'POST':'GET';window.GAS橋接器.呼叫(fn,正規化送出Payload(arg||{}),{method}).then(res=>{if(typeof ok==='function')ok(正規化回傳(res));}).catch(err=>{if(typeof fail==='function')fail(err);else if(window.Roar)window.Roar('❌','PWA API 錯誤',err.message||String(err),'錯誤');else alert(err.message||String(err));});}catch(err){if(typeof fail==='function')fail(err);else alert(err.message||String(err));}};
   window.addEventListener('load',()=>setTimeout(()=>{try{const card=document.getElementById('狀態卡');if(card&&!card.textContent.includes(PWA版本))card.innerHTML+='<br>📱 GitHub Pages PWA｜'+PWA版本;}catch(e){}},500));
 })();`;}
-  function 轉成PWA原版(html){html=String(html||'');html=html.replace(/<base\s+target=["']_top["']\s*>/i,'<base href="https://qhero70.github.io/smart-factory-worker-app/">');html=html.replace(/<title>.*?<\/title>/i,'<title>報工PWA｜07_報工作業原版全功能</title>');html=html.replace('</head>','<link rel="manifest" href="./manifest.webmanifest"><meta name="theme-color" content="#0b74ff"><meta name="apple-mobile-web-app-capable" content="yes"><script src="./pwa-config.js"><\\/script><script src="./gas-bridge.js"><\\/script></head>');html=html.replace('</body>','<script>'+橋接程式()+'<\\/script></body>');return html;}
-  async function 啟動(){try{const response=await fetch(原版網址+'?v='+Date.now(),{cache:'no-store'});if(!response.ok)throw new Error('HTTP '+response.status+'：無法讀取原版報工檔');const html=await response.text();主框.onload=function(){載入.classList.add('隱藏');主框.classList.add('顯示');};主框.srcdoc=轉成PWA原版(html);setTimeout(()=>{if(!主框.classList.contains('顯示')){載入.classList.add('隱藏');主框.classList.add('顯示');}},4500);if('serviceWorker'in navigator)navigator.serviceWorker.register('./service-worker.js').catch(()=>{});}catch(err){顯示錯誤(err);}}
+  function 轉成PWA原版(html){html=String(html||'');html=html.replace(/<base\s+target=["']_top["']\s*>/i,'<base href="https://qhero70.github.io/smart-factory-worker-app/">');html=html.replace(/<title>.*?<\/title>/i,'<title>報工PWA｜07_報工作業原版全功能</title>');html=html.replace('</head>','<link rel="manifest" href="https://qhero70.github.io/smart-factory-worker-app/manifest.webmanifest"><meta name="theme-color" content="#0b74ff"><meta name="apple-mobile-web-app-capable" content="yes"><script src="https://qhero70.github.io/smart-factory-worker-app/pwa-config.js"><\\/script><script src="https://qhero70.github.io/smart-factory-worker-app/gas-bridge.js"><\\/script></head>');html=html.replace('</body>','<script>'+橋接程式()+'<\\/script></body>');return html;}
+  async function 啟動(){try{const response=await fetch(原版網址+'?v='+Date.now(),{cache:'no-store'});if(!response.ok)throw new Error('HTTP '+response.status+'：無法讀取原版報工檔');const html=await response.text();const transformed=轉成PWA原版(html);const blob=new Blob([transformed],{type:'text/html;charset=utf-8'});if(目前BlobURL)URL.revokeObjectURL(目前BlobURL);目前BlobURL=URL.createObjectURL(blob);主框.onload=function(){載入.classList.add('隱藏');主框.classList.add('顯示');};主框.src=目前BlobURL;setTimeout(()=>{if(!主框.classList.contains('顯示')){載入.classList.add('隱藏');主框.classList.add('顯示');}},6500);if('serviceWorker'in navigator)navigator.serviceWorker.register('./service-worker.js').catch(()=>{});}catch(err){顯示錯誤(err);}}
   啟動();
 })();
 </script>
