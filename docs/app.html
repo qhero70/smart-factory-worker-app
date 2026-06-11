@@ -2,54 +2,111 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta name="theme-color" content="#0f766e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="製造應用總部">
   <title>製造部行動戰情室</title>
   <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./assets/icons/智慧製造圖示.svg" type="image/svg+xml">
   <style>
-    :root{--bg:#07111f;--card:#0f172acc;--line:#334155;--text:#ecfeff;--sub:#a7b4c8;--blue:#38bdf8;--green:#34d399;--amber:#fbbf24;--red:#fb7185}
-    *{box-sizing:border-box}body{margin:0;background:linear-gradient(135deg,#06111f,#0b2a3d);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC','Microsoft JhengHei',sans-serif}.wrap{max-width:720px;margin:0 auto;padding:18px 14px 90px}.hero{padding:22px;border:1px solid rgba(148,163,184,.28);border-radius:26px;background:rgba(15,23,42,.78);box-shadow:0 22px 60px rgba(0,0,0,.35);backdrop-filter:blur(12px)}h1{font-size:30px;margin:8px 0 6px}.tag{font-weight:900;color:#67e8f9}.sub{color:var(--sub);line-height:1.7}.card{margin-top:14px;padding:16px;border:1px solid rgba(148,163,184,.25);border-radius:22px;background:rgba(15,23,42,.72)}label{display:block;font-weight:900;margin:8px 0 6px}input{width:100%;border:1px solid var(--line);border-radius:16px;background:#020617;color:var(--text);font-size:15px;padding:13px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.btn{border:0;border-radius:17px;padding:14px 10px;font-weight:900;font-size:15px;text-align:center;text-decoration:none;display:block;color:#03101d}.blue{background:var(--blue)}.green{background:var(--green)}.amber{background:var(--amber)}.dark{background:#1e293b;color:var(--text);border:1px solid var(--line)}pre{white-space:pre-wrap;background:#020617;border:1px solid var(--line);border-radius:18px;padding:12px;line-height:1.6;min-height:70px;color:#dff7ff}.note{font-size:13px;color:#cbd5e1;line-height:1.6}@media(max-width:520px){.grid{grid-template-columns:1fr}h1{font-size:25px}}
+    :root{--底:#07111f;--卡:#0f172acc;--線:#334155;--文:#ecfeff;--淡:#a7b4c8;--藍:#38bdf8;--綠:#34d399;--黃:#fbbf24;--紅:#fb7185}
+    *{box-sizing:border-box}body{margin:0;background:linear-gradient(135deg,#06111f,#0b2a3d);color:var(--文);font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC','Microsoft JhengHei',sans-serif}.頁面{max-width:760px;margin:0 auto;padding:18px 14px 90px}.英雄,.卡片{border:1px solid rgba(148,163,184,.28);border-radius:26px;background:rgba(15,23,42,.78);box-shadow:0 22px 60px rgba(0,0,0,.35);backdrop-filter:blur(12px)}.英雄{padding:22px}.卡片{margin-top:14px;padding:16px}.標籤{font-weight:1000;color:#67e8f9}.標題{font-size:30px;margin:8px 0 6px}.說明{color:var(--淡);line-height:1.7}.格線{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.按鈕{border:0;border-radius:17px;padding:14px 10px;font-weight:1000;font-size:15px;text-align:center;text-decoration:none;display:block;color:#03101d}.藍{background:var(--藍)}.綠{background:var(--綠)}.黃{background:var(--黃)}.紅{background:var(--紅)}.深{background:#1e293b;color:var(--文);border:1px solid var(--線)}.狀態列{display:grid;grid-template-columns:1fr 1fr;gap:10px}.狀態{background:#02061799;border:1px solid rgba(148,163,184,.22);border-radius:18px;padding:12px}.狀態 b{display:block;color:#cffafe;margin-bottom:6px}.狀態 span{color:#cbd5e1;font-size:13px;line-height:1.5}pre{white-space:pre-wrap;background:#020617;border:1px solid var(--線);border-radius:18px;padding:12px;line-height:1.6;min-height:88px;color:#dff7ff;overflow:auto}.提示{font-size:13px;color:#cbd5e1;line-height:1.7}.輸入{width:100%;border:1px solid var(--線);border-radius:16px;background:#020617;color:var(--文);font-size:15px;padding:13px;margin-top:8px}@media(max-width:560px){.格線,.狀態列{grid-template-columns:1fr}.標題{font-size:26px}}
   </style>
 </head>
 <body>
-  <main class="wrap">
-    <section class="hero">
-      <div class="tag">智慧製造中央作戰指揮中心｜PWA 正式入口</div>
-      <h1>製造部行動戰情室</h1>
-      <p class="sub">v1.6.1 乾淨正式版。報工 V2 與 LINE Bot 都由同一支 GAS 主後端提供服務。</p>
+  <main class="頁面">
+    <section class="英雄">
+      <div class="標籤">智慧製造中央作戰指揮中心｜PWA 正式入口</div>
+      <h1 class="標題">製造部行動戰情室</h1>
+      <p class="說明" id="版本說明">版本讀取中。報工 V2 與 LINE Bot 都由同一支 GAS 主後端提供服務。</p>
     </section>
 
-    <section class="card">
-      <label>GAS Web App URL</label>
-      <input id="gasUrl" placeholder="貼上 https://script.google.com/macros/s/.../exec">
-      <div class="grid">
-        <button class="btn green" onclick="saveUrl()">儲存 GAS URL</button>
-        <button class="btn blue" onclick="healthCheck()">後端健康檢查</button>
-        <button class="btn amber" onclick="openReport()">開啟報工作業 V2</button>
-        <a class="btn dark" href="./index.html">返回中央入口</a>
+    <section class="卡片">
+      <div class="狀態列">
+        <div class="狀態"><b>GAS URL 狀態</b><span id="gas狀態">檢查中</span></div>
+        <div class="狀態"><b>Service Worker</b><span id="sw狀態">檢查中</span></div>
+        <div class="狀態"><b>PWA 版本</b><span id="版本狀態">檢查中</span></div>
+        <div class="狀態"><b>網路狀態</b><span id="網路狀態">檢查中</span></div>
       </div>
-      <p class="note">報工正式網址會自動組合為：GAS Web App URL + <b>?page=07_報工作業V2</b></p>
-      <pre id="result">請先貼上 GAS Web App URL，按「儲存 GAS URL」。</pre>
     </section>
 
-    <section class="card">
-      <h2>正式保留功能</h2>
-      <p class="note">LINE Bot Webhook 使用同一個 GAS URL，不加參數。報工頁使用同一個 GAS URL 加上 <b>?page=07_報工作業V2</b>。</p>
-      <pre>LINE Bot：/exec
-報工 V2：/exec?page=07_報工作業V2
-API 健康檢查：/exec?action=健康檢查</pre>
+    <section class="卡片">
+      <h2>後端連線檢查</h2>
+      <p class="提示">GAS Web App URL 固定放在 <b>docs/pwa-config.js</b> 的 <b>GAS_WEB_APP_URL</b>。下方輸入框只作為現場臨時覆蓋測試，不改 GitHub 正式設定。</p>
+      <input class="輸入" id="臨時GASURL" placeholder="臨時測試用：貼上 https://script.google.com/macros/s/.../exec">
+      <div class="格線">
+        <button class="按鈕 綠" onclick="儲存臨時URL()">儲存臨時 URL</button>
+        <button class="按鈕 藍" onclick="健康檢查()">後端健康檢查</button>
+        <button class="按鈕 黃" onclick="主檔檢查()">主檔檢查</button>
+        <button class="按鈕 紅" onclick="清除臨時URL()">清除臨時 URL</button>
+        <a class="按鈕 綠" href="./work-report-v2.html">開啟報工作業 V2</a>
+        <a class="按鈕 深" href="./index.html">返回中央入口</a>
+      </div>
+      <pre id="結果">系統初始化中...</pre>
+    </section>
+
+    <section class="卡片">
+      <h2>正式 API 路徑</h2>
+      <pre>健康檢查：?action=健康檢查
+主檔檢查：?action=主檔檢查
+報工 V2 初始資料：?action=取得報工作業v2初始資料
+報工 V2 寫入：?action=寫入報工作業v2
+不良紀錄 V2 寫入：?action=寫入不良紀錄v2
+主檔照片重刷：?action=手動重刷_主檔照片</pre>
     </section>
   </main>
-<script>
-const KEY='智慧製造_GAS_WEB_APP_URL';
-function $(id){return document.getElementById(id)}
-function out(x){$('result').textContent=typeof x==='string'?x:JSON.stringify(x,null,2)}
-function norm(u){return String(u||'').trim().replace(/\?.*$/,'')}
-function saveUrl(){const u=norm($('gasUrl').value);if(!u){out('請先貼上 GAS Web App URL');return}localStorage.setItem(KEY,u);$('gasUrl').value=u;out('✅ 已儲存 GAS URL\n'+u)}
-function getUrl(){return norm(localStorage.getItem(KEY)||$('gasUrl').value)}
-function openReport(){const u=getUrl();if(!u){out('請先儲存 GAS URL');return}window.open(u+'?page=07_報工作業V2','_blank')}
-async function healthCheck(){try{const u=getUrl();if(!u){out('請先儲存 GAS URL');return}out('檢查中...');const r=await fetch(u+'?action=健康檢查');out(await r.json())}catch(e){out('健康檢查失敗：'+e.message)}}
-window.addEventListener('load',()=>{$('gasUrl').value=localStorage.getItem(KEY)||''});
-if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(()=>{});}
-</script>
+
+  <script src="./pwa-config.js"></script>
+  <script src="./gas-bridge.js"></script>
+  <script>
+    const $ = id => document.getElementById(id);
+    const 輸出 = 資料 => { $('結果').textContent = typeof 資料 === 'string' ? 資料 : JSON.stringify(資料,null,2); };
+
+    function 更新狀態(){
+      const 設定 = window.PWA_CONFIG || {};
+      $('版本說明').textContent = `${設定.VERSION || '未設定版本'}｜${設定.APP_NAME || '製造部智慧製造應用總部'}。報工 V2 與 LINE Bot 都由同一支 GAS 主後端提供服務。`;
+      $('版本狀態').textContent = 設定.VERSION || '未設定';
+      $('網路狀態').textContent = navigator.onLine ? '目前線上' : '目前離線';
+      $('gas狀態').textContent = window.GAS橋接器?.取得GAS網址() ? '已設定 GAS Web App URL' : '尚未設定 GAS Web App URL';
+      $('臨時GASURL').value = localStorage.getItem('智慧製造_臨時GAS_WEB_APP_URL') || '';
+    }
+
+    function 儲存臨時URL(){
+      const url = $('臨時GASURL').value.trim().replace(/\?.*$/,'');
+      if(!url){輸出('請先貼上臨時 GAS Web App URL');return;}
+      localStorage.setItem('智慧製造_臨時GAS_WEB_APP_URL',url);
+      更新狀態();
+      輸出('✅ 已儲存臨時 URL\n' + url);
+    }
+
+    function 清除臨時URL(){
+      localStorage.removeItem('智慧製造_臨時GAS_WEB_APP_URL');
+      $('臨時GASURL').value = '';
+      更新狀態();
+      輸出('✅ 已清除臨時 URL，恢復使用 pwa-config.js 正式設定。');
+    }
+
+    async function 健康檢查(){
+      try{輸出('健康檢查中...');輸出(await window.GAS橋接器.呼叫('健康檢查'));}
+      catch(e){輸出('❌ 健康檢查失敗：' + e.message);}
+    }
+
+    async function 主檔檢查(){
+      try{輸出('主檔檢查中...');輸出(await window.GAS橋接器.呼叫('主檔檢查'));}
+      catch(e){輸出('❌ 主檔檢查失敗：' + e.message);}
+    }
+
+    window.addEventListener('online',更新狀態);
+    window.addEventListener('offline',更新狀態);
+    window.addEventListener('load', async () => {
+      更新狀態();
+      if('serviceWorker' in navigator){
+        try{await navigator.serviceWorker.register('./service-worker.js');$('sw狀態').textContent='已註冊 service-worker.js';}
+        catch(e){$('sw狀態').textContent='註冊失敗：'+e.message;}
+      }else{$('sw狀態').textContent='此瀏覽器不支援';}
+      輸出('✅ PWA 入口已載入。請執行「後端健康檢查」。');
+    });
+  </script>
 </body>
 </html>
