@@ -1,4 +1,4 @@
-const 快取版本 = 'v2.0.0_正式整合版';
+const 快取版本 = 'v2.0.1_UI照片修正';
 const 快取名稱 = `製造部智慧製造應用總部-${快取版本}`;
 const 必要檔案 = [
   './',
@@ -34,6 +34,12 @@ self.addEventListener('fetch', event => {
 
   if (網址.hostname.includes('script.google.com') || 網址.hostname.includes('googleusercontent.com')) {
     event.respondWith(fetch(請求, { cache: 'no-store' }));
+    return;
+  }
+
+  // 報工核心程式永遠取最新版，避免手機 Safari 留住舊 UI。
+  if (網址.pathname.endsWith('/work-report-v2-core.js')) {
+    event.respondWith(fetch(請求, { cache: 'reload' }));
     return;
   }
 
