@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const 版本 = 'v2.0.0_正式整合版_無補丁_無中班';
+  const 版本 = 'v2.0.1_正式整合版_UI照片修正';
   const 狀態 = { 人員: [], 產品: [], 群組: [], 機台: [], 不良群組: { Y: [], Z: [] }, 選人: null, 選產品: null, 選工件: null, 頁: '人員', 照片: [] };
   const $ = id => document.getElementById(id);
   const $$ = q => Array.from(document.querySelectorAll(q));
@@ -32,10 +32,10 @@
     return s;
   }
 
-  function 圖片HTML(url, alt) {
+  function 圖片HTML(url, alt, fallback = '📦') {
     const src = 圖片網址(url);
-    if (!src) return '<div class="無圖">📦</div>';
-    return `<img src="${逸出(src)}" alt="${逸出(alt)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=&quot;無圖&quot;>📦</div>'">`;
+    if (!src) return `<div class="無圖">${逸出(fallback)}</div>`;
+    return `<img src="${逸出(src)}" alt="${逸出(alt)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=&quot;無圖&quot;>${逸出(fallback)}</div>'">`;
   }
 
   function 判斷班別(rowOrValue) {
@@ -60,6 +60,52 @@
   function 關閉載入() { $('載入遮罩').classList.remove('顯示'); }
   function 訊息(text, data) { $('系統訊息').textContent = data ? text + '\n' + JSON.stringify(data, null, 2) : text; }
   function 狀態列(text) { $('狀態卡').textContent = text; }
+
+  function 套用正式UI修正() {
+    if (document.getElementById('報工PWA正式UI修正')) return;
+    const style = document.createElement('style');
+    style.id = '報工PWA正式UI修正';
+    style.textContent = `
+      .外框{padding-top:4px!important;padding-bottom:128px!important}
+      .頁首{padding:8px 12px 9px!important;margin:-4px -12px 8px!important;border-radius:0 0 18px 18px!important}
+      .標題{font-size:18px!important;line-height:1.15!important;letter-spacing:-.3px!important}
+      .副標{font-size:10px!important;line-height:1.35!important;margin-top:2px!important;opacity:.9!important}
+      .狀態卡{margin-top:6px!important;padding:6px 10px!important;border-radius:12px!important;font-size:11px!important;line-height:1.45!important}
+      .圓鈕{width:34px!important;height:34px!important;border-radius:12px!important;font-size:16px!important}
+      .分頁{margin:8px 0!important;gap:7px!important}
+      .分頁 button{padding:8px 4px!important;border-radius:15px!important;font-size:12px!important;line-height:1.25!important}
+      .掃碼鈕{padding:11px!important;border-radius:17px!important}
+      .搜尋框{margin:7px 0!important;padding:11px 14px!important}
+      .人員網格{grid-template-columns:repeat(2,1fr)!important;gap:12px!important;max-height:520px!important;padding:4px!important}
+      .人員卡片{min-height:218px!important;padding:14px 8px 13px!important;border-width:3px!important;background:#f9fcff!important;color:#0b1f36!important}
+      .人員卡片.選中{background:linear-gradient(145deg,#eaf4ff,#ffffff)!important;color:#0b1f36!important;border-color:#0b74ff!important;box-shadow:0 0 0 4px rgba(11,116,255,.25),0 14px 26px rgba(11,116,255,.22)!important}
+      .頭像圈{width:128px!important;height:128px!important;font-size:46px!important;border-width:4px!important;margin:10px auto 9px!important;background:#dcecff!important;color:#193654!important;box-shadow:0 8px 18px rgba(20,45,75,.16)!important}
+      .頭像圈 img{display:block!important;width:100%!important;height:100%!important;object-fit:cover!important;opacity:1!important;filter:none!important;mix-blend-mode:normal!important}
+      .人名{font-size:20px!important;line-height:1.18!important;color:#052b53!important;font-weight:1000!important;text-shadow:0 1px 0 rgba(255,255,255,.8)!important}
+      .人工號{font-size:15px!important;color:#34506d!important;font-weight:1000!important;margin-top:2px!important}
+      .班標{font-size:12px!important;padding:4px 9px!important;border-radius:10px!important}
+      .人員卡片.選中 .人名,.人員卡片.選中 .人工號{color:#052b53!important}
+      .選定人員卡{display:grid;grid-template-columns:118px 1fr;gap:14px;align-items:center;margin-bottom:12px;padding:12px;border:1.5px solid #b9d7ff;border-radius:20px;background:linear-gradient(135deg,#eef7ff,#ffffff)}
+      .選定人員照片{width:112px;height:112px;border-radius:22px;overflow:hidden;background:#dcecff;border:3px solid #9cc9ff;display:flex;align-items:center;justify-content:center;font-size:42px;font-weight:1000;color:#193654}
+      .選定人員照片 img{width:100%;height:100%;object-fit:cover;display:block}
+      .選定人員姓名{font-size:24px;font-weight:1000;color:#052b53;line-height:1.2}
+      .選定人員資料{font-size:14px;font-weight:900;color:#304a68;margin-top:6px;line-height:1.6}
+      @media(max-width:560px){
+        .頁首{position:sticky!important;top:0!important}
+        .副標{display:none!important}
+        .人員卡片{min-height:210px!important}
+        .頭像圈{width:122px!important;height:122px!important}
+        .選定人員卡{grid-template-columns:104px 1fr;padding:10px}
+        .選定人員照片{width:100px;height:100px;border-radius:18px}
+        .選定人員姓名{font-size:21px}
+      }
+      @media(prefers-color-scheme:dark){
+        .人員卡片,.人員卡片.選中{background:linear-gradient(145deg,#f4f9ff,#ffffff)!important;color:#0b1f36!important}
+        .選定人員卡{background:linear-gradient(135deg,#f4f9ff,#ffffff)!important}
+      }
+    `;
+    document.head.appendChild(style);
+  }
 
   function 正規化資料(raw) {
     const data = raw?.data || raw?.資料 || raw || {};
@@ -146,7 +192,7 @@
     } finally { 關閉載入(); }
   }
 
-  function 重新繪製() { 繪班別(); 繪人員(); 繪產品(); 繪工站(); 繪機台(); 繪不良(); 更新預覽(); }
+  function 重新繪製() { 繪班別(); 繪人員(); 繪選定人員(); 繪產品(); 繪工站(); 繪機台(); 繪不良(); 更新預覽(); }
   function 繪班別() { $('班別').innerHTML = ['早班', '大夜班', '加班'].map(x => `<option>${x}</option>`).join(''); $('班別').value = 狀態.選人?.班別 || '早班'; $('作業日').value = 作業日(); }
 
   function 繪人員() {
@@ -154,10 +200,28 @@
     $('常用列').innerHTML = 狀態.人員.slice(0, 8).map(p => `<button class="常用人員" data-id="${逸出(p.工號)}">${逸出(p.姓名 || p.工號)}</button>`).join('');
     $('常用列').querySelectorAll('button').forEach(b => b.onclick = () => 選人(b.dataset.id));
     const rows = 狀態.人員.filter(p => !q || [p.工號, p.姓名, p.班別].join(' ').toLowerCase().includes(q));
-    $('人員列表').innerHTML = rows.map(p => `<button class="人員卡片 ${班別樣式(p.班別)} ${狀態.選人?.工號 === p.工號 ? '選中' : ''}" data-id="${逸出(p.工號)}"><span class="班標">${逸出(p.班別)}</span><div class="頭像圈">${p.照片 ? 圖片HTML(p.照片, p.姓名) : 逸出((p.姓名 || p.工號 || '?').charAt(0))}</div><div class="人名">${逸出(p.姓名)}</div><div class="人工號">${逸出(p.工號)}</div></button>`).join('') || '<div class="空狀態">找不到人員</div>';
+    $('人員列表').innerHTML = rows.map(p => `<button class="人員卡片 ${班別樣式(p.班別)} ${狀態.選人?.工號 === p.工號 ? '選中' : ''}" data-id="${逸出(p.工號)}"><span class="班標">${逸出(p.班別)}</span><div class="頭像圈">${p.照片 ? 圖片HTML(p.照片, p.姓名, 逸出((p.姓名 || p.工號 || '?').charAt(0))) : 逸出((p.姓名 || p.工號 || '?').charAt(0))}</div><div class="人名">${逸出(p.姓名)}</div><div class="人工號">${逸出(p.工號)}</div></button>`).join('') || '<div class="空狀態">找不到人員</div>';
     $('人員列表').querySelectorAll('.人員卡片').forEach(b => b.onclick = () => 選人(b.dataset.id));
   }
-  function 選人(id) { 狀態.選人 = 狀態.人員.find(p => p.工號 === id) || null; if (狀態.選人) $('班別').value = 狀態.選人.班別 || '早班'; 繪人員(); 更新預覽(); }
+
+  function 繪選定人員() {
+    const box = $('選定人員資訊');
+    if (!box) return;
+    const p = 狀態.選人;
+    if (!p) {
+      box.innerHTML = '<div class="小字" style="margin-bottom:10px">尚未選定人員。請點選上方人員卡片。</div>';
+      return;
+    }
+    box.innerHTML = `<div class="選定人員卡"><div class="選定人員照片">${p.照片 ? 圖片HTML(p.照片, p.姓名, 逸出((p.姓名 || p.工號 || '?').charAt(0))) : 逸出((p.姓名 || p.工號 || '?').charAt(0))}</div><div><div class="選定人員姓名">${逸出(p.姓名 || '未命名')}</div><div class="選定人員資料">工號：${逸出(p.工號 || '')}<br>班別：${逸出(p.班別 || '')}<br>${逸出([p.部門, p.組別, p.職稱].filter(Boolean).join('｜'))}</div></div></div>`;
+  }
+
+  function 選人(id) {
+    狀態.選人 = 狀態.人員.find(p => p.工號 === id) || null;
+    if (狀態.選人) $('班別').value = 狀態.選人.班別 || '早班';
+    繪人員();
+    繪選定人員();
+    更新預覽();
+  }
 
   const 產品Key = g => [g.產品編號, g.客戶品號, g.品名].map(文字).join('|');
   const 群組Key = g => [g.產品編號, g.客戶品號, g.品名, g.工站名稱, g.工序, g.主機台].map(文字).join('|');
@@ -200,6 +264,6 @@
   function 繪照片() { $('照片格').innerHTML = 狀態.照片.map((p, i) => `<div class="照片項"><img src="${p.base64}"><button data-i="${i}">×</button></div>`).join(''); $('照片格').querySelectorAll('button').forEach(b => b.onclick = () => { 狀態.照片.splice(Number(b.dataset.i), 1); 繪照片(); 更新預覽(); }); $('照片計數').textContent = 狀態.照片.length + ' / 12 張照片'; }
 
   function 綁定() { $$('.分頁 button').forEach(b => b.onclick = () => 切頁(b.dataset.tab)); $('搜尋人員').oninput = 繪人員; $('搜尋工件').oninput = 繪產品; $('工站選擇').onchange = () => { 狀態.選工件 = 狀態.群組.find(g => 群組Key(g) === $('工站選擇').value) || null; 繪機台(); 更新預覽(); }; ['今日共做數', '快速不良數', '開始時間', '結束時間', '班別', '是否加班', '加班類型', '異常類型', '責任歸屬', '異常開始時間', '異常結束時間', '照片備註'].forEach(id => $(id).addEventListener('input', 更新預覽)); $('新增不良').onclick = () => { 新增不良(); 更新預覽(); }; $('下一步').onclick = () => { const order = ['人員', '工件', '產出', '品質']; 切頁(order[Math.min(order.indexOf(狀態.頁) + 1, 3)]); }; $('上一步').onclick = () => { const order = ['人員', '工件', '產出', '品質']; 切頁(order[Math.max(order.indexOf(狀態.頁) - 1, 0)]); }; $('送出報工').onclick = () => 狀態.頁 === '品質' ? 送出() : $('下一步').click(); $('重整鈕').onclick = 載入資料; $('全螢幕鈕').onclick = () => document.documentElement.requestFullscreen && document.documentElement.requestFullscreen(); $('拍照鈕').onclick = () => $('照片拍照').click(); $('選圖鈕').onclick = () => $('照片選檔').click(); $('清除照片鈕').onclick = () => { 狀態.照片 = []; 繪照片(); 更新預覽(); }; $('照片拍照').onchange = e => { 讀照片(e.target.files, '拍照'); e.target.value = ''; }; $('照片選檔').onchange = e => { 讀照片(e.target.files, '選圖'); e.target.value = ''; }; }
-  function 初始化() { 綁定(); $('作業日').value = 作業日(); 補時間(); 切頁('人員'); 載入資料(); if ('serviceWorker' in navigator) navigator.serviceWorker.register('./service-worker.js').catch(() => {}); }
+  function 初始化() { 套用正式UI修正(); 綁定(); $('作業日').value = 作業日(); 補時間(); 切頁('人員'); 載入資料(); if ('serviceWorker' in navigator) navigator.serviceWorker.register('./service-worker.js').catch(() => {}); }
   window.addEventListener('load', 初始化);
 })();
