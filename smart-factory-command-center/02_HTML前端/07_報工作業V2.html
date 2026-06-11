@@ -1,1966 +1,2141 @@
 <!doctype html>
 <html lang="zh-Hant">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-    <base target="_top">
-    <title>07_報工作業V2｜智慧製造中央作戰指揮中心</title>
-    <style>
-        :root {
-            --藍: #0b74ff;
-            --深藍: #0753bd;
-            --淺藍: #eaf3ff;
-            --底: #f3f7fc;
-            --卡: #fff;
-            --線: #d8e2f0;
-            --字: #172033;
-            --淡: #6b7688;
-            --紅: #d93025;
-            --綠: #188038;
-            --橘: #f29900;
-            --金: #e6a817;
-            --紫: #7c3aed;
-            --陰: 0 10px 28px rgba(20, 40, 80, .14);
-            --陰強: 0 16px 40px rgba(20, 40, 80, .22);
-            --半徑: 18px;
-            --半徑大: 22px;
-            --半徑小: 14px;
-            --動畫: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
-            --安全底: env(safe-area-inset-bottom, 12px);
-        }
-        * {
-            box-sizing: border-box;
-        }
-        body {
-            margin: 0;
-            background: var(--底);
-            color: var(--字);
-            font-family: 'Inter', 'Noto Sans TC', Arial, 'SF Pro TC', 'PingFang TC', sans-serif;
-            font-size: 15px;
-            line-height: 1.5;
-            -webkit-tap-highlight-color: transparent;
-            -webkit-font-smoothing: antialiased;
-            overscroll-behavior: none;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-        .外框 {
-            max-width: 640px;
-            margin: 0 auto;
-            padding: 10px 12px 110px;
-        }
-        /* 頁首 */
-        .頁首 {
-            position: sticky;
-            top: 0;
-            z-index: 30;
-            margin: -10px -12px 10px;
-            padding: 12px 14px;
-            background: linear-gradient(135deg, #004ecc 0%, #0b74ff 30%, #3da5ff 70%, #48b5ff 100%);
-            color: #fff;
-            box-shadow: var(--陰強);
-            border-radius: 0 0 22px 22px;
-        }
-        .標題列 {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-        }
-        .標題 {
-            font-size: 22px;
-            font-weight: 900;
-            letter-spacing: -0.3px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .標題 .icon {
-            font-size: 26px;
-        }
-        .副標 {
-            font-size: 11px;
-            opacity: .88;
-            margin-top: 2px;
-            line-height: 1.4;
-            letter-spacing: 0.2px;
-        }
-        .圓鈕 {
-            width: 38px;
-            height: 38px;
-            border: 0;
-            border-radius: 14px;
-            background: rgba(255, 255, 255, .2);
-            color: #fff;
-            font-size: 17px;
-            font-weight: 900;
-            cursor: pointer;
-            backdrop-filter: blur(6px);
-            -webkit-backdrop-filter: blur(6px);
-            transition: all var(--動畫);
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .圓鈕:active {
-            background: rgba(255, 255, 255, .38);
-            transform: scale(.92);
-        }
-        .狀態卡 {
-            margin-top: 10px;
-            background: rgba(0, 0, 0, .28);
-            border-radius: 16px;
-            padding: 9px 12px;
-            font-weight: 700;
-            font-size: 12px;
-            line-height: 1.6;
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-            letter-spacing: 0.1px;
-        }
-        /* 分頁導航 */
-        .分頁 {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 7px;
-            margin: 10px 0 8px;
-        }
-        .分頁 button {
-            border: 1.5px solid var(--線);
-            background: #fff;
-            color: #30405b;
-            border-radius: 18px;
-            padding: 11px 4px;
-            font-weight: 800;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all var(--動畫);
-            white-space: nowrap;
-            letter-spacing: -0.1px;
-            line-height: 1.4;
-        }
-        .分頁 button.active {
-            background: var(--藍);
-            color: #fff;
-            border-color: var(--藍);
-            box-shadow: 0 8px 20px rgba(11, 116, 255, .26);
-            transform: translateY(-1px);
-        }
-        .分頁 button:active {
-            transform: scale(.94);
-        }
-        /* 卡片 */
-        .卡片 {
-            background: var(--卡);
-            border: 1px solid var(--線);
-            border-radius: var(--半徑大);
-            padding: 15px;
-            margin: 10px 0;
-            box-shadow: 0 6px 20px rgba(18, 38, 76, .06);
-            transition: box-shadow var(--動畫);
-        }
-        .卡片:hover {
-            box-shadow: 0 8px 26px rgba(18, 38, 76, .1);
-        }
-        .區標 {
-            font-size: 19px;
-            font-weight: 900;
-            margin-bottom: 10px;
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            letter-spacing: -0.2px;
-        }
-        .小字 {
-            font-size: 11px;
-            color: var(--淡);
-            line-height: 1.45;
-            letter-spacing: 0.1px;
-        }
-        label {
-            display: block;
-            font-weight: 800;
-            margin: 10px 0 5px;
-            font-size: 13px;
-            letter-spacing: -0.1px;
-            color: #2a3a54;
-        }
-        .必填:after {
-            content: ' *';
-            color: var(--紅);
-            font-weight: 900;
-        }
-        select,
-        input,
-        textarea {
-            width: 100%;
-            border: 1.5px solid #c9d5e6;
-            border-radius: var(--半徑小);
-            padding: 11px 12px;
-            background: #fff;
-            font-size: 15px;
-            color: var(--字);
-            font-family: inherit;
-            transition: border-color var(--動畫), box-shadow var(--動畫);
-            appearance: auto;
-            -webkit-appearance: auto;
-        }
-        select:focus,
-        input:focus,
-        textarea:focus {
-            outline: none;
-            border-color: var(--藍);
-            box-shadow: 0 0 0 4px rgba(11, 116, 255, .1);
-        }
-        textarea {
-            min-height: 84px;
-            resize: vertical;
-        }
-        input[readonly] {
-            background: #f8fafc;
-            color: #405570;
-            cursor: default;
-        }
-        .兩欄 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 9px;
-        }
-        .三欄 {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 9px;
-        }
-        /* 照片卡 */
-        .照片卡 {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            border: 1.5px dashed #c9d8eb;
-            border-radius: 18px;
-            background: #fbfdff;
-            padding: 12px;
-            min-height: 100px;
-            transition: all var(--動畫);
-        }
-        .照片卡 img {
-            width: 90px;
-            height: 90px;
-            border-radius: 16px;
-            object-fit: cover;
-            background: #e9eef6;
-            flex-shrink: 0;
-        }
-        .無圖 {
-            width: 90px;
-            height: 90px;
-            border-radius: 16px;
-            background: var(--淺藍);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            color: #4a6a8a;
-            font-size: 13px;
-            flex-shrink: 0;
-            text-align: center;
-            line-height: 1.3;
-        }
-        .名稱大 {
-            font-size: 18px;
-            font-weight: 900;
-            letter-spacing: -0.2px;
-            line-height: 1.3;
-        }
-        .工號強調 {
-            display: inline-block;
-            margin-top: 6px;
-            padding: 7px 12px;
-            border-radius: 14px;
-            background: #e8f0fe;
-            color: #174ea6;
-            font-size: 20px;
-            font-weight: 900;
-            letter-spacing: 1px;
-        }
-        /* 機台 */
-        .機台格 {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 9px;
-            margin-top: 4px;
-        }
-        .機台卡 {
-            border: 1.5px solid var(--線);
-            border-radius: 18px;
-            background: #fff;
-            padding: 10px;
-            transition: all var(--動畫);
-            cursor: default;
-        }
-        .機台卡:hover {
-            border-color: #b8cef0;
-            box-shadow: 0 4px 14px rgba(18, 38, 76, .07);
-        }
-        .機台卡 img {
-            width: 100%;
-            height: 96px;
-            border-radius: 14px;
-            object-fit: cover;
-            background: #e9eef6;
-        }
-        .機台卡 .無機圖 {
-            height: 96px;
-            border-radius: 14px;
-            background: #e8eef7;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #627084;
-            font-weight: 800;
-            font-size: 13px;
-        }
-        .機台號 {
-            font-size: 20px;
-            font-weight: 900;
-            color: #0b57d0;
-            margin-top: 6px;
-            letter-spacing: 0.2px;
-        }
-        /* 摘要數字卡 */
-        .摘要 {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-top: 8px;
-        }
-        .數字卡 {
-            background: #f7fbff;
-            border: 1.5px solid #dbe8f7;
-            border-radius: 16px;
-            padding: 10px 8px;
-            text-align: center;
-            transition: all var(--動畫);
-        }
-        .數字卡 b {
-            display: block;
-            font-size: 26px;
-            color: #0b57d0;
-            font-weight: 900;
-            letter-spacing: -0.3px;
-        }
-        .數字卡 span {
-            font-size: 11px;
-            color: var(--淡);
-            font-weight: 600;
-        }
-        /* 預覽 */
-        .預覽 {
-            white-space: pre-wrap;
-            background: #0f172a;
-            color: #e2e8f0;
-            border-radius: 18px;
-            padding: 14px;
-            font-family: 'SF Mono', 'Cascadia Code', 'Consolas', 'Monaco', monospace;
-            font-size: 12px;
-            line-height: 1.6;
-            letter-spacing: 0.1px;
-            overflow-x: auto;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-        /* 頭像卡片網格 */
-        .人員網格 {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            max-height: 420px;
-            overflow-y: auto;
-            padding: 2px;
-            scroll-behavior: smooth;
-        }
-        .人員卡片 {
-            border: 2px solid #e2e8f3;
-            border-radius: 18px;
-            padding: 12px 8px;
-            text-align: center;
-            cursor: pointer;
-            background: #fff;
-            transition: all var(--動畫);
-            position: relative;
-            min-height: 120px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-        }
-        .人員卡片:hover {
-            border-color: #b0cbf0;
-            box-shadow: 0 8px 22px rgba(18, 38, 76, .1);
-            transform: translateY(-2px);
-        }
-        .人員卡片:active {
-            transform: scale(.94);
-            transition: transform 0.08s ease;
-        }
-        .人員卡片.選中 {
-            border-color: var(--藍);
-            background: #eef5ff;
-            box-shadow: 0 0 0 6px rgba(11, 116, 255, .1), 0 8px 22px rgba(11, 116, 255, .16);
-            animation: 脈衝選中 0.5s ease-out;
-        }
-        @keyframes 脈衝選中 {
-            0% {
-                box-shadow: 0 0 0 0px rgba(11, 116, 255, .4), 0 8px 22px rgba(11, 116, 255, .2);
-            }
-            100% {
-                box-shadow: 0 0 0 6px rgba(11, 116, 255, .1), 0 8px 22px rgba(11, 116, 255, .16);
-            }
-        }
-        .人員卡片 .頭像圈 {
-            width: 64px;
-            height: 64px;
-            border-radius: 50%;
-            object-fit: cover;
-            background: #e2e8f3;
-            font-size: 22px;
-            font-weight: 900;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #4a6a8a;
-            flex-shrink: 0;
-        }
-        .人員卡片 .頭像圈 img {
-            width: 64px;
-            height: 64px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-        .人員卡片 .人名 {
-            font-weight: 800;
-            font-size: 13px;
-            line-height: 1.2;
-            color: #1a3048;
-            letter-spacing: -0.1px;
-        }
-        .人員卡片 .人工號 {
-            font-size: 10px;
-            color: var(--淡);
-            font-weight: 600;
-            letter-spacing: 0.3px;
-        }
-        /* 常用人員橫條 */
-        .常用列 {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            padding: 4px 0;
-            align-items: center;
-        }
-        .常用列 .標籤 {
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--淡);
-            white-space: nowrap;
-            flex-shrink: 0;
-        }
-        .常用列 .常用人 {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            background: #fff;
-            border: 1.5px solid #dbe4f2;
-            border-radius: 24px;
-            padding: 6px 12px 6px 6px;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 13px;
-            transition: all var(--動畫);
-            white-space: nowrap;
-        }
-        .常用列 .常用人:active {
-            background: #eef5ff;
-            border-color: var(--藍);
-            transform: scale(.94);
-        }
-        .常用列 .常用人 .迷你頭 {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            object-fit: cover;
-            background: #e2e8f3;
-            flex-shrink: 0;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 900;
-            color: #4a6a8a;
-        }
-        .常用列 .常用人 .迷你頭 img {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-        /* 掃碼按鈕 */
-        .掃碼鈕 {
-            width: 100%;
-            border: 2px dashed #b8cef0;
-            background: #f8fbff;
-            border-radius: 18px;
-            padding: 14px;
-            font-weight: 800;
-            font-size: 15px;
-            cursor: pointer;
-            color: #0b57d0;
-            transition: all var(--動畫);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            letter-spacing: 0.1px;
-        }
-        .掃碼鈕:active {
-            background: #e8f1fd;
-            border-color: var(--藍);
-            transform: scale(.96);
-        }
-        .掃碼鈕 .掃碼icon {
-            font-size: 22px;
-        }
-        /* 掃碼模態 */
-        .模態遮罩 {
-            position: fixed;
-            inset: 0;
-            background: rgba(10, 20, 40, .85);
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            animation: 淡入 .25s ease;
-        }
-        @keyframes 淡入 {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
-        }
-        .模態框 {
-            background: #fff;
-            border-radius: var(--半徑大);
-            padding: 18px;
-            width: 92%;
-            max-width: 460px;
-            box-shadow: var(--陰強);
-            position: relative;
-            animation: 彈入 .3s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        @keyframes 彈入 {
-            from {
-                transform: scale(.85);
-                opacity: 0;
-            }
-            to {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-        .模態框 .視訊區 {
-            width: 100%;
-            aspect-ratio: 4/3;
-            background: #000;
-            border-radius: 14px;
-            overflow: hidden;
-            position: relative;
-            margin-bottom: 10px;
-        }
-        .模態框 video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .模態框 .掃描框 {
-            position: absolute;
-            inset: 15%;
-            border: 3px solid rgba(11, 255, 100, .7);
-            border-radius: 12px;
-            pointer-events: none;
-            animation: 掃描呼吸 2s ease-in-out infinite;
-        }
-        @keyframes 掃描呼吸 {
-            0%,
-            100% {
-                box-shadow: 0 0 0 8px rgba(11, 255, 100, .15);
-            }
-            50% {
-                box-shadow: 0 0 0 20px rgba(11, 255, 100, .05);
-            }
-        }
-        .模態框 .掃描線 {
-            position: absolute;
-            left: 15%;
-            right: 15%;
-            height: 2px;
-            background: #0f0;
-            box-shadow: 0 0 12px #0f0;
-            animation: 掃描移動 1.8s linear infinite;
-            pointer-events: none;
-        }
-        @keyframes 掃描移動 {
-            0% {
-                top: 15%;
-            }
-            50% {
-                top: 85%;
-            }
-            100% {
-                top: 15%;
-            }
-        }
-        .模態按鈕列 {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        .模態按鈕列 button {
-            flex: 1;
-            min-width: 80px;
-            border: 0;
-            border-radius: 14px;
-            padding: 12px;
-            font-weight: 800;
-            font-size: 14px;
-            cursor: pointer;
-        }
-        .模態按鈕列 .關閉鈕 {
-            background: #f1f5f9;
-            color: #475569;
-        }
-        .模態按鈕列 .手輸鈕 {
-            background: #fff;
-            color: #0b57d0;
-            border: 1.5px solid #bfd2ef;
-        }
-        .掃碼輸入手動 {
-            width: 100%;
-            margin-top: 8px;
-            border: 2px solid #ffb700;
-            border-radius: 14px;
-            padding: 12px;
-            font-size: 16px;
-            font-weight: 700;
-            text-align: center;
-            letter-spacing: 2px;
-            background: #fffef5;
-        }
-        .掃碼輸入手動::placeholder {
-            letter-spacing: 0;
-            font-weight: 400;
-            color: #a0aab4;
-        }
-        .隱藏 {
-            display: none !important;
-        }
-        /* 底部 */
-        .底部 {
-            position: fixed;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: 20;
-            background: rgba(245, 248, 252, .96);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-            border-top: 1.5px solid var(--線);
-            padding: 9px 12px calc(9px + var(--安全底));
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 9px;
-        }
-        .主按鈕,
-        .次按鈕 {
-            border: 0;
-            border-radius: 16px;
-            padding: 14px 10px;
-            font-size: 15px;
-            font-weight: 900;
-            cursor: pointer;
-            letter-spacing: 0.1px;
-            transition: all var(--動畫);
-        }
-        .主按鈕 {
-            background: var(--藍);
-            color: #fff;
-            box-shadow: 0 6px 18px rgba(11, 116, 255, .3);
-        }
-        .主按鈕:active {
-            transform: scale(.94);
-            box-shadow: 0 3px 10px rgba(11, 116, 255, .2);
-        }
-        .主按鈕:disabled {
-            background: #9ebee6;
-            box-shadow: none;
-            cursor: not-allowed;
-        }
-        .次按鈕 {
-            background: #fff;
-            color: #0b57d0;
-            border: 1.5px solid #bfd2ef;
-        }
-        .次按鈕:active {
-            background: #f5f8fd;
-            transform: scale(.94);
-        }
-        /* 浮訊 */
-        .浮訊 {
-            position: fixed;
-            left: 12px;
-            right: 12px;
-            bottom: 90px;
-            background: #101827;
-            color: #fff;
-            border-radius: 18px;
-            padding: 12px 14px;
-            box-shadow: var(--陰強);
-            z-index: 40;
-            font-weight: 700;
-            font-size: 13px;
-            text-align: center;
-            animation: 浮上 .35s cubic-bezier(0.34, 1.3, 0.64, 1);
-            pointer-events: none;
-        }
-        @keyframes 浮上 {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        /* 載入遮罩 */
-        .載入 {
-            position: fixed;
-            inset: 0;
-            background: rgba(245, 248, 252, .9);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 50;
-            backdrop-filter: blur(2px);
-            -webkit-backdrop-filter: blur(2px);
-        }
-        .載入 div {
-            background: #fff;
-            border-radius: 22px;
-            padding: 22px 28px;
-            box-shadow: var(--陰強);
-            font-weight: 900;
-            font-size: 15px;
-            letter-spacing: 0.1px;
-            animation: 彈入 .35s cubic-bezier(0.34, 1.3, 0.64, 1);
-        }
-        /* 照片上傳預覽 */
-        .照片上傳預覽 {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 7px;
-            margin-top: 6px;
-        }
-        .照片上傳預覽 img {
-            width: 100%;
-            height: 88px;
-            object-fit: cover;
-            border-radius: 14px;
-            border: 1.5px solid var(--線);
-            transition: all var(--動畫);
-        }
-        .照片上傳預覽 img:hover {
-            border-color: var(--藍);
-            box-shadow: 0 4px 12px rgba(11, 116, 255, .15);
-        }
-        .搜尋框 {
-            margin-bottom: 6px;
-            border-radius: 24px;
-            padding: 11px 16px;
-            border: 2px solid #d8e2f0;
-            font-size: 14px;
-            background: #fbfdff;
-            transition: all var(--動畫);
-        }
-        .搜尋框:focus {
-            border-color: var(--藍);
-            box-shadow: 0 0 0 5px rgba(11, 116, 255, .07);
-        }
-        /* 不良記錄同步提示 */
-        .不良同步標記 {
-            display: inline-block;
-            background: #fff3cd;
-            color: #856404;
-            border-radius: 10px;
-            padding: 3px 10px;
-            font-size: 11px;
-            font-weight: 700;
-            margin-left: 4px;
-            animation: 閃爍 1.2s ease-in-out infinite;
-        }
-        @keyframes 閃爍 {
-            0%,
-            100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: .5;
-            }
-        }
-        /* 響應式 */
-        @media(max-width:430px) {
-            .兩欄,
-            .三欄 {
-                grid-template-columns: 1fr;
-            }
-            .機台格 {
-                grid-template-columns: 1fr;
-            }
-            .標題 {
-                font-size: 18px;
-            }
-            .摘要 {
-                grid-template-columns: 1fr 1fr;
-            }
-            .人員網格 {
-                grid-template-columns: repeat(2, 1fr);
-                max-height: 340px;
-            }
-            .人員卡片 .頭像圈 {
-                width: 48px;
-                height: 48px;
-                font-size: 17px;
-            }
-            .人員卡片 .頭像圈 img {
-                width: 48px;
-                height: 48px;
-            }
-            .人員卡片 .人名 {
-                font-size: 11px;
-            }
-            .人員卡片 .人工號 {
-                font-size: 9px;
-            }
-            .人員卡片 {
-                padding: 8px 4px;
-                min-height: 95px;
-                border-radius: 14px;
-            }
-            .模態框 {
-                width: 96%;
-                padding: 12px;
-            }
-            .照片卡 img,
-            .無圖 {
-                width: 66px;
-                height: 66px;
-            }
-            .名稱大 {
-                font-size: 15px;
-            }
-            .常用列 .常用人 {
-                font-size: 11px;
-                padding: 4px 8px 4px 4px;
-                gap: 4px;
-            }
-            .常用列 .常用人 .迷你頭 {
-                width: 24px;
-                height: 24px;
-                font-size: 10px;
-            }
-        }
-        @media(min-width:431px) and (max-width:768px) {
-            .人員網格 {
-                grid-template-columns: repeat(3, 1fr);
-                max-height: 380px;
-            }
-        }
-        @media(min-width:769px) {
-            .人員網格 {
-                grid-template-columns: repeat(4, 1fr);
-                max-height: 460px;
-            }
-            .外框 {
-                max-width: 700px;
-            }
-            .機台格 {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<base target="_top">
+<title>07_報工作業V｜智慧製造中央作戰指揮中心</title>
+<style>
+/* ═══════════════════════════════════════
+   CSS VARIABLES & RESET
+═══════════════════════════════════════ */
+:root {
+  --藍:      #0b74ff;
+  --深藍:    #0553c7;
+  --淺藍:    #eaf3ff;
+  --底:      #f0f5fc;
+  --卡:      #ffffff;
+  --線:      #d4e0f0;
+  --字:      #14243a;
+  --淡:      #627898;
+  --紅:      #d93025;
+  --綠:      #1a8f3a;
+  --橘:      #f29900;
+  --金:      #e6a817;
+  --紫:      #7c3aed;
+  --早班色:  #1a6fdb;
+  --中班色:  #c07a00;
+  --夜班色:  #5a3fb5;
+  --陰:      0 8px 24px rgba(14,30,70,.12);
+  --陰強:    0 16px 44px rgba(14,30,70,.20);
+  --半徑:    18px;
+  --半徑大:  24px;
+  --半徑小:  12px;
+  --動:      0.22s cubic-bezier(.4,0,.2,1);
+  --安全底:  env(safe-area-inset-bottom, 12px);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--底);
+  color:var(--字);
+  font-family:'Inter','Noto Sans TC','PingFang TC','SF Pro TC',Arial,sans-serif;
+  font-size:15px;line-height:1.55;
+  -webkit-tap-highlight-color:transparent;
+  -webkit-font-smoothing:antialiased;
+  overscroll-behavior:none;
+  user-select:none;-webkit-user-select:none;
+}
+
+/* ═══════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════ */
+.外框{max-width:680px;margin:0 auto;padding:10px 12px 130px;}
+
+/* ═══════════════════════════════════════
+   HEADER
+═══════════════════════════════════════ */
+.頁首{
+  position:sticky;top:0;z-index:30;
+  margin:-10px -12px 12px;
+  padding:12px 14px 10px;
+  background:linear-gradient(135deg,#003fa3 0%,#0b74ff 40%,#38a8ff 80%,#50caff 100%);
+  color:#fff;
+  box-shadow:var(--陰強);
+  border-radius:0 0 26px 26px;
+}
+.標題列{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.標題{font-size:21px;font-weight:900;letter-spacing:-.4px;display:flex;align-items:center;gap:8px;}
+.標題 .icon{font-size:25px;}
+.副標{font-size:11px;opacity:.85;margin-top:3px;line-height:1.45;letter-spacing:.2px;}
+.頭部右列{display:flex;gap:7px;align-items:center;}
+.圓鈕{
+  width:38px;height:38px;border:0;border-radius:14px;
+  background:rgba(255,255,255,.22);color:#fff;font-size:17px;font-weight:900;
+  cursor:pointer;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  transition:all var(--動);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.圓鈕:active{background:rgba(255,255,255,.4);transform:scale(.9);}
+.全螢幕鈕{font-size:15px;}
+.狀態卡{
+  margin-top:9px;background:rgba(0,0,0,.26);
+  border-radius:14px;padding:8px 12px;
+  font-weight:700;font-size:11.5px;line-height:1.6;
+  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+  letter-spacing:.1px;
+}
+
+/* ═══════════════════════════════════════
+   TAB NAV
+═══════════════════════════════════════ */
+.分頁{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:10px 0 8px;}
+.分頁 button{
+  border:1.5px solid var(--線);background:#fff;color:#384e6e;
+  border-radius:18px;padding:10px 4px;
+  font-weight:800;font-size:12.5px;cursor:pointer;
+  transition:all var(--動);white-space:nowrap;letter-spacing:-.1px;line-height:1.4;
+}
+.分頁 button.active{
+  background:var(--藍);color:#fff;border-color:var(--藍);
+  box-shadow:0 6px 18px rgba(11,116,255,.28);transform:translateY(-1px);
+}
+.分頁 button:active{transform:scale(.93);}
+
+/* ═══════════════════════════════════════
+   CARD
+═══════════════════════════════════════ */
+.卡片{
+  background:var(--卡);border:1px solid var(--線);
+  border-radius:var(--半徑大);padding:16px;margin:10px 0;
+  box-shadow:0 4px 18px rgba(16,34,72,.07);
+  transition:box-shadow var(--動);
+}
+.卡片:hover{box-shadow:0 8px 28px rgba(16,34,72,.11);}
+.區標{font-size:18px;font-weight:900;margin-bottom:11px;display:flex;gap:8px;align-items:center;letter-spacing:-.2px;}
+.區標 .en{font-size:12px;color:var(--淡);font-weight:600;}
+.小字{font-size:11px;color:var(--淡);line-height:1.45;letter-spacing:.1px;}
+
+label{display:block;font-weight:800;margin:11px 0 4px;font-size:13px;letter-spacing:-.1px;color:#253650;}
+.必填:after{content:' *';color:var(--紅);font-weight:900;}
+select,input,textarea{
+  width:100%;border:1.5px solid #c4d4e8;border-radius:var(--半徑小);
+  padding:11px 13px;background:#fff;font-size:15px;color:var(--字);
+  font-family:inherit;transition:border-color var(--動),box-shadow var(--動);
+  appearance:auto;-webkit-appearance:auto;
+}
+select:focus,input:focus,textarea:focus{
+  outline:none;border-color:var(--藍);box-shadow:0 0 0 4px rgba(11,116,255,.1);
+}
+textarea{min-height:82px;resize:vertical;}
+input[readonly]{background:#f6f9fc;color:#3e5570;cursor:default;}
+.兩欄{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.三欄{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;}
+.隱藏{display:none!important;}
+
+/* ═══════════════════════════════════════
+   SCAN BUTTON
+═══════════════════════════════════════ */
+.掃碼鈕{
+  width:100%;border:2px dashed #aecaee;background:#f6fbff;
+  border-radius:18px;padding:14px;font-weight:800;font-size:15px;
+  cursor:pointer;color:#0b57d0;transition:all var(--動);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  letter-spacing:.1px;
+}
+.掃碼鈕:active{background:#e4f0fd;border-color:var(--藍);transform:scale(.96);}
+.掃碼鈕 .icon{font-size:22px;}
+
+/* ═══════════════════════════════════════
+   PERSON SHIFT COLORS
+═══════════════════════════════════════ */
+.班早{border-color:#3a8ef0!important;background:linear-gradient(145deg,#edf5ff,#fff)!important;}
+.班早 .班標{background:#1a6fdb;color:#fff;}
+.班中{border-color:#e8a500!important;background:linear-gradient(145deg,#fffbee,#fff)!important;}
+.班中 .班標{background:#c07a00;color:#fff;}
+.班夜{border-color:#8b6cf5!important;background:linear-gradient(145deg,#f3efff,#fff)!important;}
+.班夜 .班標{background:#5a3fb5;color:#fff;}
+
+/* ═══════════════════════════════════════
+   PERSON CARD GRID (強化選中效果)
+═══════════════════════════════════════ */
+.搜尋框{
+  margin-bottom:7px;border-radius:24px;padding:11px 16px;
+  border:1.5px solid #d0dff0;font-size:14px;background:#fbfdff;
+  transition:all var(--動);
+}
+.搜尋框:focus{border-color:var(--藍);box-shadow:0 0 0 5px rgba(11,116,255,.07);}
+
+.人員網格{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:9px;max-height:440px;overflow-y:auto;
+  padding:2px;scroll-behavior:smooth;
+}
+.人員卡片{
+  border:2px solid #dde8f5;border-radius:18px;
+  padding:13px 8px;text-align:center;cursor:pointer;
+  background:#fff;transition:all var(--動);
+  position:relative;min-height:130px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+}
+.人員卡片:hover{border-color:#a8c8f0;box-shadow:0 6px 20px rgba(16,34,72,.1);transform:translateY(-2px);}
+.人員卡片:active{transform:scale(.93);}
+
+/* 選中狀態：黑白配色 + 已選取標記 */
+.人員卡片.選中{
+  background:#2c2c2c!important;border-color:#ffffff!important;
+  box-shadow:0 0 0 4px rgba(255,255,255,.25),0 8px 22px rgba(0,0,0,.3)!important;
+  color:#fff;
+}
+.人員卡片.選中 .人名{color:#fff;}
+.人員卡片.選中 .人工號{color:#ccc;}
+.人員卡片.選中 .頭像圈{border-color:#fff;}
+.選取標記{
+  display:none;
+  position:absolute;top:5px;left:50%;transform:translateX(-50%);
+  background:#fff;color:#000;border-radius:10px;padding:2px 8px;
+  font-size:10px;font-weight:900;letter-spacing:.5px;
+  white-space:nowrap;
+  z-index:5;
+}
+.人員卡片.選中 .選取標記{display:block;}
+
+.頭像圈{
+  width:80px;height:80px;border-radius:50%;overflow:hidden;
+  background:#dce8f5;font-size:30px;font-weight:900;
+  display:flex;align-items:center;justify-content:center;
+  color:#4a6a8a;flex-shrink:0;border:2.5px solid #c8d8ee;
+}
+.頭像圈 img{width:100%;height:100%;border-radius:50%;object-fit:cover;}
+.人名{font-weight:800;font-size:13px;line-height:1.2;color:#1a3048;letter-spacing:-.1px;}
+.人工號{font-size:10px;color:var(--淡);font-weight:600;letter-spacing:.3px;}
+.班標{
+  position:absolute;top:7px;right:7px;
+  font-size:9px;font-weight:800;padding:2px 7px;
+  border-radius:8px;letter-spacing:.2px;
+}
+
+/* ═══════════════════════════════════════
+   QUICK PERSON BAR
+═══════════════════════════════════════ */
+.常用列{display:flex;gap:7px;flex-wrap:wrap;padding:4px 0;align-items:center;margin-bottom:4px;}
+.常用列 .標籤{font-size:11px;font-weight:700;color:var(--淡);white-space:nowrap;flex-shrink:0;}
+.常用人{
+  display:flex;align-items:center;gap:5px;
+  background:#fff;border:1.5px solid #d8e4f2;
+  border-radius:22px;padding:5px 11px 5px 5px;
+  cursor:pointer;font-weight:700;font-size:12.5px;
+  transition:all var(--動);white-space:nowrap;
+}
+.常用人:active{background:#eef5ff;border-color:var(--藍);transform:scale(.93);}
+.迷你頭{
+  width:28px;height:28px;border-radius:50%;overflow:hidden;
+  background:#dce8f5;flex-shrink:0;font-size:11px;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:900;color:#4a6a8a;
+}
+.迷你頭 img{width:28px;height:28px;border-radius:50%;object-fit:cover;}
+
+/* ═══════════════════════════════════════
+   PRODUCT CARD GRID (圖片滿版)
+═══════════════════════════════════════ */
+.產品網格{
+  display:grid;grid-template-columns:repeat(2,1fr);
+  gap:9px;max-height:380px;overflow-y:auto;padding:2px;
+}
+.產品卡片{
+  border:2px solid #dde8f5;border-radius:18px;overflow:hidden;
+  cursor:pointer;background:#fff;transition:all var(--動);
+  display:flex;flex-direction:column;
+}
+.產品卡片:hover{border-color:#a8c8f0;box-shadow:0 5px 16px rgba(16,34,72,.1);transform:translateY(-2px);}
+.產品卡片:active{transform:scale(.93);}
+.產品卡片.選中{
+  border-color:var(--藍)!important;background:#eef5ff!important;
+  box-shadow:0 0 0 5px rgba(11,116,255,.12),0 7px 20px rgba(11,116,255,.16)!important;
+}
+.產品縮圖{
+  width:100%;aspect-ratio:4/3;overflow:hidden;
+  background:#e8eef8;display:flex;align-items:center;justify-content:center;
+  color:#6a80a0;font-size:13px;font-weight:700;
+}
+.產品縮圖 img{width:100%;height:100%;object-fit:cover;}
+.產品名稱大{font-weight:900;font-size:14px;text-align:center;line-height:1.3;color:#1a2e48;letter-spacing:-.1px;padding:8px 4px 4px;}
+.產品編號小{font-size:11px;color:var(--淡);font-weight:600;text-align:center;padding-bottom:8px;}
+
+/* ═══════════════════════════════════════
+   MACHINE CARDS
+═══════════════════════════════════════ */
+.機台格{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-top:6px;}
+.機台卡{border:1.5px solid var(--線);border-radius:16px;background:#fff;padding:10px;transition:all var(--動);}
+.機台卡:hover{border-color:#aec8ec;box-shadow:0 4px 14px rgba(16,34,72,.08);}
+.機台卡 img{width:100%;height:90px;border-radius:12px;object-fit:cover;background:#e8eef8;}
+.無機圖{height:90px;border-radius:12px;background:#e8eef8;display:flex;align-items:center;justify-content:center;color:#627084;font-weight:800;font-size:13px;}
+.機台號{font-size:19px;font-weight:900;color:#0b57d0;margin-top:5px;letter-spacing:.2px;}
+
+/* ═══════════════════════════════════════
+   SUMMARY STATS
+═══════════════════════════════════════ */
+.摘要{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:9px;}
+.數字卡{
+  background:#f5faff;border:1.5px solid #d8eaf8;
+  border-radius:16px;padding:10px 8px;text-align:center;transition:all var(--動);
+}
+.數字卡 b{display:block;font-size:25px;color:#0b57d0;font-weight:900;letter-spacing:-.3px;}
+.數字卡 span{font-size:11px;color:var(--淡);font-weight:600;}
+
+/* ═══════════════════════════════════════
+   DEFECT ALLOCATION (取代原有不良行列)
+═══════════════════════════════════════ */
+.不良分配行{
+  display:flex;align-items:center;gap:8px;
+  background:#fff8f0;border:1.5px solid #f5d9b2;
+  border-radius:14px;padding:9px 12px;margin-bottom:8px;
+}
+.不良分配行 select,.不良分配行 input{
+  flex:1;min-width:0;border-color:#e8c99a;font-size:14px;padding:10px;
+  border-radius:10px;
+}
+.不良分配行 .數量欄{width:90px;flex-shrink:0;}
+.不良分配行 .刪除分配{
+  width:26px;height:26px;border:0;border-radius:9px;
+  background:#fde8e8;color:var(--紅);font-size:14px;font-weight:900;
+  cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+}
+.添加分配鈕{
+  width:100%;border:2px dashed #f0c080;background:#fff9f0;
+  border-radius:14px;padding:12px;font-weight:800;font-size:14px;
+  cursor:pointer;color:#9a6000;transition:all var(--動);
+  display:flex;align-items:center;justify-content:center;gap:7px;
+}
+.添加分配鈕:active{background:#fef0d8;border-color:var(--金);transform:scale(.96);}
+.分配摘要{
+  margin-top:10px;padding:10px;border-radius:14px;
+  background:#f0f9ff;border:1px solid #b8d8f0;
+  font-weight:700;font-size:14px;text-align:center;
+}
+
+/* ═══════════════════════════════════════
+   PHOTO UPLOAD AREA
+═══════════════════════════════════════ */
+.照片區{margin-top:6px;}
+.照片工具列{display:flex;gap:8px;margin-bottom:8px;}
+.照片工具鈕{
+  flex:1;border:1.5px solid var(--線);background:#fff;
+  border-radius:14px;padding:10px 8px;font-weight:800;font-size:13px;
+  cursor:pointer;color:#1a3a60;transition:all var(--動);
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.照片工具鈕:active{background:#eef5ff;border-color:var(--藍);transform:scale(.95);}
+.照片工具鈕.危險{color:var(--紅);border-color:#f0c0c0;}
+.照片工具鈕.危險:active{background:#fef0f0;border-color:var(--紅);}
+
+.照片格{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:7px;
+  max-height:360px;overflow-y:auto;
+}
+.照片項目{
+  position:relative;border-radius:14px;overflow:hidden;
+  border:1.5px solid var(--線);aspect-ratio:1/1;
+  background:#e8eef8;cursor:pointer;transition:all var(--動);
+}
+.照片項目:hover{border-color:var(--藍);transform:scale(1.03);}
+.照片項目 img{width:100%;height:100%;object-fit:cover;display:block;}
+.照片項目 .刪除照片{
+  position:absolute;top:5px;right:5px;width:24px;height:24px;
+  background:rgba(0,0,0,.6);color:#fff;border:0;border-radius:8px;
+  font-size:13px;font-weight:900;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+.照片項目 .刪除照片:active{background:rgba(180,0,0,.8);transform:scale(.88);}
+.照片項目 .備註覆層{
+  position:absolute;bottom:0;left:0;right:0;
+  background:rgba(0,0,0,.55);color:#fff;
+  font-size:10px;font-weight:700;padding:3px 5px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.照片備註模態{
+  position:fixed;inset:0;background:rgba(10,20,40,.85);
+  z-index:120;display:flex;align-items:center;justify-content:center;
+  animation:淡入 .25s ease;
+}
+.照片備註框{
+  background:#fff;border-radius:22px;padding:20px;width:88%;max-width:400px;
+  box-shadow:var(--陰強);animation:彈入 .3s cubic-bezier(.34,1.56,.64,1);
+}
+.照片備註框 img{width:100%;max-height:200px;object-fit:contain;border-radius:14px;margin-bottom:12px;}
+.照片備註框 textarea{min-height:70px;border-radius:12px;font-size:14px;}
+.照片備註框 .鈕列{display:flex;gap:8px;margin-top:10px;}
+.照片備註框 .鈕列 button{
+  flex:1;border:0;border-radius:12px;padding:11px;
+  font-weight:800;font-size:14px;cursor:pointer;transition:all var(--動);
+}
+.照片備註框 .鈕列 .確認{background:var(--藍);color:#fff;}
+.照片備註框 .鈕列 .取消{background:#f1f5f9;color:#475569;}
+
+/* ═══════════════════════════════════════
+   MODAL (QR / Barcode Scan)
+═══════════════════════════════════════ */
+.模態遮罩{
+  position:fixed;inset:0;background:rgba(10,20,40,.88);
+  z-index:100;display:flex;align-items:center;justify-content:center;
+  animation:淡入 .25s ease;
+}
+@keyframes 淡入{from{opacity:0;}to{opacity:1;}}
+.模態框{
+  background:#fff;border-radius:var(--半徑大);padding:18px;
+  width:92%;max-width:460px;box-shadow:var(--陰強);
+  position:relative;animation:彈入 .3s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes 彈入{from{transform:scale(.85);opacity:0;}to{transform:scale(1);opacity:1;}}
+.視訊區{
+  width:100%;aspect-ratio:4/3;background:#000;border-radius:14px;
+  overflow:hidden;position:relative;margin-bottom:10px;
+}
+.視訊區 video{width:100%;height:100%;object-fit:cover;}
+.掃描框{
+  position:absolute;inset:15%;border:3px solid rgba(11,255,100,.75);
+  border-radius:12px;pointer-events:none;
+  animation:掃描呼吸 2s ease-in-out infinite;
+}
+@keyframes 掃描呼吸{
+  0%,100%{box-shadow:0 0 0 8px rgba(11,255,100,.15);}
+  50%{box-shadow:0 0 0 22px rgba(11,255,100,.05);}
+}
+.掃描線{
+  position:absolute;left:15%;right:15%;height:2px;
+  background:#0f0;box-shadow:0 0 12px #0f0;
+  animation:掃描移動 1.8s linear infinite;pointer-events:none;
+}
+@keyframes 掃描移動{0%{top:15%;}50%{top:85%;}100%{top:15%;}}
+.模態按鈕列{display:flex;gap:8px;flex-wrap:wrap;}
+.模態按鈕列 button{
+  flex:1;min-width:80px;border:0;border-radius:14px;
+  padding:12px;font-weight:800;font-size:14px;cursor:pointer;transition:all var(--動);
+}
+.關閉鈕{background:#f1f5f9;color:#475569;}
+.手輸鈕{background:#fff;color:#0b57d0;border:1.5px solid #bdd0ef!important;}
+.掃碼輸入手動{
+  width:100%;margin-top:8px;border:2px solid #ffb700;
+  border-radius:14px;padding:12px;font-size:16px;font-weight:700;
+  text-align:center;letter-spacing:2px;background:#fffef5;
+}
+.掃碼輸入手動::placeholder{letter-spacing:0;font-weight:400;color:#a0aab4;}
+
+/* ═══════════════════════════════════════
+   PREVIEW CODE BLOCK
+═══════════════════════════════════════ */
+.預覽{
+  white-space:pre-wrap;background:#0e1a2e;color:#c8daf0;
+  border-radius:18px;padding:14px;
+  font-family:'SF Mono','Cascadia Code','Consolas','Monaco',monospace;
+  font-size:12px;line-height:1.65;letter-spacing:.1px;
+  overflow-x:auto;max-height:320px;overflow-y:auto;
+}
+
+/* ═══════════════════════════════════════
+   ANOMALY TIME RANGE
+═══════════════════════════════════════ */
+.異常時間區{
+  background:#fff8f0;border:1.5px solid #f5d9b2;
+  border-radius:16px;padding:12px;margin-top:4px;
+}
+.異常時間區 .區標{font-size:15px;margin-bottom:7px;}
+
+/* ═══════════════════════════════════════
+   DEFECT SYNC TAG
+═══════════════════════════════════════ */
+.不良同步標記{
+  display:inline-block;background:#fff3cd;color:#856404;
+  border-radius:10px;padding:3px 10px;font-size:11px;font-weight:700;
+  margin-left:4px;animation:閃爍 1.2s ease-in-out infinite;
+}
+@keyframes 閃爍{0%,100%{opacity:1;}50%{opacity:.5;}}
+
+/* ═══════════════════════════════════════
+   BOTTOM BUTTONS
+═══════════════════════════════════════ */
+.底部{
+  position:fixed;left:0;right:0;bottom:0;z-index:20;
+  background:rgba(240,245,252,.97);backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);border-top:1.5px solid var(--線);
+  padding:9px 12px calc(9px + var(--安全底));
+  display:grid;grid-template-columns:1fr 1.6fr;gap:9px;
+}
+.主按鈕,.次按鈕{
+  border:0;border-radius:18px;padding:15px 10px;
+  font-size:15px;font-weight:900;cursor:pointer;
+  letter-spacing:.1px;transition:all var(--動);
+}
+.主按鈕{
+  background:var(--藍);color:#fff;
+  box-shadow:0 7px 20px rgba(11,116,255,.32);
+  position:relative;overflow:hidden;
+}
+.主按鈕::after{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.25) 0%,transparent 70%);
+  opacity:0;transition:opacity .3s;
+}
+.主按鈕:hover::after{opacity:1;}
+.主按鈕:active{transform:scale(.93);box-shadow:0 3px 10px rgba(11,116,255,.22);}
+.主按鈕:disabled{background:#9dbee8;box-shadow:none;cursor:not-allowed;}
+.主按鈕.送出中{animation:送出脈衝 .8s ease-in-out infinite;}
+@keyframes 送出脈衝{
+  0%,100%{box-shadow:0 7px 20px rgba(11,116,255,.32);}
+  50%{box-shadow:0 7px 32px rgba(11,116,255,.6);}
+}
+.次按鈕{background:#fff;color:#0b57d0;border:1.5px solid #bdd0ef;}
+.次按鈕:active{background:#f3f8fd;transform:scale(.93);}
+
+/* ═══════════════════════════════════════
+   SPINNER OVERLAY ON SUBMIT
+═══════════════════════════════════════ */
+.送出遮罩{
+  position:fixed;inset:0;background:rgba(10,20,40,.75);
+  z-index:200;display:flex;align-items:center;justify-content:center;
+  animation:淡入 .2s ease;
+}
+.送出卡{
+  background:#fff;border-radius:24px;padding:28px 32px;
+  box-shadow:var(--陰強);text-align:center;
+  animation:彈入 .35s cubic-bezier(.34,1.3,.64,1);min-width:180px;
+}
+.旋轉圈{
+  width:56px;height:56px;border-radius:50%;
+  border:5px solid #d8eaff;border-top-color:var(--藍);
+  animation:旋轉 .9s linear infinite;margin:0 auto 14px;
+}
+@keyframes 旋轉{to{transform:rotate(360deg);}}
+.送出卡 p{font-weight:800;font-size:15px;color:#1a3060;margin:0;}
+.送出卡 .副p{font-size:12px;color:var(--淡);margin-top:4px;}
+
+/* ═══════════════════════════════════════
+   TOAST
+═══════════════════════════════════════ */
+.浮訊{
+  position:fixed;left:12px;right:12px;bottom:96px;
+  background:#101827;color:#fff;border-radius:18px;
+  padding:12px 15px;box-shadow:var(--陰強);
+  z-index:40;font-weight:700;font-size:13px;text-align:center;
+  animation:浮上 .35s cubic-bezier(.34,1.3,.64,1);pointer-events:none;
+}
+@keyframes 浮上{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+
+/* ═══════════════════════════════════════
+   ROAR NOTIFICATION
+═══════════════════════════════════════ */
+.Roar容器{
+  position:fixed;top:14px;right:12px;z-index:50;
+  display:flex;flex-direction:column;gap:8px;pointer-events:none;
+  max-width:300px;
+}
+.Roar通知{
+  background:#fff;border-radius:16px;padding:12px 14px;
+  box-shadow:0 8px 28px rgba(14,30,70,.18);
+  border-left:4px solid var(--藍);pointer-events:all;
+  animation:Roar入場 .35s cubic-bezier(.34,1.56,.64,1);
+  display:flex;align-items:flex-start;gap:10px;
+}
+.Roar通知.成功{border-left-color:var(--綠);}
+.Roar通知.錯誤{border-left-color:var(--紅);}
+.Roar通知.警告{border-left-color:var(--橘);}
+@keyframes Roar入場{from{opacity:0;transform:translateX(40px);}to{opacity:1;transform:translateX(0);}}
+.Roar通知 .Roar圖示{font-size:18px;flex-shrink:0;margin-top:1px;}
+.Roar通知 .Roar文字 .標{font-weight:800;font-size:13px;line-height:1.3;color:#1a2e48;}
+.Roar通知 .Roar文字 .副{font-size:11px;color:var(--淡);margin-top:2px;}
+.Roar通知 .Roar關閉{
+  width:22px;height:22px;border:0;border-radius:7px;
+  background:#f0f5fb;color:#627898;font-size:11px;cursor:pointer;
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  transition:all var(--動);margin-left:auto;
+}
+.Roar通知 .Roar關閉:active{background:#e0eaf8;transform:scale(.88);}
+
+/* ═══════════════════════════════════════
+   LOADING OVERLAY
+═══════════════════════════════════════ */
+.載入{
+  position:fixed;inset:0;background:rgba(240,245,252,.92);
+  display:flex;align-items:center;justify-content:center;
+  z-index:50;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+}
+.載入 div{
+  background:#fff;border-radius:22px;padding:22px 30px;
+  box-shadow:var(--陰強);font-weight:900;font-size:15px;
+  letter-spacing:.1px;text-align:center;
+  animation:彈入 .35s cubic-bezier(.34,1.3,.64,1);
+}
+.載入 .mini旋轉{
+  width:36px;height:36px;border-radius:50%;
+  border:4px solid #d8eaff;border-top-color:var(--藍);
+  animation:旋轉 .9s linear infinite;margin:0 auto 10px;
+}
+
+/* ═══════════════════════════════════════
+   PHOTO INFO CARD
+═══════════════════════════════════════ */
+.照片卡{
+  display:flex;align-items:center;gap:13px;
+  border:1.5px dashed #c4d8ec;border-radius:18px;
+  background:#f8fbff;padding:12px;min-height:98px;
+  transition:all var(--動);
+}
+.照片卡 img{width:84px;height:84px;border-radius:15px;object-fit:cover;background:#e4edf7;flex-shrink:0;}
+.無圖{
+  width:84px;height:84px;border-radius:15px;background:var(--淺藍);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;color:#4a6a8a;font-size:12.5px;flex-shrink:0;
+  text-align:center;line-height:1.3;
+}
+.名稱大{font-size:18px;font-weight:900;letter-spacing:-.2px;line-height:1.3;}
+.工號強調{
+  display:inline-block;margin-top:7px;padding:7px 12px;
+  border-radius:14px;background:#e8f0fe;color:#174ea6;
+  font-size:20px;font-weight:900;letter-spacing:1px;
+}
+
+/* ═══════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════ */
+@media(max-width:430px){
+  .兩欄,.三欄{grid-template-columns:1fr;}
+  .機台格{grid-template-columns:1fr;}
+  .標題{font-size:17px;}
+  .摘要{grid-template-columns:1fr 1fr;}
+  .人員網格{grid-template-columns:repeat(2,1fr);max-height:360px;}
+  .頭像圈{width:64px;height:64px;font-size:24px;}
+  .頭像圈 img{width:64px;height:64px;}
+  .人員卡片{min-height:105px;border-radius:14px;padding:8px 5px;}
+  .人名{font-size:11px;}
+  .人工號{font-size:9px;}
+  .產品網格{grid-template-columns:1fr;}
+  .照片格{grid-template-columns:repeat(3,1fr);}
+  .模態框{width:96%;padding:12px;}
+  .不良分配行{flex-wrap:wrap;}
+  .不良分配行 .數量欄{width:70px;}
+}
+@media(min-width:431px) and (max-width:768px){
+  .人員網格{grid-template-columns:repeat(3,1fr);max-height:400px;}
+  .產品網格{grid-template-columns:repeat(2,1fr);}
+}
+@media(min-width:769px){
+  .外框{max-width:720px;}
+  .人員網格{grid-template-columns:repeat(4,1fr);max-height:480px;}
+  .機台格{grid-template-columns:repeat(3,1fr);}
+  .產品網格{grid-template-columns:repeat(3,1fr);}
+}
+</style>
 </head>
 <body>
-    <!-- 載入遮罩 -->
-    <div id="載入" class="載入"><div>🔄 資料讀取中，請稍候...</div></div>
 
-    <!-- 掃碼模態 -->
-    <div id="掃碼模態" class="模態遮罩 隱藏">
-        <div class="模態框">
-            <div style="font-weight:900;font-size:17px;margin-bottom:8px;text-align:center;">📷 掃描工牌條碼 / QR Code</div>
-            <div class="視訊區" id="視訊區">
-                <video id="掃碼視訊" autoplay playsinline muted></video>
-                <div class="掃描框"></div>
-                <div class="掃描線"></div>
-            </div>
-            <div style="text-align:center;font-size:11px;color:var(--淡);margin:4px 0;">請將條碼或QR Code對準掃描框</div>
-            <input type="text" id="掃碼手動輸入" class="掃碼輸入手動 隱藏" placeholder="手動輸入工號或條碼，按 Enter 確認" onkeydown="掃碼手動確認(event)">
-            <div class="模態按鈕列">
-                <button class="關閉鈕" onclick="關閉掃碼模態()">✕ 關閉</button>
-                <button class="手輸鈕" onclick="切換手動輸入()">⌨ 手動輸入</button>
-            </div>
-            <div id="掃碼狀態" style="text-align:center;font-size:12px;margin-top:6px;color:var(--淡);"></div>
+<!-- ════════════════════════════════════
+     載入遮罩 (化新精密｜報工系統)
+═════════════════════════════════════ -->
+<div id="載入" class="載入">
+  <div><div class="mini旋轉"></div>🔄 化新精密｜報工系統<br><span style="font-size:12px;color:var(--淡);font-weight:600;">Loading data...</span></div>
+</div>
+
+<!-- ════════════════════════════════════
+     送出動態遮罩
+═════════════════════════════════════ -->
+<div id="送出遮罩" class="送出遮罩 隱藏">
+  <div class="送出卡">
+    <div class="旋轉圈"></div>
+    <p id="送出狀態文字">📤 報工送出中...</p>
+    <div class="副p" id="送出副文字">Writing production record...</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     QR / Barcode 掃碼模態
+═════════════════════════════════════ -->
+<div id="掃碼模態" class="模態遮罩 隱藏">
+  <div class="模態框">
+    <div style="font-weight:900;font-size:17px;margin-bottom:8px;text-align:center;">📷 掃描工牌條碼 / Scan Badge QR Code</div>
+    <div class="視訊區" id="視訊區">
+      <video id="掃碼視訊" autoplay playsinline muted></video>
+      <div class="掃描框"></div>
+      <div class="掃描線"></div>
+    </div>
+    <div style="text-align:center;font-size:11px;color:var(--淡);margin:4px 0;">請將條碼對準掃描框 / Align barcode to frame</div>
+    <input type="text" id="掃碼手動輸入" class="掃碼輸入手動 隱藏" placeholder="手動輸入工號 / Enter employee ID, press Enter" onkeydown="掃碼手動確認(event)">
+    <div class="模態按鈕列" style="margin-top:8px;">
+      <button class="關閉鈕" onclick="關閉掃碼模態()">✕ 關閉 / Close</button>
+      <button class="手輸鈕" onclick="切換手動輸入()">⌨ 手動 / Manual</button>
+    </div>
+    <div id="掃碼狀態" style="text-align:center;font-size:12px;margin-top:6px;color:var(--淡);"></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     產品掃碼模態
+═════════════════════════════════════ -->
+<div id="產品掃碼模態" class="模態遮罩 隱藏">
+  <div class="模態框">
+    <div style="font-weight:900;font-size:17px;margin-bottom:8px;text-align:center;">📷 掃描產品條碼 / Scan Product QR Code</div>
+    <div class="視訊區" id="產品視訊區">
+      <video id="產品掃碼視訊" autoplay playsinline muted></video>
+      <div class="掃描框"></div>
+      <div class="掃描線"></div>
+    </div>
+    <div style="text-align:center;font-size:11px;color:var(--淡);margin:4px 0;">請將產品條碼對準框內 / Align product barcode</div>
+    <input type="text" id="產品掃碼手動輸入" class="掃碼輸入手動 隱藏" placeholder="輸入產品編號 / Enter product code" onkeydown="產品掃碼手動確認(event)">
+    <div class="模態按鈕列" style="margin-top:8px;">
+      <button class="關閉鈕" onclick="關閉產品掃碼模態()">✕ 關閉 / Close</button>
+      <button class="手輸鈕" onclick="切換產品手動輸入()">⌨ 手動 / Manual</button>
+    </div>
+    <div id="產品掃碼狀態" style="text-align:center;font-size:12px;margin-top:6px;color:var(--淡);"></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     照片備註模態
+═════════════════════════════════════ -->
+<div id="照片備註模態" class="照片備註模態 隱藏">
+  <div class="照片備註框">
+    <div style="font-weight:900;font-size:16px;margin-bottom:10px;">✏️ 編輯照片備註 / Edit Photo Note</div>
+    <img id="備註照片預覽" src="" alt="照片預覽">
+    <label>備註 / Note</label>
+    <textarea id="備註照片文字" placeholder="輸入此照片的說明備註..."></textarea>
+    <div class="鈕列">
+      <button class="取消" onclick="關閉照片備註模態()">取消 / Cancel</button>
+      <button class="確認" onclick="儲存照片備註()">✓ 儲存 / Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     Roar 通知容器
+═════════════════════════════════════ -->
+<div id="Roar容器" class="Roar容器"></div>
+
+<!-- ════════════════════════════════════
+     主外框
+═════════════════════════════════════ -->
+<div class="外框">
+
+  <!-- 頁首 Header -->
+  <header class="頁首">
+    <div class="標題列">
+      <div>
+        <div class="標題"><span class="icon">🏭</span>07_報工作業 V2</div>
+        <div class="副標">化新精密｜智慧製造中央作戰指揮中心 | Production Reporting V2｜08_工站途程機台主檔｜09_報工｜09_不良紀錄</div>
+      </div>
+      <div class="頭部右列">
+        <button class="圓鈕 全螢幕鈕" onclick="切換全螢幕()" title="全螢幕 / Fullscreen" id="全螢幕鈕">⛶</button>
+        <button class="圓鈕" onclick="重新載入資料()" title="重新載入 / Reload">↻</button>
+      </div>
+    </div>
+    <div id="狀態卡" class="狀態卡">🟡 正在連線主資料庫... Connecting to database...</div>
+  </header>
+
+  <!-- 分頁導航 Tab Nav -->
+  <nav class="分頁">
+    <button id="頁籤_人員" class="active" onclick="切換頁籤('人員')">👤<br>人員<br><span style="font-size:9px;opacity:.75;">Operator</span></button>
+    <button id="頁籤_工件" onclick="切換頁籤('工件')">🔧<br>工件<br><span style="font-size:9px;opacity:.75;">Workpiece</span></button>
+    <button id="頁籤_產出" onclick="切換頁籤('產出')">📊<br>產出<br><span style="font-size:9px;opacity:.75;">Output</span></button>
+    <button id="頁籤_品質" onclick="切換頁籤('品質')">🔍<br>品質<br><span style="font-size:9px;opacity:.75;">Quality</span></button>
+  </nav>
+
+  <!-- ══════ 頁面：人員 Operator ══════ -->
+  <section id="頁面_人員" class="頁面">
+    <button class="掃碼鈕" onclick="開啟掃碼模態()">
+      <span class="icon">📷</span> 掃描 / 感應工牌（條碼 / QR Code）&nbsp;|&nbsp;Scan Badge
+    </button>
+    <div style="height:6px;"></div>
+
+    <!-- 常用人員 -->
+    <div id="常用人員列" class="常用列 隱藏">
+      <span class="標籤">⭐ 常用 / Recent:</span>
+      <div id="常用人員內容" style="display:flex;gap:7px;flex-wrap:wrap;"></div>
+    </div>
+
+    <!-- 搜尋 -->
+    <input type="text" id="人員搜尋" class="搜尋框" placeholder="🔍 搜尋人員 / Search: 姓名、工號、班別 (Name, ID, Shift)..." oninput="過濾人員卡片()">
+
+    <!-- 人員卡片網格 -->
+    <div id="人員網格容器" class="人員網格"></div>
+    <div id="人員網格空" class="小字 隱藏" style="text-align:center;padding:20px;">沒有符合條件的人員 / No matching operators</div>
+
+    <!-- 選定人員詳情 -->
+    <div class="卡片" id="人員詳情卡">
+      <div class="區標">👤 選定人員 <span class="en">Selected Operator</span></div>
+      <div id="人員照片卡" class="照片卡">
+        <div class="無圖">點擊卡片<br>Click Card</div>
+        <div>
+          <div class="名稱大">尚未選擇 / Not Selected</div>
+          <div class="小字">請點擊上方人員卡片、掃碼或搜尋選擇 / Click a card, scan, or search</div>
         </div>
+      </div>
+      <div id="工號強調" class="工號強調">未輸入 / Not Set</div>
+      <div class="兩欄">
+        <div>
+          <label>姓名 / Name</label>
+          <input id="姓名" readonly placeholder="自動帶入 / Auto-filled">
+        </div>
+        <div>
+          <label>工號 / Employee ID</label>
+          <input id="工號" readonly placeholder="自動帶入 / Auto-filled">
+        </div>
+      </div>
+      <div class="兩欄">
+        <div>
+          <label>班別 / Shift</label>
+          <select id="班別"></select>
+        </div>
+        <div>
+          <label>是否加班 / Overtime</label>
+          <select id="是否加班">
+            <option value="否">否 / No</option>
+            <option value="是">是 / Yes</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label>加班類型 / Overtime Type</label>
+        <select id="加班類型">
+          <option value="無">無 / None</option>
+          <option value="平日加班">平日加班 / Weekday OT</option>
+          <option value="休息日加班">休息日加班 / Day-off OT</option>
+          <option value="例假日加班">例假日加班 / Holiday OT</option>
+        </select>
+      </div>
     </div>
+  </section>
 
-    <!-- 主外框 -->
-    <div class="外框">
-        <!-- 頁首 -->
-        <header class="頁首">
-            <div class="標題列">
-                <div>
-                    <div class="標題"><span class="icon">🏭</span>07_報工作業V2</div>
-                    <div class="副標">智慧製造中央作戰指揮中心｜正式讀取 08_工站途程機台主檔｜09_報工｜09_不良紀錄｜05_不良代碼主檔</div>
-                </div>
-                <button class="圓鈕" onclick="重新載入資料()" title="重新載入">↻</button>
-            </div>
-            <div id="狀態卡" class="狀態卡">🟡 正在連線主資料庫...</div>
-        </header>
+  <!-- ══════ 頁面：工件 Workpiece ══════ -->
+  <section id="頁面_工件" class="頁面 隱藏">
+    <div class="卡片">
+      <div class="區標">🔧 工件與工站 <span class="en">Product / Workstation</span></div>
 
-        <!-- 分頁導航 -->
-        <nav class="分頁">
-            <button id="頁籤_人員" class="active" onclick="切換頁籤('人員')">👤<br>人員</button>
-            <button id="頁籤_工件" onclick="切換頁籤('工件')">🔧<br>工件</button>
-            <button id="頁籤_產出" onclick="切換頁籤('產出')">📊<br>產出</button>
-            <button id="頁籤_品質" onclick="切換頁籤('品質')">🔍<br>品質</button>
-        </nav>
+      <!-- 產品掃碼按鈕 -->
+      <button class="掃碼鈕" onclick="開啟產品掃碼模態()" style="margin-bottom:8px;">
+        <span class="icon">📷</span> 掃描產品條碼 / Scan Product Barcode
+      </button>
 
-        <!-- 頁面：人員 -->
-        <section id="頁面_人員" class="頁面">
-            <!-- 掃碼按鈕 -->
-            <button class="掃碼鈕" onclick="開啟掃碼模態()">
-                <span class="掃碼icon">📷</span> 掃描 / 感應工牌（條碼 / QR Code）
-            </button>
-            <div style="height:6px;"></div>
+      <!-- 產品搜尋 -->
+      <input type="text" id="產品搜尋" class="搜尋框" placeholder="🔍 搜尋產品 / Search Product: 品名、產品編號 (Name, Code)..." oninput="過濾產品卡片()">
 
-            <!-- 常用人員 -->
-            <div id="常用人員列" class="常用列 隱藏">
-                <span class="標籤">⭐ 常用：</span>
-                <div id="常用人員內容"></div>
-            </div>
+      <!-- 產品卡片網格 -->
+      <div id="產品網格容器" class="產品網格"></div>
+      <div id="產品網格空" class="小字 隱藏" style="text-align:center;padding:16px;">沒有符合條件的產品 / No matching products</div>
 
-            <!-- 搜尋框 -->
-            <input type="text" id="人員搜尋" class="搜尋框" placeholder="🔍 搜尋人員：姓名、工號、班別..." oninput="過濾人員卡片()">
+      <!-- 選定產品詳情（隱藏）-->
+      <div id="選定產品區" class="隱藏">
+        <div style="height:8px;"></div>
+        <div id="產品照片卡" class="照片卡">
+          <div class="無圖">產品<br>Product</div>
+          <div><div class="名稱大">尚未選產品</div><div class="小字">選擇後顯示產品資訊</div></div>
+        </div>
+        <div class="兩欄">
+          <div><label>產品編號 / Product Code</label><input id="產品編號" readonly></div>
+          <div><label>品名 / Product Name</label><input id="品名" readonly></div>
+        </div>
 
-            <!-- 頭像卡片網格 -->
-            <div id="人員網格容器" class="人員網格"></div>
-            <div id="人員網格空" class="小字 隱藏" style="text-align:center;padding:20px;">沒有符合條件的人員</div>
+        <label class="必填">報工工站 / Workstation</label>
+        <select id="工站" onchange="工站變更()"></select>
+        <div class="三欄">
+          <div><label>工序範圍 / Process Range</label><input id="工序範圍" readonly></div>
+          <div><label>標準產能 / Std. Capacity</label><input id="標準產能" readonly></div>
+          <div><label>標準工時(秒) / Std. Time(s)</label><input id="標準工時秒" readonly></div>
+        </div>
 
-            <!-- 選中人員詳細資訊 -->
-            <div class="卡片" id="人員詳情卡">
-                <div class="區標">👤 選定人員 <span class="小字">Selected Operator</span></div>
-                <div id="人員照片卡" class="照片卡">
-                    <div class="無圖">點擊頭像<br>卡片選擇</div>
-                    <div>
-                        <div class="名稱大">尚未選擇</div>
-                        <div class="小字">請點擊上方頭像卡片、掃碼或使用下拉選單</div>
-                    </div>
-                </div>
-                <label>作業員下拉 / Operator Dropdown</label>
-                <select id="作業員" onchange="作業員變更()"></select>
-                <label>工號 / Employee ID</label>
-                <input id="工號" readonly placeholder="自動帶入">
-                <div id="工號強調" class="工號強調">未輸入</div>
-                <div class="兩欄">
-                    <div><label>姓名 / Name</label><input id="姓名" readonly></div>
-                    <div><label>班別 / Shift</label><select id="班別"></select></div>
-                </div>
-                <div class="兩欄">
-                    <div><label>是否加班 / Overtime</label><select id="是否加班"><option value="否">否 / No</option><option value="是">是 / Yes</option></select></div>
-                    <div><label>加班類型 / OT Type</label><select id="加班類型"><option value="無">無 / None</option><option value="平日加班">平日加班</option><option value="休息日加班">休息日加班</option><option value="例假日加班">例假日加班</option></select></div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 頁面：工件 -->
-        <section id="頁面_工件" class="頁面 隱藏">
-            <div class="卡片">
-                <div class="區標">🔧 工件與工站 <span class="小字">Product / Workstation</span></div>
-                <div id="產品照片卡" class="照片卡">
-                    <div class="無圖">產品</div>
-                    <div><div class="名稱大">尚未選產品</div><div class="小字">選擇產品後顯示產品照片</div></div>
-                </div>
-                <label>搜尋產品 / Search Product</label>
-                <input id="產品搜尋" class="搜尋框" placeholder="輸入產品編號、客戶品號、品名" oninput="建立產品選單()">
-                <label class="必填">產品 / Product</label>
-                <select id="產品" onchange="產品變更()"></select>
-                <div class="兩欄"><div><label>產品編號</label><input id="產品編號" readonly></div><div><label>客戶品號</label><input id="客戶品號" readonly></div></div>
-                <label>品名</label><input id="品名" readonly>
-                <label class="必填">報工工站 / Workstation</label>
-                <select id="工站" onchange="工站變更()"></select>
-                <div class="三欄"><div><label>工序範圍</label><input id="工序範圍" readonly></div><div><label>標準產能</label><input id="標準產能" readonly></div><div><label>標準工時_秒</label><input id="標準工時秒" readonly></div></div>
-                <label>主機台 / Main Machine</label>
-                <select id="主機台" onchange="主機台變更()"></select>
-                <div id="機台清單卡" class="機台格"></div>
-            </div>
-        </section>
-
-        <!-- 頁面：產出 -->
-        <section id="頁面_產出" class="頁面 隱藏">
-            <div class="卡片">
-                <div class="區標">📊 產出數量 <span class="小字">Output Qty</span></div>
-                <div class="兩欄">
-                    <div><label class="必填">今日共做數 / Total Qty</label><input id="今日共做數" type="number" min="0" inputmode="numeric" oninput="計算數量()"></div>
-                    <div><label>不良數 / NG Qty</label><input id="不良數" type="number" min="0" value="0" inputmode="numeric" oninput="計算數量()"></div>
-                </div>
-                <div class="摘要">
-                    <div class="數字卡"><span>📦 今日共做</span><b id="顯示今日共做">0</b></div>
-                    <div class="數字卡"><span>❌ 不良</span><b id="顯示不良">0</b></div>
-                    <div class="數字卡"><span>✅ 實際良品</span><b id="顯示實際良品">0</b></div>
-                </div>
-                <div class="兩欄">
-                    <div><label>開始時間</label><input id="開始時間" type="datetime-local" onchange="計算工時()"></div>
-                    <div><label>結束時間</label><input id="結束時間" type="datetime-local" onchange="計算工時()"></div>
-                </div>
-                <label>實際工時 / Working Hours</label><input id="實際工時" readonly>
-            </div>
-        </section>
-
-        <!-- 頁面：品質 -->
-        <section id="頁面_品質" class="頁面 隱藏">
-            <div class="卡片">
-                <div class="區標">🔍 品質與照片 <span class="小字">Quality / Photos</span></div>
-                <div class="兩欄">
-                    <div><label>不良類別</label><select id="不良類別" onchange="不良類別變更()"><option value="無">無 / None</option><option value="Z">Z 素材 / 外觀</option><option value="Y">Y 加工 / 尺寸</option></select></div>
-                    <div><label>不良原因</label><select id="不良原因" onchange="更新預覽()"></select></div>
-                </div>
-                <label>異常類型 / Abnormal Type</label><select id="異常類型" onchange="更新預覽()"></select>
-                <label>現場照片 / Defect or Field Photos <span class="小字">（最多6張）</span></label>
-                <input id="照片檔案" type="file" accept="image/*" multiple onchange="照片變更(event)">
-                <div id="照片上傳預覽" class="照片上傳預覽"></div>
-                <label>備註 / Remarks</label>
-                <textarea id="備註" placeholder="輸入異常描述、備註事項..." oninput="更新預覽()"></textarea>
-                <div id="不良同步提示區"></div>
-                <label>報工預覽 / Preview</label>
-                <div id="報工預覽" class="預覽">📋 尚未產生預覽，請依序填寫各頁資料</div>
-            </div>
-        </section>
+        <label>主機台 / Main Machine</label>
+        <select id="主機台" onchange="主機台變更()"></select>
+        <div id="機台清單卡" class="機台格"></div>
+      </div>
     </div>
+  </section>
 
-    <!-- 底部按鈕 -->
-    <div class="底部">
-        <button class="次按鈕" onclick="上一步()">← 上一步</button>
-        <button id="主操作鈕" class="主按鈕" onclick="下一步或送出()">下一步 →</button>
+  <!-- ══════ 頁面：產出 Output ══════ -->
+  <section id="頁面_產出" class="頁面 隱藏">
+    <div class="卡片">
+      <div class="區標">📊 產出數量 <span class="en">Output Qty</span></div>
+      <div class="兩欄">
+        <div>
+          <label class="必填">今日共做數 / Total Qty</label>
+          <input id="今日共做數" type="number" min="0" inputmode="numeric" oninput="計算數量()">
+        </div>
+        <div>
+          <label>不良數 / NG Qty</label>
+          <input id="不良數" type="number" min="0" value="0" inputmode="numeric" oninput="計算數量()">
+        </div>
+      </div>
+      <div class="摘要">
+        <div class="數字卡"><span>📦 今日共做 / Total</span><b id="顯示今日共做">0</b></div>
+        <div class="數字卡"><span>❌ 不良 / NG</span><b id="顯示不良">0</b></div>
+        <div class="數字卡"><span>✅ 實際良品 / Good</span><b id="顯示實際良品">0</b></div>
+      </div>
+      <div class="兩欄">
+        <div><label>開始時間 / Start Time</label><input id="開始時間" type="datetime-local" onchange="計算工時()"></div>
+        <div><label>結束時間 / End Time</label><input id="結束時間" type="datetime-local" onchange="計算工時()"></div>
+      </div>
+      <label>實際工時 / Working Hours</label>
+      <input id="實際工時" readonly placeholder="自動計算 / Auto-calculated">
     </div>
+  </section>
 
-    <!-- 浮動訊息 -->
-    <div id="浮訊" class="浮訊 隱藏"></div>
+  <!-- ══════ 頁面：品質 Quality ══════ -->
+  <section id="頁面_品質" class="頁面 隱藏">
+    <div class="卡片">
+      <div class="區標">🔍 品質與不良 <span class="en">Quality & Defects</span></div>
 
-    <script>
-        // ==================== 全域狀態 ====================
-        let 全域資料 = {
-            人員: [],
-            報工工站群組: [],
-            途程工站群組: [],
-            班別清單: [],
-            不良原因: { Z: [], Y: [] },
-            異常類型: [],
-            筆數: {}
-        };
-        let 狀態 = {
-            頁籤: '人員',
-            作業員: null,
-            產品群組清單: [],
-            目前產品群組: null,
-            目前工站: null,
-            現場照片清單: [],
-            掃碼串流: null,
-            掃碼偵測器: null,
-            掃碼定時器: null,
-        };
-        const 頁序 = ['人員', '工件', '產出', '品質'];
-        const LS_鍵 = 'rg_v3_最近人員';
-        const 最大常用 = 5;
+      <!-- 不良原因數量分配區域 (取代原有不良行列，電腦端可正常輸入) -->
+      <div id="不良分配區域">
+        <label style="margin-top:12px;">📋 不良原因數量分配 / NG Reason Qty Allocation <span class="小字">（分配數量需等於總不良數）</span></label>
+        <div id="不良分配容器"></div>
+        <button class="添加分配鈕" onclick="添加不良分配()">＋ 新增不良分配項目 / Add Allocation</button>
+        <div id="分配摘要區" class="分配摘要 隱藏"></div>
+      </div>
 
-        // ==================== 初始化 ====================
-        window.addEventListener('load', () => {
-            設定預設時間();
-            重新載入資料();
-            // 監聽全局鍵盤事件，用於掃描槍（快速連續輸入+回車）
-            監聽掃描槍輸入();
+      <!-- 異常類型 -->
+      <label style="margin-top:12px;">異常類型 / Abnormal Type</label>
+      <select id="異常類型" onchange="更新預覽()">
+        <option value="無異常">無異常 / Normal</option>
+        <option value="支援調度">支援調度 / Staff Reassignment</option>
+        <option value="材質異常">材質異常 / Material Defect</option>
+        <option value="換刀">換刀 / Tool Change</option>
+        <option value="機台停機">機台停機 / Machine Down</option>
+        <option value="待料">待料 / Waiting Material</option>
+        <option value="品質確認">品質確認 / Quality Check</option>
+        <option value="其他">其他 / Others</option>
+      </select>
+
+      <!-- 異常時間 -->
+      <div class="異常時間區">
+        <div class="區標">⏱ 異常時間 <span class="en">Anomaly Duration</span></div>
+        <div class="兩欄">
+          <div><label>異常開始 / Anomaly Start</label><input id="異常開始時間" type="datetime-local" onchange="計算異常工時()"></div>
+          <div><label>異常結束 / Anomaly End</label><input id="異常結束時間" type="datetime-local" onchange="計算異常工時()"></div>
+        </div>
+        <label>異常持續時間 / Anomaly Duration</label>
+        <input id="異常工時" readonly placeholder="自動計算 / Auto-calculated">
+      </div>
+
+      <!-- 現場照片 -->
+      <label style="margin-top:12px;">現場照片 / Field &amp; Defect Photos <span class="小字">（最多12張 / Max 12）</span></label>
+      <div class="照片區">
+        <div class="照片工具列">
+          <button class="照片工具鈕" onclick="觸發拍照()">📸 拍照 / Take Photo</button>
+          <button class="照片工具鈕" onclick="觸發選檔()">🖼 選圖 / Choose File</button>
+          <button class="照片工具鈕 危險" onclick="清除所有照片()">🗑 清除 / Clear</button>
+        </div>
+        <input id="照片拍照" type="file" accept="image/*" capture="environment" multiple class="隱藏" onchange="照片變更(event,'拍照')">
+        <input id="照片選檔" type="file" accept="image/*" multiple class="隱藏" onchange="照片變更(event,'選檔')">
+        <div id="照片格" class="照片格"></div>
+        <div id="照片計數" class="小字" style="margin-top:5px;text-align:center;">0 / 12 張照片 / photos</div>
+      </div>
+
+      <!-- 備註 -->
+      <label>備註 / Remarks</label>
+      <textarea id="備註" placeholder="輸入異常描述、備註事項... / Enter anomaly description, remarks..." oninput="更新預覽()"></textarea>
+
+      <!-- 不良同步提示 -->
+      <div id="不良同步提示區" style="margin-top:6px;"></div>
+
+      <!-- 報工預覽 -->
+      <label style="margin-top:12px;">報工預覽 / Report Preview</label>
+      <div id="報工預覽" class="預覽">📋 尚未產生預覽，請依序填寫各頁資料
+Production report preview will appear here...</div>
+    </div>
+  </section>
+
+</div><!-- end 外框 -->
+
+<!-- 底部按鈕 -->
+<div class="底部">
+  <button class="次按鈕" onclick="上一步()">← 上一步 / Back</button>
+  <button id="主操作鈕" class="主按鈕" onclick="下一步或送出()">下一步 → / Next</button>
+</div>
+
+<!-- 浮動訊息 -->
+<div id="浮訊" class="浮訊 隱藏"></div>
+
+<!-- ════════════════════════════════════
+     JAVASCRIPT
+═════════════════════════════════════ -->
+<script>
+// ══════════════════════════════════════
+// 全域狀態 Global State
+// ══════════════════════════════════════
+let 全域資料 = {
+  人員:[],
+  報工工站群組:[],
+  班別清單:[],
+  不良原因:{Z:[],Y:[]},
+  異常類型:[],
+  筆數:{}
+};
+
+let 狀態 = {
+  頁籤:'人員',
+  作業員:null,
+  產品群組清單:[],
+  目前產品群組:null,
+  目前工站:null,
+  現場照片清單:[],      // [{base64,mime,檔名,備註,來源}]
+  掃碼串流:null,
+  掃碼偵測器:null,
+  掃碼定時器:null,
+  產品掃碼串流:null,
+  產品掃碼偵測器:null,
+  產品掃碼定時器:null,
+  不良分配清單:[],      // [{id, 代碼, 類別, 名稱, 英文名稱, 數量}]
+  編輯照片索引:-1,
+};
+
+const 頁序 = ['人員','工件','產出','品質'];
+const LS_鍵 = 'rg_v2_最近人員';
+const 最大常用 = 6;
+const 最大照片 = 12;
+let 掃描槍緩衝 = '';
+let 掃描槍計時 = null;
+const 掃描槍間隔 = 80;
+let 不良分配ID = 0;
+
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
+window.addEventListener('load', () => {
+  設定預設時間();
+  初始化異常類型選單();
+  重新載入資料();
+  監聽掃描槍輸入();
+  監聽全螢幕變化();
+  添加不良分配(); // 預設一個空分配行
+});
+
+// ══════════════════════════════════════
+// BACKEND CALLS
+// ══════════════════════════════════════
+function 重新載入資料() {
+  顯示載入(true);
+  呼叫後端('取得報工作業v2初始資料', null, 資料載入完成, e => {
+    顯示載入(false);
+    Roar('❌', '讀取失敗 / Load Failed', (e.message || String(e)), '錯誤');
+  });
+}
+
+function 呼叫後端(fn, arg, ok, fail) {
+  try {
+    if (typeof google === 'undefined' || !google.script || !google.script.run)
+      throw new Error('請在 Apps Script 側邊欄開啟本頁 / Open in Apps Script sidebar');
+    let r = google.script.run
+      .withSuccessHandler(ok)
+      .withFailureHandler(fail || function(e){ Roar('⚠️','錯誤',e.message||String(e),'錯誤'); });
+    arg === null ? r[fn]() : r[fn](arg);
+  } catch(e) {
+    (fail || function(x){ Roar('⚠️','連線錯誤',String(x),'錯誤'); })(e);
+  }
+}
+
+function 資料載入完成(data) {
+  顯示載入(false);
+  if (!data || !data.成功) {
+    Roar('❌','資料讀取失敗 / Load Failed',(data&&data.訊息)||'請檢查後端連線','錯誤');
+    return;
+  }
+  全域資料 = data;
+  全域資料.報工工站群組 = (data.報工工站群組||data.途程工站群組||[]).map(標準化群組);
+  全域資料.不良原因 = data.不良原因||{Z:[],Y:[]};
+  全域資料.異常類型 = data.異常類型||[];
+  全域資料.班別清單 = data.班別清單||[];
+  全域資料.人員 = (data.人員||[]).map(r => {
+    r = r || {};
+    r.班別名稱 = 取得人員班別(r);
+    r.班別 = r.班別名稱;
+    return r;
+  });
+  全域資料.筆數 = data.筆數||{};
+  填入狀態卡();
+  建立班別選單();
+  建立人員卡片網格();
+  建立產品卡片網格();
+  初始化異常類型選單();
+  渲染不良分配(); // 資料載入後重繪，避免第一次只出現預設不良代碼
+  載入常用人員();
+  Roar('✅','資料已載入 / Data Loaded',
+    '人員 '+全域資料.人員.length+' 筆｜工站群組 '+全域資料.報工工站群組.length+' 筆','成功');
+}
+
+function 標準化群組(g) {
+  g = g||{};
+  if (typeof g.機台清單 === 'string') {
+    try{ g.機台清單=JSON.parse(g.機台清單); }catch(e){ g.機台清單=[]; }
+  }
+  if (!Array.isArray(g.機台清單)) g.機台清單=[];
+  if (!Array.isArray(g.工序清單))
+    g.工序清單 = String(g.工序清單||g.工序||'').split(/[、,，;；\s]+/).filter(Boolean);
+  g.報工工站名稱 = g.報工工站名稱||g.工站名稱||'';
+  g.顯示名稱 = g.顯示名稱||[g.報工工站名稱,g.工序範圍||g.工序,
+    g.機台編號清單?(g.機台編號清單.join?g.機台編號清單.join('、'):g.機台編號清單):''].filter(Boolean).join('｜');
+  return g;
+}
+
+function 填入狀態卡() {
+  let p = 全域資料.筆數||{};
+  取('狀態卡').innerHTML =
+    '🟢 資料已載入 / Data Loaded｜人員 / Operators: '+(p.人員||全域資料.人員.length)+
+    '｜工站群組 / Workstation Groups: '+(p.報工工站群組||全域資料.報工工站群組.length)+
+    '｜機台 / Machines: '+(p.工站機台關聯||0)+'｜照片索引 / Photos: '+(p.照片索引||0);
+}
+
+// ══════════════════════════════════════
+// PERSON CARDS (選中黑白效果)
+// ══════════════════════════════════════
+function 推估班別顏色(班別) {
+  let t = 推估班別(班別);
+  if (t==='大夜班') return 'night';
+  if (t==='中班') return 'swing';
+  return 'day';
+}
+
+function 班別CSS(班別) {
+  let k = 推估班別顏色(班別);
+  if (k==='night') return '班夜';
+  if (k==='swing') return '班中';
+  return '班早';
+}
+
+function 班別圖示(班別) {
+  let t = 推估班別(班別);
+  if (t==='大夜班') return '🌙';
+  if (t==='中班') return '🌇';
+  return '☀️';
+}
+
+function 取得人員班別(r) {
+  r = r || {};
+  let 線索 = [r.班別名稱, r.班別代碼, r.班別, r.原始班別, r.工作班別, r.班次,
+    [r.班別開始時間, r.班別結束時間].filter(Boolean).join('-')].filter(Boolean).join(' ');
+  return 推估班別(線索 || '早班');
+}
+
+function 確保班別選項(班別) {
+  let s = 取('班別');
+  if (!s || !班別) return;
+  let exists = Array.from(s.options).some(o => o.value === 班別);
+  if (!exists) s.add(new Option(班別, 班別));
+}
+
+function 建立人員卡片網格() {
+  let 容器 = 取('人員網格容器');
+  let 啟用人員 = 全域資料.人員.filter(r=>r.啟用!=='否');
+  if (!啟用人員.length) {
+    容器.innerHTML = '<div class="小字" style="text-align:center;padding:24px;grid-column:1/-1;">尚無啟用的人員資料 / No active operators</div>';
+    return;
+  }
+  容器.innerHTML = 啟用人員.map(r => {
+    let i = 全域資料.人員.indexOf(r);
+    let 顯示班別 = 取得人員班別(r);
+    let css = 班別CSS(顯示班別);
+    let 圖示 = 班別圖示(顯示班別);
+    let 頭像 = r.縮圖網址||r.照片網址
+      ? '<img src="'+安全屬性(r.縮圖網址||r.照片網址)+'" onerror="this.parentElement.innerHTML=\''+安全屬性(姓名首字(r.姓名))+'\'">'
+      : 姓名首字(r.姓名);
+    return '<div class="人員卡片 '+css+'" data-index="'+i+'" onclick="卡片選取人員('+i+')" id="人員卡片_'+i+'">'
+      +'<span class="班標">'+圖示+' '+(顯示班別||'').slice(0,2)+'</span>'
+      +'<div class="選取標記">✓ 已選取</div>'
+      +'<div class="頭像圈">'+頭像+'</div>'
+      +'<div class="人名">'+安全文字(r.姓名||'未知')+'</div>'
+      +'<div class="人工號">'+安全文字(r.工號||'')+'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function 姓名首字(name) {
+  let n = String(name||'?').trim();
+  return n ? n.charAt(0).toUpperCase() : '?';
+}
+
+function 過濾人員卡片() {
+  let kw = (值('人員搜尋')||'').toUpperCase().trim();
+  let cards = document.querySelectorAll('.人員卡片');
+  let any = false;
+  cards.forEach(card => {
+    let idx = parseInt(card.getAttribute('data-index'));
+    let r = 全域資料.人員[idx];
+    if (!r){ card.classList.add('隱藏'); return; }
+    let txt = [r.姓名,r.工號,r.班別,r.部門,r.人員類型].join(' ').toUpperCase();
+    if (!kw || txt.indexOf(kw)>=0) { card.classList.remove('隱藏'); any=true; }
+    else card.classList.add('隱藏');
+  });
+  取('人員網格空').classList.toggle('隱藏', any);
+}
+
+function 卡片選取人員(i) {
+  let r = 全域資料.人員[i];
+  if (!r) return;
+  狀態.作業員 = r;
+  document.querySelectorAll('.人員卡片').forEach(c=>c.classList.remove('選中'));
+  let t = 取('人員卡片_'+i);
+  if (t){ t.classList.add('選中'); t.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+  值('工號', r.工號||'');
+  值('姓名', r.姓名||'');
+  let 選定班別 = 取得人員班別(r);
+  確保班別選項(選定班別);
+  值('班別', 選定班別);
+  取('工號強調').textContent = r.工號||'未輸入';
+  取('人員照片卡').innerHTML = 圖片HTML(r.縮圖網址||r.照片網址,'無頭像 / No Photo')
+    +'<div><div class="名稱大">'+安全文字(r.姓名||'')+' <span style="font-size:12px;color:var(--淡);">'+安全文字(r.工號||'')+'</span></div>'
+    +'<div class="小字">'+安全文字([r.部門,r.班別名稱||r.班別,r.職稱||''].filter(Boolean).join('｜'))+'</div></div>';
+  記錄常用人員(i);
+  設定預設時間();
+  更新預覽();
+  Roar('👤','已選定作業員 / Operator Selected',(r.姓名||'')+'（'+( r.工號||'')+'）','成功');
+}
+
+function 建立班別選單() {
+  let s = 取('班別');
+  s.innerHTML = '';
+  ['自動判斷','早班','中班','大夜班','加班'].forEach(x=>s.add(new Option(x,x)));
+  (全域資料.班別清單||[]).forEach(x=>{
+    let v = x.值 || x.名稱 || x;
+    let n = x.名稱 || x.值 || x;
+    if (!Array.from(s.options).some(o=>o.value===v)) s.add(new Option(n,v));
+  });
+}
+
+function 推估班別(v) {
+  let t = String(v||'').trim().toUpperCase();
+  if (!t) return '早班';
+  if (t==='DAY' || t==='早班') return '早班';
+  if (t==='SWING' || t==='中班') return '中班';
+  if (t==='NIGHT' || t==='大夜班') return '大夜班';
+  if (t.includes('大夜')||t.includes('夜')||t.includes('2300')||t.includes('23:00')||t.includes('3150')||t.includes('07:50')||t.includes('0750')) return '大夜班';
+  if (t.includes('早班')||t.includes('早')||t.includes('0800')||t.includes('08:00')||t.includes('16:50')) {
+    if (t.includes('01:40') || t.includes('0140')) return '中班';
+    return '早班';
+  }
+  if (t.includes('中班')||t.includes('1650')||t.includes('16:50')||t.includes('01:40')||t.includes('0140')) return '中班';
+  if (t.includes('加班')) return '加班';
+  return '早班';
+}
+
+// ══════════════════════════════════════
+// QUICK PERSON (localStorage)
+// ══════════════════════════════════════
+function 載入常用人員() {
+  try {
+    let raw = localStorage.getItem(LS_鍵);
+    渲染常用人員(raw ? JSON.parse(raw).slice(0,最大常用) : []);
+  } catch(e) { 渲染常用人員([]); }
+}
+
+function 記錄常用人員(i) {
+  try {
+    let raw = localStorage.getItem(LS_鍵);
+    let list = raw ? JSON.parse(raw) : [];
+    list = list.filter(x=>x.索引!==i);
+    list.unshift({索引:i,次數:1,最後使用:Date.now()});
+    if (list.length>最大常用*3) list=list.slice(0,最大常用*3);
+    localStorage.setItem(LS_鍵, JSON.stringify(list));
+    渲染常用人員(list.slice(0,最大常用));
+  } catch(e) {}
+}
+
+function 渲染常用人員(list) {
+  let 列 = 取('常用人員列');
+  let 內容 = 取('常用人員內容');
+  if (!list||!list.length){ 列.classList.add('隱藏'); 內容.innerHTML=''; return; }
+  let html = list.map(item=>{
+    let r = 全域資料.人員[item.索引];
+    if (!r||r.啟用==='否') return '';
+    let head = r.縮圖網址||r.照片網址
+      ? '<img src="'+安全屬性(r.縮圖網址||r.照片網址)+'" onerror="this.parentElement.innerHTML=\''+安全屬性(姓名首字(r.姓名))+'\'">'
+      : 姓名首字(r.姓名);
+    return '<div class="常用人" onclick="卡片選取人員('+item.索引+')" title="'+安全文字(r.姓名||'')+'｜'+安全文字(r.工號||'')+'"><div class="迷你頭">'+head+'</div>'+安全文字(r.姓名||'')+'</div>';
+  }).filter(Boolean).join('');
+  內容.innerHTML = html;
+  列.classList.toggle('隱藏',!html.trim());
+}
+
+// ══════════════════════════════════════
+// SCAN MODAL (Person)
+// ══════════════════════════════════════
+function 開啟掃碼模態() {
+  取('掃碼模態').classList.remove('隱藏');
+  取('掃碼狀態').textContent='📡 啟動相機中... / Starting camera...';
+  取('掃碼手動輸入').classList.add('隱藏');
+  取('掃碼手動輸入').value='';
+  啟動掃碼相機('人員');
+}
+
+function 關閉掃碼模態() {
+  取('掃碼模態').classList.add('隱藏');
+  停止掃碼相機('人員');
+}
+
+async function 啟動掃碼相機(模式) {
+  停止掃碼相機(模式);
+  let 視訊id = 模式==='產品' ? '產品掃碼視訊' : '掃碼視訊';
+  let 狀態id = 模式==='產品' ? '產品掃碼狀態' : '掃碼狀態';
+  let 視訊 = 取(視訊id);
+  let 狀態區 = 取(狀態id);
+  try {
+    let stream = await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}}
+    });
+    if (模式==='產品') 狀態.產品掃碼串流=stream;
+    else 狀態.掃碼串流=stream;
+    視訊.srcObject=stream;視訊.style.display='block';
+    狀態區.textContent='🔍 掃描中，請將條碼對準框內 / Scanning...';
+    let detector = null;
+    if ('BarcodeDetector' in window) {
+      try {
+        let fmts = await window.BarcodeDetector.getSupportedFormats();
+        if (fmts.length) detector = new window.BarcodeDetector({formats:fmts});
+      } catch(e) {}
+    }
+    if (模式==='產品') 狀態.產品掃碼偵測器=detector;
+    else 狀態.掃碼偵測器=detector;
+    開始掃碼迴圈(模式);
+    if (!detector) {
+      狀態區.textContent='⚠️ 此瀏覽器不支援自動偵測，請手動輸入 / Browser unsupported, use manual input';
+      let 手動id = 模式==='產品' ? '產品掃碼手動輸入' : '掃碼手動輸入';
+      取(手動id).classList.remove('隱藏');
+      取(手動id).focus();
+    }
+  } catch(e) {
+    狀態區.textContent='❌ 無法存取相機：'+(e.message||'請確認相機權限');
+    視訊.style.display='none';
+    let 手動id = 模式==='產品' ? '產品掃碼手動輸入' : '掃碼手動輸入';
+    取(手動id).classList.remove('隱藏');
+    取(手動id).focus();
+  }
+}
+
+function 開始掃碼迴圈(模式) {
+  let timerKey = 模式==='產品' ? '產品掃碼定時器' : '掃碼定時器';
+  let detKey = 模式==='產品' ? '產品掃碼偵測器' : '掃碼偵測器';
+  let vidId = 模式==='產品' ? '產品掃碼視訊' : '掃碼視訊';
+  if (狀態[timerKey]) clearInterval(狀態[timerKey]);
+  if (!狀態[detKey]) return;
+  狀態[timerKey] = setInterval(async()=>{
+    let v = 取(vidId);
+    if (!v||!v.srcObject||v.readyState<2) return;
+    try {
+      let dets = await 狀態[detKey].detect(v);
+      if (dets&&dets.length) {
+        let val = dets[0].rawValue||dets[0].data||'';
+        if (val){ 模式==='產品' ? 產品掃碼成功(val) : 掃碼成功(val); }
+      }
+    } catch(e) {}
+  }, 350);
+}
+
+function 停止掃碼相機(模式) {
+  let timerKey = 模式==='產品' ? '產品掃碼定時器' : '掃碼定時器';
+  let streamKey = 模式==='產品' ? '產品掃碼串流' : '掃碼串流';
+  let detKey = 模式==='產品' ? '產品掃碼偵測器' : '掃碼偵測器';
+  let vidId = 模式==='產品' ? '產品掃碼視訊' : '掃碼視訊';
+  if (狀態[timerKey]){ clearInterval(狀態[timerKey]); 狀態[timerKey]=null; }
+  if (狀態[streamKey]){ 狀態[streamKey].getTracks().forEach(t=>t.stop()); 狀態[streamKey]=null; }
+  狀態[detKey]=null;
+  let v = 取(vidId);
+  if (v){ v.srcObject=null; v.style.display='none'; }
+}
+
+function 掃碼成功(val) {
+  停止掃碼相機('人員');
+  關閉掃碼模態();
+  let clean = String(val).trim();
+  let 找到 = 全域資料.人員.find(r=>String(r.工號||'').trim()===clean && r.啟用!=='否')
+    || 全域資料.人員.find(r=>String(r.工號||'').trim().indexOf(clean)>=0 && r.啟用!=='否')
+    || 全域資料.人員.find(r=>String(r.姓名||'').trim()===clean && r.啟用!=='否')
+    || 全域資料.人員.find(r=>(String(r.條碼||r.工牌號||r.卡號||'')===clean) && r.啟用!=='否');
+  if (找到) {
+    卡片選取人員(全域資料.人員.indexOf(找到));
+    setTimeout(()=>切換頁籤('工件'),600);
+  } else {
+    Roar('⚠️','找不到此工號 / Employee Not Found','條碼：'+clean+'，請手動選擇','警告');
+  }
+}
+
+function 切換手動輸入() {
+  let f = 取('掃碼手動輸入');
+  f.classList.toggle('隱藏');
+  if (!f.classList.contains('隱藏')){ f.focus(); 取('掃碼狀態').textContent='⌨ 請輸入工號後按 Enter'; }
+}
+
+function 掃碼手動確認(e) {
+  if (e.key==='Enter'){ e.preventDefault(); let v=取('掃碼手動輸入').value.trim(); if(v) 掃碼成功(v); }
+}
+
+// ══════════════════════════════════════
+// SCAN MODAL (Product)
+// ══════════════════════════════════════
+function 開啟產品掃碼模態() {
+  取('產品掃碼模態').classList.remove('隱藏');
+  取('產品掃碼狀態').textContent='📡 啟動相機中... / Starting camera...';
+  取('產品掃碼手動輸入').classList.add('隱藏');
+  取('產品掃碼手動輸入').value='';
+  啟動掃碼相機('產品');
+}
+
+function 關閉產品掃碼模態() {
+  取('產品掃碼模態').classList.add('隱藏');
+  停止掃碼相機('產品');
+}
+
+function 產品掃碼成功(val) {
+  停止掃碼相機('產品');
+  關閉產品掃碼模態();
+  let clean = String(val).trim();
+  let 找到 = 全域資料.報工工站群組.find(g=>
+    String(g.產品編號||'').trim()===clean ||
+    String(g.客戶品號||'').trim()===clean ||
+    String(g.品名||'').trim()===clean
+  );
+  if (找到) {
+    選取產品卡片(找到.產品編號+'|'+找到.品名);
+    Roar('✅','產品掃碼成功 / Product Scanned',(找到.品名||'')+'（'+(找到.產品編號||'')+'）','成功');
+  } else {
+    Roar('⚠️','找不到此產品 / Product Not Found','條碼：'+clean,'警告');
+  }
+}
+
+function 切換產品手動輸入() {
+  let f = 取('產品掃碼手動輸入');
+  f.classList.toggle('隱藏');
+  if (!f.classList.contains('隱藏')){ f.focus(); 取('產品掃碼狀態').textContent='⌨ 請輸入產品編號後按 Enter'; }
+}
+
+function 產品掃碼手動確認(e) {
+  if (e.key==='Enter'){ e.preventDefault(); let v=取('產品掃碼手動輸入').value.trim(); if(v) 產品掃碼成功(v); }
+}
+
+// ══════════════════════════════════════
+// SCANNER GUN (Global keyboard)
+// ══════════════════════════════════════
+function 監聽掃描槍輸入() {
+  document.addEventListener('keydown', function(e) {
+    let tag = document.activeElement?.tagName?.toLowerCase();
+    if (tag==='input'||tag==='textarea'||tag==='select') return;
+    if (e.key.length>1&&e.key!=='Enter') return;
+    if (e.key==='Enter') {
+      if (掃描槍緩衝.length>=3) {
+        e.preventDefault();
+        let v = 掃描槍緩衝.trim();
+        掃描槍緩衝='';
+        if (掃描槍計時) clearTimeout(掃描槍計時);
+        掃碼成功(v);
+      } else 掃描槍緩衝='';
+      return;
+    }
+    掃描槍緩衝+=e.key;
+    if (掃描槍計時) clearTimeout(掃描槍計時);
+    掃描槍計時 = setTimeout(()=>{ if(掃描槍緩衝.length<6) 掃描槍緩衝=''; }, 掃描槍間隔*2);
+  });
+}
+
+// ══════════════════════════════════════
+// PRODUCT CARDS (圖片滿版)
+// ══════════════════════════════════════
+function 建立產品卡片網格() {
+  let 容器 = 取('產品網格容器');
+  let map = {};
+  全域資料.報工工站群組.forEach(g=>{
+    let key = (g.產品編號||'')+'|'+(g.品名||'');
+    if (!map[key]) map[key]=g;
+  });
+  let keys = Object.keys(map);
+  if (!keys.length) {
+    容器.innerHTML='<div class="小字" style="text-align:center;padding:20px;grid-column:1/-1;">尚無產品資料 / No products</div>';
+    return;
+  }
+  容器.innerHTML = keys.sort((a,b)=>(map[a].品名||'').localeCompare(map[b].品名||'')).map(key=>{
+    let g = map[key];
+    let 顯示名稱 = 清理產品名稱(g.品名||'');
+    let thumb = g.產品縮圖網址||g.產品照片網址
+      ? '<img src="'+安全屬性(g.產品縮圖網址||g.產品照片網址)+'" onerror="this.parentElement.innerHTML=\'<span>無圖</span>\'">'
+      : '<span>📦</span>';
+    return '<div class="產品卡片" data-key="'+安全屬性(key)+'" onclick="選取產品卡片(\''+安全屬性(key)+'\')">'
+      +'<div class="產品縮圖">'+thumb+'</div>'
+      +'<div class="產品名稱大">'+安全文字(顯示名稱)+'</div>'
+      +'<div class="產品編號小">'+安全文字(g.產品編號||'')+'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function 清理產品名稱(name) {
+  return String(name||'').replace(/^[-/：；（）$@「」。，、？！._—|～《》¥\[\]{}#%^*+=·\s]+/g,'')
+    .replace(/[-/：；（）$@「」。，、？！._—|～《》¥\[\]{}#%^*+=·\s]+$/g,'').trim() || name;
+}
+
+function 過濾產品卡片() {
+  let kw = (值('產品搜尋')||'').toUpperCase().trim();
+  let cards = document.querySelectorAll('.產品卡片');
+  let any=false;
+  cards.forEach(card=>{
+    let key = card.getAttribute('data-key')||'';
+    let parts = key.split('|');
+    let code = parts[0]||'';
+    let name = parts.slice(1).join('|')||'';
+    let g = 全域資料.報工工站群組.find(x=>(x.產品編號||'')===code&&(x.品名||'')===name);
+    let txt = [code,name,g&&g.客戶品號||''].join(' ').toUpperCase();
+    if (!kw||txt.indexOf(kw)>=0){ card.classList.remove('隱藏'); any=true; }
+    else card.classList.add('隱藏');
+  });
+  取('產品網格空').classList.toggle('隱藏',any);
+}
+
+function 選取產品卡片(key) {
+  document.querySelectorAll('.產品卡片').forEach(c=>c.classList.remove('選中'));
+  let t = document.querySelector('.產品卡片[data-key="'+安全屬性(key)+'"]');
+  if (t){ t.classList.add('選中'); t.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+  let parts = key.split('|');
+  let pid = parts[0]||'', name = parts.slice(1).join('|')||'';
+  狀態.產品群組清單 = 全域資料.報工工站群組.filter(g=>(g.產品編號||'')===pid&&(g.品名||'')===name);
+  狀態.目前產品群組 = 狀態.產品群組清單[0]||null;
+  let g = 狀態.目前產品群組||{};
+  值('產品編號', g.產品編號||'');
+  值('品名', 清理產品名稱(g.品名||''));
+  顯示產品照片(g);
+  建立工站選單();
+  取('選定產品區').classList.remove('隱藏');
+  更新預覽();
+  Roar('📦','已選定產品 / Product Selected',(g.品名||'')+'（'+(g.產品編號||'')+'）','成功');
+}
+
+function 顯示產品照片(g) {
+  取('產品照片卡').innerHTML = 圖片HTML((g&&g.產品縮圖網址)||(g&&g.產品照片網址),'無產品照')
+    +'<div><div class="名稱大">'+安全文字(g&&g.品名?清理產品名稱(g.品名):'尚未選產品')+'</div>'
+    +'<div class="小字">'+安全文字(g&&g.產品編號||'')+'</div></div>';
+}
+
+function 建立工站選單() {
+  let s = 取('工站');
+  s.innerHTML = '<option value="">── 請選擇報工工站 / Select Workstation ──</option>';
+  狀態.產品群組清單.forEach((g,i)=>s.add(new Option(g.顯示名稱||[g.報工工站名稱,g.工序範圍,g.主機台].filter(Boolean).join('｜'),i)));
+  清空工站欄位();
+}
+
+function 工站變更() {
+  let i = 值('工站');
+  狀態.目前工站 = i===''?null:狀態.產品群組清單[Number(i)];
+  let g = 狀態.目前工站||{};
+  值('工序範圍', g.工序範圍||g.工序||'');
+  值('標準產能', g.標準產能||'');
+  值('標準工時秒', g.標準工時_秒||'');
+  建立主機台選單(g.機台清單||[]);
+  顯示機台卡(g.機台清單||[]);
+  更新預覽();
+}
+
+function 清空工站欄位() {
+  狀態.目前工站=null;
+  值('工序範圍',''); 值('標準產能',''); 值('標準工時秒','');
+  取('主機台').innerHTML=''; 取('機台清單卡').innerHTML='';
+}
+
+function 建立主機台選單(list) {
+  let s = 取('主機台');
+  s.innerHTML='';
+  if (!list.length){ s.add(new Option('無固定機台 / No Fixed Machine','')); return; }
+  list.forEach(m=>s.add(new Option([m.機台編號,m.區域,m.機台型號].filter(Boolean).join('｜'),m.機台編號||'')));
+}
+
+function 顯示機台卡(list) {
+  let box = 取('機台清單卡');
+  if (!list.length){ box.innerHTML='<div class="小字" style="padding:8px;">此工站無固定機台 / No dedicated machines</div>'; return; }
+  box.innerHTML = list.map(m=>'<div class="機台卡">'
+    +(m.縮圖網址||m.照片網址?'<img src="'+安全屬性(m.縮圖網址||m.照片網址)+'" onerror="this.outerHTML=\'<div class=無機圖>無機台照</div>\'">':'<div class="無機圖">無機台照</div>')
+    +'<div class="機台號">'+安全文字(m.機台編號||'')+'</div>'
+    +'<div class="小字">'+安全文字([m.區域,m.機台型號,m.設備名稱].filter(Boolean).join('｜'))+'</div>'
+    +'</div>').join('');
+}
+
+function 主機台變更() { 更新預覽(); }
+
+// ══════════════════════════════════════
+// 不良分配功能 (取代原不良行列)
+// ══════════════════════════════════════
+function 初始化異常類型選單() {
+  let s = 取('異常類型');
+  if (!s) return;
+  let 現有 = Array.from(s.options).map(o=>o.value);
+  (全域資料.異常類型||[]).forEach(x=>{
+    if (現有.indexOf(x)<0) s.add(new Option(x,x));
+  });
+}
+
+function 添加不良分配() {
+  let id = ++不良分配ID;
+  let row = {id:id, 類別:'', 代碼:'', 名稱:'', 英文名稱:'', 數量:0};
+  狀態.不良分配清單.push(row);
+  渲染不良分配();
+}
+
+function 刪除不良分配(id) {
+  狀態.不良分配清單 = 狀態.不良分配清單.filter(r=>r.id!==id);
+  渲染不良分配();
+  更新預覽();
+}
+
+function 建立不良選項HTML(list, 類別, selectedCode, selectedType) {
+  list = Array.isArray(list) ? list : [];
+  return list.map(x=>{
+    let code = x.代碼 || x.不良代碼 || '';
+    let name = x.名稱 || x.不良名稱 || '';
+    let en = x.英文名稱 || x.英文 || x.English || '';
+    let value = [code, 類別, name, en].map(v=>String(v||'').replace(/\|/g,'／')).join('|');
+    let label = [code, name, en].filter(Boolean).join('｜');
+    return '<option value="'+安全屬性(value)+'"'+(selectedCode===code&&selectedType===類別?' selected':'')+'>'+安全文字(label)+'</option>';
+  }).join('');
+}
+
+function 渲染不良分配() {
+  let 容器 = 取('不良分配容器');
+  if (!容器) return;
+  if (!狀態.不良分配清單.length){ 容器.innerHTML='<div class="小字" style="padding:6px;">尚無分配項目 / No allocation items</div>'; 更新分配摘要(); return; }
+  容器.innerHTML = 狀態.不良分配清單.map(row=>{
+    let Z清單 = (全域資料.不良原因&&全域資料.不良原因.Z)||[];
+    let Y清單 = (全域資料.不良原因&&全域資料.不良原因.Y)||[];
+    if (!Z清單.length && !Y清單.length) {
+      Z清單 = [
+        {代碼:'Z01',名稱:'素材裂縫',英文名稱:'Surface Crack'},
+        {代碼:'Z02',名稱:'加工砂孔',英文名稱:'Sand Porosity'},
+        {代碼:'Z03',名稱:'外觀刮傷',英文名稱:'Surface Scratch'}
+      ];
+      Y清單 = [
+        {代碼:'Y01',名稱:'內徑超差',英文名稱:'Inner Diameter OOT'},
+        {代碼:'Y02',名稱:'外徑超差',英文名稱:'Outer Diameter OOT'},
+        {代碼:'Y03',名稱:'長度超差',英文名稱:'Length OOT'},
+        {代碼:'Y04',名稱:'表面粗糙度',英文名稱:'Surface Roughness'}
+      ];
+    }
+    let Z選項 = 建立不良選項HTML(Z清單,'Z',row.代碼,row.類別);
+    let Y選項 = 建立不良選項HTML(Y清單,'Y',row.代碼,row.類別);
+    return '<div class="不良分配行" id="不良分配_'+row.id+'">'
+      +'<button class="刪除分配" onclick="刪除不良分配('+row.id+')">✕</button>'
+      +'<select style="flex:2;" onchange="不良分配原因變更('+row.id+',this.value)">'
+      +'<option value="">── 選擇不良原因 / Select Defect ──</option>'
+      +'<optgroup label="Z 素材/外觀">'+Z選項+'</optgroup>'
+      +'<optgroup label="Y 加工/尺寸">'+Y選項+'</optgroup>'
+      +'</select>'
+      +'<input class="數量欄" type="number" min="0" value="'+row.數量+'" inputmode="numeric" placeholder="pcs" onchange="不良分配數量變更('+row.id+',this.value)" oninput="不良分配數量變更('+row.id+',this.value)">'
+      +'</div>';
+  }).join('');
+  更新分配摘要();
+  更新預覽();
+}
+
+function 不良分配原因變更(id, val) {
+  let row = 狀態.不良分配清單.find(r=>r.id===id);
+  if (!row) return;
+  let parts = String(val||'').split('|');
+  row.代碼 = parts[0]||'';
+  row.類別 = parts[1]||'';
+  let optionName = parts[2]||'';
+  let optionEn = parts[3]||'';
+  let list = row.類別==='Z' ? (全域資料.不良原因.Z||[]) : (全域資料.不良原因.Y||[]);
+  let 找到 = list.find(x=>(x.代碼||x.不良代碼)===row.代碼);
+  row.名稱 = 找到 ? (找到.名稱||找到.不良名稱||optionName||'') : optionName;
+  row.英文名稱 = 找到 ? (找到.英文名稱||找到.英文||optionEn||'') : optionEn;
+  更新分配摘要();
+  更新預覽();
+}
+
+function 不良分配數量變更(id, val) {
+  let row = 狀態.不良分配清單.find(r=>r.id===id);
+  if (!row) return;
+  row.數量 = Math.max(0, Number(val)||0);
+  更新分配摘要();
+  更新預覽();
+}
+
+function 更新分配摘要() {
+  let box = 取('分配摘要區');
+  let 總不良 = 數字('不良數');
+  let 分配總和 = 狀態.不良分配清單.reduce((s,r)=>s + (Number(r.數量)||0), 0);
+  if (總不良 > 0 || 分配總和 > 0) {
+    let 差異 = 總不良 - 分配總和;
+    let color = 差異 === 0 ? 'var(--綠)' : 'var(--紅)';
+    box.innerHTML = '📊 分配總和：<b>'+分配總和+'</b> / 總不良：<b>'+總不良+'</b> （<span style="color:'+color+'">'+(差異===0?'✓ 已平衡':'⚠ 差 '+差異+' pcs')+'</span>）';
+    box.classList.remove('隱藏');
+  } else {
+    box.classList.add('隱藏');
+  }
+}
+
+// ══════════════════════════════════════
+// ANOMALY TIME
+// ══════════════════════════════════════
+function 計算異常工時() {
+  let 開始 = 取('異常開始時間').value;
+  let 結束 = 取('異常結束時間').value;
+  if (開始&&結束) {
+    let diff = (new Date(結束)-new Date(開始))/3600000;
+    if (diff<0) diff+=24;
+    值('異常工時', diff>=0 ? diff.toFixed(2)+' hrs' : '');
+  } else {
+    值('異常工時','');
+  }
+  更新預覽();
+}
+
+// ══════════════════════════════════════
+// PHOTOS
+// ══════════════════════════════════════
+function 觸發拍照() { 取('照片拍照').click(); }
+function 觸發選檔() { 取('照片選檔').click(); }
+
+function 照片變更(e, 來源) {
+  let files = [...e.target.files];
+  let 剩餘 = 最大照片 - 狀態.現場照片清單.length;
+  if (剩餘<=0){ Roar('⚠️','已達上限 / Max Reached','最多'+最大照片+'張照片','警告'); e.target.value=''; return; }
+  files = files.slice(0,剩餘);
+  files.forEach(file=>{
+    let reader = new FileReader();
+    reader.onload = ev=>{
+      let data = String(ev.target.result);
+      狀態.現場照片清單.push({
+        base64:data,
+        mime:file.type,
+        檔名:file.name,
+        備註:'',
+        來源:來源
+      });
+      渲染照片格();
+      更新預覽();
+    };
+    reader.readAsDataURL(file);
+  });
+  e.target.value='';
+}
+
+function 渲染照片格() {
+  let 格 = 取('照片格');
+  格.innerHTML = 狀態.現場照片清單.map((p,i)=>{
+    return '<div class="照片項目" onclick="開啟照片備註模態('+i+')">'
+      +'<img src="'+p.base64+'" alt="照片'+(i+1)+'">'
+      +(p.備註?'<div class="備註覆層">'+安全文字(p.備註)+'</div>':'')
+      +'<button class="刪除照片" onclick="event.stopPropagation();刪除照片('+i+')">✕</button>'
+      +'</div>';
+  }).join('');
+  取('照片計數').textContent = 狀態.現場照片清單.length+' / '+最大照片+' 張照片 / photos';
+}
+
+function 刪除照片(i) {
+  狀態.現場照片清單.splice(i,1);
+  渲染照片格();
+  更新預覽();
+}
+
+function 清除所有照片() {
+  if (狀態.現場照片清單.length===0) return;
+  if (!confirm('確認清除所有照片？/ Clear all photos?')) return;
+  狀態.現場照片清單=[];
+  渲染照片格();
+  更新預覽();
+}
+
+function 開啟照片備註模態(i) {
+  狀態.編輯照片索引 = i;
+  let p = 狀態.現場照片清單[i];
+  if (!p) return;
+  取('備註照片預覽').src = p.base64;
+  取('備註照片文字').value = p.備註||'';
+  取('照片備註模態').classList.remove('隱藏');
+  setTimeout(()=>取('備註照片文字').focus(),200);
+}
+
+function 關閉照片備註模態() {
+  取('照片備註模態').classList.add('隱藏');
+  狀態.編輯照片索引=-1;
+}
+
+function 儲存照片備註() {
+  let i = 狀態.編輯照片索引;
+  if (i>=0&&狀態.現場照片清單[i]) {
+    狀態.現場照片清單[i].備註 = 取('備註照片文字').value;
+    渲染照片格();
+    更新預覽();
+  }
+  關閉照片備註模態();
+}
+
+// ══════════════════════════════════════
+// CALCULATION
+// ══════════════════════════════════════
+function 計算數量() {
+  let total = 數字('今日共做數');
+  let ng = 數字('不良數');
+  if (ng>total&&total>0){ 值('不良數',total); ng=total; }
+  let good = Math.max(total-ng,0);
+  取('顯示今日共做').textContent = total;
+  取('顯示不良').textContent = ng;
+  取('顯示實際良品').textContent = good;
+  更新分配摘要();
+  更新不良同步提示();
+  更新預覽();
+}
+
+function 計算工時() {
+  let 開始 = 取('開始時間').value;
+  let 結束 = 取('結束時間').value;
+  if (開始&&結束) {
+    let diff = (new Date(結束)-new Date(開始))/3600000;
+    if (diff<0) diff+=24;
+    值('實際工時', diff>=0 ? diff.toFixed(2)+' hrs' : '');
+  }
+  更新預覽();
+}
+
+// ══════════════════════════════════════
+// BUILD REPORT DATA (整合不良分配)
+// ══════════════════════════════════════
+function 組合報工資料() {
+  let op = 狀態.作業員||{};
+  let g = 狀態.目前工站||狀態.目前產品群組||{};
+  let total = 數字('今日共做數');
+  let ng = 數字('不良數');
+  let machines = (g&&g.機台清單)||[];
+  // 將不良分配清單轉換為不良行清單格式
+  let 不良行清單 = 狀態.不良分配清單.filter(r=>r.代碼).map(r=>({
+    類別:r.類別, 代碼:r.代碼, 名稱:r.名稱, 英文名稱:r.英文名稱, 數量:r.數量
+  }));
+  let 不良總數 = 不良行清單.reduce((s,r)=>s + (Number(r.數量)||0),0);
+  return {
+    工號:op.工號||值('工號'),
+    姓名:op.姓名||值('姓名'),
+    班別:值('班別'),
+    是否加班:值('是否加班'),
+    加班類型:值('加班類型'),
+    作業員照片網址:op.照片網址||'',
+    作業員縮圖網址:op.縮圖網址||'',
+    作業員照片檔案ID:op.Google檔案ID||'',
+    產品編號:g.產品編號||值('產品編號'),
+    客戶品號:g.客戶品號||'',
+    品名:g.品名||值('品名'),
+    產品照片網址:g.產品照片網址||'',
+    產品縮圖網址:g.產品縮圖網址||'',
+    產品照片檔案ID:g.產品照片檔案ID||'',
+    工站名稱:g.工站名稱||'',
+    報工工站名稱:g.報工工站名稱||g.工站名稱||'',
+    工序:Array.isArray(g.工序清單)?g.工序清單.join(','):(g.工序||''),
+    工序清單:Array.isArray(g.工序清單)?g.工序清單.join(','):(g.工序||''),
+    機台清單:machines.map(m=>m.機台編號).filter(Boolean).join(','),
+    主機台:值('主機台'),
+    機台照片清單:machines,
+    今日共做數:total,
+    不良數:ng,
+    實際良品數:Math.max(total-ng,0),
+    不良率:total>0?ng/total:0,
+    開始時間:值('開始時間'),
+    結束時間:值('結束時間'),
+    實際工時:值('實際工時'),
+    不良行清單:不良行清單,
+    不良總數:不良總數,
+    異常類型:值('異常類型'),
+    異常開始時間:取('異常開始時間')?.value||'',
+    異常結束時間:取('異常結束時間')?.value||'',
+    異常工時:值('異常工時'),
+    備註:值('備註'),
+    現場照片清單:狀態.現場照片清單.map(p=>({
+      照片類型:'現場照片',
+      檔案名稱:p.檔名,
+      MIME類型:p.mime,
+      Base64:(p.base64||'').split(',')[1]||'',
+      備註:p.備註,
+      來源:p.來源
+    }))
+  };
+}
+
+function 更新不良同步提示() {
+  let box = 取('不良同步提示區');
+  let 有不良 = 狀態.不良分配清單.some(r=>r.代碼 && r.數量>0) || 數字('不良數')>0;
+  if (有不良) {
+    box.innerHTML='<span class="不良同步標記">⚠ 此報工將同步寫入 09_不良紀錄 / Will sync to defect record</span>';
+  } else {
+    box.innerHTML='';
+  }
+}
+
+function 更新預覽() {
+  let d = 組合報工資料();
+  let 不良明細 = d.不良行清單.map(r=>
+    '   › '+r.類別+'類 '+r.代碼+' '+r.名稱+(r.英文名稱?' / '+r.英文名稱:'')+' × '+r.數量+' pcs'
+  ).join('\n')||'   無不良記錄 / No defects';
+  取('報工預覽').textContent =
+    '📋 報工預覽 / Production Report Preview\n'
+    +'━━━━━━━━━━━━━━━━━━━━━━━━\n'
+    +'👤 作業員 / Operator：'+(d.姓名||'—')+' / '+(d.工號||'—')+'｜'+(d.班別||'—')+'\n'
+    +'   加班 / OT：'+(d.是否加班||'否')+'｜'+(d.加班類型||'無')+'\n'
+    +'📦 產品 / Product：'+(d.產品編號||'—')+'｜'+(d.品名||'—')+'\n'
+    +'🔧 工站 / Workstation：'+(d.報工工站名稱||'—')+'｜工序：'+(d.工序||'—')+'\n'
+    +'🖥 機台 / Machine：'+(d.機台清單||'無')+'｜主機台：'+(d.主機台||'無')+'\n'
+    +'━━━━━━━━━━━━━━━━━━━━━━━━\n'
+    +'📊 今日共做 / Total Qty：'+d.今日共做數+' pcs\n'
+    +'❌ 不良數 / NG Qty：'+d.不良數+' pcs\n'
+    +'✅ 實際良品 / Good Qty：'+d.實際良品數+' pcs\n'
+    +'📉 不良率 / NG Rate：'+(d.不良率>0?(d.不良率*100).toFixed(1)+'%':'0%')+'\n'
+    +'🕐 工時 / Working Hrs：'+(d.實際工時||'未計算 / N/A')+'\n'
+    +'━━━━━━━━━━━━━━━━━━━━━━━━\n'
+    +'🔍 不良明細 / Defect Details：\n'+不良明細+'\n'
+    +'🚨 異常類型 / Abnormal Type：'+(d.異常類型||'無異常')+'\n'
+    +'⏱ 異常時間 / Anomaly Duration：'+(d.異常工時||'N/A')+'\n'
+    +'📸 照片 / Photos：'+d.現場照片清單.length+' 張\n'
+    +'📝 備註 / Remarks：'+(d.備註||'無')+'\n'
+    +'━━━━━━━━━━━━━━━━━━━━━━━━\n'
+    +((d.不良數>0||d.不良行清單.length>0)
+      ?'⚠ 此報工含有不良記錄，將同步寫入 09_不良紀錄 / Contains defects, will sync\n'
+      :'✅ 無不良記錄 / No defect records\n');
+}
+
+// ══════════════════════════════════════
+// VALIDATE & SUBMIT
+// ══════════════════════════════════════
+function 驗證報工(d) {
+  if (!d.工號) return '請選擇作業員 / Please select operator';
+  if (!d.產品編號&&!d.品名) return '請選擇產品 / Please select product';
+  if (!d.報工工站名稱) return '請選擇報工工站 / Please select workstation';
+  if (d.今日共做數<=0) return '今日共做數必須大於 0 / Total qty must > 0';
+  if (d.不良數<0) return '不良數不可小於 0 / NG qty must >= 0';
+  if (d.不良數>d.今日共做數) return '不良數不可大於共做數 / NG qty must not exceed total';
+  return '';
+}
+
+function 送出報工() {
+  let d = 組合報工資料();
+  let err = 驗證報工(d);
+  if (err){ Roar('⚠️','驗證失敗 / Validation Failed',err,'錯誤'); return; }
+  更新預覽();
+  let 有不良 = (d.不良數>0||d.不良行清單.length>0);
+  let msg = '確認送出報工？/ Confirm submit?\n\n實際良品：'+d.實際良品數+' pcs'
+    +(有不良?'\n不良數：'+d.不良數+' pcs（將同步寫入09_不良紀錄）':'');
+  if (!confirm(msg)) return;
+  顯示送出遮罩(true,'📤 報工送出中...','Submitting production record...');
+  取('主操作鈕').disabled=true;
+  取('主操作鈕').classList.add('送出中');
+  呼叫後端('寫入報工作業v2', d, res=>{
+    if (res&&res.成功) {
+      let 報工編號 = res.報工編號||'';
+      if (有不良) {
+        取('送出狀態文字').textContent='📋 同步不良紀錄中...';
+        取('送出副文字').textContent='Syncing defect records...';
+        let 不良資料 = 組合不良資料(d, 報工編號);
+        呼叫後端('寫入不良紀錄v2', 不良資料, res2=>{
+          顯示送出遮罩(false);
+          取('主操作鈕').disabled=false;
+          取('主操作鈕').classList.remove('送出中');
+          if (res2&&res2.成功) {
+            Roar('✅','報工完成 / Complete','報工編號：'+報工編號+'｜不良紀錄已同步','成功');
+          } else {
+            Roar('⚠️','報工已寫入但不良記錄同步失敗',(res2&&res2.訊息)||'請手動確認','警告');
+          }
+          清空報工數量();
+        }, e=>{
+          顯示送出遮罩(false);
+          取('主操作鈕').disabled=false;
+          取('主操作鈕').classList.remove('送出中');
+          Roar('⚠️','不良記錄同步失敗',(e.message||String(e)),'警告');
+          清空報工數量();
         });
+      } else {
+        顯示送出遮罩(false);
+        取('主操作鈕').disabled=false;
+        取('主操作鈕').classList.remove('送出中');
+        Roar('✅','報工完成 / Complete','報工編號：'+報工編號,'成功');
+        清空報工數量();
+      }
+    } else {
+      顯示送出遮罩(false);
+      取('主操作鈕').disabled=false;
+      取('主操作鈕').classList.remove('送出中');
+      Roar('❌','寫入失敗 / Submit Failed',(res&&res.訊息)||'未知錯誤','錯誤');
+    }
+  }, e=>{
+    顯示送出遮罩(false);
+    取('主操作鈕').disabled=false;
+    取('主操作鈕').classList.remove('送出中');
+    Roar('❌','寫入失敗 / Submit Failed',(e.message||String(e)),'錯誤');
+  });
+}
 
-        // ==================== 後端呼叫封裝 ====================
-        function 重新載入資料() {
-            顯示載入(true);
-            呼叫後端('取得報工作業v2初始資料', null, 資料載入完成, e => {
-                顯示載入(false);
-                提示('讀取失敗：' + (e.message || e), true);
-            });
-        }
+function 組合不良資料(d, 報工編號) {
+  return {
+    報工編號:報工編號,
+    工號:d.工號, 姓名:d.姓名, 班別:d.班別,
+    產品編號:d.產品編號, 客戶品號:d.客戶品號, 品名:d.品名,
+    工站名稱:d.報工工站名稱, 工序:d.工序,
+    機台清單:d.機台清單, 主機台:d.主機台,
+    不良數:d.不良數, 不良率:d.不良率,
+    不良行清單:d.不良行清單,
+    異常類型:d.異常類型,
+    異常開始時間:d.異常開始時間,
+    異常結束時間:d.異常結束時間,
+    異常工時:d.異常工時,
+    備註:d.備註,
+    現場照片清單:d.現場照片清單,
+    開始時間:d.開始時間, 結束時間:d.結束時間, 實際工時:d.實際工時,
+    寫入時間:new Date().toISOString()
+  };
+}
 
-        function 呼叫後端(fn, arg, ok, fail) {
-            try {
-                if (typeof google === 'undefined' || !google.script || !google.script.run)
-                    throw new Error('請用 GAS Web App 開啟本頁：/exec?page=07_報工作業V2');
-                let r = google.script.run.withSuccessHandler(ok).withFailureHandler(fail || function(e) {
-                    提示(e.message || String(e), true);
-                });
-                arg === null ? r[fn]() : r[fn](arg);
-            } catch (e) {
-                (fail || 提示)(e, true);
-            }
-        }
+function 清空報工數量() {
+  值('今日共做數','');
+  值('不良數','0');
+  狀態.不良分配清單=[];
+  渲染不良分配();
+  添加不良分配();
+  狀態.現場照片清單=[];
+  取('照片格').innerHTML='';
+  取('照片計數').textContent='0 / '+最大照片+' 張照片 / photos';
+  取('不良同步提示區').innerHTML='';
+  取('備註').value='';
+  計算數量();
+}
 
-        function 資料載入完成(data) {
-            顯示載入(false);
-            if (!data || !data.成功) {
-                提示((data && data.訊息) || '資料讀取失敗，請檢查後端連線', true);
-                return;
-            }
-            全域資料 = data;
-            全域資料.報工工站群組 = (data.報工工站群組 || data.途程工站群組 || []).map(標準化群組);
-            全域資料.途程工站群組 = 全域資料.報工工站群組;
-            全域資料.不良原因 = data.不良原因 || { Z: [], Y: [] };
-            全域資料.異常類型 = data.異常類型 || [];
-            全域資料.班別清單 = data.班別清單 || [];
-            全域資料.人員 = data.人員 || [];
-            全域資料.筆數 = data.筆數 || {};
-            填入狀態卡();
-            建立人員選單();
-            建立班別選單();
-            建立產品選單();
-            建立品質選單();
-            建立人員卡片網格();
-            載入常用人員();
-            提示('✅ 資料已載入：人員 ' + 全域資料.人員.length + ' 筆｜報工工站群組 ' + 全域資料.報工工站群組
-                .length + ' 筆｜機台 ' + (全域資料.筆數.工站機台關聯 || 0) + ' 筆｜不良代碼 ' + (全域資料.筆數.不良代碼 || 0) + ' 筆');
-        }
+// ══════════════════════════════════════
+// TAB NAV
+// ══════════════════════════════════════
+function 切換頁籤(name) {
+  狀態.頁籤 = name;
+  頁序.forEach(p=>{
+    取('頁面_'+p).classList.toggle('隱藏',p!==name);
+    取('頁籤_'+p).classList.toggle('active',p===name);
+  });
+  取('主操作鈕').textContent = name==='品質' ? '📤 預覽並送出 / Submit' : '下一步 → / Next';
+  if (name==='產出') 設定預設時間();
+  更新預覽();
+  if (name==='品質') 更新不良同步提示();
+}
 
-        function 標準化群組(g) {
-            g = g || {};
-            if (typeof g.機台清單 === 'string') {
-                try { g.機台清單 = JSON.parse(g.機台清單); } catch (e) { g.機台清單 = []; }
-            }
-            if (!Array.isArray(g.機台清單)) g.機台清單 = [];
-            if (!Array.isArray(g.工序清單)) g.工序清單 = String(g.工序清單 || g.工序 || '').split(/[、,，;；\s]+/).filter(
-                Boolean);
-            g.報工工站名稱 = g.報工工站名稱 || g.工站名稱 || '';
-            g.顯示名稱 = g.顯示名稱 || [g.報工工站名稱, g.工序範圍 || g.工序, g.機台編號清單 ? (g.機台編號清單.join ? g.機台編號清單.join(
-                '、') : g.機台編號清單) : ''].filter(Boolean).join('｜');
-            return g;
-        }
+function 下一步或送出() {
+  let i = 頁序.indexOf(狀態.頁籤);
+  if (i<頁序.length-1) 切換頁籤(頁序[i+1]);
+  else 送出報工();
+}
 
-        function 填入狀態卡() {
-            let p = 全域資料.筆數 || {};
-            document.getElementById('狀態卡').innerHTML =
-                '🟢 資料已載入｜人員：' + (p.人員 || 全域資料.人員.length) + ' 筆｜報工工站群組：' + (p.報工工站群組 || 全域資料.報工工站群組
-                    .length) + ' 筆｜機台：' + (p.工站機台關聯 || 0) + ' 筆｜照片索引：' + (p.照片索引 || 0) + ' 筆｜不良代碼：' + (p.不良代碼 || 0) + ' 筆';
-        }
+function 上一步() {
+  let i = 頁序.indexOf(狀態.頁籤);
+  if (i>0) 切換頁籤(頁序[i-1]);
+}
 
-        // ==================== 人員下拉選單 ====================
-        function 建立人員選單() {
-            let s = 取('作業員');
-            s.innerHTML = '';
-            // 嘗試分組
-            let 分組 = {};
-            全域資料.人員.forEach((r, i) => {
-                if (r.啟用 === '否') return;
-                let 組名 = r.人員類型 || r.類別 || r.部門 || '現場人員';
-                if (!分組[組名]) 分組[組名] = [];
-                分組[組名].push({ r, i });
-            });
-            // 若沒有任何分組或只有一組，使用預設
-            let 組keys = Object.keys(分組);
-            if (組keys.length === 0) {
-                s.add(new Option('無可用人員', ''));
-                return;
-            }
-            if (組keys.length === 1 && 組keys[0] === '現場人員') {
-                // 單一組別，不使用optgroup
-                s.add(new Option('── 請選擇作業員 ──', ''));
-                分組['現場人員'].forEach(({ r, i }) => {
-                    s.add(new Option((r.姓名 || '') + '｜' + (r.工號 || '') + '｜' + (r.班別 || ''), i));
-                });
-            } else {
-                s.add(new Option('── 請選擇作業員 ──', ''));
-                組keys.forEach(組名 => {
-                    let og = document.createElement('optgroup');
-                    og.label = '▸ ' + 組名;
-                    分組[組名].forEach(({ r, i }) => {
-                        let opt = new Option((r.姓名 || '') + '｜' + (r.工號 || '') + '｜' + (r.班別 || ''),
-                            i);
-                        og.appendChild(opt);
-                    });
-                    s.appendChild(og);
-                });
-            }
-        }
+// ══════════════════════════════════════
+// FULLSCREEN
+// ══════════════════════════════════════
+function 切換全螢幕() {
+  if (!document.fullscreenElement) {
+    (document.documentElement.requestFullscreen
+      ||document.documentElement.webkitRequestFullscreen
+      ||document.documentElement.mozRequestFullScreen
+      ||document.documentElement.msRequestFullscreen
+    ).call(document.documentElement).catch(e=>{
+      Roar('⚠️','無法全螢幕 / Fullscreen Unavailable',(e.message||''),'警告');
+    });
+  } else {
+    (document.exitFullscreen
+      ||document.webkitExitFullscreen
+      ||document.mozCancelFullScreen
+      ||document.msExitFullscreen
+    ).call(document);
+  }
+}
 
-        function 建立班別選單() {
-            let s = 取('班別');
-            s.innerHTML = '';
-            (全域資料.班別清單 || []).forEach(x => s.add(new Option(x.名稱 || x.值, x.值 || x.名稱)));
-            if (!s.options.length)['自動判斷', '早班', '中班', '大夜班', '加班'].forEach(x => s.add(new Option(x, x)));
-        }
+function 監聽全螢幕變化() {
+  ['fullscreenchange','webkitfullscreenchange','mozfullscreenchange','MSFullscreenChange'].forEach(evt=>{
+    document.addEventListener(evt, ()=>{
+      let btn = 取('全螢幕鈕');
+      if (!btn) return;
+      btn.textContent = document.fullscreenElement ? '⛶' : '⛶';
+      btn.title = document.fullscreenElement ? '退出全螢幕 / Exit Fullscreen' : '全螢幕 / Fullscreen';
+    });
+  });
+}
 
-        // ==================== 人員卡片網格 ====================
-        function 建立人員卡片網格() {
-            let 容器 = 取('人員網格容器');
-            let 啟用人員 = 全域資料.人員.filter(r => r.啟用 !== '否');
-            if (啟用人員.length === 0) {
-                容器.innerHTML = '<div class="小字" style="text-align:center;padding:20px;">尚無啟用的人員資料</div>';
-                return;
-            }
-            容器.innerHTML = 啟用人員.map((r, i) => {
-                let 原始索引 = 全域資料.人員.indexOf(r);
-                let 頭像HTML = r.縮圖網址 || r.照片網址 ?
-                    '<img src="' + 安全屬性(r.縮圖網址 || r.照片網址) +
-                    '" onerror="this.parentElement.innerHTML=\'' + 安全屬性(姓名首字(r.姓名)) + '\'">' :
-                    姓名首字(r.姓名);
-                return '<div class="人員卡片" data-index="' + 原始索引 +
-                    '" onclick="卡片選取人員(' + 原始索引 + ')" id="人員卡片_' + 原始索引 + '">' +
-                    '<div class="頭像圈">' + 頭像HTML + '</div>' +
-                    '<div class="人名">' + 安全文字(r.姓名 || '未知') + '</div>' +
-                    '<div class="人工號">' + 安全文字(r.工號 || '') + '｜' + 安全文字(r.班別 || '') + '</div>' +
-                    '</div>';
-            }).join('');
-        }
+// ══════════════════════════════════════
+// ROAR NOTIFICATIONS
+// ══════════════════════════════════════
+function Roar(圖示, 標題, 副標, 類型) {
+  let 容器 = 取('Roar容器');
+  let id = 'roar_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
+  let css = 類型==='成功'?'成功':類型==='錯誤'?'錯誤':類型==='警告'?'警告':'';
+  let el = document.createElement('div');
+  el.className = 'Roar通知 '+css;
+  el.id = id;
+  el.innerHTML =
+    '<div class="Roar圖示">'+圖示+'</div>'
+    +'<div class="Roar文字"><div class="標">'+安全文字(標題)+'</div><div class="副">'+安全文字(String(副標||''))+'</div></div>'
+    +'<button class="Roar關閉" onclick="關閉Roar(\''+id+'\')">✕</button>';
+  容器.appendChild(el);
+  setTimeout(()=>關閉Roar(id), 5000);
+}
 
-        function 姓名首字(name) {
-            let n = String(name || '?').trim();
-            return n ? n.charAt(0).toUpperCase() : '?';
-        }
+function 關閉Roar(id) {
+  let el = 取(id);
+  if (!el) return;
+  el.style.animation='Roar離場 .3s ease forwards';
+  setTimeout(()=>{ if(el.parentNode) el.parentNode.removeChild(el); }, 320);
+}
 
-        function 過濾人員卡片() {
-            let kw = (值('人員搜尋') || '').toUpperCase().trim();
-            let 卡片們 = document.querySelectorAll('.人員卡片');
-            let any = false;
-            卡片們.forEach(card => {
-                let idx = parseInt(card.getAttribute('data-index'));
-                let r = 全域資料.人員[idx];
-                if (!r) { card.classList.add('隱藏'); return; }
-                let txt = [(r.姓名 || ''), (r.工號 || ''), (r.班別 || ''), (r.部門 || ''), (r.人員類型 || ''),
-                    '現場人員'
-                ].join(' ').toUpperCase();
-                if (!kw || txt.indexOf(kw) >= 0) {
-                    card.classList.remove('隱藏');
-                    any = true;
-                } else {
-                    card.classList.add('隱藏');
-                }
-            });
-            取('人員網格空').classList.toggle('隱藏', any);
-        }
+const style = document.createElement('style');
+style.textContent='@keyframes Roar離場{from{opacity:1;transform:translateX(0);}to{opacity:0;transform:translateX(50px);}}';
+document.head.appendChild(style);
 
-        function 卡片選取人員(原始索引) {
-            // 更新下拉
-            值('作業員', String(原始索引));
-            // 高亮卡片
-            document.querySelectorAll('.人員卡片').forEach(c => c.classList.remove('選中'));
-            let 目標卡 = document.getElementById('人員卡片_' + 原始索引);
-            if (目標卡) 目標卡.classList.add('選中');
-            // 觸發變更
-            作業員變更();
-            // 記錄常用
-            記錄常用人員(原始索引);
-            // 滾動到可見
-            if (目標卡) 目標卡.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
+// ══════════════════════════════════════
+// SUBMIT OVERLAY
+// ══════════════════════════════════════
+function 顯示送出遮罩(show, 標題, 副標) {
+  let el = 取('送出遮罩');
+  if (show) {
+    if (標題) 取('送出狀態文字').textContent=標題;
+    if (副標) 取('送出副文字').textContent=副標;
+    el.classList.remove('隱藏');
+  } else {
+    el.classList.add('隱藏');
+  }
+}
 
-        function 作業員變更() {
-            let i = 值('作業員');
-            狀態.作業員 = i === '' ? null : 全域資料.人員[Number(i)];
-            let r = 狀態.作業員 || {};
-            值('工號', r.工號 || '');
-            值('姓名', r.姓名 || '');
-            if (r.班別) 值('班別', 推估班別(r.班別));
-            取('工號強調').textContent = r.工號 || '未輸入';
-            取('人員照片卡').innerHTML = 圖片HTML(r.縮圖網址 || r.照片網址, '無頭像') +
-                '<div><div class="名稱大">' + 安全文字(r.姓名 || '尚未選擇') + '</div><div class="小字">' +
-                安全文字([r.工號, r.部門, r.班別].filter(Boolean).join('｜')) + '</div></div>';
-            // 同步高亮卡片
-            document.querySelectorAll('.人員卡片').forEach(c => c.classList.remove('選中'));
-            if (i !== '') {
-                let 目標卡 = document.getElementById('人員卡片_' + i);
-                if (目標卡) 目標卡.classList.add('選中');
-            }
-            // 記錄常用
-            if (i !== '') 記錄常用人員(Number(i));
-            更新預覽();
-        }
+// ══════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════
+function 班別標準資料() {
+  let op = 狀態.作業員||{};
+  let 班別 = 取得人員班別(op) || 推估班別(值('班別')) || '早班';
+  if (班別==='大夜班')
+    return {名稱:'大夜班',開始:op.班別開始時間||'23:00',結束:op.班別結束時間||'07:50',跨日:true,實際工時:Number(op.班別實際工時||8)};
+  if (班別==='中班')
+    return {名稱:'中班',開始:op.班別開始時間||'16:50',結束:op.班別結束時間||'01:40',跨日:true,實際工時:Number(op.班別實際工時||8)};
+  return {名稱:'早班',開始:op.班別開始時間||'08:00',結束:op.班別結束時間||'16:50',跨日:false,實際工時:Number(op.班別實際工時||8)};
+}
 
-        function 推估班別(v) {
-            let t = String(v || '');
-            if (t.includes('中')) return '中班';
-            if (t.includes('夜')) return '大夜班';
-            if (t.includes('加班')) return '加班';
-            return '早班';
-        }
+function 轉日期時間值(時間, 跨日) {
+  let now = new Date();
+  let [hh,mm] = String(時間||'00:00').split(':').map(Number);
+  let d = new Date(now.getFullYear(),now.getMonth(),now.getDate(),hh||0,mm||0,0,0);
+  if (跨日) d.setDate(d.getDate()+1);
+  return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);
+}
 
-        // ==================== 常用人員 (localStorage) ====================
-        function 載入常用人員() {
-            try {
-                let raw = localStorage.getItem(LS_鍵);
-                if (raw) {
-                    let data = JSON.parse(raw);
-                    if (Array.isArray(data)) 渲染常用人員(data.slice(0, 最大常用));
-                    else 渲染常用人員([]);
-                } else {
-                    渲染常用人員([]);
-                }
-            } catch (e) {
-                渲染常用人員([]);
-            }
-        }
+function 設定預設時間() {
+  let rule = 班別標準資料();
+  值('班別', rule.名稱);
+  值('開始時間', 轉日期時間值(rule.開始, false));
+  值('結束時間', 轉日期時間值(rule.結束, rule.跨日));
+  值('實際工時', rule.實際工時);
+  更新預覽();
+}
 
-        function 記錄常用人員(原始索引) {
-            try {
-                let raw = localStorage.getItem(LS_鍵);
-                let list = raw ? JSON.parse(raw) : [];
-                // 移除重複
-                list = list.filter(item => item.索引 !== 原始索引);
-                // 加到最前
-                list.unshift({ 索引: 原始索引, 次數: (list.find(item => item.索引 === 原始索引)?.次數 || 0) + 1,
-                    最後使用: Date.now() });
-                // 限制數量
-                if (list.length > 最大常用 * 3) list = list.slice(0, 最大常用 * 3);
-                localStorage.setItem(LS_鍵, JSON.stringify(list));
-                渲染常用人員(list.slice(0, 最大常用));
-            } catch (e) {
-                // localStorage 不可用，忽略
-            }
-        }
-
-        function 渲染常用人員(list) {
-            let 列 = 取('常用人員列');
-            let 內容 = 取('常用人員內容');
-            if (!list || list.length === 0) {
-                列.classList.add('隱藏');
-                內容.innerHTML = '';
-                return;
-            }
-            列.classList.remove('隱藏');
-            內容.innerHTML = list.map(item => {
-                let r = 全域資料.人員[item.索引];
-                if (!r || r.啟用 === '否') return '';
-                let 迷你頭HTML = r.縮圖網址 || r.照片網址 ?
-                    '<img src="' + 安全屬性(r.縮圖網址 || r.照片網址) +
-                    '" onerror="this.parentElement.innerHTML=\'' + 安全屬性(姓名首字(r.姓名)) + '\'">' :
-                    姓名首字(r.姓名);
-                return '<div class="常用人" onclick="卡片選取人員(' + item.索引 + ')" title="' + 安全文字(r.姓名 || '') +
-                    '｜' + 安全文字(r.工號 || '') + '">' +
-                    '<div class="迷你頭">' + 迷你頭HTML + '</div>' +
-                    安全文字(r.姓名 || '') +
-                    '</div>';
-            }).filter(Boolean).join('');
-            if (!內容.innerHTML.trim()) 列.classList.add('隱藏');
-        }
-
-        // ==================== 掃碼功能 ====================
-        function 開啟掃碼模態() {
-            取('掃碼模態').classList.remove('隱藏');
-            取('掃碼狀態').textContent = '📡 啟動相機中...';
-            取('掃碼手動輸入').classList.add('隱藏');
-            取('掃碼手動輸入').value = '';
-            啟動掃碼相機();
-        }
-
-        function 關閉掃碼模態() {
-            取('掃碼模態').classList.add('隱藏');
-            停止掃碼相機();
-        }
-
-        async function 啟動掃碼相機() {
-            停止掃碼相機(); // 先停止舊的
-            let 視訊 = 取('掃碼視訊');
-            let 狀態區 = 取('掃碼狀態');
-            try {
-                let stream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
-                });
-                狀態.掃碼串流 = stream;
-                視訊.srcObject = stream;
-                視訊.style.display = 'block';
-                狀態區.textContent = '🔍 正在掃描中，請將條碼對準框內...';
-                // 嘗試 BarcodeDetector API
-                if ('BarcodeDetector' in window && window.BarcodeDetector.getSupportedFormats) {
-                    try {
-                        let formats = await window.BarcodeDetector.getSupportedFormats();
-                        if (formats.length > 0) {
-                            狀態.掃碼偵測器 = new window.BarcodeDetector({ formats });
-                            開始掃碼迴圈();
-                            return;
-                        }
-                    } catch (e) { /* 回退 */ }
-                }
-                // 回退：使用簡易的定時截圖方式（提示使用者）
-                狀態區.textContent = '⚠️ 此瀏覽器不支援條碼自動偵測，請使用手動輸入或嘗試其他瀏覽器（Chrome/Edge）';
-                // 仍嘗試使用簡易迴圈（有些環境可能部分支援）
-                開始掃碼迴圈();
-            } catch (e) {
-                狀態區.textContent = '❌ 無法存取相機：' + (e.message || '請確認相機權限已開啟');
-                視訊.style.display = 'none';
-                // 自動顯示手動輸入
-                取('掃碼手動輸入').classList.remove('隱藏');
-                取('掃碼手動輸入').focus();
-            }
-        }
-
-        function 開始掃碼迴圈() {
-            if (狀態.掃碼定時器) clearInterval(狀態.掃碼定時器);
-            if (!狀態.掃碼偵測器) {
-                // 無偵測器，每2秒提示
-                狀態.掃碼定時器 = setInterval(() => {
-                    let 狀態區 = 取('掃碼狀態');
-                    if (狀態區.textContent.indexOf('手動') < 0 && 狀態區.textContent.indexOf('不支援') < 0) {
-                        狀態區.textContent = '🔍 掃描中...（若持續無反應請使用手動輸入）';
-                    }
-                }, 3000);
-                return;
-            }
-            狀態.掃碼定時器 = setInterval(async () => {
-                let 視訊 = 取('掃碼視訊');
-                if (!視訊 || !視訊.srcObject || 視訊.readyState < 2) return;
-                try {
-                    let detections = await 狀態.掃碼偵測器.detect(視訊);
-                    if (detections && detections.length > 0) {
-                        let 條碼值 = detections[0].rawValue || detections[0].data || '';
-                        if (條碼值) {
-                            掃碼成功(條碼值);
-                        }
-                    }
-                } catch (e) {
-                    // 忽略單次偵測錯誤
-                }
-            }, 350);
-        }
-
-        function 停止掃碼相機() {
-            if (狀態.掃碼定時器) { clearInterval(狀態.掃碼定時器);
-                狀態.掃碼定時器 = null; }
-            if (狀態.掃碼串流) {
-                狀態.掃碼串流.getTracks().forEach(t => t.stop());
-                狀態.掃碼串流 = null;
-            }
-            狀態.掃碼偵測器 = null;
-            let 視訊 = 取('掃碼視訊');
-            if (視訊) { 視訊.srcObject = null;
-                視訊.style.display = 'none'; }
-        }
-
-        function 掃碼成功(條碼值) {
-            停止掃碼相機();
-            取('掃碼狀態').textContent = '✅ 掃描成功：' + 安全文字(條碼值);
-            關閉掃碼模態();
-            // 根據條碼值查找人員（優先匹配工號，其次匹配姓名，再次匹配條碼欄位）
-            let 找到 = null;
-            let 條碼乾淨 = String(條碼值).trim();
-            // 精確匹配工號
-            找到 = 全域資料.人員.find(r => String(r.工號 || '').trim() === 條碼乾淨 && r.啟用 !== '否');
-            // 模糊匹配工號（條碼可能包含前綴）
-            if (!找到) {
-                找到 = 全域資料.人員.find(r => String(r.工號 || '').trim().indexOf(條碼乾淨) >= 0 && r.啟用 !== '否');
-            }
-            // 匹配姓名
-            if (!找到) {
-                找到 = 全域資料.人員.find(r => String(r.姓名 || '').trim() === 條碼乾淨 && r.啟用 !== '否');
-            }
-            // 匹配條碼欄位（如果有的話）
-            if (!找到) {
-                找到 = 全域資料.人員.find(r => (String(r.條碼 || r.工牌號 || r.卡號 || '') === 條碼乾淨) && r.啟用 !== '否');
-            }
-            if (找到) {
-                let idx = 全域資料.人員.indexOf(找到);
-                卡片選取人員(idx);
-                提示('✅ 掃碼成功！已選定：' + (找到.姓名 || '') + '（' + (找到.工號 || '') + '）');
-                // 自動跳到下一頁
-                setTimeout(() => 切換頁籤('工件'), 600);
-            } else {
-                提示('⚠️ 找不到工號為「' + 條碼乾淨 + '」的人員，請確認條碼內容或手動選擇', true);
-            }
-        }
-
-        function 切換手動輸入() {
-            let 輸入框 = 取('掃碼手動輸入');
-            輸入框.classList.toggle('隱藏');
-            if (!輸入框.classList.contains('隱藏')) {
-                輸入框.focus();
-                取('掃碼狀態').textContent = '⌨ 請手動輸入工號或條碼，按 Enter 確認';
-            } else {
-                取('掃碼狀態').textContent = '🔍 繼續掃描...';
-            }
-        }
-
-        function 掃碼手動確認(event) {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                let val = 取('掃碼手動輸入').value.trim();
-                if (val) 掃碼成功(val);
-            }
-        }
-
-        // ==================== 掃描槍監聽（全局鍵盤快速輸入） ====================
-        let 掃描槍緩衝 = '';
-        let 掃描槍計時 = null;
-        const 掃描槍間隔 = 80; // ms，掃描槍輸入間隔通常很短
-
-        function 監聽掃描槍輸入() {
-            document.addEventListener('keydown', function(e) {
-                // 如果焦點在input/textarea/select上，不攔截（用戶正在手動輸入）
-                let tag = document.activeElement?.tagName?.toLowerCase();
-                if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
-                // 忽略功能鍵
-                if (e.key.length > 1 && e.key !== 'Enter') return;
-                if (e.key === 'Enter') {
-                    if (掃描槍緩衝.length >= 3) {
-                        e.preventDefault();
-                        let 條碼值 = 掃描槍緩衝.trim();
-                        掃描槍緩衝 = '';
-                        if (掃描槍計時) clearTimeout(掃描槍計時);
-                        掃描成功(條碼值);
-                    } else {
-                        掃描槍緩衝 = '';
-                    }
-                    return;
-                }
-                // 累積字符
-                掃描槍緩衝 += e.key;
-                if (掃描槍計時) clearTimeout(掃描槍計時);
-                掃描槍計時 = setTimeout(() => {
-                    // 超過間隔時間，清除緩衝（可能是手動打字）
-                    if (掃描槍緩衝.length < 6) 掃描槍緩衝 = '';
-                }, 掃描槍間隔 * 2);
-            });
-        }
-
-        // ==================== 產品相關 ====================
-        function 建立產品選單() {
-            let s = 取('產品');
-            let kw = (值('產品搜尋') || '').toUpperCase();
-            let map = {};
-            全域資料.報工工站群組.forEach(g => {
-                let key = (g.產品編號 || '') + '|' + (g.品名 || '');
-                let text = [g.產品編號, g.客戶品號, g.品名].join(' ').toUpperCase();
-                if (kw && text.indexOf(kw) < 0) return;
-                if (!map[key]) map[key] = g;
-            });
-            s.innerHTML = '<option value="">── 請選擇產品 ──</option>';
-            Object.keys(map).sort((a, b) => (map[a].品名 || '').localeCompare(map[b].品名 || '')).forEach(key => {
-                let g = map[key];
-                s.add(new Option([g.產品編號, g.客戶品號, g.品名].filter(Boolean).join('｜'), key));
-            });
-        }
-
-        function 產品變更() {
-            let key = 值('產品');
-            let parts = key.split('|');
-            let pid = parts[0] || '',
-                name = parts.slice(1).join('|') || '';
-            狀態.產品群組清單 = 全域資料.報工工站群組.filter(g => (g.產品編號 || '') === pid && (g.品名 || '') === name);
-            狀態.目前產品群組 = 狀態.產品群組清單[0] || null;
-            let g = 狀態.目前產品群組 || {};
-            值('產品編號', g.產品編號 || '');
-            值('客戶品號', g.客戶品號 || '');
-            值('品名', g.品名 || '');
-            顯示產品照片(g);
-            建立工站選單();
-            更新預覽();
-        }
-
-        function 顯示產品照片(g) {
-            取('產品照片卡').innerHTML = 圖片HTML((g && g.產品縮圖網址) || (g && g.產品照片網址), '無產品照') +
-                '<div><div class="名稱大">' + 安全文字(g && g.品名 ? g.品名 : '尚未選產品') + '</div><div class="小字">' +
-                安全文字([g && g.產品編號, g && g.客戶品號].filter(Boolean).join('｜')) + '</div></div>';
-        }
-
-        function 建立工站選單() {
-            let s = 取('工站');
-            s.innerHTML = '<option value="">── 請選擇報工工站 ──</option>';
-            狀態.產品群組清單.forEach((g, i) => s.add(new Option(g.顯示名稱 || [g.報工工站名稱, g.工序範圍, g.主機台].filter(Boolean)
-                .join('｜'), i)));
-            清空工站欄位();
-        }
-
-        function 工站變更() {
-            let i = 值('工站');
-            狀態.目前工站 = i === '' ? null : 狀態.產品群組清單[Number(i)];
-            let g = 狀態.目前工站 || {};
-            值('工序範圍', g.工序範圍 || g.工序 || '');
-            值('標準產能', g.標準產能 || '');
-            值('標準工時秒', g.標準工時_秒 || '');
-            建立主機台選單(g.機台清單 || []);
-            顯示機台卡(g.機台清單 || []);
-            更新預覽();
-        }
-
-        function 清空工站欄位() {
-            狀態.目前工站 = null;
-            值('工序範圍', '');
-            值('標準產能', '');
-            值('標準工時秒', '');
-            取('主機台').innerHTML = '';
-            取('機台清單卡').innerHTML = '';
-        }
-
-        function 建立主機台選單(list) {
-            let s = 取('主機台');
-            s.innerHTML = '';
-            if (!list.length) { s.add(new Option('無固定機台 / None', '')); return; }
-            list.forEach(m => s.add(new Option([m.機台編號, m.區域, m.機台型號].filter(Boolean).join('｜'), m.機台編號 || '')));
-        }
-
-        function 顯示機台卡(list) {
-            let box = 取('機台清單卡');
-            if (!list.length) { box.innerHTML =
-                '<div class="小字" style="padding:8px;">此工站無固定機台或為委外 / 人工作業</div>'; return; }
-            box.innerHTML = list.map(m => '<div class="機台卡">' +
-                (m.縮圖網址 || m.照片網址 ?
-                    '<img src="' + 安全屬性(m.縮圖網址 || m.照片網址) +
-                    '" onerror="this.outerHTML=\'<div class=無機圖>無機台照</div>\'">' :
-                    '<div class="無機圖">無機台照</div>') +
-                '<div class="機台號">' + 安全文字(m.機台編號 || '') + '</div>' +
-                '<div class="小字">' + 安全文字([m.區域, m.機台型號, m.設備名稱].filter(Boolean).join('｜')) + '</div>' +
-                '</div>').join('');
-        }
-
-        function 主機台變更() { 更新預覽(); }
-
-        // ==================== 品質相關 ====================
-        function 建立品質選單() {
-            let a = 取('異常類型');
-            a.innerHTML = '';
-            (全域資料.異常類型 || []).forEach(x => a.add(new Option(x, x)));
-            if (!a.options.length)['無異常 / Normal', '機台停機 / Machine Down', '待料 / Waiting Material', '換刀 / Tool Change',
-                '品質確認 / Quality Check', '其他 / Others'
-            ].forEach(x => a.add(new Option(x, x)));
-            不良類別變更();
-        }
-
-        function 不良類別變更() {
-            let t = 值('不良類別');
-            let s = 取('不良原因');
-            s.innerHTML = '<option value="">無 / None</option>';
-            if (t === '無') { 更新不良同步提示();
-                更新預覽(); return; }
-            (全域資料.不良原因[t] || []).forEach(x => s.add(new Option((x.代碼 || '') + '｜' + (x.名稱 || ''), (x.代碼 || '') +
-                '｜' + (x.名稱 || ''))));
-            更新不良同步提示();
-            更新預覽();
-        }
-
-        function 更新不良同步提示() {
-            let 不良 = 值('不良類別');
-            let ng = 數字('不良數');
-            let box = 取('不良同步提示區');
-            if (不良 !== '無' || ng > 0) {
-                box.innerHTML = '<span class="不良同步標記">⚠ 此報工將同步寫入 09_不良紀錄</span>';
-            } else {
-                box.innerHTML = '';
-            }
-        }
-
-        function 照片變更(e) {
-            狀態.現場照片清單 = [];
-            let files = [...e.target.files].slice(0, 6);
-            let box = 取('照片上傳預覽');
-            box.innerHTML = '';
-            files.forEach(file => {
-                let reader = new FileReader();
-                reader.onload = ev => {
-                    let data = String(ev.target.result);
-                    box.innerHTML += '<img src="' + data + '" alt="照片縮圖">';
-                    狀態.現場照片清單.push({
-                        照片類型: 值('不良類別') === '無' ? '現場照片' : '不良照片',
-                        檔案名稱: file.name,
-                        MIME類型: file.type,
-                        Base64: data.split(',')[1] || '',
-                        備註: 值('備註')
-                    });
-                    更新預覽();
-                };
-                reader.readAsDataURL(file);
-            });
-        }
-
-        // ==================== 計算 ====================
-        function 計算數量() {
-            let total = 數字('今日共做數'),
-                ng = 數字('不良數');
-            if (ng > total && total > 0) { 值('不良數', total);
-                ng = total; }
-            let good = Math.max(total - ng, 0);
-            取('顯示今日共做').textContent = total;
-            取('顯示不良').textContent = ng;
-            取('顯示實際良品').textContent = good;
-            更新不良同步提示();
-            更新預覽();
-        }
-
-        function 計算工時() {
-            let a = 值('開始時間'),
-                b = 值('結束時間');
-            if (a && b) {
-                let h = (new Date(b) - new Date(a)) / 3600000;
-                值('實際工時', h > 0 ? h.toFixed(2) : '');
-            }
-            更新預覽();
-        }
-
-        // ==================== 組合報工資料 ====================
-        function 組合報工資料() {
-            let op = 狀態.作業員 || {},
-                g = 狀態.目前工站 || 狀態.目前產品群組 || {},
-                total = 數字('今日共做數'),
-                ng = 數字('不良數'),
-                machines = g.機台清單 || [];
-            return {
-                工號: op.工號 || 值('工號'),
-                姓名: op.姓名 || 值('姓名'),
-                班別: 值('班別'),
-                是否加班: 值('是否加班'),
-                加班類型: 值('加班類型'),
-                作業員照片網址: op.照片網址 || '',
-                作業員縮圖網址: op.縮圖網址 || '',
-                作業員照片檔案ID: op.Google檔案ID || '',
-                產品編號: g.產品編號 || 值('產品編號'),
-                客戶品號: g.客戶品號 || 值('客戶品號'),
-                品名: g.品名 || 值('品名'),
-                產品照片網址: g.產品照片網址 || '',
-                產品縮圖網址: g.產品縮圖網址 || '',
-                產品照片檔案ID: g.產品照片檔案ID || '',
-                工站名稱: g.工站名稱 || '',
-                報工工站名稱: g.報工工站名稱 || g.工站名稱 || '',
-                工序: Array.isArray(g.工序清單) ? g.工序清單.join(',') : (g.工序 || ''),
-                工序清單: Array.isArray(g.工序清單) ? g.工序清單.join(',') : (g.工序 || ''),
-                機台清單: machines.map(m => m.機台編號).filter(Boolean).join(','),
-                主機台: 值('主機台'),
-                機台照片清單: machines,
-                今日共做數: total,
-                不良數: ng,
-                實際良品數: Math.max(total - ng, 0),
-                不良率: total > 0 ? ng / total : 0,
-                開始時間: 值('開始時間'),
-                結束時間: 值('結束時間'),
-                實際工時: 值('實際工時'),
-                不良類別: 值('不良類別'),
-                不良代碼: (值('不良原因').split('｜')[0] || ''),
-                不良原因: 值('不良原因'),
-                異常類型: 值('異常類型'),
-                備註: 值('備註'),
-                現場照片清單: 狀態.現場照片清單
-            };
-        }
-
-        function 更新預覽() {
-            let d = 組合報工資料();
-            取('報工預覽').textContent =
-                '📋 報工預覽 / Production Report Preview\n' +
-                '━━━━━━━━━━━━━━━━━━━━━━━━\n' +
-                '👤 作業員：' + (d.姓名 || '') + ' / ' + (d.工號 || '') + '｜' + (d.班別 || '') + '\n' +
-                '   加班：' + (d.是否加班 || '否') + '｜' + (d.加班類型 || '無') + '\n' +
-                '📦 產品：' + (d.產品編號 || '') + '｜' + (d.客戶品號 || '') + '｜' + (d.品名 || '') + '\n' +
-                '🔧 工站：' + (d.報工工站名稱 || '') + '｜工序：' + (d.工序 || '') + '\n' +
-                '🖥 機台：' + (d.機台清單 || '無') + '｜主機台：' + (d.主機台 || '無') + '\n' +
-                '━━━━━━━━━━━━━━━━━━━━━━━━\n' +
-                '📊 今日共做：' + d.今日共做數 + ' pcs\n' +
-                '❌ 不良數：' + d.不良數 + ' pcs\n' +
-                '✅ 實際良品：' + d.實際良品數 + ' pcs\n' +
-                '📉 不良率：' + (d.不良率 > 0 ? (d.不良率 * 100).toFixed(1) + '%' : '0%') + '\n' +
-                '🕐 工時：' + (d.實際工時 || '未計算') + ' hrs\n' +
-                '⚠ 不良類別：' + (d.不良類別 || '無') + '\n' +
-                '🔍 不良原因：' + (d.不良原因 || '無') + '\n' +
-                '🚨 異常類型：' + (d.異常類型 || '無異常') + '\n' +
-                '📸 照片：' + (d.現場照片清單 || []).length + ' 張\n' +
-                '📝 備註：' + (d.備註 || '無') + '\n' +
-                '━━━━━━━━━━━━━━━━━━━━━━━━\n' +
-                ((d.不良數 > 0 || d.不良類別 !== '無') ? '⚠ 此報工含有不良記錄，將同步寫入 09_不良紀錄\n' : '✅ 無不良記錄\n');
-        }
-
-        // ==================== 驗證與送出 ====================
-        function 驗證報工(d) {
-            if (!d.工號) return '請選擇作業員';
-            if (!d.產品編號 && !d.品名) return '請選擇產品';
-            if (!d.報工工站名稱) return '請選擇報工工站';
-            if (d.今日共做數 <= 0) return '今日共做數必須大於 0';
-            if (d.不良數 < 0) return '不良數不可小於 0';
-            if (d.不良數 > d.今日共做數) return '不良數不可大於今日共做數';
-            return '';
-        }
-
-        function 送出報工() {
-            let d = 組合報工資料();
-            let err = 驗證報工(d);
-            if (err) { 提示(err, true); return; }
-            更新預覽();
-            let 有不良 = (d.不良數 > 0 || d.不良類別 !== '無');
-            let confirmMsg = '確認送出報工？\n\n實際良品：' + d.實際良品數 + ' pcs' +
-                (有不良 ? '\n不良數：' + d.不良數 + ' pcs（將同步寫入09_不良紀錄）' : '');
-            if (!confirm(confirmMsg)) return;
-
-            let btn = 取('主操作鈕');
-            let 原文字 = btn.textContent;
-            btn.disabled = true;
-            btn.textContent = '⏳ 送出中...';
-            btn.style.opacity = '.72';
-            btn.style.transform = 'scale(.98)';
-            提示('📤 報工送出中，請勿重複點擊...');
-
-            function 還原按鈕() {
-                btn.disabled = false;
-                btn.textContent = 原文字 || '📤 預覽並送出';
-                btn.style.opacity = '';
-                btn.style.transform = '';
-            }
-
-            // 先寫入報工；後端 v1.6.4 已可同步寫入09_不良紀錄，前端再呼叫寫入不良紀錄v2時後端會防重複。
-            呼叫後端('寫入報工作業v2', d, res => {
-                if (res && res.成功) {
-                    let 報工編號 = res.報工編號 || '';
-                    if (有不良) {
-                        let 不良資料 = 組合不良資料(d, 報工編號);
-                        提示('✅ 報工已寫入（' + 報工編號 + '），確認不良紀錄同步...');
-                        呼叫後端('寫入不良紀錄v2', 不良資料, res2 => {
-                            還原按鈕();
-                            if (res2 && res2.成功) {
-                                提示('✅ 報工完成！報工編號：' + 報工編號 + '｜不良紀錄已同步');
-                            } else {
-                                提示('⚠️ 報工已寫入，但不良紀錄同步回覆異常：' + ((res2 && res2.訊息) || '請確認09_不良紀錄'), true);
-                            }
-                            清空報工數量();
-                        }, err2 => {
-                            還原按鈕();
-                            提示('⚠️ 報工已寫入，但不良紀錄同步失敗：' + (err2.message || err2), true);
-                            清空報工數量();
-                        });
-                    } else {
-                        還原按鈕();
-                        提示('✅ 報工完成！報工編號：' + 報工編號);
-                        清空報工數量();
-                    }
-                } else {
-                    還原按鈕();
-                    提示('❌ 寫入失敗：' + ((res && res.訊息) || '未知錯誤'), true);
-                }
-            }, err => {
-                還原按鈕();
-                提示('❌ 寫入失敗：' + (err.message || err), true);
-            });
-        }
-
-        function 組合不良資料(d, 報工編號) {
-            return {
-                報工編號: 報工編號,
-                工號: d.工號,
-                姓名: d.姓名,
-                班別: d.班別,
-                產品編號: d.產品編號,
-                客戶品號: d.客戶品號,
-                品名: d.品名,
-                工站名稱: d.報工工站名稱,
-                工序: d.工序,
-                機台清單: d.機台清單,
-                主機台: d.主機台,
-                不良數: d.不良數,
-                不良率: d.不良率,
-                不良類別: d.不良類別,
-                不良代碼: d.不良代碼,
-                不良原因: d.不良原因,
-                異常類型: d.異常類型,
-                備註: d.備註,
-                現場照片清單: d.現場照片清單,
-                開始時間: d.開始時間,
-                結束時間: d.結束時間,
-                實際工時: d.實際工時,
-                寫入時間: new Date().toISOString()
-            };
-        }
-
-        function 清空報工數量() {
-            值('今日共做數', '');
-            值('不良數', '0');
-            狀態.現場照片清單 = [];
-            取('照片檔案').value = '';
-            取('照片上傳預覽').innerHTML = '';
-            取('不良同步提示區').innerHTML = '';
-            計算數量();
-        }
-
-        // ==================== 頁籤切換 ====================
-        function 切換頁籤(name) {
-            狀態.頁籤 = name;
-            頁序.forEach(p => {
-                取('頁面_' + p).classList.toggle('隱藏', p !== name);
-                取('頁籤_' + p).classList.toggle('active', p === name);
-            });
-            取('主操作鈕').textContent = name === '品質' ? '📤 預覽並送出' : '下一步 →';
-            更新預覽();
-            // 切換到品質頁時更新不良同步提示
-            if (name === '品質') 更新不良同步提示();
-        }
-
-        function 下一步或送出() {
-            let i = 頁序.indexOf(狀態.頁籤);
-            if (i < 頁序.length - 1) 切換頁籤(頁序[i + 1]);
-            else 送出報工();
-        }
-
-        function 上一步() {
-            let i = 頁序.indexOf(狀態.頁籤);
-            if (i > 0) 切換頁籤(頁序[i - 1]);
-        }
-
-        // ==================== 工具函數 ====================
-        function 設定預設時間() {
-            let now = new Date();
-            let local = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-            值('開始時間', local);
-            值('結束時間', local);
-            值('實際工時', '0');
-        }
-
-        function 取(id) { return document.getElementById(id); }
-
-        function 值(id, v) {
-            let el = 取(id);
-            if (v === undefined) return el ? el.value : '';
-            if (el) el.value = v;
-        }
-
-        function 數字(id) { let n = Number(值(id)); return isNaN(n) ? 0 : n; }
-
-        function 安全文字(s) { return String(s || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;',
-                '"': '&quot;', "'": '&#39;' }[m])); }
-
-        function 安全屬性(s) { return 安全文字(s).replace(/\n/g, ''); }
-
-        function 圖片HTML(url, text) {
-            return url ? '<img src="' + 安全屬性(url) + '" onerror="this.outerHTML=\'<div class=無圖>' + 安全文字(text) +
-                '</div>\'">' : '<div class="無圖">' + 安全文字(text) + '</div>';
-        }
-
-        function 顯示載入(show) { 取('載入').classList.toggle('隱藏', !show); }
-
-        function 提示(msg, isErr) {
-            let el = 取('浮訊');
-            el.textContent = msg && msg.message ? msg.message : String(msg);
-            el.classList.remove('隱藏');
-            el.style.background = isErr ? '#b3261e' : '#101827';
-            clearTimeout(window.__toast);
-            window.__toast = setTimeout(() => el.classList.add('隱藏'), 3500);
-        }
-    </script>
+function 取(id){ return document.getElementById(id); }
+function 值(id,v){ let el=取(id); if(v===undefined) return el?el.value:''; if(el) el.value=v; }
+function 數字(id){ let n=Number(值(id)); return isNaN(n)?0:n; }
+function 安全文字(s){ return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function 安全屬性(s){ return 安全文字(s).replace(/\n/g,''); }
+function 圖片HTML(url,text){ return url?'<img src="'+安全屬性(url)+'" onerror="this.outerHTML=\'<div class=無圖>'+安全文字(text)+'</div>\'">':'<div class="無圖">'+安全文字(text)+'</div>'; }
+function 顯示載入(show){ let el=取('載入'); if(el) el.classList.toggle('隱藏',!show); }
+function 提示(msg,isErr){
+  let el=取('浮訊');
+  el.textContent=msg&&msg.message?msg.message:String(msg);
+  el.classList.remove('隱藏');
+  el.style.background=isErr?'#b3261e':'#101827';
+  clearTimeout(window.__toast);
+  window.__toast=setTimeout(()=>el.classList.add('隱藏'),3500);
+}
+</script>
 </body>
 </html>
