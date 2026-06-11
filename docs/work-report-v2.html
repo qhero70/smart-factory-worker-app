@@ -7,130 +7,36 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="報工PWA">
   <link rel="manifest" href="./manifest.webmanifest">
-  <title>報工PWA｜原版報工作業全功能載入中</title>
+  <title>報工PWA｜07_報工作業原版完整功能</title>
   <style>
-    html,body{height:100%;margin:0;background:#060d18;color:#e2e8f0;font-family:system-ui,-apple-system,'Noto Sans TC','Microsoft JhengHei',sans-serif;}
-    .載入畫面{height:100%;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;}
-    .卡{width:min(520px,100%);border:1px solid rgba(96,165,250,.35);border-radius:28px;background:rgba(15,23,42,.86);box-shadow:0 24px 80px rgba(0,0,0,.45);padding:28px;}
-    .標{font-size:26px;font-weight:900;margin-bottom:8px}.副{font-size:14px;color:#94a3b8;line-height:1.7}.進度{height:8px;background:#1e293b;border-radius:99px;overflow:hidden;margin-top:22px}.進度 div{height:100%;width:42%;border-radius:99px;background:linear-gradient(90deg,#22c55e,#3b82f6,#f59e0b);animation:run 1.4s linear infinite}@keyframes run{0%{transform:translateX(-120%)}100%{transform:translateX(260%)}}
-    .錯誤{color:#fecaca;white-space:pre-wrap;text-align:left;background:#450a0a;border:1px solid #991b1b;border-radius:16px;padding:14px;margin-top:18px;display:none}
+    *{box-sizing:border-box}html,body{height:100%;margin:0;background:#060d18;color:#e2e8f0;font-family:system-ui,-apple-system,'Noto Sans TC','Microsoft JhengHei',sans-serif;overflow:hidden}.載入畫面{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;background:#060d18}.載入畫面.隱藏{display:none}.卡{width:min(520px,100%);border:1px solid rgba(96,165,250,.38);border-radius:28px;background:rgba(15,23,42,.88);box-shadow:0 24px 80px rgba(0,0,0,.45);padding:28px}.標{font-size:26px;font-weight:900;margin-bottom:10px}.副{font-size:14px;color:#94a3b8;line-height:1.7}.進度{height:8px;background:#1e293b;border-radius:99px;overflow:hidden;margin-top:22px}.進度 div{height:100%;width:42%;border-radius:99px;background:linear-gradient(90deg,#22c55e,#3b82f6,#f59e0b);animation:run 1.4s linear infinite}@keyframes run{0%{transform:translateX(-120%)}100%{transform:translateX(260%)}}.錯誤{color:#fecaca;white-space:pre-wrap;text-align:left;background:#450a0a;border:1px solid #991b1b;border-radius:16px;padding:14px;margin-top:18px;display:none;max-height:42vh;overflow:auto}.主框{position:fixed;inset:0;width:100%;height:100%;border:0;background:#f0f5fc;display:none}.主框.顯示{display:block}.工具列{position:fixed;right:10px;bottom:10px;z-index:20}.工具列 button{border:0;border-radius:14px;padding:10px 12px;font-weight:900;background:#0b74ff;color:#fff;box-shadow:0 6px 18px rgba(0,0,0,.22)}
   </style>
 </head>
 <body>
-  <div class="載入畫面">
-    <div class="卡">
-      <div class="標">🏭 報工 PWA</div>
-      <div class="副">正在載入 07_報工作業原版完整 UI。<br>本頁不再使用精簡版，會保留原本報工.txt 的掃碼、常用人員、產出、不良分配、異常時間、照片、預覽與送出流程。</div>
-      <div class="進度"><div></div></div>
-      <div id="錯誤" class="錯誤"></div>
-    </div>
-  </div>
-
-  <script>
-  (async function(){
-    const 原版網址 = 'https://raw.githubusercontent.com/qhero70/smart-factory-worker-app/main/smart-factory-command-center/02_HTML%E5%89%8D%E7%AB%AF/07_%E5%A0%B1%E5%B7%A5%E4%BD%9C%E6%A5%ADV2.html';
-    const 版本 = 'v1.1.0_原版報工TXT全功能PWA';
-
-    function 顯示錯誤(err){
-      const el = document.getElementById('錯誤');
-      el.style.display = 'block';
-      el.textContent = '載入原版報工 UI 失敗：\n' + (err && err.stack ? err.stack : String(err));
-    }
-
-    function 轉PWA原版(html){
-      html = String(html || '');
-      html = html.replace(/<base\s+target=["']_top["']\s*>/i, '');
-      html = html.replace(/<title>.*?<\/title>/i, '<title>報工PWA｜07_報工作業原版全功能</title>');
-      html = html.replace('</head>', '<link rel="manifest" href="./manifest.webmanifest"><meta name="theme-color" content="#0b74ff"><meta name="apple-mobile-web-app-capable" content="yes"></head>');
-      html = html.replace('</body>', '\n<script src="./pwa-config.js"><\\/script>\n<script src="./gas-bridge.js"><\\/script>\n<script>\n' + PWA橋接程式碼() + '\n<\\/script>\n</body>');
-      return html;
-    }
-
-    function PWA橋接程式碼(){
-      return `
+  <div id="載入畫面" class="載入畫面"><div class="卡"><div class="標">🏭 報工 PWA</div><div class="副">正在載入 07_報工作業原版完整 UI。<br>保留報工.txt 全部功能：掃碼、常用人員、產出、不良分配、異常時間、照片、預覽與送出。</div><div class="進度"><div></div></div><div id="錯誤" class="錯誤"></div></div></div>
+  <iframe id="主框" class="主框" title="07_報工作業原版完整 PWA" allow="camera; fullscreen"></iframe>
+  <div class="工具列"><button type="button" onclick="location.reload()">重新載入</button></div>
+<script>
 (function(){
-  'use strict';
-  const PWA版本 = '${版本}';
-  const 原呼叫後端 = window.呼叫後端;
-  function 正規化回傳(res){
-    if(!res) return {成功:false, 訊息:'GAS 無回傳資料'};
-    if(res.成功 !== undefined) return res;
-    if(res.success !== undefined){
-      const data = res.data || res.資料 || {};
-      const out = Object.assign({}, data, res, {成功:!!res.success, 訊息:res.message || res.訊息 || res.error || ''});
-      if(res.data && typeof res.data === 'object'){
-        Object.keys(res.data).forEach(k => { out[k] = res.data[k]; });
-      }
-      if(!out.筆數 && out.meta && out.meta.筆數) out.筆數 = out.meta.筆數;
-      if(!out.不良原因 && Array.isArray(out.不良代號)) out.不良原因 = 不良代號轉群組(out.不良代號);
-      return out;
-    }
-    return Object.assign({成功:true, 訊息:'OK'}, res);
-  }
-  function 不良代號轉群組(list){
-    const g = {Y:[], Z:[]};
-    (list || []).forEach(x => {
-      const code = String(x.不良代號 || x.不良代碼 || x.代碼 || '').trim();
-      const key = String(x.分類 || code.charAt(0) || 'Z').toUpperCase();
-      if(!g[key]) g[key] = [];
-      g[key].push({代碼:code, 名稱:x.不良名稱 || x.中文名稱 || x.名稱 || '', 英文名稱:x.英文名稱 || x.英文 || '', 備註:x.備註 || ''});
-    });
-    return g;
-  }
-  function 正規化送出Payload(payload){
-    const p = Object.assign({}, payload || {});
-    if(Array.isArray(p.不良行清單) && !p.不良分配){
-      p.不良分配 = p.不良行清單.map(x => ({分類:x.類別, 不良代號:x.代碼, 不良名稱:x.名稱, 英文名稱:x.英文名稱, 數量:x.數量}));
-    }
-    if(p.現場照片清單 && Array.isArray(p.現場照片清單)){
-      p.照片數量 = p.現場照片清單.length;
-    }
-    return p;
-  }
-  window.呼叫後端 = function(fn, arg, ok, fail){
-    try{
-      if(!window.GAS橋接器 || !window.GAS橋接器.呼叫) throw new Error('gas-bridge.js 尚未載入');
-      const action = fn;
-      const payload = 正規化送出Payload(arg || {});
-      const method = /^寫入|^新增|^更新|^刪除/.test(String(action)) ? 'POST' : 'GET';
-      window.GAS橋接器.呼叫(action, payload, {method}).then(res => {
-        const data = 正規化回傳(res);
-        if(typeof ok === 'function') ok(data);
-      }).catch(err => {
-        if(typeof fail === 'function') fail(err);
-        else if(window.Roar) window.Roar('❌','PWA API 錯誤', err.message || String(err), '錯誤');
-        else alert(err.message || String(err));
-      });
-    }catch(err){
-      if(typeof fail === 'function') fail(err);
-      else if(typeof 原呼叫後端 === 'function') return 原呼叫後端(fn,arg,ok,fail);
-      else alert(err.message || String(err));
-    }
-  };
-  window.addEventListener('load', () => {
-    setTimeout(() => {
-      try{
-        const card = document.getElementById('狀態卡');
-        if(card && !card.textContent.includes(PWA版本)) card.innerHTML += '<br>📱 GitHub Pages PWA｜' + PWA版本;
-        if('serviceWorker' in navigator) navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
-      }catch(e){}
-    }, 300);
-  });
-})();`;
-    }
-
-    try{
-      const response = await fetch(原版網址 + '?v=' + Date.now(), {cache:'no-store'});
-      if(!response.ok) throw new Error('HTTP ' + response.status + '：無法讀取原版報工檔');
-      const html = await response.text();
-      const transformed = 轉PWA原版(html);
-      document.open();
-      document.write(transformed);
-      document.close();
-    }catch(err){
-      顯示錯誤(err);
-    }
-  })();
-  </script>
+  const 原版網址='https://raw.githubusercontent.com/qhero70/smart-factory-worker-app/main/smart-factory-command-center/02_HTML%E5%89%8D%E7%AB%AF/07_%E5%A0%B1%E5%B7%A5%E4%BD%9C%E6%A5%ADV2.html';
+  const 版本='v1.1.1_iframe原版報工TXT全功能PWA';
+  const 載入=document.getElementById('載入畫面');
+  const 錯誤=document.getElementById('錯誤');
+  const 主框=document.getElementById('主框');
+  function 顯示錯誤(err){錯誤.style.display='block';錯誤.textContent='載入原版報工 UI 失敗：\n'+(err&&err.stack?err.stack:String(err));}
+  function 橋接程式(){return `
+(function(){
+  const PWA版本='${版本}';
+  function 不良代號轉群組(list){const g={Y:[],Z:[]};(list||[]).forEach(x=>{const code=String(x.不良代號||x.不良代碼||x.代碼||'').trim();const key=String(x.分類||code.charAt(0)||'Z').toUpperCase();if(!g[key])g[key]=[];g[key].push({代碼:code,名稱:x.不良名稱||x.中文名稱||x.名稱||'',英文名稱:x.英文名稱||x.英文||'',備註:x.備註||''});});return g;}
+  function 正規化回傳(res){if(!res)return{成功:false,訊息:'GAS 無回傳資料'};if(res.成功!==undefined)return res;if(res.success!==undefined){const data=res.data||res.資料||{};const out=Object.assign({},data,res,{成功:!!res.success,訊息:res.message||res.訊息||res.error||''});if(res.data&&typeof res.data==='object')Object.keys(res.data).forEach(k=>out[k]=res.data[k]);if(!out.筆數&&out.meta&&out.meta.筆數)out.筆數=out.meta.筆數;if(!out.不良原因&&Array.isArray(out.不良代號))out.不良原因=不良代號轉群組(out.不良代號);if(!out.報工工站群組&&out.途程工站群組)out.報工工站群組=out.途程工站群組;return out;}return Object.assign({成功:true,訊息:'OK'},res);}
+  function 正規化送出Payload(payload){const p=Object.assign({},payload||{});if(Array.isArray(p.不良行清單)&&!p.不良分配){p.不良分配=p.不良行清單.map(x=>({分類:x.類別,不良代號:x.代碼,不良名稱:x.名稱,英文名稱:x.英文名稱,數量:x.數量}));}if(Array.isArray(p.現場照片清單))p.照片數量=p.現場照片清單.length;return p;}
+  window.呼叫後端=function(fn,arg,ok,fail){try{if(!window.GAS橋接器||!window.GAS橋接器.呼叫)throw new Error('gas-bridge.js 尚未載入');const method=/^寫入|^新增|^更新|^刪除/.test(String(fn))?'POST':'GET';window.GAS橋接器.呼叫(fn,正規化送出Payload(arg||{}),{method}).then(res=>{if(typeof ok==='function')ok(正規化回傳(res));}).catch(err=>{if(typeof fail==='function')fail(err);else if(window.Roar)window.Roar('❌','PWA API 錯誤',err.message||String(err),'錯誤');else alert(err.message||String(err));});}catch(err){if(typeof fail==='function')fail(err);else alert(err.message||String(err));}};
+  window.addEventListener('load',()=>setTimeout(()=>{try{const card=document.getElementById('狀態卡');if(card&&!card.textContent.includes(PWA版本))card.innerHTML+='<br>📱 GitHub Pages PWA｜'+PWA版本;}catch(e){}},500));
+})();`;}
+  function 轉成PWA原版(html){html=String(html||'');html=html.replace(/<base\s+target=["']_top["']\s*>/i,'<base href="https://qhero70.github.io/smart-factory-worker-app/">');html=html.replace(/<title>.*?<\/title>/i,'<title>報工PWA｜07_報工作業原版全功能</title>');html=html.replace('</head>','<link rel="manifest" href="./manifest.webmanifest"><meta name="theme-color" content="#0b74ff"><meta name="apple-mobile-web-app-capable" content="yes"><script src="./pwa-config.js"><\\/script><script src="./gas-bridge.js"><\\/script></head>');html=html.replace('</body>','<script>'+橋接程式()+'<\\/script></body>');return html;}
+  async function 啟動(){try{const response=await fetch(原版網址+'?v='+Date.now(),{cache:'no-store'});if(!response.ok)throw new Error('HTTP '+response.status+'：無法讀取原版報工檔');const html=await response.text();主框.onload=function(){載入.classList.add('隱藏');主框.classList.add('顯示');};主框.srcdoc=轉成PWA原版(html);setTimeout(()=>{if(!主框.classList.contains('顯示')){載入.classList.add('隱藏');主框.classList.add('顯示');}},4500);if('serviceWorker'in navigator)navigator.serviceWorker.register('./service-worker.js').catch(()=>{});}catch(err){顯示錯誤(err);}}
+  啟動();
+})();
+</script>
 </body>
 </html>
