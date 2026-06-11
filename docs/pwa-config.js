@@ -1,5 +1,5 @@
 window.PWA_CONFIG = {
-  GAS_WEB_APP_URL: '貼上 GAS Web App URL',
+  GAS_WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbweSKwcREbv-5R5E1ZIj_XOZDGQzRPCdoOAy2uTkhMwZTZoIv-GtpQi0PF8ahdb6KEJ/execL',
   APP_NAME: '製造部智慧製造應用總部',
   VERSION: 'v1.0.0',
   SPREADSHEET_ID: '1JA0-kxVO6x3NbCgjmUurkwd8lffolj0pbInissLl8BQ',
