@@ -1,4 +1,4 @@
-const 快取版本 = 'v1.1.1_iframe原版報工TXT全功能PWA';
+const 快取版本 = 'v1.1.2_Blob原版報工TXT全功能PWA';
 const 快取名稱 = `製造部智慧製造應用總部-${快取版本}`;
 const 必要檔案 = [
   './',
