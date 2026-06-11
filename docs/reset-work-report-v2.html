@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>報工 PWA 快取重置</title>
+<style>
+html,body{height:100%;margin:0;background:#06101f;color:#e5edf8;font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC','Microsoft JhengHei',sans-serif}main{height:100%;display:flex;align-items:center;justify-content:center;padding:24px}section{width:min(520px,100%);background:#0f172a;border:1px solid #31445f;border-radius:28px;padding:26px;box-shadow:0 20px 60px rgba(0,0,0,.35);text-align:center}h1{font-size:28px;margin:0 0 10px}p{color:#a9b8cc;line-height:1.8;font-weight:700}.bar{height:10px;border-radius:99px;background:#1e293b;overflow:hidden;margin:20px 0}.bar div{height:100%;width:45%;background:linear-gradient(90deg,#22c55e,#0b74ff,#f59e0b);border-radius:99px;animation:run 1.2s infinite linear}@keyframes run{from{transform:translateX(-110%)}to{transform:translateX(260%)}}pre{text-align:left;background:#020617;border:1px solid #26384f;border-radius:16px;padding:14px;white-space:pre-wrap;color:#dbeafe;max-height:38vh;overflow:auto}button{border:0;border-radius:16px;background:#0b74ff;color:#fff;font-size:17px;font-weight:900;padding:14px 18px;margin-top:12px;width:100%}
+</style>
+</head>
+<body>
+<main>
+<section>
+<h1>🏭 報工 PWA 快取重置</h1>
+<p>正在清除舊版 Service Worker、舊版 Cache API 與舊補強腳本，完成後會自動進入新版報工作業。</p>
+<div class="bar"><div></div></div>
+<pre id="log">開始重置...</pre>
+<button id="go" type="button">手動進入新版報工</button>
+</section>
+</main>
+<script>
+(function(){
+  const log = document.getElementById('log');
+  function line(t){ log.textContent += '\n' + t; }
+  async function reset(){
+    try{
+      if('serviceWorker' in navigator){
+        const regs = await navigator.serviceWorker.getRegistrations();
+        line('找到 Service Worker：' + regs.length + ' 個');
+        for(const reg of regs){ await reg.unregister(); }
+        line('Service Worker 已解除註冊');
+      }else{
+        line('此瀏覽器沒有 Service Worker');
+      }
+      if(window.caches){
+        const keys = await caches.keys();
+        line('找到快取：' + keys.length + ' 組');
+        for(const key of keys){ await caches.delete(key); }
+        line('Cache API 已清除');
+      }
+      try{
+        await fetch('./pwa-config.js?v=' + Date.now(), {cache:'reload'});
+        await fetch('./work-report-v2-dom-fix.js?v=' + Date.now(), {cache:'reload'});
+        await fetch('./work-report-v2-shift-fix-v124.js?v=' + Date.now(), {cache:'reload'});
+        line('新版設定與補強腳本已預載');
+      }catch(e){ line('預載略過：' + e.message); }
+      line('3 秒後進入新版報工...');
+      setTimeout(go, 3000);
+    }catch(err){
+      line('重置發生錯誤：' + err.message);
+    }
+  }
+  function go(){
+    location.replace('./work-report-v2.html?ver=124-clean-' + Date.now());
+  }
+  document.getElementById('go').onclick = go;
+  reset();
+})();
+</script>
+</body>
+</html>
