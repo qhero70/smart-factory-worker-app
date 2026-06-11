@@ -1,7 +1,7 @@
 (function(){
   'use strict';
 
-  const 版本 = 'v1.2.4_班別強制修正';
+  const 版本 = 'v1.2.6_無中班強制早班修正';
   let 主檔 = null;
   const 文字 = v => String(v ?? '').trim();
   const 清字 = v => 文字(v).replace(/\s+/g, '').toUpperCase();
@@ -22,14 +22,10 @@
     const 原始班別 = 文字(取值(row, ['班別','班次','工作班別','原始班別','班別時間']));
     const compact = 清字(班別名稱 + ' ' + 班別代碼 + ' ' + 原始班別);
 
-    // 你的 01_人員主檔：化新早班(0800~1650)、DAY、早班。這些全部必須回早班。
-    if(班別名稱.includes('早') || 班別代碼 === 'DAY' || 班別代碼 === 'D' || 原始班別.includes('早') || compact.includes('0800')) return '早班';
-    if(班別名稱.includes('大夜') || 班別名稱.includes('夜') || 班別代碼 === 'NIGHT' || 班別代碼 === 'N' || 原始班別.includes('大夜') || 原始班別.includes('夜') || compact.includes('2300') || compact.includes('3150') || compact.includes('0315')) return '大夜班';
-    if(班別名稱.includes('中') || 班別代碼 === 'MID' || 班別代碼 === 'M' || 班別代碼 === 'SWING' || 原始班別.includes('中')) return '中班';
-
-    // 只有沒有 0800、也沒有早班字樣時，1650 才能代表中班。
-    if(compact.includes('1650') && !compact.includes('0800')) return '中班';
-    return 原始班別 || 班別名稱 || '';
+    // 目前 01_人員主檔實際使用：早班 + 大夜班，沒有中班。
+    // 因此前端若看到「中班」，先視為舊邏輯誤判，全部改回早班；只有明確 NIGHT / 大夜 才顯示大夜班。
+    if(班別名稱.includes('大夜') || 班別名稱.includes('夜') || 班別代碼 === 'NIGHT' || 班別代碼 === 'N' || 原始班別.includes('大夜') || 原始班別.includes('夜') || compact.includes('2300') || compact.includes('3150') || compact.includes('0315') || compact.includes('0750')) return '大夜班';
+    return '早班';
   }
 
   function 人員清單(){
@@ -61,9 +57,8 @@
   function 設定卡片班別(card, 班別){
     if(!card || !班別) return;
     card.classList.remove('班早','班中','班夜');
-    if(班別 === '早班') card.classList.add('班早');
-    if(班別 === '中班') card.classList.add('班中');
     if(班別 === '大夜班') card.classList.add('班夜');
+    else card.classList.add('班早');
     const tag = card.querySelector('.班標');
     if(tag) tag.textContent = 班別;
   }
@@ -71,32 +66,39 @@
   function 確保班別選單(班別){
     const select = $('班別');
     if(!select || !班別) return;
-    if(!Array.from(select.options).some(o => o.value === 班別 || o.textContent === 班別)){
-      const opt = document.createElement('option');
-      opt.value = 班別;
-      opt.textContent = 班別;
-      select.appendChild(opt);
-    }
+    ['早班','大夜班'].forEach(s => {
+      if(!Array.from(select.options).some(o => o.value === s || o.textContent === s)){
+        const opt = document.createElement('option');
+        opt.value = s;
+        opt.textContent = s;
+        select.appendChild(opt);
+      }
+    });
   }
 
   function 修正畫面班別(){
-    const list = 人員清單();
-    if(!list.length) return;
     $$('.人員卡片').forEach(card => {
       const p = 找人員(card);
-      if(!p) return;
-      const s = 判斷班別(p);
+      let s = p ? 判斷班別(p) : '';
+      // 如果後端沒有原始班別欄位，仍強制把畫面上的中班改成早班。
+      if(!s){
+        const tagText = 文字(card.querySelector('.班標')?.textContent || '');
+        s = tagText.includes('大夜') || tagText.includes('夜') ? '大夜班' : '早班';
+      }
       確保班別選單(s);
       設定卡片班別(card, s);
     });
 
     const selected = document.querySelector('.人員卡片.選中');
     const select = $('班別');
-    if(selected && select){
-      const p = 找人員(selected);
-      const s = 判斷班別(p);
-      if(s){
-        確保班別選單(s);
+    if(select){
+      let s = '早班';
+      if(selected){
+        const p = 找人員(selected);
+        s = p ? 判斷班別(p) : (文字(selected.querySelector('.班標')?.textContent).includes('大夜') ? '大夜班' : '早班');
+      }
+      確保班別選單(s);
+      if(select.value === '自動判斷' || select.value === '中班' || !select.value || selected){
         select.value = s;
         select.dispatchEvent(new Event('input', {bubbles:true}));
         select.dispatchEvent(new Event('change', {bubbles:true}));
@@ -104,8 +106,8 @@
     }
 
     const status = $('狀態卡');
-    if(status && !status.textContent.includes('班別v124')){
-      status.textContent += '｜班別v124';
+    if(status && !status.textContent.includes('無中班v126')){
+      status.textContent += '｜無中班v126';
     }
   }
 
@@ -117,6 +119,7 @@
   window.addEventListener('load', () => setTimeout(執行, 800));
   document.addEventListener('click', () => setTimeout(執行, 120), true);
   document.addEventListener('change', () => setTimeout(執行, 120), true);
-  setTimeout(執行, 1200);
-  setInterval(執行, 1800);
+  setTimeout(執行, 800);
+  setTimeout(執行, 1800);
+  setInterval(執行, 1000);
 })();
