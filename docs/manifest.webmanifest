@@ -1,10 +1,21 @@
 {
-  "name": "智慧製造中央作戰指揮中心",
-  "short_name": "製造戰情室",
+  "name": "製造部智慧製造應用總部",
+  "short_name": "製造應用總部",
+  "description": "智慧製造中央作戰指揮中心現場手機 PWA，提供報工 V2、戰情入口與 GAS API 對接。",
   "start_url": "./app.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#07111f",
   "theme_color": "#0f766e",
-  "lang": "zh-Hant",
-  "orientation": "portrait-primary"
+  "lang": "zh-Hant-TW",
+  "orientation": "portrait-primary",
+  "categories": ["business", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "./assets/icons/智慧製造圖示.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
 }
