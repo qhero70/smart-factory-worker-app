@@ -1,4 +1,4 @@
-const 快取版本 = 'v1.1.2_Blob原版報工TXT全功能PWA';
+const 快取版本 = 'v1.2.0_靜態完整正式版_不空白';
 const 快取名稱 = `製造部智慧製造應用總部-${快取版本}`;
 const 必要檔案 = [
   './',
@@ -30,7 +30,7 @@ self.addEventListener('fetch', event => {
   const 請求 = event.request;
   const 網址 = new URL(請求.url);
 
-  if (網址.hostname.includes('script.google.com') || 網址.hostname.includes('googleusercontent.com') || 網址.hostname.includes('raw.githubusercontent.com')) {
+  if (網址.hostname.includes('script.google.com') || 網址.hostname.includes('googleusercontent.com')) {
     event.respondWith(fetch(請求, { cache: 'no-store' }));
     return;
   }
@@ -47,7 +47,7 @@ self.addEventListener('fetch', event => {
   }
 
   event.respondWith(
-    caches.match(請求).then(cached => cached || fetch(請求).then(response => {
+    caches.match(請求).then(cached => cached || fetch(請求, { cache: 'no-store' }).then(response => {
       if (請求.method === 'GET' && response && response.status === 200) {
         const 複本 = response.clone();
         caches.open(快取名稱).then(cache => cache.put(請求, 複本));
