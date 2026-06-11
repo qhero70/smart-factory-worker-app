@@ -1,4 +1,4 @@
-const 快取版本 = 'v1.2.1_產品照片欄位相容補強';
+const 快取版本 = 'v1.2.2_DOM補強';
 const 快取名稱 = `製造部智慧製造應用總部-${快取版本}`;
 const 必要檔案 = [
   './',
@@ -10,6 +10,7 @@ const 必要檔案 = [
   './pwa-config.js',
   './gas-bridge.js',
   './work-report-v2-photo-fallback.js',
+  './work-report-v2-dom-fix.js',
   './assets/icons/智慧製造圖示.svg'
 ];
 
