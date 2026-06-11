@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="製造部智慧製造應用總部">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#22d3ee"/>
+      <stop offset="1" stop-color="#0f766e"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="#07111f"/>
+  <circle cx="256" cy="256" r="196" fill="url(#g)" opacity="0.18"/>
+  <path d="M124 316h264v58H124zM148 168h56v114h-56zM228 132h56v150h-56zM308 200h56v82h-56z" fill="#ecfeff"/>
+  <path d="M118 316l72-74 54 42 82-108 72 140" fill="none" stroke="#67e8f9" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="190" cy="242" r="20" fill="#34d399"/>
+  <circle cx="244" cy="284" r="20" fill="#34d399"/>
+  <circle cx="326" cy="176" r="20" fill="#34d399"/>
+</svg>
