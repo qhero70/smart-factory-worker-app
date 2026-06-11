@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta name="theme-color" content="#0f766e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="報工 V2">
+  <title>報工作業 V2｜製造部智慧製造應用總部</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./assets/icons/智慧製造圖示.svg" type="image/svg+xml">
+  <style>
+    :root{--底:#07111f;--卡:#0f172acc;--線:#334155;--文:#ecfeff;--淡:#a7b4c8;--藍:#38bdf8;--綠:#34d399;--黃:#fbbf24;--紅:#fb7185}
+    *{box-sizing:border-box}body{margin:0;background:linear-gradient(135deg,#06111f,#0b2a3d);color:var(--文);font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC','Microsoft JhengHei',sans-serif}.頁面{max-width:820px;margin:0 auto;padding:16px 12px 96px}.英雄,.卡片{border:1px solid rgba(148,163,184,.28);border-radius:24px;background:rgba(15,23,42,.78);box-shadow:0 20px 58px rgba(0,0,0,.34);backdrop-filter:blur(12px)}.英雄{padding:20px}.卡片{margin-top:12px;padding:14px}.標籤{font-weight:1000;color:#67e8f9}.標題{font-size:28px;margin:8px 0 6px}.提示{color:var(--淡);line-height:1.65;font-size:13px}.格線{display:grid;grid-template-columns:1fr 1fr;gap:10px}.欄位{margin-top:12px}label{display:block;font-weight:1000;margin-bottom:6px}select,input,textarea{width:100%;border:1px solid var(--線);border-radius:16px;background:#020617;color:var(--文);font-size:16px;padding:13px}textarea{min-height:96px;resize:vertical}.按鈕{border:0;border-radius:17px;padding:14px 10px;font-weight:1000;font-size:16px;text-align:center;text-decoration:none;display:block;color:#03101d}.藍{background:var(--藍)}.綠{background:var(--綠)}.黃{background:var(--黃)}.深{background:#1e293b;color:var(--文);border:1px solid var(--線)}.狀態列{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.狀態{background:#02061799;border:1px solid rgba(148,163,184,.22);border-radius:17px;padding:10px}.狀態 b{display:block;color:#cffafe;margin-bottom:4px}.狀態 span{color:#cbd5e1;font-size:13px;line-height:1.5}.不良列{display:grid;grid-template-columns:1fr 90px;gap:8px;align-items:center;border:1px solid rgba(148,163,184,.2);border-radius:16px;background:#02061777;padding:10px;margin-top:8px}.不良列 b{display:block;color:#fde68a}.不良列 span{display:block;color:#cbd5e1;font-size:12px;margin-top:2px}.不良列 input{text-align:center}.訊息{white-space:pre-wrap;background:#020617;border:1px solid var(--線);border-radius:18px;padding:12px;line-height:1.6;min-height:100px;color:#dff7ff;overflow:auto}.工具列{position:sticky;bottom:0;z-index:20;margin:14px -12px -96px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(180deg,transparent,rgba(2,6,23,.96) 24%)}@media(max-width:640px){.格線,.狀態列{grid-template-columns:1fr}.標題{font-size:25px}.不良列{grid-template-columns:1fr 82px}}
+  </style>
+</head>
+<body>
+  <main class="頁面">
+    <section class="英雄">
+      <div class="標籤">報工作業 V2｜GitHub Pages PWA</div>
+      <h1 class="標題">現場報工</h1>
+      <p class="提示">本頁不再使用 GAS HTML 畫面，改由 PWA 透過 gas-bridge.js 呼叫 GAS Web App API。GAS 主後端與原 07_報工作業V2.html 不在本階段變更。</p>
+    </section>
+
+    <section class="卡片">
+      <div class="狀態列">
+        <div class="狀態"><b>資料載入</b><span id="載入狀態">尚未載入</span></div>
+        <div class="狀態"><b>送出狀態</b><span id="送出狀態">待送出</span></div>
+        <div class="狀態"><b>PWA 版本</b><span id="版本狀態">v1.0.0</span></div>
+      </div>
+    </section>
+
+    <section class="卡片">
+      <h2>一、基本資料</h2>
+      <div class="格線">
+        <div class="欄位"><label for="工號">人員卡片</label><select id="工號"></select></div>
+        <div class="欄位"><label for="班別">班別</label><select id="班別"><option>早班</option><option>中班</option><option>大夜班</option></select></div>
+      </div>
+    </section>
+
+    <section class="卡片">
+      <h2>二、產品與工站</h2>
+      <div class="欄位"><label for="產品編號">產品卡片</label><select id="產品編號"></select></div>
+      <div class="格線">
+        <div class="欄位"><label for="工站編號">工站選擇</label><select id="工站編號"></select></div>
+        <div class="欄位"><label for="機台編號">機台照片 / 機台選擇</label><select id="機台編號"></select></div>
+      </div>
+      <p class="提示">機台照片欄位目前由 03_機台主檔直掛資料提供；若 GAS 初始資料回傳照片網址，下一步會在此卡片直接顯示照片。</p>
+    </section>
+
+    <section class="卡片">
+      <h2>三、產出與不良分配</h2>
+      <div class="欄位"><label for="產出數量">產出數量</label><input id="產出數量" inputmode="numeric" pattern="[0-9]*" type="number" min="0" placeholder="請輸入本次產出數量"></div>
+      <div class="欄位">
+        <label>不良分配</label>
+        <div id="不良分配區"><p class="提示">等待不良代號載入...</p></div>
+      </div>
+      <div class="欄位"><label for="照片備註">照片備註</label><textarea id="照片備註" placeholder="可輸入照片說明、異常位置、現場備註。照片上傳串接放在下一階段。"></textarea></div>
+    </section>
+
+    <section class="卡片">
+      <h2>四、系統訊息</h2>
+      <pre class="訊息" id="系統訊息">初始化中...</pre>
+    </section>
+
+    <section class="工具列">
+      <div class="格線">
+        <button class="按鈕 黃" id="重新載入">重新載入主檔</button>
+        <button class="按鈕 綠" id="送出報工">送出報工</button>
+        <a class="按鈕 藍" href="./app.html">回戰情室</a>
+        <a class="按鈕 深" href="./index.html">回首頁</a>
+      </div>
+    </section>
+  </main>
+
+  <script src="./pwa-config.js"></script>
+  <script src="./gas-bridge.js"></script>
+  <script src="./work-report-v2-submit.js"></script>
+  <script>
+    document.getElementById('版本狀態').textContent = window.PWA_CONFIG?.VERSION || 'v1.0.0';
+    if('serviceWorker' in navigator){navigator.serviceWorker.register('./service-worker.js').catch(()=>{});}
+  </script>
+</body>
+</html>
