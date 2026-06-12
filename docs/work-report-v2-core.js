@@ -181,7 +181,7 @@
       var id=安全文字(m.機台編號||m.機台代號||m.設備編號||'');
       var name=安全文字(m.機台名稱||m.設備名稱||m.名稱||'');
       var photo=取機台照片(m);
-      var image=photo?'<img src="'+安全文字(photo)+'" alt="'+id+'" loading="lazy" referrerpolicy="no-referrer" decoding="async" onerror="this.closest(\'.機台卡\').classList.add(\'照片載入失敗\');this.replaceWith(document.createElement(\'div\'));">':'<div class="無圖">無機圖</div>';
+      var image=photo?'<img src="'+安全文字(photo)+'" alt="'+id+'" loading="lazy" referrerpolicy="no-referrer" decoding="async" onerror="this.outerHTML=\'<div class=\\\'無圖\\\'>照片載入失敗</div>\';">':'<div class="無圖">無機圖</div>';
       return '<div class="機台卡">'+image+'<div class="機台號">'+id+'</div><div class="小字">'+name+'</div></div>';
     }).join('');
     box.innerHTML=html||'<div class="空狀態">此工站未設定機台</div>';
@@ -190,7 +190,26 @@
     box.style.setProperty('opacity','1','important');
     window.智慧製造機台照片狀態={版本:正式版號,工站:station.工站名稱||'',機台數:rows.length,有照片數:rows.filter(function(m){return !!取機台照片(m);}).length};
   }
-  function run(){loadCss();killLoading();bindScrollGuard();productDrop();bindGlobalProductOpen();stationTop();machinePhotos();}
+  function bindRefreshButton(){
+    var btn=document.getElementById('重整鈕');
+    if(!btn||btn.dataset.refreshBind==='236')return;
+    var clone=btn.cloneNode(true);
+    clone.dataset.refreshBind='236';
+    clone.title='更新到最新正式版 '+正式版號;
+    clone.addEventListener('click',function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      if(e.stopImmediatePropagation)e.stopImmediatePropagation();
+      var status=document.getElementById('狀態卡');
+      if(status)status.textContent='🟡 更新中｜重新載入最新正式版 '+正式版號;
+      var url=new URL(location.href);
+      url.searchParams.set('v',正式版號);
+      url.searchParams.set('更新時間',String(Date.now()));
+      location.replace(url.toString());
+    },true);
+    btn.parentNode.replaceChild(clone,btn);
+  }
+  function run(){loadCss();killLoading();bindScrollGuard();productDrop();bindGlobalProductOpen();stationTop();machinePhotos();bindRefreshButton();}
   loadCss();killLoading();
   var s=document.createElement('script');
   s.src='https://cdn.jsdelivr.net/gh/qhero70/smart-factory-worker-app@eb33ca85a8bca1746614659b41596d3b9a9f8bf8/docs/work-report-v2-core.js?v='+Date.now();
