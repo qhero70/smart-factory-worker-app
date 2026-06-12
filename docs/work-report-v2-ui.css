@@ -1,8 +1,6 @@
 /* 製造部．報工系統 V2 正式現場 UI */
-
 #載入遮罩{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important}
 body.正在滑動選單 .人員卡片,body.正在滑動選單 .產品卡片{pointer-events:none!important}
-
 #人員下拉控制,#產品下拉控制{border:1px solid rgba(0,210,255,.45);background:rgba(15,20,35,.82);border-radius:22px;padding:12px;margin:12px 0;box-shadow:0 10px 28px rgba(0,0,0,.28)}
 #人員下拉按鈕,#產品下拉按鈕{width:100%;border:1px solid var(--線);background:rgba(0,210,255,.10);color:#fff;border-radius:18px;min-height:76px;padding:10px 14px;display:grid;grid-template-columns:56px 1fr 28px;gap:12px;align-items:center;text-align:left;font-weight:1000}
 #人員下拉按鈕 .下拉頭像,#產品下拉按鈕 .下拉產品圖{width:56px;height:56px;border-radius:16px;overflow:hidden;background:#0a0a15;border:1px solid rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center}
@@ -10,22 +8,15 @@ body.正在滑動選單 .人員卡片,body.正在滑動選單 .產品卡片{poin
 #人員下拉按鈕 .下拉姓名,#產品下拉按鈕 .下拉產品名{display:block;font-size:19px;line-height:1.2;color:#fff}
 #人員下拉按鈕 .下拉資料,#產品下拉按鈕 .下拉產品資料{display:block;font-size:13px;color:#7ae9ff;margin-top:3px}
 #人員下拉按鈕 .下拉箭頭,#產品下拉按鈕 .下拉箭頭{color:var(--藍);font-size:24px;text-align:center}
-
-body:not(.產品下拉展開) #產品下拉控制 ~ #產品列表{display:none!important;height:0!important;min-height:0!important;max-height:0!important;overflow:hidden!important;margin:0!important;padding:0!important}
-body.產品下拉展開 #產品列表{display:grid!important;height:auto!important;min-height:0!important;max-height:none!important;overflow:visible!important}
-body.產品下拉展開 #產品下拉按鈕{border-color:var(--藍);box-shadow:0 0 20px rgba(0,210,255,.25)}
-
-/* 人員 CSS 防呆下拉：點搜尋欄才展開 */
-.人員網格{display:grid!important;grid-template-columns:1fr!important;gap:12px!important;height:0!important;min-height:0!important;max-height:0!important;margin:0!important;overflow:hidden!important;perspective:none!important;transition:max-height .18s ease,margin .18s ease}
-body:has(#搜尋人員:focus) .人員網格,.人員網格:focus-within{height:auto!important;max-height:56vh!important;margin:12px 0 18px!important;overflow:auto!important;-webkit-overflow-scrolling:touch!important}
-.人員網格::before{content:'請先點上方搜尋欄展開人員圖片卡片清單';display:block;color:#ffe08a;font-weight:1000;text-align:center;font-size:14px;padding:8px 0}
-body:has(#搜尋人員:focus) .人員網格::before,.人員網格:focus-within::before{content:'人員圖片卡片清單｜上下滑動不會誤選'}
+body:not(.人員下拉展開) #人員下拉控制 ~ #人員列表,body:not(.產品下拉展開) #產品下拉控制 ~ #產品列表{display:none!important;height:0!important;min-height:0!important;max-height:0!important;overflow:hidden!important;margin:0!important;padding:0!important}
+body.人員下拉展開 #人員列表,body.產品下拉展開 #產品列表{display:grid!important;height:auto!important;min-height:0!important;max-height:56vh!important;overflow:auto!important;-webkit-overflow-scrolling:touch!important;margin:12px 0 18px!important}
+body.人員下拉展開 #人員下拉按鈕,body.產品下拉展開 #產品下拉按鈕{border-color:var(--藍);box-shadow:0 0 20px rgba(0,210,255,.25)}
+.人員網格{display:grid!important;grid-template-columns:1fr!important;gap:12px!important;height:auto!important;min-height:0!important;margin:12px 0 18px!important;overflow:visible!important;perspective:none!important}
+.人員網格::before{content:'人員圖片卡片清單｜上下滑動不會誤選';display:block;color:#ffe08a;font-weight:1000;text-align:center;font-size:14px;padding:8px 0}
 .人員卡片{position:relative!important;transform:none!important;opacity:1!important;z-index:auto!important;pointer-events:auto!important;width:100%!important;max-width:none!important;height:auto!important;max-height:none!important;min-height:112px!important;padding:10px!important;border-radius:22px!important;border:1px solid var(--線)!important;background:rgba(15,20,35,.78)!important;box-shadow:0 10px 28px rgba(0,0,0,.28)!important;display:grid!important;grid-template-columns:96px 1fr!important;grid-template-rows:auto auto!important;gap:8px 12px!important;align-items:center!important;text-align:left!important;-webkit-box-reflect:none!important;overflow:hidden!important}
 .人員卡片.選中{border-color:var(--藍)!important;box-shadow:0 0 0 3px rgba(0,210,255,.18),0 0 28px rgba(0,210,255,.28)!important;background:linear-gradient(135deg,rgba(0,210,255,.16),rgba(15,20,35,.88))!important}
 .人員卡片:after{display:none!important}.人員卡片 .頭像圈{position:static!important;grid-column:1!important;grid-row:1/3!important;width:96px!important;height:96px!important;border-radius:18px!important;border:1px solid rgba(255,255,255,.12)!important;margin:0!important;overflow:hidden!important;background:#0a0a15!important}.人員卡片 .頭像圈 img{width:100%!important;height:100%!important;object-fit:cover!important;display:block!important}
 .人員卡片 .人名{position:static!important;grid-column:2!important;grid-row:1!important;display:block!important;font-size:20px!important;line-height:1.25!important;color:#fff!important;font-weight:1000!important;text-align:left!important;text-shadow:none!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important}
 .人員卡片 .人工號{position:static!important;grid-column:2!important;grid-row:2!important;transform:none!important;display:inline-flex!important;width:max-content!important;min-width:0!important;padding:4px 10px!important;border-radius:999px!important;background:rgba(0,210,255,.18)!important;border:1px solid rgba(0,210,255,.58)!important;color:#7ae9ff!important;font-size:14px!important;font-weight:1000!important;text-shadow:none!important}.人員卡片 .班標{position:absolute!important;top:10px!important;right:10px!important;z-index:5!important}.導航箭頭{display:none!important}
-
 .產品網格{grid-template-columns:1fr!important;gap:12px!important;overflow:visible!important}.產品卡片{width:100%!important;min-height:112px!important;border-radius:22px!important;display:grid!important;grid-template-columns:96px 1fr!important;gap:12px!important;align-items:center!important;text-align:left!important}.產品卡片 .產品圖{width:96px!important;height:96px!important;border-radius:18px!important}.產品卡片 .產品圖 img{width:100%!important;height:100%!important;object-fit:cover!important}.產品卡片 .產品名{font-size:20px!important;line-height:1.25!important;white-space:normal!important}
-
 #工站固定區{display:block!important;border:1px solid rgba(0,210,255,.45)!important;background:rgba(15,20,35,.88)!important;border-radius:22px!important;padding:14px!important;margin:12px 0 14px!important;box-shadow:0 10px 28px rgba(0,0,0,.28)!important}#工站固定區 label{font-size:15px!important;color:#8fb3c8!important;font-weight:1000!important;margin-bottom:8px!important}#工站固定區 select{min-height:58px!important;font-size:18px!important;font-weight:1000!important;border-color:rgba(0,210,255,.45)!important}#工站固定區 #工站提示{display:block!important;color:#ffe08a!important;font-size:14px!important;font-weight:900!important;margin-top:10px!important}#工站固定區 #機台清單{display:none!important}#產品列表 .卡片{grid-column:1/-1!important;position:relative!important;top:auto!important;z-index:1!important}
