@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  var 正式版號='236';
+  var 正式版號='237';
   var 起點X=0,起點Y=0,正在滑動=false,封鎖點擊到=0;
   function loadCss(){
     if(document.getElementById('報工正式樣式'))return;
@@ -20,8 +20,8 @@
     }
   }
   function bindScrollGuard(){
-    if(document.body.dataset.scrollGuard==='236')return;
-    document.body.dataset.scrollGuard='236';
+    if(document.body.dataset.scrollGuard==='237')return;
+    document.body.dataset.scrollGuard='237';
     document.addEventListener('touchstart',function(e){
       if(!e.touches||!e.touches.length)return;
       起點X=e.touches[0].clientX;
@@ -86,8 +86,8 @@
       list.parentNode.insertBefore(wrap,list);
     }
     var btn=document.getElementById('產品下拉按鈕');
-    if(btn&&btn.dataset.bind!=='236'){
-      btn.dataset.bind='236';
+    if(btn&&btn.dataset.bind!=='237'){
+      btn.dataset.bind='237';
       btn.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();showProducts();},true);
       btn.addEventListener('touchend',function(e){e.preventDefault();e.stopPropagation();showProducts();},true);
     }
@@ -102,8 +102,8 @@
       info.textContent=(selected.querySelector('.產品副')||{}).textContent||'已選定產品';
     }
     if(!document.body.classList.contains('產品下拉展開'))hideProducts();
-    if(list.dataset.dropClose!=='236'){
-      list.dataset.dropClose='236';
+    if(list.dataset.dropClose!=='237'){
+      list.dataset.dropClose='237';
       list.addEventListener('click',function(e){
         if(Date.now()<封鎖點擊到)return;
         if(e.target.closest('.產品卡片'))setTimeout(function(){hideProducts();productDrop();stationTop();machinePhotos();},180);
@@ -111,8 +111,8 @@
     }
   }
   function bindGlobalProductOpen(){
-    if(document.body.dataset.productGlobal==='236')return;
-    document.body.dataset.productGlobal='236';
+    if(document.body.dataset.productGlobal==='237')return;
+    document.body.dataset.productGlobal='237';
     document.addEventListener('click',function(e){
       var hit=e.target.closest('#產品下拉控制,#產品下拉按鈕');
       if(!hit)return;
@@ -192,9 +192,9 @@
   }
   function bindRefreshButton(){
     var btn=document.getElementById('重整鈕');
-    if(!btn||btn.dataset.refreshBind==='236')return;
+    if(!btn||btn.dataset.refreshBind==='237')return;
     var clone=btn.cloneNode(true);
-    clone.dataset.refreshBind='236';
+    clone.dataset.refreshBind='237';
     clone.title='更新到最新正式版 '+正式版號;
     clone.addEventListener('click',function(e){
       e.preventDefault();
