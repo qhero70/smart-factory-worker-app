@@ -1,7 +1,7 @@
 window.PWA_CONFIG = {
   GAS_WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbweSKwcREbv-5R5E1ZIj_XOZDGQzRPCdoOAy2uTkhMwZTZoIv-GtpQi0PF8ahdb6KEJ/exec',
   APP_NAME: '製造部智慧製造應用總部',
-  VERSION: 'v2.1.23_正式現場版',
+  VERSION: 'v2.1.24_正式現場版',
   SPREADSHEET_ID: '1JA0-kxVO6x3NbCgjmUurkwd8lffolj0pbInissLl8BQ',
   API_TIMEOUT_MS: 8000,
   API_ACTIONS: {
@@ -20,93 +20,8 @@ window.PWA_CONFIG = {
     var link=document.createElement('link');
     link.id='報工正式樣式';
     link.rel='stylesheet';
-    link.href='./work-report-v2-ui.css?v=223';
+    link.href='./work-report-v2-ui.css?v=228';
     document.head.appendChild(link);
-  }
-  function 建立人員下拉(){
-    var list=document.getElementById('人員列表');
-    if(!list)return;
-    var wrap=document.getElementById('人員下拉控制');
-    if(!wrap){
-      wrap=document.createElement('div');
-      wrap.id='人員下拉控制';
-      wrap.innerHTML='<button id="人員下拉按鈕" type="button"><span class="下拉頭像"></span><span><span class="下拉姓名">請選擇人員</span><span class="下拉資料">點擊展開圖片卡片清單</span></span><span class="下拉箭頭">⌄</span></button>';
-      list.parentNode.insertBefore(wrap,list);
-      document.getElementById('人員下拉按鈕').addEventListener('click',function(){document.body.classList.toggle('人員下拉展開');});
-    }
-    var selected=list.querySelector('.人員卡片.選中');
-    var avatar=wrap.querySelector('.下拉頭像');
-    var name=wrap.querySelector('.下拉姓名');
-    var info=wrap.querySelector('.下拉資料');
-    if(selected){
-      var img=selected.querySelector('.頭像圈 img');
-      avatar.innerHTML=img?'<img src="'+img.src+'" alt="">':'';
-      name.textContent=(selected.querySelector('.人名')||{}).textContent||'已選人員';
-      info.textContent=((selected.querySelector('.人工號')||{}).textContent||'')+'｜'+((selected.querySelector('.班標')||{}).textContent||'');
-    }
-  }
-  function 綁定人員收合(){
-    var list=document.getElementById('人員列表');
-    if(!list||list.dataset.dropClose==='1')return;
-    list.dataset.dropClose='1';
-    list.addEventListener('click',function(e){
-      if(e.target.closest('.人員卡片'))setTimeout(function(){document.body.classList.remove('人員下拉展開');建立人員下拉();},120);
-    },true);
-  }
-  function 建立產品下拉(){
-    var list=document.getElementById('產品列表');
-    if(!list)return;
-    var wrap=document.getElementById('產品下拉控制');
-    if(!wrap){
-      wrap=document.createElement('div');
-      wrap.id='產品下拉控制';
-      wrap.innerHTML='<button id="產品下拉按鈕" type="button"><span class="下拉產品圖"></span><span><span class="下拉產品名">請選擇產品</span><span class="下拉產品資料">點擊展開產品圖片卡片清單</span></span><span class="下拉箭頭">⌄</span></button>';
-      list.parentNode.insertBefore(wrap,list);
-      document.getElementById('產品下拉按鈕').addEventListener('click',function(){document.body.classList.toggle('產品下拉展開');});
-    }
-    var selected=list.querySelector('.產品卡片.選中');
-    var avatar=wrap.querySelector('.下拉產品圖');
-    var name=wrap.querySelector('.下拉產品名');
-    var info=wrap.querySelector('.下拉產品資料');
-    if(selected){
-      var img=selected.querySelector('.產品圖 img');
-      avatar.innerHTML=img?'<img src="'+img.src+'" alt="">':'📦';
-      name.textContent=(selected.querySelector('.產品名')||{}).textContent||'已選產品';
-      info.textContent=(selected.querySelector('.產品副')||{}).textContent||'已選定產品';
-    }
-  }
-  function 綁定產品收合(){
-    var list=document.getElementById('產品列表');
-    if(!list||list.dataset.productClose==='1')return;
-    list.dataset.productClose='1';
-    list.addEventListener('click',function(e){
-      if(e.target.closest('.產品卡片'))setTimeout(function(){document.body.classList.remove('產品下拉展開');建立產品下拉();工站固定顯示();},160);
-    },true);
-  }
-  function 工站固定顯示(){
-    var list=document.getElementById('產品列表');
-    var sel=document.getElementById('工站選擇');
-    if(!list||!sel)return;
-    var card=sel.closest('.卡片');
-    if(!card)return;
-    card.id='工站固定區';
-    card.style.position='relative';
-    card.style.top='auto';
-    card.style.zIndex='1';
-    card.style.display='block';
-    card.style.borderColor='rgba(0,210,255,.45)';
-    var control=document.getElementById('產品下拉控制');
-    if(control&&control.nextElementSibling!==card)control.parentNode.insertBefore(card,control.nextSibling);
-    else if(!control&&list.previousElementSibling!==card)list.parentNode.insertBefore(card,list);
-  }
-  function 綁定產品滑動(){
-    var list=document.getElementById('產品列表');
-    if(!list||list.dataset.stationScroll==='4')return;
-    list.dataset.stationScroll='4';
-    list.addEventListener('click',function(e){
-      var item=e.target.closest('.產品卡片');
-      if(item)setTimeout(function(){var station=document.getElementById('工站固定區');if(station)station.scrollIntoView({behavior:'smooth',block:'start'});},120);
-    },true);
   }
   function 補時間班別(){
     var n=new Date();
@@ -142,6 +57,6 @@ window.PWA_CONFIG = {
     input.dataset.clean='1';
     input.addEventListener('input',function(){input.value=input.value.trim().toLowerCase();});
   }
-  function 執行(){載入正式樣式();建立人員下拉();綁定人員收合();建立產品下拉();綁定產品收合();工站固定顯示();綁定產品滑動();補時間班別();限制不良();整理掃碼輸入();}
-  document.addEventListener('DOMContentLoaded',function(){setInterval(執行,1000);setTimeout(執行,300);setTimeout(執行,1600);});
+  function 執行(){載入正式樣式();補時間班別();限制不良();整理掃碼輸入();}
+  document.addEventListener('DOMContentLoaded',function(){setInterval(執行,1500);setTimeout(執行,300);setTimeout(執行,1600);});
 })();
