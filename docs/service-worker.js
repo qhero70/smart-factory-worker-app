@@ -1,4 +1,4 @@
-const 快取版本 = 'v2.1.7_報工功能恢復版';
+const 快取版本 = 'v2.1.17_正式現場版';
 const 快取名稱 = `製造部智慧製造應用總部-${快取版本}`;
 const 必要檔案 = [
   './',
@@ -10,6 +10,7 @@ const 必要檔案 = [
   './manifest.webmanifest',
   './pwa-config.js',
   './gas-bridge.js',
+  './assets/hs-logo.svg',
   './assets/icons/智慧製造圖示.svg'
 ];
 
@@ -42,7 +43,8 @@ self.addEventListener('fetch', event => {
     網址.pathname.endsWith('/work-report-v2-core.js') ||
     網址.pathname.endsWith('/gas-bridge.js') ||
     網址.pathname.endsWith('/pwa-config.js') ||
-    網址.pathname.endsWith('/service-worker.js')
+    網址.pathname.endsWith('/service-worker.js') ||
+    網址.pathname.endsWith('/assets/hs-logo.svg')
   ) {
     event.respondWith(fetch(請求, { cache: 'reload' }));
     return;
