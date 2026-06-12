@@ -1,6 +1,71 @@
 /* 製造部．報工系統 V2 正式現場 UI */
-.人員網格{
+
+/* 人員下拉模式 */
+#人員下拉控制{
+  border:1px solid rgba(0,210,255,.45);
+  background:rgba(15,20,35,.82);
+  border-radius:22px;
+  padding:12px;
+  margin:12px 0;
+  box-shadow:0 10px 28px rgba(0,0,0,.28);
+}
+#人員下拉按鈕{
+  width:100%;
+  border:1px solid var(--線);
+  background:rgba(0,210,255,.10);
+  color:#fff;
+  border-radius:18px;
+  min-height:76px;
+  padding:10px 14px;
+  display:grid;
+  grid-template-columns:56px 1fr 28px;
+  gap:12px;
+  align-items:center;
+  text-align:left;
+  font-weight:1000;
+}
+#人員下拉按鈕 .下拉頭像{
+  width:56px;
+  height:56px;
+  border-radius:16px;
+  overflow:hidden;
+  background:#0a0a15;
+  border:1px solid rgba(255,255,255,.16);
+}
+#人員下拉按鈕 .下拉頭像 img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+#人員下拉按鈕 .下拉姓名{
+  font-size:19px;
+  line-height:1.2;
+  color:#fff;
+}
+#人員下拉按鈕 .下拉資料{
+  font-size:13px;
+  color:#7ae9ff;
+  margin-top:3px;
+}
+#人員下拉按鈕 .下拉箭頭{
+  color:var(--藍);
+  font-size:24px;
+  text-align:center;
+}
+#人員列表{
+  display:none!important;
+}
+body.人員下拉展開 #人員列表{
   display:grid!important;
+}
+body.人員下拉展開 #人員下拉按鈕{
+  border-color:var(--藍);
+  box-shadow:0 0 20px rgba(0,210,255,.25);
+}
+
+/* 人員圖片卡片清單 */
+.人員網格{
   grid-template-columns:1fr!important;
   gap:12px!important;
   height:auto!important;
@@ -97,6 +162,39 @@
   z-index:5!important;
 }
 .導航箭頭{display:none!important;}
+
+/* 工站下拉固定顯示模式 */
+#工站固定區{
+  display:block!important;
+  border:1px solid rgba(0,210,255,.45)!important;
+  background:rgba(15,20,35,.88)!important;
+  border-radius:22px!important;
+  padding:14px!important;
+  margin:12px 0 14px!important;
+  box-shadow:0 10px 28px rgba(0,0,0,.28)!important;
+}
+#工站固定區 label{
+  font-size:15px!important;
+  color:#8fb3c8!important;
+  font-weight:1000!important;
+  margin-bottom:8px!important;
+}
+#工站固定區 select{
+  min-height:58px!important;
+  font-size:18px!important;
+  font-weight:1000!important;
+  border-color:rgba(0,210,255,.45)!important;
+}
+#工站固定區 #工站提示{
+  display:block!important;
+  color:#ffe08a!important;
+  font-size:14px!important;
+  font-weight:900!important;
+  margin-top:10px!important;
+}
+#工站固定區 #機台清單{
+  display:none!important;
+}
 #產品列表 .卡片{
   grid-column:1/-1!important;
   position:relative!important;
