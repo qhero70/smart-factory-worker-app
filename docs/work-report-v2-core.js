@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  var 正式版號='240';
+  var 正式版號='241';
   var 起點X=0,起點Y=0,正在滑動=false,封鎖點擊到=0;
   var 已綁定加班保護=false;
   var 加班手動=false;
@@ -25,8 +25,8 @@
     }
   }
   function bindScrollGuard(){
-    if(document.body.dataset.scrollGuard==='240')return;
-    document.body.dataset.scrollGuard='240';
+    if(document.body.dataset.scrollGuard==='241')return;
+    document.body.dataset.scrollGuard='241';
     document.addEventListener('touchstart',function(e){
       if(!e.touches||!e.touches.length)return;
       起點X=e.touches[0].clientX;
@@ -91,8 +91,8 @@
       list.parentNode.insertBefore(wrap,list);
     }
     var btn=document.getElementById('產品下拉按鈕');
-    if(btn&&btn.dataset.bind!=='240'){
-      btn.dataset.bind='240';
+    if(btn&&btn.dataset.bind!=='241'){
+      btn.dataset.bind='241';
       btn.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();showProducts();},true);
       btn.addEventListener('touchend',function(e){e.preventDefault();e.stopPropagation();showProducts();},true);
     }
@@ -107,8 +107,8 @@
       info.textContent=(selected.querySelector('.產品副')||{}).textContent||'已選定產品 / Product selected';
     }
     if(!document.body.classList.contains('產品下拉展開'))hideProducts();
-    if(list.dataset.dropClose!=='240'){
-      list.dataset.dropClose='240';
+    if(list.dataset.dropClose!=='241'){
+      list.dataset.dropClose='241';
       list.addEventListener('click',function(e){
         if(Date.now()<封鎖點擊到)return;
         if(e.target.closest('.產品卡片'))setTimeout(function(){hideProducts();productDrop();stationTop();machinePhotos();},180);
@@ -116,8 +116,8 @@
     }
   }
   function bindGlobalProductOpen(){
-    if(document.body.dataset.productGlobal==='240')return;
-    document.body.dataset.productGlobal='240';
+    if(document.body.dataset.productGlobal==='241')return;
+    document.body.dataset.productGlobal='241';
     document.addEventListener('click',function(e){
       var hit=e.target.closest('#產品下拉控制,#產品下拉按鈕');
       if(!hit)return;
@@ -170,7 +170,7 @@
     return String(取欄(m,['機台編號','機台代號','設備編號','主機台','編號','代號','id','ID'])||m||'').trim();
   }
   function 取機台照片(m){
-    return 正規化圖片網址(取欄(m,['照片','機台照片','機台照片網址','照片網址','縮圖網址','圖片網址','機台照片檔案ID','Google檔案ID','照片檔案ID','檔案ID']));
+    return 正規化圖片網址(取欄(m,['照片','機台照片','機台照片網址','照片網址','縮圖網址','圖片網址','機台圖片','設備照片','設備圖片','機台照片檔案ID','Google檔案ID','照片檔案ID','檔案ID']));
   }
   function 解析機台編號清單(station){
     var raw=[];
@@ -185,9 +185,13 @@
   function 找主檔機台(id,state){
     var list=Array.isArray(state&&state.機台)?state.機台:[];
     var clean=String(id||'').trim();
+    var compact=clean.replace(/[^A-Za-z0-9]/g,'').toUpperCase();
     if(!clean)return null;
     return list.find(function(m){
-      return [m.機台編號,m.機台代號,m.設備編號,m.主機台,m.編號,m.代號,m.id,m.ID].some(function(v){return String(v||'').trim()===clean;});
+      return [m.機台編號,m.機台代號,m.設備編號,m.主機台,m.編號,m.代號,m.id,m.ID].some(function(v){
+        var t=String(v||'').trim();
+        return t===clean||t.replace(/[^A-Za-z0-9]/g,'').toUpperCase()===compact;
+      });
     })||null;
   }
   function 機台列補照片(m,state){
@@ -226,22 +230,18 @@
     });
     rows=rows.filter(function(m){return m&&m.機台編號;});
     if(!rows.length)return;
-    var hasPhoto=box.querySelector('.機台卡 img');
-    var text=box.textContent||'';
-    var shouldRepair=!hasPhoto||text.indexOf('無機圖')>=0||text.indexOf('No Photo')>=0||text.indexOf('請先選擇產品與工站')>=0||text.indexOf('未設定機台')>=0;
-    if(!shouldRepair)return;
     var html=rows.map(function(m){
       var id=安全文字(m.機台編號||'');
       var name=安全文字(m.機台名稱||m.機台編號||'');
       var photo=取機台照片(m);
-      var image=photo?'<img src="'+安全文字(photo)+'" alt="'+id+'" loading="lazy" referrerpolicy="no-referrer" decoding="async" onerror="this.outerHTML=\'<div class=\\\'無圖\\\'>照片載入失敗 / Photo load failed</div>\';">':'<div class="無圖">無機圖 / No Photo</div>';
+      var image=photo?'<img src="'+安全文字(photo)+'" alt="'+id+'" loading="eager" referrerpolicy="no-referrer" decoding="async" onerror="this.outerHTML=\'<div class=\\\'無圖\\\'>照片載入失敗 / Photo load failed<br>'+id+'</div>\';">':'<div class="無圖">無機圖 / No Photo<br>'+id+'</div>';
       return '<div class="機台卡">'+image+'<div class="機台號">'+id+'</div><div class="小字">'+name+'</div></div>';
     }).join('');
     box.innerHTML=html;
     box.style.setProperty('display','grid','important');
     box.style.setProperty('visibility','visible','important');
     box.style.setProperty('opacity','1','important');
-    window.智慧製造機台照片狀態={版本:正式版號,修復來源:'工站+機台主檔',工站:station.工站名稱||'',機台數:rows.length,有照片數:rows.filter(function(m){return !!取機台照片(m);}).length};
+    window.智慧製造機台照片狀態={版本:正式版號,修復來源:'每次強制重畫_工站加機台主檔',工站:station.工站名稱||'',機台數:rows.length,有照片數:rows.filter(function(m){return !!取機台照片(m);}).length,機台:rows.map(function(m){return {機台編號:m.機台編號,有照片:!!取機台照片(m)};})};
   }
   function normalizeOvertimeValue(value){
     var text=String(value||'').split('/')[0].trim();
@@ -255,18 +255,18 @@
     var ot=document.getElementById('是否加班');
     if(ot){
       var current=normalizeOvertimeValue(ot.value||手動是否加班||'否');
-      if(ot.dataset.manualOvertimeOptions!=='240'){
+      if(ot.dataset.manualOvertimeOptions!=='241'){
         ot.innerHTML='<option value="否">否 / No</option><option value="是">是 / Yes</option>';
-        ot.dataset.manualOvertimeOptions='240';
+        ot.dataset.manualOvertimeOptions='241';
       }
       ot.value=加班手動?手動是否加班:current;
     }
     var type=document.getElementById('加班類型');
     if(type){
       var currentType=normalizeOvertimeType(type.value||手動加班類型||'無');
-      if(type.dataset.manualOvertimeTypeOptions!=='240'){
+      if(type.dataset.manualOvertimeTypeOptions!=='241'){
         type.innerHTML='<option value="無">無 / None</option><option value="平日加班">平日加班 / Weekday OT</option><option value="假日加班">假日加班 / Holiday OT</option><option value="臨時加班">臨時加班 / Temporary OT</option>';
-        type.dataset.manualOvertimeTypeOptions='240';
+        type.dataset.manualOvertimeTypeOptions='241';
       }
       type.value=加班類型手動?手動加班類型:currentType;
     }
@@ -330,9 +330,9 @@
   }
   function bindRefreshButton(){
     var btn=document.getElementById('重整鈕');
-    if(!btn||btn.dataset.refreshBind==='240')return;
+    if(!btn||btn.dataset.refreshBind==='241')return;
     var clone=btn.cloneNode(true);
-    clone.dataset.refreshBind='240';
+    clone.dataset.refreshBind='241';
     clone.title='更新到最新正式版 / Update to latest version '+正式版號;
     clone.addEventListener('click',function(e){
       e.preventDefault();
