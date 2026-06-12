@@ -1,4 +1,4 @@
-const 快取版本 = 'v2.0.1_UI照片修正_正式主檔';
+const 快取版本 = 'v2.1.0_CoverFlow正式整合版';
 const 快取名稱 = `製造部智慧製造應用總部-${快取版本}`;
 const 必要檔案 = [
   './',
@@ -37,8 +37,12 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // 報工核心程式永遠取最新版，避免手機 Safari 留住舊 UI。
-  if (網址.pathname.endsWith('/work-report-v2-core.js')) {
+  if (
+    網址.pathname.endsWith('/work-report-v2.html') ||
+    網址.pathname.endsWith('/work-report-v2-core.js') ||
+    網址.pathname.endsWith('/gas-bridge.js') ||
+    網址.pathname.endsWith('/pwa-config.js')
+  ) {
     event.respondWith(fetch(請求, { cache: 'reload' }));
     return;
   }
