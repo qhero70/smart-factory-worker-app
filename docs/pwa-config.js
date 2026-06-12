@@ -1,9 +1,9 @@
 window.PWA_CONFIG = {
   GAS_WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbweSKwcREbv-5R5E1ZIj_XOZDGQzRPCdoOAy2uTkhMwZTZoIv-GtpQi0PF8ahdb6KEJ/exec',
   APP_NAME: '製造部智慧製造應用總部',
-  VERSION: 'v2.0.0_正式整合版',
+  VERSION: 'v2.1.1_CoverFlow載入防卡版',
   SPREADSHEET_ID: '1JA0-kxVO6x3NbCgjmUurkwd8lffolj0pbInissLl8BQ',
-  API_TIMEOUT_MS: 20000,
+  API_TIMEOUT_MS: 8000,
   API_ACTIONS: {
     健康檢查: '健康檢查',
     主檔檢查: '主檔檢查',
