@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  var 正式版號='237';
+  var 正式版號='238';
   var 起點X=0,起點Y=0,正在滑動=false,封鎖點擊到=0;
   function loadCss(){
     if(document.getElementById('報工正式樣式'))return;
@@ -20,8 +20,8 @@
     }
   }
   function bindScrollGuard(){
-    if(document.body.dataset.scrollGuard==='237')return;
-    document.body.dataset.scrollGuard='237';
+    if(document.body.dataset.scrollGuard==='238')return;
+    document.body.dataset.scrollGuard='238';
     document.addEventListener('touchstart',function(e){
       if(!e.touches||!e.touches.length)return;
       起點X=e.touches[0].clientX;
@@ -82,12 +82,12 @@
     if(!wrap){
       wrap=document.createElement('div');
       wrap.id='產品下拉控制';
-      wrap.innerHTML='<button id="產品下拉按鈕" type="button"><span class="下拉產品圖">📦</span><span><span class="下拉產品名">請選擇產品</span><span class="下拉產品資料">點擊展開產品圖片卡片清單</span></span><span class="下拉箭頭">⌄</span></button>';
+      wrap.innerHTML='<button id="產品下拉按鈕" type="button"><span class="下拉產品圖">📦</span><span><span class="下拉產品名">請選擇產品 / Select Product</span><span class="下拉產品資料">點擊展開產品圖片卡片清單 / Tap to open product photo list</span></span><span class="下拉箭頭">⌄</span></button>';
       list.parentNode.insertBefore(wrap,list);
     }
     var btn=document.getElementById('產品下拉按鈕');
-    if(btn&&btn.dataset.bind!=='237'){
-      btn.dataset.bind='237';
+    if(btn&&btn.dataset.bind!=='238'){
+      btn.dataset.bind='238';
       btn.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();showProducts();},true);
       btn.addEventListener('touchend',function(e){e.preventDefault();e.stopPropagation();showProducts();},true);
     }
@@ -98,12 +98,12 @@
       var name=wrap.querySelector('.下拉產品名');
       var info=wrap.querySelector('.下拉產品資料');
       pic.innerHTML=img?'<img src="'+img.src+'" alt="">':'📦';
-      name.textContent=(selected.querySelector('.產品名')||{}).textContent||'已選產品';
-      info.textContent=(selected.querySelector('.產品副')||{}).textContent||'已選定產品';
+      name.textContent=(selected.querySelector('.產品名')||{}).textContent||'已選產品 / Selected Product';
+      info.textContent=(selected.querySelector('.產品副')||{}).textContent||'已選定產品 / Product selected';
     }
     if(!document.body.classList.contains('產品下拉展開'))hideProducts();
-    if(list.dataset.dropClose!=='237'){
-      list.dataset.dropClose='237';
+    if(list.dataset.dropClose!=='238'){
+      list.dataset.dropClose='238';
       list.addEventListener('click',function(e){
         if(Date.now()<封鎖點擊到)return;
         if(e.target.closest('.產品卡片'))setTimeout(function(){hideProducts();productDrop();stationTop();machinePhotos();},180);
@@ -111,8 +111,8 @@
     }
   }
   function bindGlobalProductOpen(){
-    if(document.body.dataset.productGlobal==='237')return;
-    document.body.dataset.productGlobal='237';
+    if(document.body.dataset.productGlobal==='238')return;
+    document.body.dataset.productGlobal='238';
     document.addEventListener('click',function(e){
       var hit=e.target.closest('#產品下拉控制,#產品下拉按鈕');
       if(!hit)return;
@@ -181,10 +181,10 @@
       var id=安全文字(m.機台編號||m.機台代號||m.設備編號||'');
       var name=安全文字(m.機台名稱||m.設備名稱||m.名稱||'');
       var photo=取機台照片(m);
-      var image=photo?'<img src="'+安全文字(photo)+'" alt="'+id+'" loading="lazy" referrerpolicy="no-referrer" decoding="async" onerror="this.outerHTML=\'<div class=\\\'無圖\\\'>照片載入失敗</div>\';">':'<div class="無圖">無機圖</div>';
+      var image=photo?'<img src="'+安全文字(photo)+'" alt="'+id+'" loading="lazy" referrerpolicy="no-referrer" decoding="async" onerror="this.outerHTML=\'<div class=\\\'無圖\\\'>照片載入失敗 / Photo load failed</div>\';">':'<div class="無圖">無機圖 / No Photo</div>';
       return '<div class="機台卡">'+image+'<div class="機台號">'+id+'</div><div class="小字">'+name+'</div></div>';
     }).join('');
-    box.innerHTML=html||'<div class="空狀態">此工站未設定機台</div>';
+    box.innerHTML=html||'<div class="空狀態">此工站未設定機台 / No machine assigned to this station</div>';
     box.style.setProperty('display','grid','important');
     box.style.setProperty('visibility','visible','important');
     box.style.setProperty('opacity','1','important');
@@ -192,16 +192,16 @@
   }
   function bindRefreshButton(){
     var btn=document.getElementById('重整鈕');
-    if(!btn||btn.dataset.refreshBind==='237')return;
+    if(!btn||btn.dataset.refreshBind==='238')return;
     var clone=btn.cloneNode(true);
-    clone.dataset.refreshBind='237';
-    clone.title='更新到最新正式版 '+正式版號;
+    clone.dataset.refreshBind='238';
+    clone.title='更新到最新正式版 / Update to latest version '+正式版號;
     clone.addEventListener('click',function(e){
       e.preventDefault();
       e.stopPropagation();
       if(e.stopImmediatePropagation)e.stopImmediatePropagation();
       var status=document.getElementById('狀態卡');
-      if(status)status.textContent='🟡 更新中｜重新載入最新正式版 '+正式版號;
+      if(status)status.textContent='🟡 更新中 / Updating｜重新載入最新正式版 / Reloading latest version '+正式版號;
       var url=new URL(location.href);
       url.searchParams.set('v',正式版號);
       url.searchParams.set('更新時間',String(Date.now()));
