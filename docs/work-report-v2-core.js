@@ -1,7 +1,12 @@
 (function(){
   'use strict';
-  var 正式版號='238';
+  var 正式版號='239';
   var 起點X=0,起點Y=0,正在滑動=false,封鎖點擊到=0;
+  var 已綁定加班保護=false;
+  var 加班手動=false;
+  var 加班類型手動=false;
+  var 手動是否加班='否';
+  var 手動加班類型='無';
   function loadCss(){
     if(document.getElementById('報工正式樣式'))return;
     var l=document.createElement('link');
@@ -20,8 +25,8 @@
     }
   }
   function bindScrollGuard(){
-    if(document.body.dataset.scrollGuard==='238')return;
-    document.body.dataset.scrollGuard='238';
+    if(document.body.dataset.scrollGuard==='239')return;
+    document.body.dataset.scrollGuard='239';
     document.addEventListener('touchstart',function(e){
       if(!e.touches||!e.touches.length)return;
       起點X=e.touches[0].clientX;
@@ -86,8 +91,8 @@
       list.parentNode.insertBefore(wrap,list);
     }
     var btn=document.getElementById('產品下拉按鈕');
-    if(btn&&btn.dataset.bind!=='238'){
-      btn.dataset.bind='238';
+    if(btn&&btn.dataset.bind!=='239'){
+      btn.dataset.bind='239';
       btn.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();showProducts();},true);
       btn.addEventListener('touchend',function(e){e.preventDefault();e.stopPropagation();showProducts();},true);
     }
@@ -102,8 +107,8 @@
       info.textContent=(selected.querySelector('.產品副')||{}).textContent||'已選定產品 / Product selected';
     }
     if(!document.body.classList.contains('產品下拉展開'))hideProducts();
-    if(list.dataset.dropClose!=='238'){
-      list.dataset.dropClose='238';
+    if(list.dataset.dropClose!=='239'){
+      list.dataset.dropClose='239';
       list.addEventListener('click',function(e){
         if(Date.now()<封鎖點擊到)return;
         if(e.target.closest('.產品卡片'))setTimeout(function(){hideProducts();productDrop();stationTop();machinePhotos();},180);
@@ -111,8 +116,8 @@
     }
   }
   function bindGlobalProductOpen(){
-    if(document.body.dataset.productGlobal==='238')return;
-    document.body.dataset.productGlobal='238';
+    if(document.body.dataset.productGlobal==='239')return;
+    document.body.dataset.productGlobal='239';
     document.addEventListener('click',function(e){
       var hit=e.target.closest('#產品下拉控制,#產品下拉按鈕');
       if(!hit)return;
@@ -190,11 +195,96 @@
     box.style.setProperty('opacity','1','important');
     window.智慧製造機台照片狀態={版本:正式版號,工站:station.工站名稱||'',機台數:rows.length,有照片數:rows.filter(function(m){return !!取機台照片(m);}).length};
   }
+  function normalizeOvertimeValue(value){
+    var text=String(value||'').split('/')[0].trim();
+    return text==='是'?'是':'否';
+  }
+  function normalizeOvertimeType(value){
+    var text=String(value||'').split('/')[0].trim();
+    return /^(平日加班|假日加班|臨時加班|無)$/.test(text)?text:'無';
+  }
+  function ensureOvertimeOptions(){
+    var ot=document.getElementById('是否加班');
+    if(ot){
+      var current=normalizeOvertimeValue(ot.value||手動是否加班||'否');
+      if(ot.dataset.manualOvertimeOptions!=='239'){
+        ot.innerHTML='<option value="否">否 / No</option><option value="是">是 / Yes</option>';
+        ot.dataset.manualOvertimeOptions='239';
+      }
+      ot.value=加班手動?手動是否加班:current;
+    }
+    var type=document.getElementById('加班類型');
+    if(type){
+      var currentType=normalizeOvertimeType(type.value||手動加班類型||'無');
+      if(type.dataset.manualOvertimeTypeOptions!=='239'){
+        type.innerHTML='<option value="無">無 / None</option><option value="平日加班">平日加班 / Weekday OT</option><option value="假日加班">假日加班 / Holiday OT</option><option value="臨時加班">臨時加班 / Temporary OT</option>';
+        type.dataset.manualOvertimeTypeOptions='239';
+      }
+      type.value=加班類型手動?手動加班類型:currentType;
+    }
+  }
+  function applyOvertimeManualValue(){
+    var ot=document.getElementById('是否加班');
+    var type=document.getElementById('加班類型');
+    if(!ot&&!type)return;
+    ensureOvertimeOptions();
+    if(!加班手動){
+      手動是否加班='否';
+      if(ot)ot.value='否';
+    }else if(ot){
+      ot.value=手動是否加班;
+    }
+    if(!加班類型手動||手動是否加班==='否'){
+      手動加班類型='無';
+      if(type)type.value='無';
+    }else if(type){
+      type.value=手動加班類型;
+    }
+  }
+  function bindOvertimeManual(){
+    if(已綁定加班保護)return;
+    var ot=document.getElementById('是否加班');
+    var type=document.getElementById('加班類型');
+    if(!ot&&!type)return;
+    已綁定加班保護=true;
+    document.addEventListener('change',function(e){
+      if(e.target&&e.target.id==='是否加班'){
+        加班手動=true;
+        手動是否加班=normalizeOvertimeValue(e.target.value);
+        if(手動是否加班==='否'){
+          加班類型手動=false;
+          手動加班類型='無';
+        }
+        setTimeout(applyOvertimeManualValue,0);
+      }
+      if(e.target&&e.target.id==='加班類型'){
+        加班類型手動=true;
+        手動加班類型=normalizeOvertimeType(e.target.value);
+        if(手動加班類型!=='無'){
+          加班手動=true;
+          手動是否加班='是';
+        }
+        setTimeout(applyOvertimeManualValue,0);
+      }
+    },true);
+    document.addEventListener('input',function(e){
+      if(e.target&&e.target.id==='是否加班'){
+        加班手動=true;
+        手動是否加班=normalizeOvertimeValue(e.target.value);
+        setTimeout(applyOvertimeManualValue,0);
+      }
+      if(e.target&&e.target.id==='加班類型'){
+        加班類型手動=true;
+        手動加班類型=normalizeOvertimeType(e.target.value);
+        setTimeout(applyOvertimeManualValue,0);
+      }
+    },true);
+  }
   function bindRefreshButton(){
     var btn=document.getElementById('重整鈕');
-    if(!btn||btn.dataset.refreshBind==='238')return;
+    if(!btn||btn.dataset.refreshBind==='239')return;
     var clone=btn.cloneNode(true);
-    clone.dataset.refreshBind='238';
+    clone.dataset.refreshBind='239';
     clone.title='更新到最新正式版 / Update to latest version '+正式版號;
     clone.addEventListener('click',function(e){
       e.preventDefault();
@@ -209,7 +299,7 @@
     },true);
     btn.parentNode.replaceChild(clone,btn);
   }
-  function run(){loadCss();killLoading();bindScrollGuard();productDrop();bindGlobalProductOpen();stationTop();machinePhotos();bindRefreshButton();}
+  function run(){loadCss();killLoading();bindScrollGuard();productDrop();bindGlobalProductOpen();stationTop();machinePhotos();bindOvertimeManual();applyOvertimeManualValue();bindRefreshButton();}
   loadCss();killLoading();
   var s=document.createElement('script');
   s.src='https://cdn.jsdelivr.net/gh/qhero70/smart-factory-worker-app@eb33ca85a8bca1746614659b41596d3b9a9f8bf8/docs/work-report-v2-core.js?v='+Date.now();
@@ -218,7 +308,7 @@
     var ev=document.createEvent('Event');
     ev.initEvent('DOMContentLoaded',true,true);
     document.dispatchEvent(ev);
-    setInterval(run,800);
+    setInterval(run,650);
     setTimeout(run,200);
     setTimeout(run,1000);
     setTimeout(machinePhotos,1600);
