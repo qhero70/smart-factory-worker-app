@@ -1,62 +1,15 @@
-window.PWA_CONFIG = {
-  GAS_WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbweSKwcREbv-5R5E1ZIj_XOZDGQzRPCdoOAy2uTkhMwZTZoIv-GtpQi0PF8ahdb6KEJ/exec',
-  APP_NAME: '製造部智慧製造應用總部',
-  VERSION: 'v2.1.24_正式現場版',
-  SPREADSHEET_ID: '1JA0-kxVO6x3NbCgjmUurkwd8lffolj0pbInissLl8BQ',
-  API_TIMEOUT_MS: 8000,
-  API_ACTIONS: {
-    健康檢查: '健康檢查',
-    主檔檢查: '主檔檢查',
-    取得報工作業v2初始資料: '取得報工作業v2初始資料',
-    寫入報工作業v2: '寫入報工作業v2',
-    寫入不良紀錄v2: '寫入不良紀錄v2',
-    手動重刷_主檔照片: '手動重刷_主檔照片'
-  }
+window.PWA_CONFIG={
+  GAS_WEB_APP_URL:'https://script.google.com/macros/s/AKfycbweSKwcREbv-5R5E1ZIj_XOZDGQzRPCdoOAy2uTkhMwZTZoIv-GtpQi0PF8ahdb6KEJ/exec',
+  APP_NAME:'製造部智慧製造應用總部',
+  VERSION:'v2.1.27_正式現場版',
+  SPREADSHEET_ID:'1JA0-kxVO6x3NbCgjmUurkwd8lffolj0pbInissLl8BQ',
+  API_TIMEOUT_MS:8000,
+  API_ACTIONS:{健康檢查:'健康檢查',主檔檢查:'主檔檢查',取得報工作業v2初始資料:'取得報工作業v2初始資料',寫入報工作業v2:'寫入報工作業v2',寫入不良紀錄v2:'寫入不良紀錄v2',手動重刷_主檔照片:'手動重刷_主檔照片'}
 };
-
 (function(){
-  function 載入正式樣式(){
-    if(document.getElementById('報工正式樣式'))return;
-    var link=document.createElement('link');
-    link.id='報工正式樣式';
-    link.rel='stylesheet';
-    link.href='./work-report-v2-ui.css?v=228';
-    document.head.appendChild(link);
-  }
-  function 補時間班別(){
-    var n=new Date();
-    var local=new Date(n.getTime()-n.getTimezoneOffset()*60000).toISOString().slice(0,16);
-    var s=document.querySelector('.人員卡片.選中 .班標');
-    var b=document.getElementById('班別');
-    var sh=s?s.textContent.trim():'';
-    if(b&&(sh==='早班'||sh==='大夜班'))b.value=sh;
-    var a=document.getElementById('開始時間');
-    var e=document.getElementById('結束時間');
-    if(a&&!a.value)a.value=local;
-    if(e&&!e.value)e.value=local;
-  }
-  function 限制不良(){
-    function n(v){v=String(v||'').replace(/[^0-9]/g,'');return Number(v)||0;}
-    var totalEl=document.getElementById('今日共做數');
-    var badEl=document.getElementById('快速不良數');
-    var total=n(totalEl&&totalEl.value);
-    if(totalEl&&totalEl.value)totalEl.value=String(total);
-    if(badEl&&badEl.value){var bad=Math.min(n(badEl.value),total||n(badEl.value));badEl.value=String(bad);}
-    var limit=badEl&&badEl.value?n(badEl.value):total;
-    var items=Array.from(document.querySelectorAll('.不良數量'));
-    items.forEach(function(input){
-      if(!input.value)return;
-      var other=items.reduce(function(sum,x){return x===input?sum:sum+n(x.value);},0);
-      var allow=Math.max(0,limit-other);
-      input.value=String(Math.min(n(input.value),allow));
-    });
-  }
-  function 整理掃碼輸入(){
-    var input=document.getElementById('掃碼手動輸入');
-    if(!input||input.dataset.clean==='1')return;
-    input.dataset.clean='1';
-    input.addEventListener('input',function(){input.value=input.value.trim().toLowerCase();});
-  }
-  function 執行(){載入正式樣式();補時間班別();限制不良();整理掃碼輸入();}
-  document.addEventListener('DOMContentLoaded',function(){setInterval(執行,1500);setTimeout(執行,300);setTimeout(執行,1600);});
+function S(){if(document.getElementById('報工正式樣式'))return;var x=document.createElement('link');x.id='報工正式樣式';x.rel='stylesheet';x.href='./work-report-v2-ui.css?v=233';document.head.appendChild(x)}
+function P(){var l=document.getElementById('人員列表');if(!l)return;var c=document.getElementById('人員下拉控制');if(!c){c=document.createElement('div');c.id='人員下拉控制';c.className='人員下拉正式';c.innerHTML='<button id="人員下拉按鈕" type="button"><span class="下拉頭像">👤</span><span><span class="下拉姓名">請選擇人員</span><span class="下拉資料">點擊展開人員圖片卡片清單</span></span><span class="下拉箭頭">⌄</span></button>';l.parentNode.insertBefore(c,l)}var b=document.getElementById('人員下拉按鈕');if(b&&!b.dataset.ok){b.dataset.ok='1';b.onclick=function(e){e&&e.preventDefault();document.body.classList.add('人員下拉展開')}}var h=l.querySelector('.人員卡片.選中');if(h){var n=c.querySelector('.下拉姓名'),d=c.querySelector('.下拉資料'),p=c.querySelector('.下拉頭像'),im=h.querySelector('.頭像圈 img');if(n)n.textContent=(h.querySelector('.人名')||{}).textContent||'已選人員';if(d)d.textContent=((h.querySelector('.人工號')||{}).textContent||'')+'｜'+((h.querySelector('.班標')||{}).textContent||'');if(p)p.innerHTML=im?'<img src="'+im.src+'" alt="">':'👤'}if(!l.dataset.close){l.dataset.close='1';l.addEventListener('click',function(e){if(e.target.closest('.人員卡片'))setTimeout(function(){document.body.classList.remove('人員下拉展開');P()},160)},true)}}
+function T(){var n=new Date(),v=new Date(n.getTime()-n.getTimezoneOffset()*60000).toISOString().slice(0,16),a=document.getElementById('開始時間'),e=document.getElementById('結束時間');if(a&&!a.value)a.value=v;if(e&&!e.value)e.value=v}
+function R(){S();P();T()}
+document.addEventListener('DOMContentLoaded',function(){setInterval(R,1000);setTimeout(R,250);setTimeout(R,1200)})
 })();
