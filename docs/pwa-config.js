@@ -1,7 +1,7 @@
 window.PWA_CONFIG = {
   GAS_WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbweSKwcREbv-5R5E1ZIj_XOZDGQzRPCdoOAy2uTkhMwZTZoIv-GtpQi0PF8ahdb6KEJ/exec',
   APP_NAME: '製造部智慧製造應用總部',
-  VERSION: 'v2.1.17_正式現場版',
+  VERSION: 'v2.1.20_正式現場版',
   SPREADSHEET_ID: '1JA0-kxVO6x3NbCgjmUurkwd8lffolj0pbInissLl8BQ',
   API_TIMEOUT_MS: 8000,
   API_ACTIONS: {
@@ -15,6 +15,14 @@ window.PWA_CONFIG = {
 };
 
 (function(){
+  function 載入正式樣式(){
+    if(document.getElementById('報工正式樣式'))return;
+    var link=document.createElement('link');
+    link.id='報工正式樣式';
+    link.rel='stylesheet';
+    link.href='./work-report-v2-ui.css?v=220';
+    document.head.appendChild(link);
+  }
   function 工站上移(){
     var list=document.getElementById('產品列表');
     var sel=document.getElementById('工站選擇');
@@ -73,5 +81,5 @@ window.PWA_CONFIG = {
     input.dataset.clean='1';
     input.addEventListener('input',function(){input.value=input.value.trim().toLowerCase();});
   }
-  document.addEventListener('DOMContentLoaded',function(){setInterval(function(){工站上移();綁定產品滑動();補時間班別();限制不良();整理掃碼輸入();},1200);setTimeout(function(){工站上移();綁定產品滑動();補時間班別();限制不良();整理掃碼輸入();},300);setTimeout(function(){工站上移();綁定產品滑動();補時間班別();限制不良();整理掃碼輸入();},1600);});
+  document.addEventListener('DOMContentLoaded',function(){setInterval(function(){載入正式樣式();工站上移();綁定產品滑動();補時間班別();限制不良();整理掃碼輸入();},1200);setTimeout(function(){載入正式樣式();工站上移();綁定產品滑動();補時間班別();限制不良();整理掃碼輸入();},300);setTimeout(function(){載入正式樣式();工站上移();綁定產品滑動();補時間班別();限制不良();整理掃碼輸入();},1600);});
 })();
