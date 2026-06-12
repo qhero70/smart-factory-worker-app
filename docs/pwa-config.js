@@ -1,7 +1,7 @@
 window.PWA_CONFIG = {
   GAS_WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbweSKwcREbv-5R5E1ZIj_XOZDGQzRPCdoOAy2uTkhMwZTZoIv-GtpQi0PF8ahdb6KEJ/exec',
   APP_NAME: '製造部智慧製造應用總部',
-  VERSION: 'v2.1.15_正式現場版',
+  VERSION: 'v2.1.16_正式現場版',
   SPREADSHEET_ID: '1JA0-kxVO6x3NbCgjmUurkwd8lffolj0pbInissLl8BQ',
   API_TIMEOUT_MS: 8000,
   API_ACTIONS: {
@@ -51,5 +51,21 @@ window.PWA_CONFIG = {
     if(a&&!a.value)a.value=local;
     if(e&&!e.value)e.value=local;
   }
-  document.addEventListener('DOMContentLoaded',function(){setInterval(function(){工站上移();綁定產品滑動();補時間班別();},1200);setTimeout(function(){工站上移();綁定產品滑動();補時間班別();},300);setTimeout(function(){工站上移();綁定產品滑動();補時間班別();},1600);});
+  function 限制不良(){
+    function n(v){v=String(v||'').replace(/[^0-9]/g,'');return Number(v)||0;}
+    var totalEl=document.getElementById('今日共做數');
+    var badEl=document.getElementById('快速不良數');
+    var total=n(totalEl&&totalEl.value);
+    if(totalEl&&totalEl.value)totalEl.value=String(total);
+    if(badEl&&badEl.value){var bad=Math.min(n(badEl.value),total||n(badEl.value));badEl.value=String(bad);}
+    var limit=badEl&&badEl.value?n(badEl.value):total;
+    var items=Array.from(document.querySelectorAll('.不良數量'));
+    items.forEach(function(input){
+      if(!input.value)return;
+      var other=items.reduce(function(sum,x){return x===input?sum:sum+n(x.value);},0);
+      var allow=Math.max(0,limit-other);
+      input.value=String(Math.min(n(input.value),allow));
+    });
+  }
+  document.addEventListener('DOMContentLoaded',function(){setInterval(function(){工站上移();綁定產品滑動();補時間班別();限制不良();},1200);setTimeout(function(){工站上移();綁定產品滑動();補時間班別();限制不良();},300);setTimeout(function(){工站上移();綁定產品滑動();補時間班別();限制不良();},1600);});
 })();
