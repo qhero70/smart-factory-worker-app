@@ -1,7 +1,7 @@
 window.PWA_CONFIG = {
   GAS_WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbweSKwcREbv-5R5E1ZIj_XOZDGQzRPCdoOAy2uTkhMwZTZoIv-GtpQi0PF8ahdb6KEJ/exec',
   APP_NAME: '製造部智慧製造應用總部',
-  VERSION: 'v2.1.20_正式現場版',
+  VERSION: 'v2.1.21_正式現場版',
   SPREADSHEET_ID: '1JA0-kxVO6x3NbCgjmUurkwd8lffolj0pbInissLl8BQ',
   API_TIMEOUT_MS: 8000,
   API_ACTIONS: {
@@ -20,31 +20,35 @@ window.PWA_CONFIG = {
     var link=document.createElement('link');
     link.id='報工正式樣式';
     link.rel='stylesheet';
-    link.href='./work-report-v2-ui.css?v=220';
+    link.href='./work-report-v2-ui.css?v=221';
     document.head.appendChild(link);
   }
-  function 工站上移(){
+  function 工站跟隨產品(){
     var list=document.getElementById('產品列表');
     var sel=document.getElementById('工站選擇');
     if(!list||!sel)return;
     var card=sel.closest('.卡片');
     if(!card)return;
-    card.style.position='sticky';
-    card.style.top='118px';
-    card.style.zIndex='90';
+    card.style.position='relative';
+    card.style.top='auto';
+    card.style.zIndex='1';
     card.style.borderColor='rgba(0,210,255,.38)';
-    if(card.nextElementSibling!==list)list.parentNode.insertBefore(card,list);
+    card.style.marginTop='10px';
+    card.style.marginBottom='16px';
+    var selected=list.querySelector('.產品卡片.選中');
+    if(selected){
+      if(selected.nextElementSibling!==card)selected.parentNode.insertBefore(card,selected.nextSibling);
+    }else{
+      if(list.firstElementChild!==card)list.insertBefore(card,list.firstElementChild);
+    }
   }
   function 綁定產品滑動(){
     var list=document.getElementById('產品列表');
-    if(!list||list.dataset.stationScroll==='1')return;
-    list.dataset.stationScroll='1';
+    if(!list||list.dataset.stationScroll==='2')return;
+    list.dataset.stationScroll='2';
     list.addEventListener('click',function(e){
-      if(e.target.closest('.產品卡片'))setTimeout(function(){
-        var sel=document.getElementById('工站選擇');
-        var card=sel&&sel.closest('.卡片');
-        if(card)card.scrollIntoView({behavior:'smooth',block:'start'});
-      },120);
+      var item=e.target.closest('.產品卡片');
+      if(item)setTimeout(function(){item.scrollIntoView({behavior:'smooth',block:'start'});},120);
     },true);
   }
   function 補時間班別(){
@@ -81,5 +85,5 @@ window.PWA_CONFIG = {
     input.dataset.clean='1';
     input.addEventListener('input',function(){input.value=input.value.trim().toLowerCase();});
   }
-  document.addEventListener('DOMContentLoaded',function(){setInterval(function(){載入正式樣式();工站上移();綁定產品滑動();補時間班別();限制不良();整理掃碼輸入();},1200);setTimeout(function(){載入正式樣式();工站上移();綁定產品滑動();補時間班別();限制不良();整理掃碼輸入();},300);setTimeout(function(){載入正式樣式();工站上移();綁定產品滑動();補時間班別();限制不良();整理掃碼輸入();},1600);});
+  document.addEventListener('DOMContentLoaded',function(){setInterval(function(){載入正式樣式();工站跟隨產品();綁定產品滑動();補時間班別();限制不良();整理掃碼輸入();},1200);setTimeout(function(){載入正式樣式();工站跟隨產品();綁定產品滑動();補時間班別();限制不良();整理掃碼輸入();},300);setTimeout(function(){載入正式樣式();工站跟隨產品();綁定產品滑動();補時間班別();限制不良();整理掃碼輸入();},1600);});
 })();
