@@ -1,5 +1,12 @@
 /* 製造部．報工系統 V2 正式現場 UI */
 
+#載入遮罩{
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
+}
+
 /* 共用下拉控制 */
 #人員下拉控制,
 #產品下拉控制{
@@ -220,7 +227,7 @@ body.產品下拉展開 #產品下拉按鈕{
   white-space:normal!important;
 }
 
-/* 工站下拉固定顯示模式 */
+/* 工站下拉固定顯示模式：工站在產品選擇上面 */
 #工站固定區{
   display:block!important;
   border:1px solid rgba(0,210,255,.45)!important;
