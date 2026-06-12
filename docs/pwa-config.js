@@ -1,7 +1,7 @@
 window.PWA_CONFIG = {
   GAS_WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbweSKwcREbv-5R5E1ZIj_XOZDGQzRPCdoOAy2uTkhMwZTZoIv-GtpQi0PF8ahdb6KEJ/exec',
   APP_NAME: '製造部智慧製造應用總部',
-  VERSION: 'v2.1.14_正式現場版',
+  VERSION: 'v2.1.15_正式現場版',
   SPREADSHEET_ID: '1JA0-kxVO6x3NbCgjmUurkwd8lffolj0pbInissLl8BQ',
   API_TIMEOUT_MS: 8000,
   API_ACTIONS: {
@@ -39,5 +39,17 @@ window.PWA_CONFIG = {
       },120);
     },true);
   }
-  document.addEventListener('DOMContentLoaded',function(){setInterval(function(){工站上移();綁定產品滑動();},1200);setTimeout(function(){工站上移();綁定產品滑動();},300);setTimeout(function(){工站上移();綁定產品滑動();},1600);});
+  function 補時間班別(){
+    var n=new Date();
+    var local=new Date(n.getTime()-n.getTimezoneOffset()*60000).toISOString().slice(0,16);
+    var s=document.querySelector('.人員卡片.選中 .班標');
+    var b=document.getElementById('班別');
+    var sh=s?s.textContent.trim():'';
+    if(b&&(sh==='早班'||sh==='大夜班'))b.value=sh;
+    var a=document.getElementById('開始時間');
+    var e=document.getElementById('結束時間');
+    if(a&&!a.value)a.value=local;
+    if(e&&!e.value)e.value=local;
+  }
+  document.addEventListener('DOMContentLoaded',function(){setInterval(function(){工站上移();綁定產品滑動();補時間班別();},1200);setTimeout(function(){工站上移();綁定產品滑動();補時間班別();},300);setTimeout(function(){工站上移();綁定產品滑動();補時間班別();},1600);});
 })();
