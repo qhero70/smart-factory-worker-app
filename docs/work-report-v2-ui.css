@@ -76,8 +76,10 @@ body.正在滑動選單 .產品卡片{
   font-size:24px;
   text-align:center;
 }
-body:not(.人員下拉展開) #人員列表,
-body:not(.產品下拉展開) #產品列表{
+
+/* 下拉防呆：只有控制卡存在時才收合清單，避免人員整個消失 */
+body:not(.人員下拉展開) #人員下拉控制 ~ #人員列表,
+body:not(.產品下拉展開) #產品下拉控制 ~ #產品列表{
   display:none!important;
   height:0!important;
   min-height:0!important;
@@ -102,6 +104,7 @@ body.產品下拉展開 #產品下拉按鈕{
 
 /* 人員圖片卡片清單 */
 .人員網格{
+  display:grid!important;
   grid-template-columns:1fr!important;
   gap:12px!important;
   height:auto!important;
