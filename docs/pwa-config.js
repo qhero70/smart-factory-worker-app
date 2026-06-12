@@ -1,7 +1,7 @@
 window.PWA_CONFIG = {
   GAS_WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbweSKwcREbv-5R5E1ZIj_XOZDGQzRPCdoOAy2uTkhMwZTZoIv-GtpQi0PF8ahdb6KEJ/exec',
   APP_NAME: '製造部智慧製造應用總部',
-  VERSION: 'v2.1.16_正式現場版',
+  VERSION: 'v2.1.17_正式現場版',
   SPREADSHEET_ID: '1JA0-kxVO6x3NbCgjmUurkwd8lffolj0pbInissLl8BQ',
   API_TIMEOUT_MS: 8000,
   API_ACTIONS: {
@@ -67,5 +67,11 @@ window.PWA_CONFIG = {
       input.value=String(Math.min(n(input.value),allow));
     });
   }
-  document.addEventListener('DOMContentLoaded',function(){setInterval(function(){工站上移();綁定產品滑動();補時間班別();限制不良();},1200);setTimeout(function(){工站上移();綁定產品滑動();補時間班別();限制不良();},300);setTimeout(function(){工站上移();綁定產品滑動();補時間班別();限制不良();},1600);});
+  function 整理掃碼輸入(){
+    var input=document.getElementById('掃碼手動輸入');
+    if(!input||input.dataset.clean==='1')return;
+    input.dataset.clean='1';
+    input.addEventListener('input',function(){input.value=input.value.trim().toLowerCase();});
+  }
+  document.addEventListener('DOMContentLoaded',function(){setInterval(function(){工站上移();綁定產品滑動();補時間班別();限制不良();整理掃碼輸入();},1200);setTimeout(function(){工站上移();綁定產品滑動();補時間班別();限制不良();整理掃碼輸入();},300);setTimeout(function(){工站上移();綁定產品滑動();補時間班別();限制不良();整理掃碼輸入();},1600);});
 })();
