@@ -44,6 +44,23 @@ input,select,textarea{width:100%;border:1.5px solid #c4d4e8;border-radius:13px;p
 <div class="底部"><button id="上一步" class="次按鈕">← 上一步</button><button id="送出報工" class="主按鈕 送出鈕">送出預覽</button><button id="下一步" class="主按鈕">下一步 →</button></div>
 <script src="./pwa-config.js"></script>
 <script src="./gas-bridge.js"></script>
-<script src="./work-report-v2-core.js?v=201"></script>
+<script src="./work-report-v2-core.js?v=202"></script>
+<script>
+(() => {
+  const 合法班別 = new Set(['早班', '大夜班']);
+  function 修正班別選單() {
+    const select = document.getElementById('班別');
+    if (!select) return;
+    Array.from(select.options).forEach(option => {
+      const value = (option.value || option.textContent || '').trim();
+      if (!合法班別.has(value)) option.remove();
+    });
+    if (!合法班別.has(select.value)) select.value = '早班';
+  }
+  document.addEventListener('DOMContentLoaded', 修正班別選單);
+  window.addEventListener('load',修正班別選單);
+  new MutationObserver(修正班別選單).observe(document.documentElement,{childList:true,subtree:true});
+})();
+</script>
 </body>
 </html>
