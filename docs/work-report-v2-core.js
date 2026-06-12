@@ -1,11 +1,12 @@
 (function(){
   'use strict';
+  var 起點X=0,起點Y=0,正在滑動=false,封鎖點擊到=0;
   function loadCss(){
     if(document.getElementById('報工正式樣式'))return;
     var l=document.createElement('link');
     l.id='報工正式樣式';
     l.rel='stylesheet';
-    l.href='./work-report-v2-ui.css?v=227';
+    l.href='./work-report-v2-ui.css?v=228';
     document.head.appendChild(l);
   }
   function killLoading(){
@@ -16,6 +17,38 @@
       x.style.setProperty('visibility','hidden','important');
       x.style.setProperty('pointer-events','none','important');
     }
+  }
+  function bindScrollGuard(){
+    if(document.body.dataset.scrollGuard==='228')return;
+    document.body.dataset.scrollGuard='228';
+    document.addEventListener('touchstart',function(e){
+      if(!e.touches||!e.touches.length)return;
+      起點X=e.touches[0].clientX;
+      起點Y=e.touches[0].clientY;
+      正在滑動=false;
+    },true);
+    document.addEventListener('touchmove',function(e){
+      if(!e.touches||!e.touches.length)return;
+      var dx=Math.abs(e.touches[0].clientX-起點X);
+      var dy=Math.abs(e.touches[0].clientY-起點Y);
+      if(dx>10||dy>10){
+        正在滑動=true;
+        封鎖點擊到=Date.now()+450;
+        document.body.classList.add('正在滑動選單');
+      }
+    },true);
+    document.addEventListener('touchend',function(){
+      if(正在滑動)封鎖點擊到=Date.now()+450;
+      setTimeout(function(){document.body.classList.remove('正在滑動選單');},180);
+    },true);
+    document.addEventListener('click',function(e){
+      if(Date.now()>封鎖點擊到)return;
+      if(e.target.closest('.人員卡片,.產品卡片')){
+        e.preventDefault();
+        e.stopPropagation();
+        if(e.stopImmediatePropagation)e.stopImmediatePropagation();
+      }
+    },true);
   }
   function showProducts(){
     var list=document.getElementById('產品列表');
@@ -52,8 +85,8 @@
       list.parentNode.insertBefore(wrap,list);
     }
     var btn=document.getElementById('產品下拉按鈕');
-    if(btn&&btn.dataset.bind!=='227'){
-      btn.dataset.bind='227';
+    if(btn&&btn.dataset.bind!=='228'){
+      btn.dataset.bind='228';
       btn.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();showProducts();},true);
       btn.addEventListener('touchend',function(e){e.preventDefault();e.stopPropagation();showProducts();},true);
     }
@@ -68,16 +101,17 @@
       info.textContent=(selected.querySelector('.產品副')||{}).textContent||'已選定產品';
     }
     if(!document.body.classList.contains('產品下拉展開'))hideProducts();
-    if(list.dataset.dropClose!=='227'){
-      list.dataset.dropClose='227';
+    if(list.dataset.dropClose!=='228'){
+      list.dataset.dropClose='228';
       list.addEventListener('click',function(e){
+        if(Date.now()<封鎖點擊到)return;
         if(e.target.closest('.產品卡片'))setTimeout(function(){hideProducts();productDrop();stationTop();},180);
       },true);
     }
   }
   function bindGlobalProductOpen(){
-    if(document.body.dataset.productGlobal==='227')return;
-    document.body.dataset.productGlobal='227';
+    if(document.body.dataset.productGlobal==='228')return;
+    document.body.dataset.productGlobal='228';
     document.addEventListener('click',function(e){
       var hit=e.target.closest('#產品下拉控制,#產品下拉按鈕');
       if(!hit)return;
@@ -104,7 +138,7 @@
     card.style.display='block';
     if(control.previousElementSibling!==card)control.parentNode.insertBefore(card,control);
   }
-  function run(){loadCss();killLoading();productDrop();bindGlobalProductOpen();stationTop();}
+  function run(){loadCss();killLoading();bindScrollGuard();productDrop();bindGlobalProductOpen();stationTop();}
   loadCss();killLoading();
   var s=document.createElement('script');
   s.src='https://cdn.jsdelivr.net/gh/qhero70/smart-factory-worker-app@eb33ca85a8bca1746614659b41596d3b9a9f8bf8/docs/work-report-v2-core.js?v='+Date.now();
