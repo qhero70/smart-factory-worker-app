@@ -6,6 +6,10 @@
   opacity:0!important;
   pointer-events:none!important;
 }
+body.正在滑動選單 .人員卡片,
+body.正在滑動選單 .產品卡片{
+  pointer-events:none!important;
+}
 
 /* 共用下拉控制 */
 #人員下拉控制,
