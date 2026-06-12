@@ -65,13 +65,23 @@
   font-size:24px;
   text-align:center;
 }
-#人員列表,
-#產品列表{
+body:not(.人員下拉展開) #人員列表,
+body:not(.產品下拉展開) #產品列表{
   display:none!important;
+  height:0!important;
+  min-height:0!important;
+  max-height:0!important;
+  overflow:hidden!important;
+  margin:0!important;
+  padding:0!important;
 }
 body.人員下拉展開 #人員列表,
 body.產品下拉展開 #產品列表{
   display:grid!important;
+  height:auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  overflow:visible!important;
 }
 body.人員下拉展開 #人員下拉按鈕,
 body.產品下拉展開 #產品下拉按鈕{
@@ -198,6 +208,11 @@ body.產品下拉展開 #產品下拉按鈕{
   width:96px!important;
   height:96px!important;
   border-radius:18px!important;
+}
+.產品卡片 .產品圖 img{
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
 }
 .產品卡片 .產品名{
   font-size:20px!important;
