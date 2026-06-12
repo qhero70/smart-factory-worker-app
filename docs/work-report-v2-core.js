@@ -5,7 +5,7 @@
     var l=document.createElement('link');
     l.id='報工正式樣式';
     l.rel='stylesheet';
-    l.href='./work-report-v2-ui.css?v=225';
+    l.href='./work-report-v2-ui.css?v=226';
     document.head.appendChild(l);
   }
   function showProducts(){
@@ -43,17 +43,17 @@
       list.parentNode.insertBefore(wrap,list);
     }
     var btn=document.getElementById('產品下拉按鈕');
-    if(btn&&btn.dataset.bind!=='225'){
-      btn.dataset.bind='225';
+    if(btn&&btn.dataset.bind!=='226'){
+      btn.dataset.bind='226';
       btn.addEventListener('click',function(e){
         e.preventDefault();
         e.stopPropagation();
-        if(document.body.classList.contains('產品下拉展開'))hideProducts();else showProducts();
+        showProducts();
       },true);
       btn.addEventListener('touchend',function(e){
         e.preventDefault();
         e.stopPropagation();
-        if(document.body.classList.contains('產品下拉展開'))hideProducts();else showProducts();
+        showProducts();
       },true);
     }
     var selected=list.querySelector('.產品卡片.選中');
@@ -67,27 +67,27 @@
       info.textContent=(selected.querySelector('.產品副')||{}).textContent||'已選定產品';
     }
     if(!document.body.classList.contains('產品下拉展開'))hideProducts();
-    if(list.dataset.dropClose!=='225'){
-      list.dataset.dropClose='225';
+    if(list.dataset.dropClose!=='226'){
+      list.dataset.dropClose='226';
       list.addEventListener('click',function(e){
         if(e.target.closest('.產品卡片'))setTimeout(function(){hideProducts();productDrop();stationTop();},180);
       },true);
     }
   }
   function bindGlobalProductToggle(){
-    if(document.body.dataset.productGlobal==='225')return;
-    document.body.dataset.productGlobal='225';
+    if(document.body.dataset.productGlobal==='226')return;
+    document.body.dataset.productGlobal='226';
     document.addEventListener('click',function(e){
       var hit=e.target.closest('#產品下拉控制,#產品下拉按鈕');
       if(!hit)return;
       e.preventDefault();
       e.stopPropagation();
-      if(document.body.classList.contains('產品下拉展開'))hideProducts();else showProducts();
+      showProducts();
     },true);
     document.addEventListener('touchstart',function(e){
       var hit=e.target.closest('#產品下拉控制,#產品下拉按鈕');
       if(!hit)return;
-      if(document.body.classList.contains('產品下拉展開'))hideProducts();else showProducts();
+      showProducts();
     },true);
   }
   function stationTop(){
