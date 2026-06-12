@@ -1,4 +1,4 @@
-const 快取版本 = 'v2.1.0_CoverFlow正式整合版';
+const 快取版本 = 'v2.1.1_CoverFlow載入防卡版';
 const 快取名稱 = `製造部智慧製造應用總部-${快取版本}`;
 const 必要檔案 = [
   './',
@@ -41,7 +41,8 @@ self.addEventListener('fetch', event => {
     網址.pathname.endsWith('/work-report-v2.html') ||
     網址.pathname.endsWith('/work-report-v2-core.js') ||
     網址.pathname.endsWith('/gas-bridge.js') ||
-    網址.pathname.endsWith('/pwa-config.js')
+    網址.pathname.endsWith('/pwa-config.js') ||
+    網址.pathname.endsWith('/service-worker.js')
   ) {
     event.respondWith(fetch(請求, { cache: 'reload' }));
     return;
