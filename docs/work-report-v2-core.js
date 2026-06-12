@@ -1,12 +1,13 @@
 (function(){
   'use strict';
+  var 正式版號='236';
   var 起點X=0,起點Y=0,正在滑動=false,封鎖點擊到=0;
   function loadCss(){
     if(document.getElementById('報工正式樣式'))return;
     var l=document.createElement('link');
     l.id='報工正式樣式';
     l.rel='stylesheet';
-    l.href='./work-report-v2-ui.css?v=228';
+    l.href='./work-report-v2-ui.css?v='+正式版號;
     document.head.appendChild(l);
   }
   function killLoading(){
@@ -19,8 +20,8 @@
     }
   }
   function bindScrollGuard(){
-    if(document.body.dataset.scrollGuard==='228')return;
-    document.body.dataset.scrollGuard='228';
+    if(document.body.dataset.scrollGuard==='236')return;
+    document.body.dataset.scrollGuard='236';
     document.addEventListener('touchstart',function(e){
       if(!e.touches||!e.touches.length)return;
       起點X=e.touches[0].clientX;
@@ -85,8 +86,8 @@
       list.parentNode.insertBefore(wrap,list);
     }
     var btn=document.getElementById('產品下拉按鈕');
-    if(btn&&btn.dataset.bind!=='228'){
-      btn.dataset.bind='228';
+    if(btn&&btn.dataset.bind!=='236'){
+      btn.dataset.bind='236';
       btn.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();showProducts();},true);
       btn.addEventListener('touchend',function(e){e.preventDefault();e.stopPropagation();showProducts();},true);
     }
@@ -101,17 +102,17 @@
       info.textContent=(selected.querySelector('.產品副')||{}).textContent||'已選定產品';
     }
     if(!document.body.classList.contains('產品下拉展開'))hideProducts();
-    if(list.dataset.dropClose!=='228'){
-      list.dataset.dropClose='228';
+    if(list.dataset.dropClose!=='236'){
+      list.dataset.dropClose='236';
       list.addEventListener('click',function(e){
         if(Date.now()<封鎖點擊到)return;
-        if(e.target.closest('.產品卡片'))setTimeout(function(){hideProducts();productDrop();stationTop();},180);
+        if(e.target.closest('.產品卡片'))setTimeout(function(){hideProducts();productDrop();stationTop();machinePhotos();},180);
       },true);
     }
   }
   function bindGlobalProductOpen(){
-    if(document.body.dataset.productGlobal==='228')return;
-    document.body.dataset.productGlobal='228';
+    if(document.body.dataset.productGlobal==='236')return;
+    document.body.dataset.productGlobal='236';
     document.addEventListener('click',function(e){
       var hit=e.target.closest('#產品下拉控制,#產品下拉按鈕');
       if(!hit)return;
@@ -138,7 +139,58 @@
     card.style.display='block';
     if(control.previousElementSibling!==card)control.parentNode.insertBefore(card,control);
   }
-  function run(){loadCss();killLoading();bindScrollGuard();productDrop();bindGlobalProductOpen();stationTop();}
+  function 安全文字(value){
+    return String(value==null?'':value).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});
+  }
+  function 正規化圖片網址(value){
+    var raw=String(value||'').trim();
+    if(!raw)return '';
+    raw=raw.replace(/^=IMAGE\(/i,'').replace(/^image\(/i,'').replace(/[()"']/g,'').trim();
+    var hit=raw.match(/https?:\/\/[^\s,，;；]+/i);
+    if(hit)raw=hit[0];
+    if(raw.indexOf('data:image/')===0)return raw;
+    var id=raw.match(/[-\w]{25,}/);
+    if(id)return 'https://drive.google.com/thumbnail?id='+id[0]+'&sz=w900';
+    return raw;
+  }
+  function 取機台照片(m){
+    if(!m)return '';
+    return 正規化圖片網址(m.照片||m.機台照片||m.機台照片網址||m.照片網址||m.縮圖網址||m.機台照片檔案ID||m.Google檔案ID||m.檔案ID||'');
+  }
+  function machinePhotos(){
+    var box=document.getElementById('機台清單');
+    if(!box)return;
+    var state=window.智慧製造報工狀態||{};
+    var station=state.選定工站||null;
+    var select=document.getElementById('工站選擇');
+    if(!station&&select&&select.value&&Array.isArray(state.工站群組)){
+      station=state.工站群組.find(function(g){
+        var key=[g.產品編號,g.客戶品號,g.品名,g.工站名稱,g.工序,g.主機台].map(function(v){return String(v||'').trim();}).join('|');
+        return key===select.value;
+      })||null;
+    }
+    if(!station)return;
+    var rows=Array.isArray(station.機台清單)?station.機台清單:[];
+    if(!rows.length)return;
+    var hasCorePhoto=box.querySelector('.機台卡 img');
+    var hasNoImage=box.textContent&&box.textContent.indexOf('無機圖')>=0;
+    var hasEmpty=box.textContent&&box.textContent.indexOf('請先選擇產品與工站')>=0;
+    var shouldRepair=!hasCorePhoto||hasNoImage||hasEmpty;
+    if(!shouldRepair)return;
+    var html=rows.map(function(m){
+      var id=安全文字(m.機台編號||m.機台代號||m.設備編號||'');
+      var name=安全文字(m.機台名稱||m.設備名稱||m.名稱||'');
+      var photo=取機台照片(m);
+      var image=photo?'<img src="'+安全文字(photo)+'" alt="'+id+'" loading="lazy" referrerpolicy="no-referrer" decoding="async" onerror="this.closest(\'.機台卡\').classList.add(\'照片載入失敗\');this.replaceWith(document.createElement(\'div\'));">':'<div class="無圖">無機圖</div>';
+      return '<div class="機台卡">'+image+'<div class="機台號">'+id+'</div><div class="小字">'+name+'</div></div>';
+    }).join('');
+    box.innerHTML=html||'<div class="空狀態">此工站未設定機台</div>';
+    box.style.setProperty('display','grid','important');
+    box.style.setProperty('visibility','visible','important');
+    box.style.setProperty('opacity','1','important');
+    window.智慧製造機台照片狀態={版本:正式版號,工站:station.工站名稱||'',機台數:rows.length,有照片數:rows.filter(function(m){return !!取機台照片(m);}).length};
+  }
+  function run(){loadCss();killLoading();bindScrollGuard();productDrop();bindGlobalProductOpen();stationTop();machinePhotos();}
   loadCss();killLoading();
   var s=document.createElement('script');
   s.src='https://cdn.jsdelivr.net/gh/qhero70/smart-factory-worker-app@eb33ca85a8bca1746614659b41596d3b9a9f8bf8/docs/work-report-v2-core.js?v='+Date.now();
@@ -150,6 +202,9 @@
     setInterval(run,800);
     setTimeout(run,200);
     setTimeout(run,1000);
+    setTimeout(machinePhotos,1600);
   };
+  document.addEventListener('change',function(e){if(e.target&&e.target.id==='工站選擇')setTimeout(machinePhotos,160);},true);
+  document.addEventListener('click',function(e){if(e.target&&e.target.closest('.產品卡片'))setTimeout(machinePhotos,420);},true);
   document.head.appendChild(s);
 })();
