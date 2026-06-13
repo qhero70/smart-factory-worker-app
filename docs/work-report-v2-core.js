@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  var 正式版號='242';
+  var 正式版號='244';
   var 起點X=0,起點Y=0,正在滑動=false,封鎖點擊到=0;
   var 已綁定加班保護=false;
   var 已綁定送出直送=false;
@@ -31,8 +31,8 @@
     }
   }
   function bindScrollGuard(){
-    if(document.body.dataset.scrollGuard==='242')return;
-    document.body.dataset.scrollGuard='242';
+    if(document.body.dataset.scrollGuard==='244')return;
+    document.body.dataset.scrollGuard='244';
     document.addEventListener('touchstart',function(e){
       if(!e.touches||!e.touches.length)return;
       起點X=e.touches[0].clientX;
@@ -97,8 +97,8 @@
       list.parentNode.insertBefore(wrap,list);
     }
     var btn=document.getElementById('產品下拉按鈕');
-    if(btn&&btn.dataset.bind!=='242'){
-      btn.dataset.bind='242';
+    if(btn&&btn.dataset.bind!=='244'){
+      btn.dataset.bind='244';
       btn.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();showProducts();},true);
       btn.addEventListener('touchend',function(e){e.preventDefault();e.stopPropagation();showProducts();},true);
     }
@@ -114,17 +114,59 @@
       寫文字(info,(selected.querySelector('.產品副')||{}).textContent||'已選定產品 / Product selected');
     }
     if(!document.body.classList.contains('產品下拉展開'))hideProducts();
-    if(list.dataset.dropClose!=='242'){
-      list.dataset.dropClose='242';
+    if(list.dataset.dropClose!=='244'){
+      list.dataset.dropClose='244';
       list.addEventListener('click',function(e){
         if(Date.now()<封鎖點擊到)return;
         if(e.target.closest('.產品卡片'))setTimeout(function(){hideProducts();productDrop();stationTop();machinePhotos(true);},180);
       },true);
     }
   }
+  function personDrop(){
+    var list=document.getElementById('人員列表');
+    if(!list)return;
+    var wrap=document.getElementById('人員下拉控制');
+    if(!wrap){
+      wrap=document.createElement('div');
+      wrap.id='人員下拉控制';
+      wrap.className='人員下拉正式';
+      wrap.innerHTML='<button id="人員下拉按鈕" type="button"><span class="下拉頭像">👤</span><span><span class="下拉姓名">請選擇人員 / Select Operator</span><span class="下拉資料">點擊展開人員圖片卡片清單 / Tap to open operator photo list</span></span><span class="下拉箭頭">⌄</span></button>';
+      list.parentNode.insertBefore(wrap,list);
+    }
+    var btn=document.getElementById('人員下拉按鈕');
+    if(btn&&btn.dataset.bindPerson!=='244'){
+      btn.dataset.bindPerson='244';
+      btn.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();document.body.classList.add('人員下拉展開');},true);
+      btn.addEventListener('touchend',function(e){e.preventDefault();e.stopPropagation();document.body.classList.add('人員下拉展開');},true);
+    }
+    var selected=list.querySelector('.人員卡片.選中');
+    var pic=wrap.querySelector('.下拉頭像');
+    var name=wrap.querySelector('.下拉姓名');
+    var data=wrap.querySelector('.下拉資料');
+    if(selected){
+      var img=selected.querySelector('.頭像圈 img');
+      var nextPic=img&&img.src?'<img src="'+img.src+'" alt="">':'👤';
+      if(pic&&pic.innerHTML!==nextPic)pic.innerHTML=nextPic;
+      寫文字(name,(selected.querySelector('.人名')||{}).textContent||'已選人員 / Selected Operator');
+      var emp=((selected.querySelector('.人工號')||{}).textContent||'').trim();
+      var shift=((selected.querySelector('.班標')||{}).textContent||'').trim();
+      寫文字(data,(emp||shift)?emp+'｜'+shift:'已選人員 / Selected Operator');
+    }else{
+      if(pic&&pic.innerHTML!=='👤')pic.innerHTML='👤';
+      寫文字(name,'請選擇人員 / Select Operator');
+      寫文字(data,'點擊展開人員圖片卡片清單 / Tap to open operator photo list');
+    }
+    if(list.dataset.personDropClose!=='244'){
+      list.dataset.personDropClose='244';
+      list.addEventListener('click',function(e){
+        if(Date.now()<封鎖點擊到)return;
+        if(e.target.closest('.人員卡片'))setTimeout(function(){document.body.classList.remove('人員下拉展開');personDrop();},160);
+      },true);
+    }
+  }
   function bindGlobalProductOpen(){
-    if(document.body.dataset.productGlobal==='242')return;
-    document.body.dataset.productGlobal='242';
+    if(document.body.dataset.productGlobal==='244')return;
+    document.body.dataset.productGlobal='244';
     document.addEventListener('click',function(e){
       var hit=e.target.closest('#產品下拉控制,#產品下拉按鈕');
       if(!hit)return;
@@ -173,12 +215,8 @@
     if(id)return 'https://drive.google.com/thumbnail?id='+id[0]+'&sz=w900';
     return raw;
   }
-  function 取機台編號(m){
-    return String(取欄(m,['機台編號','機台代號','設備編號','主機台','編號','代號','id','ID'])||m||'').trim();
-  }
-  function 取機台照片(m){
-    return 正規化圖片網址(取欄(m,['照片','機台照片','機台照片網址','照片網址','縮圖網址','圖片網址','機台圖片','設備照片','設備圖片','機台照片檔案ID','Google檔案ID','照片檔案ID','檔案ID']));
-  }
+  function 取機台編號(m){return String(取欄(m,['機台編號','機台代號','設備編號','主機台','編號','代號','id','ID'])||m||'').trim();}
+  function 取機台照片(m){return 正規化圖片網址(取欄(m,['照片','機台照片','機台照片網址','照片網址','縮圖網址','圖片網址','機台圖片','設備照片','設備圖片','機台照片檔案ID','Google檔案ID','照片檔案ID','檔案ID']));}
   function 解析機台編號清單(station){
     var raw=[];
     if(Array.isArray(station&&station.機台清單))station.機台清單.forEach(function(x){raw.push(取機台編號(x));});
@@ -232,9 +270,7 @@
     var rows=[];
     if(Array.isArray(station.機台清單))rows=station.機台清單.map(function(m){return 機台列補照片(m,state);});
     var ids=解析機台編號清單(station);
-    ids.forEach(function(id){
-      if(!rows.some(function(m){return m.機台編號===id;}))rows.push(機台列補照片({機台編號:id},state));
-    });
+    ids.forEach(function(id){if(!rows.some(function(m){return m.機台編號===id;}))rows.push(機台列補照片({機台編號:id},state));});
     rows=rows.filter(function(m){return m&&m.機台編號;});
     if(!rows.length)return;
     var signature=rows.map(function(m){return [m.機台編號,m.機台名稱,取機台照片(m)].join('|');}).join('||');
@@ -253,32 +289,26 @@
     box.style.setProperty('display','grid','important');
     box.style.setProperty('visibility','visible','important');
     box.style.setProperty('opacity','1','important');
-    window.智慧製造機台照片狀態={版本:正式版號,修復來源:'穩定重畫_只在工站機台變更時',工站:station.工站名稱||'',機台數:rows.length,有照片數:rows.filter(function(m){return !!取機台照片(m);}).length};
+    window.智慧製造機台照片狀態={版本:正式版號,修復來源:'回穩定版_只在工站機台變更時',工站:station.工站名稱||'',機台數:rows.length,有照片數:rows.filter(function(m){return !!取機台照片(m);}).length};
   }
-  function normalizeOvertimeValue(value){
-    var text=String(value||'').split('/')[0].trim();
-    return text==='是'?'是':'否';
-  }
-  function normalizeOvertimeType(value){
-    var text=String(value||'').split('/')[0].trim();
-    return /^(平日加班|假日加班|臨時加班|無)$/.test(text)?text:'無';
-  }
+  function normalizeOvertimeValue(value){var text=String(value||'').split('/')[0].trim();return text==='是'?'是':'否';}
+  function normalizeOvertimeType(value){var text=String(value||'').split('/')[0].trim();return /^(平日加班|假日加班|臨時加班|無)$/.test(text)?text:'無';}
   function ensureOvertimeOptions(){
     var ot=document.getElementById('是否加班');
     if(ot){
       var current=normalizeOvertimeValue(ot.value||手動是否加班||'否');
-      if(ot.dataset.manualOvertimeOptions!=='242'){
+      if(ot.dataset.manualOvertimeOptions!=='244'){
         ot.innerHTML='<option value="否">否 / No</option><option value="是">是 / Yes</option>';
-        ot.dataset.manualOvertimeOptions='242';
+        ot.dataset.manualOvertimeOptions='244';
       }
       if(ot.value!==(加班手動?手動是否加班:current))ot.value=加班手動?手動是否加班:current;
     }
     var type=document.getElementById('加班類型');
     if(type){
       var currentType=normalizeOvertimeType(type.value||手動加班類型||'無');
-      if(type.dataset.manualOvertimeTypeOptions!=='242'){
+      if(type.dataset.manualOvertimeTypeOptions!=='244'){
         type.innerHTML='<option value="無">無 / None</option><option value="平日加班">平日加班 / Weekday OT</option><option value="假日加班">假日加班 / Holiday OT</option><option value="臨時加班">臨時加班 / Temporary OT</option>';
-        type.dataset.manualOvertimeTypeOptions='242';
+        type.dataset.manualOvertimeTypeOptions='244';
       }
       var next=加班類型手動?手動加班類型:currentType;
       if(type.value!==next)type.value=next;
@@ -289,18 +319,10 @@
     var type=document.getElementById('加班類型');
     if(!ot&&!type)return;
     ensureOvertimeOptions();
-    if(!加班手動){
-      手動是否加班='否';
-      if(ot&&ot.value!=='否')ot.value='否';
-    }else if(ot&&ot.value!==手動是否加班){
-      ot.value=手動是否加班;
-    }
-    if(!加班類型手動||手動是否加班==='否'){
-      手動加班類型='無';
-      if(type&&type.value!=='無')type.value='無';
-    }else if(type&&type.value!==手動加班類型){
-      type.value=手動加班類型;
-    }
+    if(!加班手動){手動是否加班='否';if(ot&&ot.value!=='否')ot.value='否';}
+    else if(ot&&ot.value!==手動是否加班){ot.value=手動是否加班;}
+    if(!加班類型手動||手動是否加班==='否'){手動加班類型='無';if(type&&type.value!=='無')type.value='無';}
+    else if(type&&type.value!==手動加班類型){type.value=手動加班類型;}
   }
   function bindOvertimeManual(){
     if(已綁定加班保護)return;
@@ -310,41 +332,22 @@
     已綁定加班保護=true;
     document.addEventListener('change',function(e){
       if(e.target&&e.target.id==='是否加班'){
-        加班手動=true;
-        手動是否加班=normalizeOvertimeValue(e.target.value);
-        if(手動是否加班==='否'){
-          加班類型手動=false;
-          手動加班類型='無';
-        }
+        加班手動=true;手動是否加班=normalizeOvertimeValue(e.target.value);
+        if(手動是否加班==='否'){加班類型手動=false;手動加班類型='無';}
         setTimeout(applyOvertimeManualValue,0);
       }
       if(e.target&&e.target.id==='加班類型'){
-        加班類型手動=true;
-        手動加班類型=normalizeOvertimeType(e.target.value);
-        if(手動加班類型!=='無'){
-          加班手動=true;
-          手動是否加班='是';
-        }
+        加班類型手動=true;手動加班類型=normalizeOvertimeType(e.target.value);
+        if(手動加班類型!=='無'){加班手動=true;手動是否加班='是';}
         setTimeout(applyOvertimeManualValue,0);
       }
     },true);
     document.addEventListener('input',function(e){
-      if(e.target&&e.target.id==='是否加班'){
-        加班手動=true;
-        手動是否加班=normalizeOvertimeValue(e.target.value);
-        setTimeout(applyOvertimeManualValue,0);
-      }
-      if(e.target&&e.target.id==='加班類型'){
-        加班類型手動=true;
-        手動加班類型=normalizeOvertimeType(e.target.value);
-        setTimeout(applyOvertimeManualValue,0);
-      }
+      if(e.target&&e.target.id==='是否加班'){加班手動=true;手動是否加班=normalizeOvertimeValue(e.target.value);setTimeout(applyOvertimeManualValue,0);}
+      if(e.target&&e.target.id==='加班類型'){加班類型手動=true;手動加班類型=normalizeOvertimeType(e.target.value);setTimeout(applyOvertimeManualValue,0);}
     },true);
   }
-  function 送出按鈕固定(){
-    var btn=document.getElementById('送出報工');
-    if(btn)寫文字(btn,'確認送出 / Confirm Submit');
-  }
+  function 送出按鈕固定(){var btn=document.getElementById('送出報工');if(btn)寫文字(btn,'確認送出 / Confirm Submit');}
   function bindSubmitDirect(){
     if(已綁定送出直送)return;
     var btn=document.getElementById('送出報工');
@@ -360,24 +363,19 @@
   }
   function bindRefreshButton(){
     var btn=document.getElementById('重整鈕');
-    if(!btn||btn.dataset.refreshBind==='242')return;
+    if(!btn||btn.dataset.refreshBind==='244')return;
     var clone=btn.cloneNode(true);
-    clone.dataset.refreshBind='242';
+    clone.dataset.refreshBind='244';
     clone.title='更新到最新正式版 / Update to latest version '+正式版號;
     clone.addEventListener('click',function(e){
-      e.preventDefault();
-      e.stopPropagation();
-      if(e.stopImmediatePropagation)e.stopImmediatePropagation();
+      e.preventDefault();e.stopPropagation();if(e.stopImmediatePropagation)e.stopImmediatePropagation();
       var status=document.getElementById('狀態卡');
       if(status)status.textContent='🟡 更新中 / Updating｜重新載入最新正式版 / Reloading latest version '+正式版號;
-      var url=new URL(location.href);
-      url.searchParams.set('v',正式版號);
-      url.searchParams.set('更新時間',String(Date.now()));
-      location.replace(url.toString());
+      var url=new URL(location.href);url.searchParams.set('v',正式版號);url.searchParams.set('更新時間',String(Date.now()));location.replace(url.toString());
     },true);
     btn.parentNode.replaceChild(clone,btn);
   }
-  function run(){loadCss();killLoading();bindScrollGuard();productDrop();bindGlobalProductOpen();stationTop();machinePhotos(false);bindOvertimeManual();applyOvertimeManualValue();bindSubmitDirect();送出按鈕固定();bindRefreshButton();}
+  function run(){loadCss();killLoading();bindScrollGuard();personDrop();productDrop();bindGlobalProductOpen();stationTop();machinePhotos(false);bindOvertimeManual();applyOvertimeManualValue();bindSubmitDirect();送出按鈕固定();bindRefreshButton();}
   loadCss();killLoading();
   var s=document.createElement('script');
   s.src='https://cdn.jsdelivr.net/gh/qhero70/smart-factory-worker-app@eb33ca85a8bca1746614659b41596d3b9a9f8bf8/docs/work-report-v2-core.js?v='+Date.now();
@@ -389,10 +387,13 @@
     setInterval(run,1500);
     setTimeout(run,200);
     setTimeout(run,900);
-    setTimeout(function(){machinePhotos(true);},1500);
-    setTimeout(function(){machinePhotos(true);},2600);
+    setTimeout(function(){personDrop();machinePhotos(true);},1500);
+    setTimeout(function(){personDrop();machinePhotos(true);},2600);
   };
   document.addEventListener('change',function(e){if(e.target&&e.target.id==='工站選擇')setTimeout(function(){machinePhotos(true);},120);},true);
-  document.addEventListener('click',function(e){if(e.target&&e.target.closest('.產品卡片')){上次機台簽章='';setTimeout(function(){machinePhotos(true);},260);setTimeout(function(){machinePhotos(true);},900);}},true);
+  document.addEventListener('click',function(e){
+    if(e.target&&e.target.closest('.產品卡片')){上次機台簽章='';setTimeout(function(){machinePhotos(true);},260);setTimeout(function(){machinePhotos(true);},900);}
+    if(e.target&&e.target.closest('.人員卡片')){setTimeout(personDrop,160);}
+  },true);
   document.head.appendChild(s);
 })();
