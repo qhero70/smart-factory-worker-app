@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#06111f">
+<title>生產計畫表清洗器 V2｜10_排程需求池</title>
+<style>
+:root{--底:#06111f;--卡:#10253d;--線:#2b4a68;--字:#eef7ff;--淡:#9db3c7;--藍:#38bdf8;--綠:#22c55e;--紅:#fb7185;--黃:#fbbf24}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 15% 0%,#16466c,transparent 36%),linear-gradient(180deg,#06111f,#081827);color:var(--字);font-family:system-ui,-apple-system,'Microsoft JhengHei',sans-serif}.外框{max-width:1280px;margin:auto;padding:14px 12px 80px}.頁首{position:sticky;top:0;z-index:5;margin:0 -12px 12px;padding:14px;background:#06111fe8;backdrop-filter:blur(14px);border-bottom:1px solid var(--線)}h1{margin:0;font-size:28px;font-weight:1000}.副標{margin-top:4px;color:var(--淡);font-size:13px}.卡{background:#ffffff12;border:1px solid #ffffff22;border-radius:20px;padding:15px;margin:12px 0;box-shadow:0 20px 50px #0007}.雙欄{display:grid;grid-template-columns:1.1fr .9fr;gap:12px}.指標{display:grid;grid-template-columns:repeat(6,1fr);gap:9px}.數字卡{background:#ffffff14;border:1px solid #ffffff1e;border-radius:16px;padding:12px}.數字卡 span{display:block;color:var(--淡);font-size:11px;font-weight:900}.數字卡 b{font-size:27px}.警示 b{color:var(--紅)}input,button{font:inherit}input{width:100%;border:1px solid #ffffff28;background:#0005;color:var(--字);border-radius:14px;padding:12px;margin-top:8px}button{border:1px solid #ffffff26;background:#ffffff14;color:var(--字);border-radius:999px;padding:10px 13px;font-weight:1000}button.主按鈕,button.啟用{background:linear-gradient(135deg,var(--藍),#60a5fa);color:#03111f;border:0}.工具列,.分頁{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.分頁{overflow:auto;padding-bottom:8px}.畫面{display:none}.畫面.啟用{display:block}.表格框{overflow:auto;max-height:68vh;border:1px solid #ffffff22;border-radius:16px}table{width:100%;border-collapse:collapse;min-width:980px;background:#0004}th,td{padding:9px 10px;border-bottom:1px solid #ffffff16;text-align:left;white-space:nowrap;font-size:12px}th{position:sticky;top:0;background:#102a43;color:#c9f2ff}.卡片列{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:10px}.產品卡{border:1px solid #ffffff22;border-radius:18px;padding:13px;background:#ffffff10}.產品卡.紅{border-color:#fb7185aa;box-shadow:0 0 0 1px #fb718533}.產品卡 h3{font-size:15px;margin:0 0 5px}.淡字{color:var(--淡);font-size:12px;line-height:1.7}.小數字{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:9px}.小數字 p{margin:0;background:#0004;border-radius:12px;padding:7px}.小數字 span{display:block;color:var(--淡);font-size:10px}.小數字 b{font-size:17px}.空{padding:25px;text-align:center;color:var(--淡);border:1px dashed #ffffff33;border-radius:16px}.訊息{white-space:pre-wrap;background:#0005;border:1px solid #ffffff22;border-radius:14px;padding:10px;color:#dbeafe;font-size:12px;margin-top:9px}.修正{color:#a7f3d0;font-weight:900}@media(max-width:850px){.雙欄{grid-template-columns:1fr}.指標{grid-template-columns:repeat(2,1fr)}h1{font-size:24px}}
+</style>
+</head>
+<body>
+<div class="外框">
+  <div class="頁首"><h1>生產計畫表清洗器 V2</h1><div class="副標">修正版：日期 1900 自動轉計畫年份、表頭列自動排除、只產生有效排程需求</div></div>
+  <section class="卡 雙欄">
+    <div>
+      <h2>① 上傳生管 Excel</h2>
+      <div class="淡字">本版專門修正你截圖中的問題：<span class="修正">1900 日期</span>、<span class="修正">料號/客戶品號/品名被當資料</span>。</div>
+      <input id="檔案" type="file" accept=".xlsx,.xls,.csv">
+      <input id="年份" placeholder="計畫年份，例如 2026。系統會先從檔名自動判斷。">
+      <input id="後端網址" value="https://script.google.com/macros/s/AKfycbweSKwcREbv-5R5E1ZIj_XOZDGQzRPCdoOAy2uTkhMwZTZoIv-GtpQi0PF8ahdb6KEJ/exec">
+      <div class="工具列">
+        <button class="主按鈕" id="寫入">寫入 10_排程需求池</button>
+        <button id="匯出需求池">匯出需求池CSV</button>
+        <button id="匯出每日">匯出每日明細CSV</button>
+        <button id="匯出JSON">匯出JSON</button>
+        <button id="複製LINE">複製LINE摘要</button>
+      </div>
+      <div class="訊息" id="訊息">等待上傳。</div>
+    </div>
+    <div>
+      <h2>② V2 修正標準</h2>
+      <div class="淡字">
+        1. 任何 1900-xx-xx 會轉成計畫年份。<br>
+        2. 料號、客戶品號、品名這種表頭列不會進資料。<br>
+        3. 不再把單一數字 13、24、30 當日期。<br>
+        4. 出貨訂單只抓今天以後且數量大於 0。<br>
+        5. CSV 輸出日期固定 YYYY-MM-DD。
+      </div>
+      <div class="淡字" id="批次">批次：尚未匯入</div>
+    </div>
+  </section>
+  <section class="卡"><div class="指標">
+    <div class="數字卡"><span>每日明細</span><b id="k1">0</b></div>
+    <div class="數字卡"><span>已排除表頭</span><b id="k0">0</b></div>
+    <div class="數字卡"><span>出貨訂單</span><b id="k2">0</b></div>
+    <div class="數字卡"><span>需求池</span><b id="k3">0</b></div>
+    <div class="數字卡 警示"><span>錯誤</span><b id="k4">0</b></div>
+    <div class="數字卡 警示"><span>風險/欠量</span><b id="k5">0</b></div>
+  </div></section>
+  <section class="卡">
+    <div class="分頁">
+      <button class="啟用" data-v="每日">每日明細</button>
+      <button data-v="彙總">本月彙總</button>
+      <button data-v="出貨">出貨訂單</button>
+      <button data-v="需求">10_排程需求池</button>
+      <button data-v="錯誤">錯誤清單</button>
+    </div>
+    <div id="每日" class="畫面 啟用"></div><div id="彙總" class="畫面"></div><div id="出貨" class="畫面"></div><div id="需求" class="畫面"></div><div id="錯誤" class="畫面"></div>
+  </section>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+'use strict';
+const 狀態={檔名:'',批次:'',計畫年份:new Date().getFullYear(),每日:[],彙總:[],出貨:[],需求:[],錯誤:[],排除表頭:0};
+const 每日欄=['區域','產品編號','客戶品號','品名','工單','日期','類型','數量','期初庫存','產能_8H','備註'];
+const 需求欄=['需求編號','批次編號','來源檔名','來源工作表','產品編號','客戶品號','品名','工單','類型','需求日期','數量','期初庫存','產能_8H','本月計畫量','本月產出量','本月出貨量','欠量','每日班數','OEE','所需工作天','建議開工日','預計完工日','交期風險','狀態','唯一鍵','備註','建立時間','更新時間'];
+const $=id=>document.getElementById(id);const 補=n=>String(n).padStart(2,'0');
+function 日期字串(d){return d instanceof Date&&!isNaN(d)?d.getFullYear()+'-'+補(d.getMonth()+1)+'-'+補(d.getDate()):''}
+function 今天(){return 日期字串(new Date)}
+function 現在(){const d=new Date;return 日期字串(d)+' '+補(d.getHours())+':'+補(d.getMinutes())+':'+補(d.getSeconds())}
+function 文字(v){return String(v??'').replace(/\u3000/g,' ').trim()}
+function 數字(v){if(typeof v==='number')return isFinite(v)?v:0;let s=文字(v).replaceAll(',','').replaceAll('，','').replace(/[()]/g,'');let n=Number(s);return isFinite(n)?n:0}
+function 修正年份(d){if(!(d instanceof Date)||isNaN(d))return '';if(d.getFullYear()<2000)d.setFullYear(狀態.計畫年份);return 日期字串(d)}
+function Excel序號轉日期(n){let d=new Date(Date.UTC(1899,11,30));d.setUTCDate(d.getUTCDate()+Number(n));return new Date(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate())}
+function 解析日期(v){
+  if(v instanceof Date)return 修正年份(new Date(v.getTime()));
+  if(typeof v==='number'&&v>59)return 修正年份(Excel序號轉日期(v));
+  let s=文字(v);if(!s)return '';
+  s=s.replaceAll('年','/').replaceAll('月','/').replaceAll('日','').replaceAll('-','/').replace(/\s+/g,'');
+  let p=s.split('/').filter(Boolean);let y=狀態.計畫年份,m=0,d=0;
+  if(p.length===3){y=Number(p[0]);m=Number(p[1]);d=Number(p[2]);if(y<2000)y=狀態.計畫年份}
+  else if(p.length===2){m=Number(p[0]);d=Number(p[1])}
+  else return '';
+  if(!m||!d||m<1||m>12||d<1||d>31)return '';
+  return 日期字串(new Date(y,m-1,d));
+}
+function 類型(v){const s=文字(v);if(/訂單|出貨/.test(s))return '訂單(出貨)';if(s.includes('供料'))return '供料';if(/計畫|計劃/.test(s))return '計畫';if(/產出|實績/.test(s))return '產出';return ''}
+function 找欄(row,keys){for(let i=0;i<row.length;i++){const s=文字(row[i]).toLowerCase();for(const k of keys){if(s.includes(k.toLowerCase()))return i}}return -1}
+function 找標題列(rows){let best=-1,score=0;rows.forEach((r,i)=>{const t=r.map(文字).join('|');let s=0;if(/品名|產品/.test(t))s+=2;if(/產品編號|料號|品號/.test(t))s+=2;if(t.includes('客戶'))s++;if(t.includes('工單'))s++;if(/產能|8H|標準數/.test(t))s++;if(s>score){score=s;best=i}});return score>=3?best:-1}
+function 找日期列(rows){let best={i:-1,d:[]};rows.forEach((r,i)=>{let arr=[];r.forEach((c,j)=>{const dd=解析日期(c);if(dd)arr.push({c:j,d:dd})});if(arr.length>best.d.length)best={i,d:arr}});return best.d.length>=2?best:{i:-1,d:[]}}
+function 是表頭資料(r){const p=文字(r.產品編號),c=文字(r.客戶品號),n=文字(r.品名),w=文字(r.工單);return /^(料號|產品編號|品號|產品料號)$/i.test(p)||/客戶品號|客戶料號/i.test(c)||/^品名$|^產品$|^Product$/i.test(n)||/^工單$|^工單號$/.test(w)}
+function 目標工作表(n){return !/BOM|ASSY|組裝|用料|圖|說明|封面/.test(n)}
+function 解析工作表(name,rows){
+  const hi=找標題列(rows),di=找日期列(rows);
+  if(hi<0||di.i<0){狀態.錯誤.push({工作表:name,列:'',錯誤:'找不到標題列或日期列',原始資料:''});return}
+  const h=rows[hi];
+  const c={產品編號:找欄(h,['產品編號','產品料號','料號','品號','Part']),客戶品號:找欄(h,['客戶品號','客戶料號','Customer']),品名:找欄(h,['品名','產品','Product','機種']),工單:找欄(h,['工單','工令','WO']),期初庫存:找欄(h,['期初庫存','庫存','期初']),產能_8H:找欄(h,['標準數/8H','產能8H','產能/8H','8H產能','產能','標準數']),備註:找欄(h,['備註','說明','Remark'])};
+  let last={產品編號:'',客戶品號:'',品名:'',工單:'',期初庫存:0,產能_8H:0,備註:''};
+  for(let r=Math.max(hi,di.i)+1;r<rows.length;r++){
+    const row=rows[r];const tp=row.map(類型).find(Boolean);
+    ['產品編號','客戶品號','品名','工單','備註'].forEach(k=>{if(c[k]>=0&&文字(row[c[k]]))last[k]=文字(row[c[k]])});
+    if(c.期初庫存>=0&&文字(row[c.期初庫存]))last.期初庫存=數字(row[c.期初庫存]);
+    if(c.產能_8H>=0&&數字(row[c.產能_8H])>0)last.產能_8H=數字(row[c.產能_8H]);
+    if(!tp)continue;
+    const base={區域:name,...last};
+    if(是表頭資料(base)){狀態.排除表頭++;continue}
+    di.d.forEach(x=>{const q=數字(row[x.c]);if(!q)return;if(!base.品名||是表頭資料(base)){狀態.排除表頭++;return}狀態.每日.push({區域:name,產品編號:base.產品編號,客戶品號:base.客戶品號,品名:base.品名,工單:base.工單,日期:x.d,類型:tp,數量:q,期初庫存:base.期初庫存,產能_8H:base.產能_8H,備註:base.備註})})
+  }
+}
+function 是工作日(d){return d.getDay()!==0&&d.getDay()!==6}
+function 倒推(s,n){let d=new Date(s+'T00:00:00'),c=0;while(c<n){d.setDate(d.getDate()-1);if(是工作日(d))c++}return 日期字串(d)}
+function 順推(s,n){let d=new Date(s+'T00:00:00'),c=1;while(c<Math.max(1,n)){d.setDate(d.getDate()+1);if(是工作日(d))c++}return 日期字串(d)}
+function 分組鍵(r){return [r.區域,r.產品編號,r.客戶品號,r.品名].join('｜')}
+function 建立結果(){
+  const map=new Map;
+  狀態.每日.forEach(r=>{const k=分組鍵(r);if(!map.has(k))map.set(k,{品名:r.品名,區域:r.區域,產品編號:r.產品編號,客戶品號:r.客戶品號,本月計畫量:0,本月產出量:0,本月出貨量:0,供料:0,期初庫存:r.期初庫存,產能_8H:r.產能_8H,出貨日期:[],備註:r.備註});const g=map.get(k);if(!g.產能_8H&&r.產能_8H)g.產能_8H=r.產能_8H;if(r.類型==='計畫')g.本月計畫量+=r.數量;if(r.類型==='產出')g.本月產出量+=r.數量;if(r.類型==='供料'&&r.數量>0)g.供料+=r.數量;if(r.類型.includes('出貨')&&r.數量>0){g.本月出貨量+=r.數量;g.出貨日期.push({日期:r.日期,數量:r.數量})}});
+  狀態.彙總=[...map.values()].map(g=>{g.可用量=g.期初庫存+g.本月產出量+g.供料;g.欠量=Math.max(0,g.本月出貨量-g.可用量);g.達成率=g.本月計畫量?Math.round(g.本月產出量/g.本月計畫量*1000)/10:0;g.出貨日期.sort((a,b)=>a.日期.localeCompare(b.日期));const first=g.出貨日期[0]?.日期||'';const cap=g.產能_8H*2;g.所需工作天=g.欠量&&cap?Math.ceil(g.欠量/cap):0;g.建議開工日=first&&g.所需工作天?倒推(first,g.所需工作天):'';g.預計完工日=g.建議開工日?順推(g.建議開工日,g.所需工作天):'';g.交期風險=!g.產能_8H&&g.本月出貨量?'缺產能':(g.建議開工日&&g.建議開工日<今天()?'晚':'準');g.狀態=g.欠量?'未滿足':'已滿足';return g}).sort((a,b)=>b.欠量-a.欠量);
+  const seq={};
+  狀態.出貨=狀態.每日.filter(r=>r.類型.includes('出貨')&&r.數量>0&&r.日期>=今天()).sort((a,b)=>a.日期.localeCompare(b.日期)).map(r=>{seq[r.日期]=(seq[r.日期]||0)+1;const g=狀態.彙總.find(x=>分組鍵(x)===分組鍵(r))||{};return{訂單號:'ORD'+r.日期.replaceAll('-','')+String(seq[r.日期]).padStart(5,'0'),客戶:r.客戶品號,產品:r.品名,產品編號:r.產品編號,客戶品號:r.客戶品號,工單:r.工單,區域:r.區域,日期:r.日期,數量:r.數量,狀態:'待確認',產能_8H:g.產能_8H||r.產能_8H,建議開工日:g.建議開工日,交期風險:g.交期風險,欠量:g.欠量}});
+  const seen=new Set;狀態.需求=[];
+  狀態.出貨.forEach((o,i)=>{const g=狀態.彙總.find(x=>x.區域===o.區域&&x.產品編號===o.產品編號&&x.客戶品號===o.客戶品號&&x.品名===o.產品)||{};const u=[o.區域,o.產品編號,o.客戶品號,o.產品,o.日期,'訂單(出貨)',o.數量].join('｜');if(seen.has(u))return;seen.add(u);const oee=.931;const days=o.產能_8H?Math.ceil(Math.ceil(o.數量/.97)/(o.產能_8H*.98*.98*2))+1:0;const s=days?倒推(o.日期,Math.ceil(days*1.15)):'';const risk=!o.產能_8H?'缺產能':(s&&s<今天()?'晚':'準');狀態.需求.push({需求編號:'REQ-'+狀態.批次+'-'+String(i+1).padStart(4,'0'),批次編號:狀態.批次,來源檔名:狀態.檔名,來源工作表:o.區域,產品編號:o.產品編號,客戶品號:o.客戶品號,品名:o.產品,工單:o.工單,類型:'訂單(出貨)',需求日期:o.日期,數量:o.數量,期初庫存:g.期初庫存||0,產能_8H:o.產能_8H||0,本月計畫量:g.本月計畫量||0,本月產出量:g.本月產出量||0,本月出貨量:g.本月出貨量||0,欠量:g.欠量||0,每日班數:2,OEE:oee,所需工作天:days,建議開工日:s,預計完工日:s?順推(s,days):'',交期風險:risk,狀態:'待確認',唯一鍵:u,備註:g.備註||'',建立時間:現在(),更新時間:現在()})})
+}
+function 表格(id,heads,rows){$(id).innerHTML=rows.length?'<div class="表格框"><table><thead><tr>'+heads.map(h=>'<th>'+h+'</th>').join('')+'</tr></thead><tbody>'+rows.slice(0,700).map(r=>'<tr>'+heads.map(h=>'<td>'+文字(r[h])+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>':'<div class="空">尚無資料</div>'}
+function 渲染(){
+  $('k1').textContent=狀態.每日.length;$('k0').textContent=狀態.排除表頭;$('k2').textContent=狀態.出貨.length;$('k3').textContent=狀態.需求.length;$('k4').textContent=狀態.錯誤.length;$('k5').textContent=狀態.需求.filter(x=>x.交期風險!=='準'||x.欠量>0).length;$('批次').textContent='批次：'+(狀態.批次||'尚未匯入')+'｜計畫年份：'+狀態.計畫年份;
+  表格('每日',每日欄,狀態.每日);表格('出貨',['訂單號','客戶','產品','產品編號','日期','數量','狀態','產能_8H','建議開工日','交期風險'],狀態.出貨);表格('需求',需求欄,狀態.需求);表格('錯誤',['工作表','列','錯誤','原始資料'],狀態.錯誤);
+  $('彙總').innerHTML=狀態.彙總.length?'<div class="卡片列">'+狀態.彙總.slice(0,220).map(g=>'<div class="產品卡 '+(g.欠量?'紅':'')+'"><h3>'+g.品名+'</h3><div class="淡字">'+g.區域+'｜'+g.產品編號+'｜'+g.客戶品號+'</div><div class="小數字"><p><span>計畫</span><b>'+g.本月計畫量+'</b></p><p><span>產出</span><b>'+g.本月產出量+'</b></p><p><span>出貨</span><b>'+g.本月出貨量+'</b></p><p><span>欠量</span><b>'+g.欠量+'</b></p><p><span>產能8H</span><b>'+(g.產能_8H||'-')+'</b></p><p><span>達成</span><b>'+g.達成率+'%</b></p></div><div class="淡字">開工：'+(g.建議開工日||'免排')+'｜風險：'+g.交期風險+'｜狀態：'+g.狀態+'</div></div>').join('')+'</div>':'<div class="空">尚無資料</div>'
+}
+async function 讀檔(file){
+  if(!file||!window.XLSX)return alert('找不到 Excel 解析套件');
+  const y=文字($('年份').value)||((file.name.match(/20\d{2}/)||[])[0]);狀態.計畫年份=Number(y)||new Date().getFullYear();$('年份').value=狀態.計畫年份;
+  狀態.檔名=file.name;狀態.批次='PLAN-'+狀態.計畫年份+'-'+Date.now().toString().slice(-7);狀態.每日=[];狀態.彙總=[];狀態.出貨=[];狀態.需求=[];狀態.錯誤=[];狀態.排除表頭=0;
+  $('訊息').textContent='讀取中：'+file.name+'\n計畫年份：'+狀態.計畫年份;
+  const wb=XLSX.read(await file.arrayBuffer(),{type:'array',cellDates:true,raw:false});
+  wb.SheetNames.filter(目標工作表).forEach(n=>解析工作表(n,XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,defval:'',raw:false})));
+  建立結果();渲染();$('訊息').textContent='完成：工作表 '+wb.SheetNames.length+' 張｜每日明細 '+狀態.每日.length+' 筆｜排除表頭 '+狀態.排除表頭+' 筆｜需求池 '+狀態.需求.length+' 筆。\n若仍看到 1900 年，請確認是否使用 v2 網址。';
+}
+function CSV(rows,heads){const q='"',nl='\n';const safe=v=>{let s=文字(v).replaceAll(q,q+q);return s.includes(',')||s.includes(nl)?q+s+q:s};return String.fromCharCode(65279)+[heads.join(','),...rows.map(r=>heads.map(h=>safe(r[h])).join(','))].join(nl)}
+function 下載(name,text,type){let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:type||'text/plain;charset=utf-8'}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},300)}
+$('檔案').onchange=e=>讀檔(e.target.files[0]);
+$('匯出需求池').onclick=()=>狀態.需求.length?下載('10_排程需求池_'+狀態.批次+'.csv',CSV(狀態.需求,需求欄),'text/csv;charset=utf-8'):alert('沒有需求池資料');
+$('匯出每日').onclick=()=>狀態.每日.length?下載('每日明細_'+狀態.批次+'.csv',CSV(狀態.每日,每日欄),'text/csv;charset=utf-8'):alert('沒有每日明細資料');
+$('匯出JSON').onclick=()=>下載('生產計畫清洗_'+狀態.批次+'.json',JSON.stringify(狀態,null,2),'application/json');
+$('複製LINE').onclick=async()=>{let rows=狀態.彙總.filter(g=>g.欠量||g.交期風險!=='準').slice(0,12);let txt=['【製一組生產計畫重點】'+現在(),'批次：'+狀態.批次,...rows.map((g,i)=>(i+1)+'. ⚠️ '+g.品名+'｜區:'+g.區域+'｜欠:'+g.欠量+'｜8H:'+g.產能_8H+'｜開:'+(g.建議開工日||'-')+'｜風險:'+g.交期風險)].join('\n');await navigator.clipboard.writeText(txt);alert('已複製LINE摘要')};
+$('寫入').onclick=async()=>{if(!狀態.需求.length)return alert('沒有需求池資料');const body=JSON.stringify({action:'寫入排程需求池',動作:'寫入排程需求池',批次編號:狀態.批次,需求池:狀態.需求,清洗紀錄:{來源檔名:狀態.檔名,匯入時間:現在(),總筆數:狀態.每日.length,有效筆數:狀態.需求.length,錯誤筆數:狀態.錯誤.length,排除表頭:狀態.排除表頭,狀態:狀態.錯誤.length?'部分成功':'成功'}});$('訊息').textContent='寫入中...';try{let r=await fetch($('後端網址').value,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body});$('訊息').textContent='GAS回覆：'+(await r.text()).slice(0,800)}catch(e){try{await fetch($('後端網址').value,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body});$('訊息').textContent='已用 no-cors 備援送出，請到 Google Sheets 確認 10_排程需求池。'}catch(x){$('訊息').textContent='寫入失敗：'+x.message}}};
+document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-v]').forEach(x=>x.classList.remove('啟用'));document.querySelectorAll('.畫面').forEach(x=>x.classList.remove('啟用'));b.classList.add('啟用');$(b.dataset.v).classList.add('啟用')});
+渲染();
+</script>
+</body>
+</html>
