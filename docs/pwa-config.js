@@ -1,7 +1,7 @@
 window.PWA_CONFIG={
   GAS_WEB_APP_URL:'https://script.google.com/macros/s/AKfycbweSKwcREbv-5R5E1ZIj_XOZDGQzRPCdoOAy2uTkhMwZTZoIv-GtpQi0PF8ahdb6KEJ/exec',
   APP_NAME:'製造部智慧製造應用總部',
-  VERSION:'v2.1.33_穩定送出正式版',
+  VERSION:'v2.1.34_完整中英文合併穩定版',
   SPREADSHEET_ID:'1JA0-kxVO6x3NbCgjmUurkwd8lffolj0pbInissLl8BQ',
   API_TIMEOUT_MS:8000,
   API_ACTIONS:{健康檢查:'健康檢查',主檔檢查:'主檔檢查',取得報工作業v2初始資料:'取得報工作業v2初始資料',寫入報工作業v2:'寫入報工作業v2',寫入不良紀錄v2:'寫入不良紀錄v2',手動重刷_主檔照片:'手動重刷_主檔照片'}
@@ -9,7 +9,7 @@ window.PWA_CONFIG={
 
 (function(){
   'use strict';
-  const 正式版號='242';
+  const 正式版號='243';
   const 班別時間表={
     早班:{顯示:'早班',英文:'Day Shift',開始:'08:00',結束:'16:50',跨日:false,休息:[['10:00','10:10'],['12:10','12:40'],['14:40','14:50']]},
     中班:{顯示:'中班',英文:'Swing Shift',開始:'16:50',結束:'01:40',跨日:true,休息:[['18:50','19:00'],['21:00','21:30'],['23:30','23:40']]},
@@ -33,6 +33,7 @@ window.PWA_CONFIG={
   function 寫文字(el,text){if(el&&el.textContent!==text)el.textContent=text;}
   function 寫HTML(el,html){if(el&&el.innerHTML!==html)el.innerHTML=html;}
   function 寫值(el,value){if(el&&el.value!==value)el.value=value;}
+  function 主詞(text){return String(text||'').replace(/\*/g,'').split('/')[0].trim().replace(/\s+/g,'');}
 
   function 正規化班別(value){
     const text=String(value||'').replace(/\s+/g,'').toUpperCase();
@@ -165,24 +166,91 @@ window.PWA_CONFIG={
       return 原始寫入報工(next);
     };
   }
-  function 套用靜態雙語(){
+  function 設定選項雙語(select,map){
+    if(!select)return;
+    const keep=select.value;
+    let changed=false;
+    Array.from(select.options||[]).forEach(o=>{
+      const raw=String(o.value||o.textContent||'').split('/')[0].trim();
+      if(map[raw]){
+        if(o.value!==raw){o.value=raw;changed=true;}
+        if(o.textContent!==map[raw]){o.textContent=map[raw];changed=true;}
+      }
+    });
+    if(changed&&keep)select.value=String(keep).split('/')[0].trim();
+  }
+  function 套用完整中英文合併版(){
     document.title='製造部．報工系統 / Manufacturing Work Report System';
     寫文字(document.querySelector('.標題'),'🏭 製造部．報工系統 / Manufacturing Work Report');
     寫文字(document.querySelector('.副標'),'化新智慧製造HS / Huaxin Smart Manufacturing HS');
-    const labels={'今日共做數':'今日共做數 / Total Quantity','不良數量':'不良數量 / Defect Quantity','實際良品數':'實際良品數 / Good Quantity','開始時間':'開始時間 / Start Time','結束時間':'結束時間 / End Time','實際工時_分':'實際工時_分 / Actual Work Minutes','是否加班':'是否加班 / Overtime','加班類型':'加班類型 / Overtime Type'};
-    $$('label').forEach(label=>{const key=String(label.textContent||'').split('/')[0].trim();if(labels[key])寫文字(label,labels[key]);});
-    const btn=$('送出報工');
-    if(btn)寫文字(btn,'確認送出 / Confirm Submit');
+
+    const tabMap={人員:'👤<br>人員 / Operator',工件:'🔧<br>工件 / Workpiece',產出:'📊<br>產出 / Output',品質:'🔍<br>品質 / Quality'};
+    Object.keys(tabMap).forEach(k=>{const el=document.querySelector('[data-tab="'+k+'"]');if(el)寫HTML(el,tabMap[k]);});
+
+    const labelMap={
+      '班別':'班別 / Shift','作業日':'作業日 / Work Date','工站選擇':'工站選擇 / Station Select','機台照片':'機台照片 / Machine Photos',
+      '今日共做數':'今日共做數 / Total Quantity','不良數量':'不良數量 / Defect Quantity','實際良品數':'實際良品數 / Good Quantity',
+      '開始時間':'開始時間 / Start Time','結束時間':'結束時間 / End Time','實際工時_分':'實際工時_分 / Actual Work Minutes',
+      '是否加班':'是否加班 / Overtime','加班類型':'加班類型 / Overtime Type','不良原因數量分配':'不良原因數量分配 / Defect Reason Allocation',
+      '異常類型':'異常類型 / Abnormal Type','責任歸屬':'責任歸屬 / Responsibility','異常開始時間':'異常開始時間 / Abnormal Start Time',
+      '異常結束時間':'異常結束時間 / Abnormal End Time','照片備註':'照片備註 / Photo Notes','現場照片':'現場照片 / Site Photos'
+    };
+    $$('label').forEach(label=>{const key=主詞(label.textContent);if(labelMap[key])寫文字(label,labelMap[key]);});
+
+    const sectionPairs=[
+      ['👤 選定人員','👤 選定人員 / Selected Operator'],['🔧 工件與工站','🔧 工件與工站 / Workpiece & Station'],
+      ['📊 產出與工時','📊 產出與工時 / Output & Work Time'],['🔍 品質與不良','🔍 品質與不良 / Quality & Defects'],
+      ['🧾 報工預覽','🧾 報工預覽 / Work Report Preview'],['🧾 系統訊息','🧾 系統訊息 / System Message']
+    ];
+    $$('.區標').forEach(el=>{const t=String(el.textContent||'').replace(/\s+/g,' ').trim();sectionPairs.forEach(p=>{if(t.includes(p[0])&&!t.includes('/'))寫文字(el,p[1]);});});
+
+    const placeholders={
+      搜尋人員:'搜尋人員姓名、工號 / Search operator name or ID...',搜尋工件:'搜尋工件品名、料號 / Search workpiece name or part No...',
+      今日共做數:'請輸入總數 / Enter total quantity',快速不良數:'不良數 / Defect quantity',實際良品數:'自動計算 / Auto calculated',
+      照片備註:'輸入異常描述、照片說明、現場備註 / Enter abnormal notes, photo notes, site remarks...',掃碼手動輸入:'無法掃描時，可手動輸入 / Enter manually if scan fails'
+    };
+    Object.keys(placeholders).forEach(id=>{const el=$(id);if(el&&el.placeholder!==placeholders[id])el.placeholder=placeholders[id];});
+
+    設定選項雙語($('是否加班'),{否:'否 / No',是:'是 / Yes'});
+    設定選項雙語($('加班類型'),{無:'無 / None',平日加班:'平日加班 / Weekday OT',假日加班:'假日加班 / Holiday OT',臨時加班:'臨時加班 / Temporary OT'});
+    設定選項雙語($('異常類型'),{'無異常':'無異常 / Normal',設備異常:'設備異常 / Equipment Abnormal','機台停機':'機台停機 / Machine Down','待料':'待料 / Waiting Material','換刀':'換刀 / Tool Change','品質確認':'品質確認 / Quality Check','其他':'其他 / Others'});
+    設定選項雙語($('責任歸屬'),{無:'無 / None',製造:'製造 / Manufacturing',素材:'素材 / Material',外包:'外包 / Outsourcing',設備:'設備 / Equipment',生技:'生技 / Process Engineering',其他:'其他 / Others'});
+
+    寫文字($('上一步'),'← 上一步 / Previous');
+    寫文字($('下一步'),'下一步 / Next →');
+    寫文字($('送出報工'),'確認送出 / Confirm Submit');
+    寫文字($('新增不良'),'＋ 新增不良分配 / Add Defect Allocation');
+    寫文字($('拍照鈕'),'📸 拍照 / Camera');
+    寫文字($('選圖鈕'),'🖼 選圖 / Gallery');
+    寫文字($('清除照片鈕'),'🗑 清除 / Clear');
+    寫文字($('掃碼取消'),'關閉 / Close');
+    寫文字($('掃碼重啟'),'重掃 / Rescan');
+    寫文字($('掃碼送出'),'套用 / Apply');
+
+    const personBtn=$('人員下拉按鈕');
+    if(personBtn){
+      const n=personBtn.querySelector('.下拉姓名');
+      const d=personBtn.querySelector('.下拉資料');
+      if(n&&n.textContent==='請選擇人員')寫文字(n,'請選擇人員 / Select Operator');
+      if(d&&d.textContent.indexOf('/')<0)寫文字(d,'點擊展開人員圖片卡片清單 / Tap to open operator photo list');
+    }
+    const productBtn=$('產品下拉按鈕');
+    if(productBtn){
+      const n=productBtn.querySelector('.下拉產品名');
+      const d=productBtn.querySelector('.下拉產品資料');
+      if(n&&n.textContent==='請選擇產品')寫文字(n,'請選擇產品 / Select Product');
+      if(d&&d.textContent.indexOf('/')<0)寫文字(d,'點擊展開產品圖片卡片清單 / Tap to open product photo list');
+    }
+
+    const full=$('全螢幕鈕');if(full)full.title='全螢幕 / Full Screen';
+    const refresh=$('重整鈕');if(refresh)refresh.title='更新 / Refresh';
   }
-  function 穩定送出按鈕(){
-    const btn=$('送出報工');
-    if(btn)寫文字(btn,'確認送出 / Confirm Submit');
-  }
+  function 穩定送出按鈕(){寫文字($('送出報工'),'確認送出 / Confirm Submit');}
   function 啟動(){
     確保班別選項();
     綁定時間();
     修正送出Payload();
-    套用靜態雙語();
+    套用完整中英文合併版();
     套用班別時間(false);
     穩定送出按鈕();
   }
