@@ -1,14 +1,15 @@
 /**
- * 10_排程需求池後端正式模組
+ * 10_排程需求池後端正式模組｜純模組版
  * 專案：製造部智慧製造應用總部
  * 目的：接收 production-plan-cleaner-v3.html 送出的排程需求池資料，寫入 Google Sheets。
  * 原則：不影響報工、不影響 LINE Bot、不影響主檔檢查。
  *
- * 使用方式：
- * 1. 若你的 GAS 專案目前還沒有 doPost，可直接使用本檔 doPost。
- * 2. 若你的 GAS 專案已經有 doPost，請不要新增第二個 doPost，改在既有 doPost 解析 payload 後呼叫：
- *    var 排程結果 = 排程需求池_嘗試處理動作_(payload);
- *    if (排程結果) return 排程需求池_輸出JSON_(排程結果);
+ * 重要：
+ * 這一版不包含 doGet / doPost，避免與既有 LINE Bot、報工 API 的 doPost 衝突。
+ *
+ * 接入既有 doPost 時，只需要在原本 doPost 解析 payload 後加入：
+ * var 排程結果 = 排程需求池_嘗試處理動作_(payload);
+ * if (排程結果) return 排程需求池_輸出JSON_(排程結果);
  */
 
 var 排程需求池_試算表ID_ = '1JA0-kxVO6x3NbCgjmUurkwd8lffolj0pbInissLl8BQ';
@@ -43,21 +44,9 @@ var 排程需求池_預設參數_ = [
   ['週日是否生產','N','預設週日不排產',排程需求池_現在_()]
 ];
 
-function doGet(e) {
-  var action = e && e.parameter ? String(e.parameter.action || e.parameter['動作'] || '') : '';
-  if (action === '初始化_10_排程需求池') return 排程需求池_輸出JSON_(初始化_10_排程需求池());
-  return 排程需求池_輸出JSON_({ ok: true, 系統: '10_排程需求池後端', 時間: 排程需求池_現在_(), 可用動作: ['健康檢查','初始化_10_排程需求池','寫入排程需求池'] });
-}
-
-function doPost(e) {
-  try {
-    var payload = 排程需求池_解析請求_(e);
-    var result = 排程需求池_嘗試處理動作_(payload);
-    if (result) return 排程需求池_輸出JSON_(result);
-    return 排程需求池_輸出JSON_({ ok: false, message: '未知動作', action: payload.action || payload['動作'] || '', 時間: 排程需求池_現在_() });
-  } catch (err) {
-    return 排程需求池_輸出JSON_({ ok: false, message: '排程需求池 doPost 錯誤：' + err.message, stack: String(err.stack || ''), 時間: 排程需求池_現在_() });
-  }
+function 排程需求池_由既有doPost接入_(e) {
+  var payload = 排程需求池_解析請求_(e);
+  return 排程需求池_嘗試處理動作_(payload);
 }
 
 function 排程需求池_嘗試處理動作_(payload) {
