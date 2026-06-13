@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#06111f">
+<title>生產計畫表清洗器 V3｜10_排程需求池正式版</title>
+<style>
+:root{--底:#06111f;--底2:#081827;--卡:#10253dcc;--卡2:#ffffff12;--線:#ffffff24;--字:#eef7ff;--淡:#9db3c7;--藍:#38bdf8;--綠:#22c55e;--紅:#fb7185;--黃:#fbbf24;--紫:#a78bfa}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:radial-gradient(circle at 10% 0%,#16466c,transparent 34%),linear-gradient(180deg,var(--底),var(--底2));color:var(--字);font-family:system-ui,-apple-system,'Microsoft JhengHei',sans-serif}button,input,select{font:inherit}.外框{max-width:1400px;margin:auto;padding:12px 10px 88px}.頁首{position:sticky;top:0;z-index:20;margin:0 -10px 12px;padding:12px 14px;background:#06111fe8;backdrop-filter:blur(16px);border-bottom:1px solid var(--線)}h1{margin:0;font-size:27px;line-height:1.18;font-weight:1000}.副標{margin-top:4px;color:var(--淡);font-size:12px}.卡{background:var(--卡2);border:1px solid var(--線);border-radius:20px;padding:14px;margin:12px 0;box-shadow:0 18px 46px #0007}.雙欄{display:grid;grid-template-columns:1.08fr .92fr;gap:12px}.指標列{display:grid;grid-template-columns:repeat(6,1fr);gap:9px}.指標{background:#ffffff14;border:1px solid #ffffff1d;border-radius:16px;padding:11px}.指標 span{display:block;color:var(--淡);font-size:11px;font-weight:900}.指標 b{font-size:25px}.紅 b{color:var(--紅)}.綠 b{color:var(--綠)}.黃 b{color:var(--黃)}.輸入{width:100%;border:1px solid #ffffff2a;background:#0005;color:var(--字);border-radius:14px;padding:11px;margin-top:8px}.工具列,.分頁,.篩選列{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.分頁{overflow:auto;padding-bottom:8px}.按鈕,button{border:1px solid #ffffff28;background:#ffffff14;color:var(--字);border-radius:999px;padding:9px 12px;font-weight:1000;cursor:pointer}.按鈕.主,button.主,.分頁 button.啟用{background:linear-gradient(135deg,var(--藍),#60a5fa);color:#03111f;border:0}.按鈕.危{background:#fb718533;border-color:#fb718588;color:#fff}.開關{display:flex;gap:7px;align-items:center;color:var(--淡);font-size:12px;font-weight:900}.開關 input{width:auto;margin:0}.畫面{display:none}.畫面.啟用{display:block}.表格框{overflow:auto;max-height:68vh;border:1px solid var(--線);border-radius:16px}table{width:100%;border-collapse:collapse;min-width:1080px;background:#0004}th,td{padding:8px 9px;border-bottom:1px solid #ffffff14;text-align:left;white-space:nowrap;font-size:12px}th{position:sticky;top:0;background:#102a43;color:#c9f2ff;z-index:1}.數字{text-align:right;font-variant-numeric:tabular-nums}.空{padding:24px;text-align:center;color:var(--淡);border:1px dashed #ffffff34;border-radius:16px}.訊息{white-space:pre-wrap;background:#0005;border:1px solid var(--線);border-radius:14px;padding:10px;color:#dbeafe;font-size:12px;margin-top:9px;line-height:1.55}.淡字{color:var(--淡);font-size:12px;line-height:1.7}.徽章{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:1000;border:1px solid #ffffff2b;background:#ffffff12}.徽章.綠{background:#22c55e22;color:#a7f3d0;border-color:#22c55e77}.徽章.紅{background:#fb718522;color:#fecdd3;border-color:#fb718577}.徽章.黃{background:#fbbf2422;color:#fde68a;border-color:#fbbf2477}.徽章.藍{background:#38bdf822;color:#bae6fd;border-color:#38bdf877}.卡片列{display:grid;grid-template-columns:repeat(auto-fit,minmax(285px,1fr));gap:10px}.產品卡{border:1px solid var(--線);border-radius:18px;padding:12px;background:#ffffff10;position:relative;overflow:hidden}.產品卡.風險{border-color:#fb7185aa;box-shadow:0 0 0 1px #fb718533,0 0 28px #fb718522}.產品卡 h3{margin:0 0 5px;font-size:15px;line-height:1.35}.小數字{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:9px}.小數字 p{margin:0;background:#0004;border-radius:12px;padding:7px}.小數字 span{display:block;color:var(--淡);font-size:10px}.小數字 b{font-size:16px}.預視列{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}.浮層{display:none;position:fixed;inset:0;background:#06111ff0;z-index:100;padding:14px;overflow:auto}.浮層.啟用{display:block}.截圖格{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:12px}.截圖卡{background:#0f172a;border:1px solid #38bdf877;border-radius:20px;padding:15px;box-shadow:0 18px 48px #0008}.截圖卡 h2{font-size:18px;margin:0 0 8px}.截圖頭{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.進度{height:8px;background:#0006;border-radius:999px;overflow:hidden;margin-top:8px}.進度 i{display:block;height:100%;background:linear-gradient(90deg,var(--藍),var(--綠));width:0%}@media(max-width:860px){.雙欄{grid-template-columns:1fr}.指標列{grid-template-columns:repeat(2,1fr)}h1{font-size:23px}.外框{padding-bottom:110px}table{min-width:980px}.卡片列{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="外框">
+  <div class="頁首">
+    <h1>生產計畫表清洗器 V3 正式版</h1>
+    <div class="副標">第六階段｜生管 Excel → 每日明細 → 本月戰情卡片 → 出貨訂單 → 10_排程需求池｜報工穩定版不動</div>
+  </div>
+
+  <section class="卡 雙欄">
+    <div>
+      <h2>① 上傳生產計畫表</h2>
+      <div class="淡字">V3 已套用：TARGET_SHEETS 白名單、A7/A8 重複排除、1900 日期修正、出貨正負分開、訂單已滿足、覆蓋率、期末庫存、重點模式、LINE 摘要、四連月預視。</div>
+      <input id="檔案" class="輸入" type="file" accept=".xlsx,.xls,.csv">
+      <input id="BOM檔案" class="輸入" type="file" accept=".xlsx,.xls,.csv" title="可選：外部BOM檔案">
+      <div class="篩選列">
+        <input id="計畫年份" class="輸入" style="max-width:160px" placeholder="計畫年份">
+        <input id="計畫月份" class="輸入" style="max-width:160px" placeholder="計畫月份">
+        <select id="工作表篩選" class="輸入" style="max-width:210px"><option value="">全部工作表</option></select>
+        <select id="類型篩選" class="輸入" style="max-width:170px"><option value="">全部類型</option><option>計畫</option><option>產出</option><option>訂單(出貨)</option><option>供料</option></select>
+      </div>
+      <div class="工具列">
+        <label class="開關"><input id="隱藏零" type="checkbox" checked>隱藏 0 數量</label>
+        <label class="開關"><input id="隱藏全零卡" type="checkbox" checked>隱藏全零卡片</label>
+        <label class="開關"><input id="週末可生產" type="checkbox">週末可生產</label>
+        <input id="每日班數" class="輸入" style="max-width:120px" value="2" placeholder="每日班數">
+      </div>
+      <input id="後端網址" class="輸入" value="https://script.google.com/macros/s/AKfycbweSKwcREbv-5R5E1ZIj_XOZDGQzRPCdoOAy2uTkhMwZTZoIv-GtpQi0PF8ahdb6KEJ/exec">
+      <div class="工具列">
+        <button class="主" id="寫入需求池">寫入 10_排程需求池</button>
+        <button id="重點模式">重點模式</button>
+        <button id="截圖模式">截圖模式</button>
+        <button id="複製LINE">複製LINE摘要</button>
+        <button id="匯出每日">匯出每日CSV</button>
+        <button id="匯出彙總">匯出彙總CSV</button>
+        <button id="匯出出貨">匯出出貨CSV</button>
+        <button id="匯出需求">匯出需求池CSV</button>
+        <button id="匯出JSON">匯出JSON</button>
+      </div>
+      <div class="訊息" id="訊息">等待上傳。</div>
+    </div>
+    <div>
+      <h2>② V3 完成標準</h2>
+      <div class="淡字">
+        1. 日期不可再出現 1900。<br>
+        2. 只處理白名單/符合規則的排程工作表。<br>
+        3. A7(HEADER)+A8(CON) 存在時，自動排除 A7+A8(一)。<br>
+        4. 本月彙總需有正向出貨、負向出貨、訂單已滿足、覆蓋率、期末庫存。<br>
+        5. 重點模式要優先抓未滿足、欠量、達成率低於 95%。<br>
+        6. 需求池只取今天以後正向出貨。
+      </div>
+      <div class="訊息" id="批次">批次：尚未匯入</div>
+    </div>
+  </section>
+
+  <section class="卡"><div class="指標列">
+    <div class="指標"><span>每日明細</span><b id="k每日">0</b></div>
+    <div class="指標 綠"><span>本月卡片</span><b id="k彙總">0</b></div>
+    <div class="指標"><span>出貨訂單</span><b id="k出貨">0</b></div>
+    <div class="指標"><span>需求池</span><b id="k需求">0</b></div>
+    <div class="指標 紅"><span>高風險</span><b id="k風險">0</b></div>
+    <div class="指標 黃"><span>BOM</span><b id="kBOM">0</b></div>
+  </div></section>
+
+  <section class="卡">
+    <div class="分頁">
+      <button class="啟用" data-v="每日畫面">每日明細</button>
+      <button data-v="彙總畫面">本月彙總卡片</button>
+      <button data-v="出貨畫面">出貨訂單</button>
+      <button data-v="需求畫面">10_排程需求池</button>
+      <button data-v="組裝畫面">組裝件需求</button>
+      <button data-v="BOM畫面">BOM 檢視</button>
+      <button data-v="錯誤畫面">錯誤/排除</button>
+    </div>
+    <div id="每日畫面" class="畫面 啟用"></div>
+    <div id="彙總畫面" class="畫面"></div>
+    <div id="出貨畫面" class="畫面"></div>
+    <div id="需求畫面" class="畫面"></div>
+    <div id="組裝畫面" class="畫面"></div>
+    <div id="BOM畫面" class="畫面"></div>
+    <div id="錯誤畫面" class="畫面"></div>
+  </section>
+</div>
+
+<div id="截圖浮層" class="浮層"><div class="截圖頭"><h1>製一組重點｜自動聚焦最近出貨</h1><button class="危" onclick="關閉截圖()">關閉</button></div><div id="截圖內容" class="截圖格"></div></div>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+'use strict';
+const TARGET_SHEETS=new Set(['A1+A2(一)','A3 (一)','A4 (一)','A5 (一)','A5 (ㄧ)','A5（ 一）','A8 (ROT)','YC(義大利)','EEA供料','B2 (ACW系列)','B2 (AP系列)','A7+A8 (一)','A7(HEADER)+A8 (CON)','cxmr431','訂單','HEADER出貨','在製數量','EEA供料']);
+const TYPE_KEYS=new Set(['訂單','供料','計畫','計劃','產出','訂單(出貨)','出貨']);
+const 狀態={檔名:'',批次:'',年月:{年:new Date().getFullYear(),月:new Date().getMonth()+1},原始每日:[],每日:[],彙總:[],出貨:[],需求:[],BOM:[],組裝:[],錯誤:[],排除:[],重點:false,重點列:[],已解析工作表:[],日期來源:[]};
+const 每日欄=['區域','產品編號','客戶品號','品名','工單','日期','類型','數量','期初庫存','產能_8H','備註'];
+const 彙總欄=['區域','產品編號','客戶品號','品名','本月計畫量','本月產出量','本月出貨量_正向','本月出貨量_負向','本月需求量','可用量','訂單已滿足','期初庫存','庫存覆蓋缺口','覆蓋率','達成率','生產欠量','期末庫存預估','產能_標準數每8H','產品類別','加工機台清單','主機台','出貨日清單','要求開工日','可行開工日','可行完工日','交期風險','重點分數'];
+const 出貨欄=['訂單號','客戶','產品','產品編號','客戶品號','工單','區域','日期','數量','產能_8H','狀態','建議開工日','交期風險'];
+const 需求欄=['需求編號','批次編號','來源檔名','來源工作表','產品編號','客戶品號','品名','工單','類型','需求日期','數量','期初庫存','產能_8H','本月計畫量','本月產出量','本月出貨量','生產欠量','庫存覆蓋缺口','每日班數','OEE','所需工作天','建議開工日','預計完工日','交期風險','狀態','唯一鍵','備註','建立時間','更新時間'];
+const BOM欄=['主件名稱','主件 ERP','客戶料號','小料 ERP','小料客戶號','小料名稱','用量','分類'];
+const 組裝欄=['成品','成品料號','需求_本月','COVER需求','BODY需求','不足提示'];
+const $=id=>document.getElementById(id); const 補=n=>String(n).padStart(2,'0');
+function 文字(v){return String(v??'').replace(/\u3000/g,' ').trim()}
+function 數字(v){if(typeof v==='number')return isFinite(v)?v:0;let s=文字(v).replaceAll(',','').replaceAll('，','').replace(/\(([^)]+)\)/,'-$1');let n=Number(s);return isFinite(n)?n:0}
+function 日期字串(d){return d instanceof Date&&!isNaN(d)?d.getFullYear()+'-'+補(d.getMonth()+1)+'-'+補(d.getDate()):''}
+function 今天(){return 日期字串(new Date)}
+function 現在(){let d=new Date;return 日期字串(d)+' '+補(d.getHours())+':'+補(d.getMinutes())+':'+補(d.getSeconds())}
+function 轉月日(iso){return iso?iso.slice(5).replace('-','/'):''}
+function 估年月(fileName,rows){let joined=fileName+' '+(rows||[]).slice(0,12).map(r=>r.slice(0,30).join(' ')).join(' ');let m=joined.match(/(20\d{2})\D{0,3}(\d{1,2})\s*月?/);if(m)return{年:+m[1],月:Math.min(12,Math.max(1,+m[2]))};let y=joined.match(/(20\d{2})/);return{年:y?+y[1]:new Date().getFullYear(),月:new Date().getMonth()+1}}
+function Excel日期(n){let d=new Date(Date.UTC(1899,11,30));d.setUTCDate(d.getUTCDate()+Number(n));return new Date(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate())}
+function 解析日期(v,允許單日=false){
+  if(v instanceof Date){let d=new Date(v.getTime());if(d.getFullYear()<2000)d.setFullYear(狀態.年月.年);return 日期字串(d)}
+  if(typeof v==='number'&&v>59){let d=Excel日期(v);if(d.getFullYear()<2000)d.setFullYear(狀態.年月.年);return 日期字串(d)}
+  let s=文字(v); if(!s)return '';
+  let m8=s.match(/^(20\d{2})(\d{2})(\d{2})$/); if(m8)return 日期字串(new Date(+m8[1],+m8[2]-1,+m8[3]));
+  s=s.replaceAll('年','/').replaceAll('月','/').replaceAll('日','').replaceAll('-','/').replaceAll('.','/').replace(/\s+/g,'');
+  let p=s.split('/').filter(Boolean).map(Number); let y=狀態.年月.年,m=0,d=0;
+  if(p.length===3){y=p[0]<2000?狀態.年月.年:p[0];m=p[1];d=p[2]}
+  else if(p.length===2){m=p[0];d=p[1]}
+  else if(p.length===1&&允許單日){m=狀態.年月.月;d=p[0]}
+  else return '';
+  if(!m||!d||m<1||m>12||d<1||d>31)return '';
+  return 日期字串(new Date(y,m-1,d));
+}
+function 類型(v){let s=文字(v);if(s==='訂單')return '訂單(出貨)';if(s.includes('出貨'))return '訂單(出貨)';if(s.includes('訂單'))return '訂單(出貨)';if(s.includes('供料'))return '供料';if(s.includes('計畫')||s.includes('計劃'))return '計畫';if(s.includes('產出')||s.includes('實績'))return '產出';return ''}
+function 找欄(row,keys){for(let i=0;i<row.length;i++){let s=文字(row[i]).toLowerCase();for(let k of keys){if(s.includes(k.toLowerCase()))return i}}return -1}
+function 找標題列(rows){let best=-1,score=0;rows.slice(0,80).forEach((r,i)=>{let t=r.map(文字).join('|');let s=0;if(/品名|產品名稱|產品品名/.test(t))s+=3;if(/客戶品號|客戶料號/.test(t))s+=3;if(/產品編號|料號|品號/.test(t))s+=3;if(/工單|在製/.test(t))s++;if(/產能|標準數|8H/.test(t))s++;if(s>score){score=s;best=i}});return score>=5?best:-1}
+function 找日期資訊(rows){let exact=null,best={i:-1,c:-1,d:[],score:0};rows.slice(0,90).forEach((r,i)=>{r.forEach((cell,j)=>{if(文字(cell)==='日期')exact={i,c:j}});let arr=[];r.forEach((cell,j)=>{let dd=解析日期(cell,true);if(dd)arr.push({c:j,d:dd})});if(arr.length>best.score)best={i,c:arr.length?arr[0].c-1:-1,d:arr,score:arr.length}});if(exact){let r=rows[exact.i]||[],arr=[];for(let c=exact.c+1;c<r.length;c++){let dd=解析日期(r[c],true);if(dd)arr.push({c,d:dd})}if(arr.length>=2)return{i:exact.i,c:exact.c,d:arr,模式:'日期欄'}}return best.score>=2?{i:best.i,c:best.c,d:best.d,模式:'日期列'}:{i:-1,c:-1,d:[],模式:'無'}}
+function 合法工作表清單(names){let chosen=names.filter(n=>TARGET_SHEETS.has(n)||/^C\d+\s*\(/.test(n)||/^(A|B)\d/.test(n)||/EEA|YC|出貨|供料|cxmr/i.test(n));if(chosen.includes('A7(HEADER)+A8 (CON)'))chosen=chosen.filter(n=>n!=='A7+A8 (一)');return chosen.filter(n=>!/BOM|ASSY|組裝|用料/.test(n))}
+function 是BOM表(n){return /BOM|ASSY|組裝|用料/i.test(n)}
+function 是表頭資料(r){let p=文字(r.產品編號),c=文字(r.客戶品號),n=文字(r.品名),w=文字(r.工單);return /^(料號|產品編號|品號|產品料號|product)$/i.test(p)||/客戶品號|客戶料號/i.test(c)||/^品名$|^產品$|^Product$/i.test(n)||/^工單$|^工單號$/.test(w)}
+function 產品類別(code){let s=文字(code);let m=s.match(/(\d)$/);if(!m)return '';return m[1]==='0'?'成品':m[1]==='1'?'素材':m[1]==='8'?'半成品':''}
+function 機台清單(area,name){let s=(area+' '+name).match(/#?\b\d{2,5}\b/g)||[];let arr=[...new Set(s.map(x=>x.replace('#','')))];return{清單:arr.join(','),主:arr[0]||''}}
+function 工作日(d){return $('週末可生產').checked?true:(d.getDay()!==0&&d.getDay()!==6)}
+function 倒推(iso,days){let d=new Date(iso+'T00:00:00'),c=0;while(c<days){d.setDate(d.getDate()-1);if(工作日(d))c++}return 日期字串(d)}
+function 順推(iso,days){let d=new Date(iso+'T00:00:00'),c=1;while(c<Math.max(1,days)){d.setDate(d.getDate()+1);if(工作日(d))c++}return 日期字串(d)}
+function 分組鍵(r){return [r.區域,r.產品編號,r.客戶品號,r.品名].join('｜')}
+function MM(iso){return iso?iso.slice(0,7):''}
+function 寫訊息(t){$('訊息').textContent=t}
+function 解析工作表(name,rows){
+  let hi=找標題列(rows),di=找日期資訊(rows); if(hi<0||di.i<0){狀態.錯誤.push({工作表:name,列:'',類別:'解析失敗',訊息:'找不到標題列或日期列',原始資料:''});return}
+  let h=rows[hi]; let c={產品編號:找欄(h,['產品編號','產品料號','料號','品號','物料','Part']),客戶品號:找欄(h,['客戶品號','客戶料號','客戶型號','Customer']),品名:找欄(h,['品名','品名/規格','產品名稱','產品品名','產品','Product','機種']),工單:找欄(h,['在製工單','工單號','工單','工令','WO']),期初庫存:找欄(h,['期初庫存','月初庫存','庫存','期初']),產能_8H:找欄(h,['標準數/8H','產能8H','產能/8H','8H產能','產能(班)','產能','標準數']),備註:找欄(h,['備註','說明','Remark'])};
+  let last={產品編號:'',客戶品號:'',品名:'',工單:'',期初庫存:0,產能_8H:0,備註:''}; 狀態.已解析工作表.push(name); 狀態.日期來源.push(...di.d.map(x=>x.d));
+  for(let r=Math.max(hi,di.i)+1;r<rows.length;r++){
+    let row=rows[r], typeCell=di.c>=0?row[di.c]:row.map(類型).find(Boolean), tp=類型(typeCell); ['產品編號','客戶品號','品名','工單','備註'].forEach(k=>{if(c[k]>=0&&文字(row[c[k]]))last[k]=文字(row[c[k]])});
+    if(c.期初庫存>=0&&文字(row[c.期初庫存])!==''&&數字(row[c.期初庫存])!==0)last.期初庫存=數字(row[c.期初庫存]);
+    if(c.產能_8H>=0&&數字(row[c.產能_8H])>0)last.產能_8H=數字(row[c.產能_8H]);
+    if(!tp)continue; let base={區域:name,...last}; if(是表頭資料(base)){狀態.排除.push({工作表:name,列:r+1,類別:'排除表頭資料列',訊息:'料號/客戶品號/品名被排除',原始資料:row.join('|')});continue}
+    di.d.forEach(x=>{let q=數字(row[x.c]); if($('隱藏零').checked&&q===0)return; if(!base.品名){狀態.錯誤.push({工作表:name,列:r+1,類別:'缺品名',訊息:'無品名不可進每日明細',原始資料:row.join('|')});return} 狀態.原始每日.push({區域:name,產品編號:base.產品編號,客戶品號:base.客戶品號,品名:base.品名,工單:base.工單,日期:x.d,類型:tp,數量:q,期初庫存:base.期初庫存,產能_8H:base.產能_8H,備註:base.備註})})
+  }
+}
+function 解析BOM列(rows){let out=[]; if(!rows.length)return out; let hi=0,score=0;rows.slice(0,30).forEach((r,i)=>{let t=r.map(文字).join('|');let s=0;if(/主件|成品|main/i.test(t))s+=2;if(/元件|小料|comp|子件/i.test(t))s+=2;if(/用量|qty/i.test(t))s++;if(s>score){score=s;hi=i}});let h=rows[hi]||[];let c={主件名稱:找欄(h,['主件名稱','成品品名','main_name','母件品名']),主件ERP:找欄(h,['主件 ERP','成品料號','main_mat_no','母件產品編號','主件料號']),客戶料號:找欄(h,['客戶料號','main_cust_no','客戶品號']),小料ERP:找欄(h,['小料 ERP','元件料號','comp_erp_no','子件產品編號']),小料客戶號:找欄(h,['小料客戶號','元件料號(簡)','comp_part_no','小料客戶號']),小料名稱:找欄(h,['小料名稱','元件品名','comp_name','子件品名']),用量:找欄(h,['用量','qty','數量'])};for(let i=hi+1;i<rows.length;i++){let r=rows[i];let row={主件名稱:文字(r[c.主件名稱]),'主件 ERP':文字(r[c.主件ERP]),客戶料號:文字(r[c.客戶料號]),'小料 ERP':文字(r[c.小料ERP]),小料客戶號:文字(r[c.小料客戶號]),小料名稱:文字(r[c.小料名稱]),用量:數字(r[c.用量])};if(!row['主件 ERP']||(!row['小料 ERP']&&!row.小料客戶號))continue;let z=(row.小料名稱+' '+row['小料 ERP']+' '+row.小料客戶號).toUpperCase();row.分類=z.includes('COVER')?'COVER':(z.includes('BODY')||z.includes('HOUSING')?'BODY':'');out.push(row)}return out}
+function 套用篩選(){let sh=$('工作表篩選').value, tp=$('類型篩選').value;狀態.每日=狀態.原始每日.filter(r=>(!sh||r.區域===sh)&&(!tp||r.類型===tp)&&(!$('隱藏零').checked||數字(r.數量)!==0));建立彙總();建立出貨與需求();建立組裝();渲染()}
+function 建立彙總(){
+  let map=new Map; 狀態.每日.forEach(r=>{let k=分組鍵(r);if(!map.has(k))map.set(k,{區域:r.區域,產品編號:r.產品編號,客戶品號:r.客戶品號,品名:r.品名,本月計畫量:0,本月產出量:0,本月出貨量_正向:0,本月出貨量_負向:0,供料正向:0,期初庫存:r.期初庫存||0,產能_標準數每8H:r.產能_8H||0,出貨日清單:[],備註:r.備註||'',每日:{}});let g=map.get(k);if(!g.產能_標準數每8H&&r.產能_8H)g.產能_標準數每8H=r.產能_8H;if(r.期初庫存>0)g.期初庫存=r.期初庫存;if(!g.每日[r.日期])g.每日[r.日期]={計畫:0,產出:0,訂單:0,供料:0};if(r.類型==='計畫'){g.本月計畫量+=r.數量;g.每日[r.日期].計畫+=r.數量}else if(r.類型==='產出'){g.本月產出量+=r.數量;g.每日[r.日期].產出+=r.數量}else if(r.類型==='供料'){if(r.數量>0)g.供料正向+=r.數量;g.每日[r.日期].供料+=r.數量}else if(r.類型.includes('出貨')){if(r.數量>0){g.本月出貨量_正向+=r.數量;g.出貨日清單.push(r.日期)}else g.本月出貨量_負向+=Math.abs(r.數量);g.每日[r.日期].訂單+=r.數量}});
+  狀態.彙總=[...map.values()].map(g=>{let need=g.本月出貨量_正向,avail=g.期初庫存+g.本月產出量+g.供料正向;g.本月需求量=need;g.可用量=avail;g.訂單已滿足=avail>=need?'Y':'N';g.庫存覆蓋缺口=Math.max(0,need-avail);g.覆蓋率=need?Math.min(100,Math.round(g.期初庫存/need*1000)/10):(g.期初庫存>0?100:0);g.達成率=g.本月計畫量?Math.round(g.本月產出量/g.本月計畫量*1000)/10:0;g.生產欠量=g.本月出貨量_負向+Math.max(0,g.本月出貨量_正向-g.本月產出量);g.期末庫存預估=g.期初庫存+g.供料正向+g.本月產出量-g.本月出貨量_正向;g.出貨日清單=[...new Set(g.出貨日清單)].sort().join(',');g.產品類別=產品類別(g.產品編號);let mach=機台清單(g.區域,g.品名);g.加工機台清單=mach.清單;g.主機台=mach.主;let first=g.出貨日清單.split(',').filter(Boolean)[0]||'';let cap=g.產能_標準數每8H*數字($('每日班數').value||2);let needProd=Math.max(0,g.本月出貨量_正向-g.期初庫存);let days=(first&&cap&&needProd)?Math.ceil(needProd/cap):0;g.要求開工日=days?倒推(first,days):'';g.可行開工日=g.要求開工日;g.可行完工日=g.可行開工日?順推(g.可行開工日,days):'';g.交期風險=!g.產能_標準數每8H&&need?'缺產能':(g.可行開工日&&g.可行開工日<今天()?'晚':'準');g.重點分數=重點分數(g);return g}).filter(g=>!$('隱藏全零卡').checked||!(g.本月計畫量===0&&g.本月產出量===0&&g.本月出貨量_正向===0&&g.本月出貨量_負向===0&&g.期初庫存===0)).sort((a,b)=>b.重點分數-a.重點分數);
+  四連月預視(); 狀態.重點列=狀態.彙總.filter(g=>g.重點分數>0).sort((a,b)=>b.重點分數-a.重點分數);
+}
+function 重點分數(g){let s=0;if(g.訂單已滿足==='N')s+=1000;s+=Math.max(0,g.本月出貨量_正向-g.本月產出量);if(g.達成率<80)s+=(80-g.達成率)*2;if(g.期末庫存預估<0)s+=50;if(g.達成率<95&&g.本月計畫量>0)s+=20;return Math.round(s)}
+function 四連月預視(){let dates=狀態.日期來源.concat(狀態.每日.map(r=>r.日期)).filter(Boolean);let base=new Date();let months=[];for(let i=0;i<4;i++){let d=new Date(base.getFullYear(),base.getMonth()+i,1);months.push({key:d.getFullYear()+'-'+補(d.getMonth()+1),label:(d.getMonth()+1)+'月'})}狀態.彙總.forEach(g=>{months.forEach(m=>g['預視-'+m.label]=0)});狀態.每日.filter(r=>r.類型.includes('出貨')).forEach(r=>{let g=狀態.彙總.find(x=>分組鍵(x)===分組鍵(r));let m=months.find(x=>x.key===MM(r.日期));if(g&&m)g['預視-'+m.label]+=Math.max(0,r.數量)})}
+function 建立出貨與需求(){let seq={};狀態.出貨=狀態.每日.filter(r=>r.類型.includes('出貨')&&r.數量>0&&r.日期>=今天()).sort((a,b)=>a.日期.localeCompare(b.日期)).map(r=>{seq[r.日期]=(seq[r.日期]||0)+1;let g=狀態.彙總.find(x=>分組鍵(x)===分組鍵(r))||{};return{訂單號:'ORD'+r.日期.replaceAll('-','')+String(seq[r.日期]).padStart(5,'0'),客戶:r.客戶品號,產品:r.品名,產品編號:r.產品編號,客戶品號:r.客戶品號,工單:r.工單,區域:r.區域,日期:r.日期,數量:r.數量,產能_8H:g.產能_標準數每8H||r.產能_8H||0,狀態:'待確認',建議開工日:g.可行開工日||'',交期風險:g.交期風險||'準'}});let seen=new Set;狀態.需求=[];狀態.出貨.forEach((o,i)=>{let g=狀態.彙總.find(x=>x.區域===o.區域&&x.產品編號===o.產品編號&&x.客戶品號===o.客戶品號&&x.品名===o.產品)||{};let u=[o.區域,o.產品編號,o.客戶品號,o.產品,o.日期,'訂單(出貨)',o.數量].join('｜');if(seen.has(u))return;seen.add(u);let OEE=.931;let days=o.產能_8H?Math.ceil(Math.ceil(o.數量/.97)/(o.產能_8H*.98*.98*數字($('每日班數').value||2)))+1:0;let start=days?倒推(o.日期,Math.ceil(days*1.15)):'';let risk=!o.產能_8H?'缺產能':(start&&start<今天()?'晚':'準');狀態.需求.push({需求編號:'REQ-'+狀態.批次+'-'+String(i+1).padStart(4,'0'),批次編號:狀態.批次,來源檔名:狀態.檔名,來源工作表:o.區域,產品編號:o.產品編號,客戶品號:o.客戶品號,品名:o.產品,工單:o.工單,類型:'訂單(出貨)',需求日期:o.日期,數量:o.數量,期初庫存:g.期初庫存||0,產能_8H:o.產能_8H||0,本月計畫量:g.本月計畫量||0,本月產出量:g.本月產出量||0,本月出貨量:g.本月出貨量_正向||0,生產欠量:g.生產欠量||0,庫存覆蓋缺口:g.庫存覆蓋缺口||0,每日班數:數字($('每日班數').value||2),OEE:OEE,所需工作天:days,建議開工日:start,預計完工日:start?順推(start,days):'',交期風險:risk,狀態:'待確認',唯一鍵:u,備註:g.備註||'',建立時間:現在(),更新時間:現在()})})}
+function 建立組裝(){let map=new Map;狀態.BOM.forEach(b=>{let k=b['主件 ERP'];if(!map.has(k))map.set(k,{name:b.主件名稱,cover:0,body:0});let x=map.get(k);if(b.分類==='COVER')x.cover+=數字(b.用量);if(b.分類==='BODY')x.body+=數字(b.用量)});狀態.組裝=[];狀態.彙總.forEach(g=>{let b=map.get(g.產品編號);if(!b||g.本月出貨量_正向<=0)return;let cover=g.本月出貨量_正向*b.cover,body=g.本月出貨量_正向*b.body;狀態.組裝.push({成品:g.品名,成品料號:g.產品編號,需求_本月:g.本月出貨量_正向,COVER需求:cover,BODY需求:body,不足提示:(cover||body)?'需補工：'+(cover?'COVER '+cover+' ':'')+(body?'BODY '+body:''):'OK'})})}
+async function 讀檔(file){if(!file||!window.XLSX)return alert('找不到 Excel 解析套件');狀態.檔名=file.name;狀態.批次='PLAN-'+Date.now().toString().slice(-9);狀態.原始每日=[];狀態.每日=[];狀態.彙總=[];狀態.出貨=[];狀態.需求=[];狀態.錯誤=[];狀態.排除=[];狀態.已解析工作表=[];狀態.日期來源=[];寫訊息('讀取中：'+file.name);let wb=XLSX.read(await file.arrayBuffer(),{type:'array',cellDates:true,raw:false});let sample=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:'',raw:false});狀態.年月=估年月(file.name,sample);$('計畫年份').value=狀態.年月.年;$('計畫月份').value=狀態.年月.月;let sheets=合法工作表清單(wb.SheetNames);let bomSheets=wb.SheetNames.filter(是BOM表);bomSheets.forEach(n=>{狀態.BOM.push(...解析BOM列(XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,defval:'',raw:false})))});sheets.forEach(n=>解析工作表(n,XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,defval:'',raw:false})));建立選項();套用篩選();寫訊息('完成：解析工作表 '+狀態.已解析工作表.length+' 張｜每日明細 '+狀態.每日.length+' 筆｜本月卡片 '+狀態.彙總.length+' 張｜出貨訂單 '+狀態.出貨.length+' 筆｜BOM '+狀態.BOM.length+' 筆。\n已解析：'+狀態.已解析工作表.join('、'))}
+async function 讀BOM(file){if(!file)return;let wb=XLSX.read(await file.arrayBuffer(),{type:'array',cellDates:true,raw:false});狀態.BOM=[];wb.SheetNames.forEach(n=>狀態.BOM.push(...解析BOM列(XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,defval:'',raw:false}))));建立組裝();渲染();寫訊息('外部 BOM 已載入：'+狀態.BOM.length+' 筆')}
+function 建立選項(){let s=$('工作表篩選'),v=s.value;s.innerHTML='<option value="">全部工作表</option>'+[...new Set(狀態.原始每日.map(r=>r.區域))].sort().map(x=>'<option>'+escapeHtml(x)+'</option>').join('');s.value=v}
+function escapeHtml(s){return 文字(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function 表格(id,heads,rows){$(id).innerHTML=rows.length?'<div class="表格框"><table><thead><tr>'+heads.map(h=>'<th>'+h+'</th>').join('')+'</tr></thead><tbody>'+rows.slice(0,900).map(r=>'<tr>'+heads.map(h=>'<td class="'+(typeof r[h]==='number'?'數字':'')+'">'+escapeHtml(r[h])+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>':'<div class="空">尚無資料</div>'}
+function 渲染(){ $('k每日').textContent=狀態.每日.length;$('k彙總').textContent=狀態.彙總.length;$('k出貨').textContent=狀態.出貨.length;$('k需求').textContent=狀態.需求.length;$('k風險').textContent=狀態.重點列.length;$('kBOM').textContent=狀態.BOM.length;$('批次').textContent='批次：'+(狀態.批次||'尚未匯入')+'｜計畫年月：'+狀態.年月.年+'-'+補(狀態.年月.月)+'｜排除：'+狀態.排除.length+'｜錯誤：'+狀態.錯誤.length;
+  表格('每日畫面',每日欄,狀態.每日);表格('出貨畫面',出貨欄,狀態.出貨);表格('需求畫面',需求欄,狀態.需求);表格('組裝畫面',組裝欄,狀態.組裝);表格('BOM畫面',BOM欄,狀態.BOM);表格('錯誤畫面',['工作表','列','類別','訊息','原始資料'],狀態.錯誤.concat(狀態.排除));渲染卡片();}
+function 渲染卡片(){let rows=狀態.重點?狀態.重點列:狀態.彙總;$('彙總畫面').innerHTML=rows.length?'<div class="卡片列">'+rows.map(g=>{let ok=g.訂單已滿足==='Y';let m=['6月','7月','8月','9月','10月','11月','12月','1月'].filter(x=>g['預視-'+x]!=null).slice(0,4);return '<div class="產品卡 '+(!ok||g.生產欠量>0||g.達成率<95?'風險':'')+'"><h3>'+escapeHtml(g.品名)+'</h3><div class="淡字">'+escapeHtml(g.區域)+'｜'+escapeHtml(g.產品編號)+'｜'+escapeHtml(g.客戶品號)+'</div><div class="工具列"><span class="徽章 '+(ok?'綠':'紅')+'">'+(ok?'已滿足':'未滿足')+'</span><span class="徽章 '+(g.交期風險==='準'?'綠':'紅')+'">'+g.交期風險+'</span><span class="徽章 藍">'+escapeHtml(g.產品類別||'未分類')+'</span></div><div class="小數字"><p><span>計畫</span><b>'+g.本月計畫量+'</b></p><p><span>產出</span><b>'+g.本月產出量+'</b></p><p><span>出貨+</span><b>'+g.本月出貨量_正向+'</b></p><p><span>出貨-</span><b>'+g.本月出貨量_負向+'</b></p><p><span>生產欠量</span><b>'+g.生產欠量+'</b></p><p><span>覆蓋缺口</span><b>'+g.庫存覆蓋缺口+'</b></p><p><span>達成</span><b>'+g.達成率+'%</b></p><p><span>覆蓋</span><b>'+g.覆蓋率+'%</b></p><p><span>期末</span><b>'+g.期末庫存預估+'</b></p></div><div class="淡字">8H:'+g.產能_標準數每8H+'｜開工:'+(g.可行開工日||'-')+'｜完工:'+(g.可行完工日||'-')+'｜機台:'+(g.主機台||'-')+'</div><div class="預視列">'+m.map(x=>'<span class="徽章 黃">預視'+x+' '+(g['預視-'+x]||0)+'</span>').join('')+'</div></div>'}).join('')+'</div>':'<div class="空">尚無卡片</div>'}
+function CSV(rows,heads){let q='"',nl='\n';let safe=v=>{let s=文字(v).replaceAll(q,q+q);return s.includes(',')||s.includes(nl)?q+s+q:s};return String.fromCharCode(65279)+[heads.join(','),...rows.map(r=>heads.map(h=>safe(r[h])).join(','))].join(nl)}
+function 下載(name,text,type){let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:type||'text/plain;charset=utf-8'}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},300)}
+function LINE文字(){let rows=狀態.重點列.slice(0,12);return ['【製一組重點 '+現在().slice(11,16)+'｜自動聚焦最近出貨】',...rows.map((g,i)=>(i+1)+'. '+(g.訂單已滿足==='Y'?'✅':'⚠️')+' '+g.品名+'｜區:'+g.區域+'｜達成:'+g.達成率+'%｜欠:'+g.生產欠量+'｜標準/8H:'+g.產能_標準數每8H+'｜開:'+(轉月日(g.可行開工日)||'-')+'｜出:'+(轉月日((g.出貨日清單||'').split(',').find(d=>d>=今天())||(g.出貨日清單||'').split(',')[0])||'-')+'｜機:'+(g.主機台||'-'))].join('\n')}
+function 開截圖(){let rows=狀態.重點列.slice(0,12);$('截圖內容').innerHTML=rows.map((g,i)=>'<div class="截圖卡"><h2>'+(i+1)+'. '+escapeHtml(g.品名)+'</h2><div class="淡字">區:'+escapeHtml(g.區域)+'｜機:'+(g.主機台||'-')+'</div><div class="小數字"><p><span>需求</span><b>'+g.本月出貨量_正向+'</b></p><p><span>欠量</span><b>'+g.生產欠量+'</b></p><p><span>8H</span><b>'+g.產能_標準數每8H+'</b></p></div><div class="工具列"><span class="徽章 '+(g.訂單已滿足==='Y'?'綠':'紅')+'">'+(g.訂單已滿足==='Y'?'已滿足':'未滿足')+'</span><span class="徽章 黃">開 '+(轉月日(g.可行開工日)||'-')+'</span><span class="徽章 藍">出 '+(轉月日((g.出貨日清單||'').split(',').find(d=>d>=今天())||(g.出貨日清單||'').split(',')[0])||'-')+'</span></div><div class="淡字">期初:'+g.期初庫存+'｜期末估:'+g.期末庫存預估+'｜覆蓋率:'+g.覆蓋率+'%</div></div>').join('')||'<div class="空">沒有重點資料</div>';$('截圖浮層').classList.add('啟用')}
+function 關閉截圖(){$('截圖浮層').classList.remove('啟用')}
+$('檔案').onchange=e=>讀檔(e.target.files[0]);$('BOM檔案').onchange=e=>讀BOM(e.target.files[0]);$('隱藏零').onchange=套用篩選;$('隱藏全零卡').onchange=套用篩選;$('週末可生產').onchange=套用篩選;$('每日班數').onchange=套用篩選;$('工作表篩選').onchange=套用篩選;$('類型篩選').onchange=套用篩選;
+$('重點模式').onclick=()=>{狀態.重點=!狀態.重點;$('重點模式').textContent=狀態.重點?'退出重點':'重點模式';document.querySelector('[data-v="彙總畫面"]').click();渲染卡片()};$('截圖模式').onclick=開截圖;$('複製LINE').onclick=async()=>{let t=LINE文字();try{await navigator.clipboard.writeText(t);alert('已複製 LINE 摘要')}catch(e){prompt('請手動複製',t)}};
+$('匯出每日').onclick=()=>狀態.每日.length?下載('每日明細_'+狀態.批次+'.csv',CSV(狀態.每日,每日欄),'text/csv;charset=utf-8'):alert('沒有資料');$('匯出彙總').onclick=()=>狀態.彙總.length?下載('本月彙總_'+狀態.批次+'.csv',CSV(狀態.彙總,彙總欄),'text/csv;charset=utf-8'):alert('沒有資料');$('匯出出貨').onclick=()=>狀態.出貨.length?下載('出貨訂單_'+狀態.批次+'.csv',CSV(狀態.出貨,出貨欄),'text/csv;charset=utf-8'):alert('沒有資料');$('匯出需求').onclick=()=>狀態.需求.length?下載('10_排程需求池_'+狀態.批次+'.csv',CSV(狀態.需求,需求欄),'text/csv;charset=utf-8'):alert('沒有資料');$('匯出JSON').onclick=()=>下載('生產計畫清洗V3_'+狀態.批次+'.json',JSON.stringify(狀態,null,2),'application/json');
+$('寫入需求池').onclick=async()=>{if(!狀態.需求.length)return alert('沒有需求池資料');let body=JSON.stringify({action:'寫入排程需求池',動作:'寫入排程需求池',版本:'V3',批次編號:狀態.批次,需求池:狀態.需求,清洗紀錄:{來源檔名:狀態.檔名,匯入時間:現在(),每日明細:狀態.每日.length,本月彙總:狀態.彙總.length,出貨訂單:狀態.出貨.length,需求池:狀態.需求.length,錯誤:狀態.錯誤.length,排除:狀態.排除.length,狀態:狀態.錯誤.length?'部分成功':'成功'}});寫訊息('寫入中...');try{let r=await fetch($('後端網址').value,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body});寫訊息('GAS 回覆：'+(await r.text()).slice(0,900))}catch(e){try{await fetch($('後端網址').value,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body});寫訊息('已用 no-cors 備援送出，請到 Google Sheets 確認 10_排程需求池。')}catch(x){寫訊息('寫入失敗：'+x.message)}}};
+document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-v]').forEach(x=>x.classList.remove('啟用'));document.querySelectorAll('.畫面').forEach(x=>x.classList.remove('啟用'));b.classList.add('啟用');$(b.dataset.v).classList.add('啟用')});
+渲染();
+</script>
+</body>
+</html>
