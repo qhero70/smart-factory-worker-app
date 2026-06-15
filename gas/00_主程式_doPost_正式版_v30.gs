@@ -1,19 +1,20 @@
 /**
  * 00_主程式_doPost_正式版_v30
  * 專案：製造部智慧製造應用總部
- * 版本：v30.2.1
+ * 版本：v30.2.2
  *
  * 正式入口整合順序：
- * 1. LINE Webhook 主管戰情直連回覆
- * 2. 29 主管戰情入口
- * 3. 28 主管戰情看板 API
- * 4. 27 每日自動化排程
- * 5. 26 LINE每日戰情推播
- * 6. 25 AI戰情摘要資料源
- * 7. 24 派班報工每日結算
- * 8. 23 派班報工巡檢修復
- * 9. 22/21 派班報工與防呆
- * 10. 10 排程需求池
+ * 1. 31 LINE 主管戰情日期快選：今日戰情、昨日戰情、戰情 yyyy-MM-dd
+ * 2. 30 LINE 主管戰情直連回覆：主管戰情、總部首頁、報工、功能
+ * 3. 29 主管戰情入口
+ * 4. 28 主管戰情看板 API
+ * 5. 27 每日自動化排程
+ * 6. 26 LINE每日戰情推播
+ * 7. 25 AI戰情摘要資料源
+ * 8. 24 派班報工每日結算
+ * 9. 23 派班報工巡檢修復
+ * 10. 22/21 派班報工與防呆
+ * 11. 10 排程需求池
  */
 
 function doPost(e) {
@@ -21,6 +22,10 @@ function doPost(e) {
   const action = String((p && (p.action || p['動作'])) || '').trim();
 
   if (p && p.events && Array.isArray(p.events)) {
+    if (typeof LINE主管戰情日期快選_嘗試處理Webhook_ === 'function') {
+      var 日期快選結果 = LINE主管戰情日期快選_嘗試處理Webhook_(p);
+      if (日期快選結果 && 日期快選結果.已處理) return 主程式_安全輸出JSON_(日期快選結果);
+    }
     if (typeof LINE主管戰情直連_嘗試處理Webhook_ === 'function') {
       var 主管戰情LINE結果 = LINE主管戰情直連_嘗試處理Webhook_(p);
       if (主管戰情LINE結果 && 主管戰情LINE結果.已處理) return 主程式_安全輸出JSON_(主管戰情LINE結果);
