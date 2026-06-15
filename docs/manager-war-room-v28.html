@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>28_主管戰情看板｜智慧製造中央作戰指揮中心</title>
+<style>
+:root{--bg:#06111d;--card:#0b1f31;--card2:#0f2d42;--line:#1e7494;--cyan:#19d3ff;--text:#eaf7ff;--muted:#92adc1;--red:#ff5c73;--yellow:#ffd34d;--green:#36e083;--blue:#6aa9ff;--violet:#c084fc}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#113756 0,#06111d 42%,#03070c 100%);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",Arial,sans-serif}.wrap{width:min(1180px,100%);margin:0 auto;padding:16px 14px 86px}.top{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,rgba(6,17,29,.98),rgba(6,17,29,.82));backdrop-filter:blur(12px);border-bottom:1px solid rgba(25,211,255,.25);padding:12px 14px}.brand{display:flex;align-items:center;justify-content:space-between;gap:10px}.brand h1{margin:0;font-size:20px;letter-spacing:.5px}.tag{font-size:12px;color:#ff3fb6;font-weight:800}.toolbar{display:grid;grid-template-columns:1fr auto auto;gap:8px;margin-top:12px}input,button{border:1px solid rgba(25,211,255,.45);background:#071725;color:var(--text);border-radius:12px;padding:12px;font-weight:800}button{background:linear-gradient(135deg,#0a5d80,#0891b2);cursor:pointer}.status{font-size:12px;color:var(--muted);margin-top:8px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}.card{background:linear-gradient(180deg,rgba(15,45,66,.96),rgba(7,23,37,.96));border:1px solid rgba(25,211,255,.28);border-radius:18px;padding:14px;box-shadow:0 12px 30px rgba(0,0,0,.22)}.card h2{margin:0 0 8px;font-size:14px;color:#b9ecff}.big{font-size:30px;font-weight:1000;letter-spacing:.3px}.sub{font-size:12px;color:var(--muted);line-height:1.55}.risk{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;font-weight:1000}.risk-high{background:rgba(255,92,115,.16);color:#ff8fa0;border:1px solid rgba(255,92,115,.35)}.risk-mid{background:rgba(255,211,77,.16);color:#ffe08a;border:1px solid rgba(255,211,77,.35)}.risk-low{background:rgba(54,224,131,.15);color:#7ef0aa;border:1px solid rgba(54,224,131,.35)}.wide{grid-column:span 2}.full{grid-column:1/-1}.section{margin-top:12px}.list{display:grid;gap:8px}.item{border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.035);border-radius:14px;padding:12px}.item-title{font-weight:1000}.item-meta{font-size:12px;color:var(--muted);margin-top:5px;line-height:1.55}.bar{height:9px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden;margin-top:10px}.bar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,#19d3ff,#36e083)}.pill{display:inline-block;padding:4px 8px;border-radius:999px;background:rgba(25,211,255,.12);border:1px solid rgba(25,211,255,.22);font-size:12px;margin:2px}.footerNav{position:fixed;left:0;right:0;bottom:0;background:rgba(3,7,12,.92);backdrop-filter:blur(10px);border-top:1px solid rgba(25,211,255,.25);display:flex;justify-content:center;gap:8px;padding:8px}.footerNav button{padding:10px 14px;border-radius:999px}.hidden{display:none}@media(max-width:820px){.grid{grid-template-columns:repeat(2,1fr)}.wide{grid-column:1/-1}.brand h1{font-size:17px}.toolbar{grid-template-columns:1fr auto}.toolbar button:last-child{grid-column:1/-1}.big{font-size:24px}}@media(max-width:520px){.grid{grid-template-columns:1fr}.toolbar{grid-template-columns:1fr}.footerNav{overflow:auto;justify-content:flex-start}.footerNav button{white-space:nowrap}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <div><div class="tag">Huaxin Smart Manufacturing HS</div><h1>📊 主管戰情看板 / Manager War Room</h1></div>
+    <span id="riskBadge" class="risk risk-low">風險：-</span>
+  </div>
+  <div class="toolbar">
+    <input id="workDate" type="date">
+    <button onclick="loadBoard()">刷新</button>
+    <button onclick="setToday()">今日</button>
+  </div>
+  <div id="status" class="status">待載入主管戰情資料。</div>
+</header>
+<main class="wrap">
+  <section class="grid">
+    <article class="card"><h2>派班筆數</h2><div id="kDispatch" class="big">0</div><div class="sub">今日派班總量</div></article>
+    <article class="card"><h2>已報工</h2><div id="kDone" class="big">0</div><div class="sub">完成報工派班</div></article>
+    <article class="card"><h2>未報工</h2><div id="kMissing" class="big">0</div><div class="sub">需班長追蹤</div></article>
+    <article class="card"><h2>不良數</h2><div id="kBad" class="big">0</div><div class="sub">今日不良總數</div></article>
+    <article class="card wide"><h2>完成率</h2><div id="kComplete" class="big">0.0%</div><div class="bar"><i id="barComplete"></i></div><div class="sub">良品數 ÷ 派工量合計</div></article>
+    <article class="card wide"><h2>不良率</h2><div id="kBadRate" class="big">0.0%</div><div class="bar"><i id="barBad"></i></div><div class="sub">不良數 ÷ 報工數</div></article>
+    <article class="card full"><h2>AI 摘要</h2><div id="summary" class="sub">尚未載入。</div></article>
+    <article class="card full"><h2>主管建議</h2><div id="suggestion" class="sub">尚未載入。</div></article>
+  </section>
+  <section id="riskSec" class="section card"><h2>風險清單</h2><div id="riskList" class="list"></div></section>
+  <section id="missingSec" class="section card hidden"><h2>未報工追蹤</h2><div id="missingList" class="list"></div></section>
+  <section id="effSec" class="section card hidden"><h2>工站效率排行</h2><div id="effList" class="list"></div></section>
+  <section id="autoSec" class="section card hidden"><h2>自動化 / LINE 狀態</h2><div id="autoBox" class="sub"></div></section>
+</main>
+<nav class="footerNav">
+  <button onclick="showSec('riskSec')">風險</button>
+  <button onclick="showSec('missingSec')">未報工</button>
+  <button onclick="showSec('effSec')">效率</button>
+  <button onclick="showSec('autoSec')">自動化</button>
+</nav>
+<script>
+const GAS_URL='https://script.google.com/macros/s/AKfycbwOi-xjKoMD9jVq4HrHBvh7k1DCn70lAPAJiqaWJhvH70PbuRo4ciopCjYcytIalaW4/exec';
+function $(id){return document.getElementById(id)}
+function pct(n){n=Number(n||0);return (n*100).toFixed(1)+'%'}
+function esc(s){return String(s??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
+function today(){const d=new Date();return d.toISOString().slice(0,10)}
+function setToday(){$('workDate').value=today();loadBoard()}
+async function api(payload){const res=await fetch(GAS_URL,{method:'POST',body:JSON.stringify(payload)});return await res.json()}
+async function loadBoard(){
+  const d=$('workDate').value||today();$('status').textContent='載入中：'+d;
+  try{const data=await api({action:'取得主管戰情看板',作業日:d,筆數:40});render(data);$('status').textContent=(data.ok?'已更新':'讀取異常')+'｜'+(data.時間||'');}
+  catch(e){$('status').textContent='讀取失敗：'+e.message;}
+}
+function render(data){
+  const k=data.KPI||{};
+  $('kDispatch').textContent=k.派班筆數||0;$('kDone').textContent=k.已報工派班數||0;$('kMissing').textContent=k.未報工派班數||0;$('kBad').textContent=k.不良數||0;
+  $('kComplete').textContent=pct(k.完成率);$('kBadRate').textContent=pct(k.不良率);$('barComplete').style.width=Math.min(100,Number(k.完成率||0)*100)+'%';$('barBad').style.width=Math.min(100,Number(k.不良率||0)*100)+'%';
+  const risk=String(k.風險等級||'無資料');const rb=$('riskBadge');rb.textContent='風險：'+risk;rb.className='risk '+(risk==='高'?'risk-high':risk==='中'?'risk-mid':'risk-low');
+  $('summary').innerHTML=esc(data.AI摘要文字||'尚無摘要').replace(/\n/g,'<br>');$('suggestion').innerHTML=esc(data.主管建議||'尚無建議').replace(/\n/g,'<br>');
+  renderRisk(data.風險清單||[]);renderMissing(data.未報工追蹤||[]);renderEff(data.效率排行||[]);renderAuto(data);
+}
+function renderRisk(rows){$('riskList').innerHTML=rows.length?rows.map(r=>`<div class="item"><div class="item-title"><span class="pill">${esc(r.風險等級||'')}</span>${esc(r.風險類型||'風險')}</div><div class="item-meta">${esc(r.風險說明||r.訊息||'')}<br>${esc(r.工站||'')} ${esc(r.工單||'')} ${esc(r.品名或工序||'')}</div></div>`).join(''):'<div class="sub">目前沒有風險資料。</div>'}
+function renderMissing(rows){$('missingList').innerHTML=rows.length?rows.map(r=>`<div class="item"><div class="item-title">${esc(r.姓名||'')}｜${esc(r.品名||'')}</div><div class="item-meta">${esc(r.報工工站名稱||r.工站名稱||'')}｜${esc(r.工序||'')}｜派工 ${esc(r.派工量||0)}<br>${esc(r.工單編號||'')}</div></div>`).join(''):'<div class="sub">目前沒有未報工追蹤。</div>'}
+function renderEff(rows){$('effList').innerHTML=rows.length?rows.map(r=>`<div class="item"><div class="item-title">${esc(r.報工工站名稱||r.工站名稱||'工站')}</div><div class="item-meta">${esc(r.工序||'')}｜主機台 ${esc(r.主機台||'-')}｜完成率 ${pct(r.完成率)}｜不良率 ${pct(r.不良率)}</div><div class="bar"><i style="width:${Math.min(100,Number(r.完成率||0)*100)}%"></i></div></div>`).join(''):'<div class="sub">目前沒有工站效率資料。</div>'}
+function renderAuto(data){const a=data.自動化最新狀態||{},l=data.LINE最新狀態||{};$('autoBox').innerHTML=`自動化：${esc(a.狀態||'-')}｜${esc(a.訊息||'')}<br>LINE：${esc(l.狀態||'-')}｜${esc(l.訊息||'')}<br>資料筆數：${esc(JSON.stringify(data.筆數||{}))}`}
+function showSec(id){['riskSec','missingSec','effSec','autoSec'].forEach(x=>$(x).classList.toggle('hidden',x!==id));window.scrollTo({top:document.querySelector('#'+id).offsetTop-80,behavior:'smooth'})}
+$('workDate').value=today();loadBoard();
+</script>
+</body>
+</html>
