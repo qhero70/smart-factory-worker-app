@@ -1,49 +1,55 @@
 # 30_LINE主管戰情直連回覆正式版
 
-用途：修正 LINE Bot 輸入「主管戰情」沒有反應。
+用途：修正 LINE Bot 輸入「主管戰情 / 今日戰情 / 昨日戰情 / 戰情 yyyy-MM-dd」沒有反應或只寫紀錄不回覆的問題。
 
-## Apps Script 要刪除 / 保留
+## GitHub 正式保留檔
 
-保留：
+```text
+gas/30_LINE主管戰情直連回覆正式版.gs
+gas/00_主程式_doPost_正式版_v30.gs
+```
+
+## 已刪除舊檔
+
+```text
+gas/29_LINE文字指令主管戰情接入片段.gs
+gas/30_LINEWebhook_主管戰情最小可用替換版.gs
+gas/00_主程式_doPost_每日自動化接入版_v27.gs
+gas/00_主程式_doPost_主管戰情看板接入版_v28.gs
+gas/00_主程式_doPost_主管戰情入口接入版_v29.gs
+```
+
+## Apps Script 要保留
 
 ```text
 29_主管戰情看板入口整合正式模組.gs
+30_LINE主管戰情直連回覆正式版.gs
 ```
 
-刪除或不要使用：
+## Apps Script 要刪除
 
 ```text
 29_LINE文字指令主管戰情接入片段.gs
 30_LINEWebhook_主管戰情最小可用替換版.gs
 ```
 
-原因：這兩支不是完整直連版，若沒有接到原本 LINE 回覆函數，LINE 會沒有反應。
+## doPost 正式接入
 
-## 正確做法
-
-新增 Apps Script 檔案：
+請使用：
 
 ```text
-30_LINE主管戰情直連回覆正式版.gs
+gas/00_主程式_doPost_正式版_v30.gs
 ```
 
-內容請使用 ChatGPT 回覆內提供的完整貼上版。
+取代主後端同名函數：
 
-## doPost 接入位置
-
-在主後端 `doPost(e)` 裡，`const p = 解析POST_(e);` 下面立即加入：
-
-```javascript
-if (p && p.events && Array.isArray(p.events)) {
-  var 主管戰情LINE結果 = LINE主管戰情直連_嘗試處理Webhook_(p);
-  if (主管戰情LINE結果 && 主管戰情LINE結果.已處理) {
-    if (typeof 排程需求池_輸出JSON_ === 'function') {
-      return 排程需求池_輸出JSON_(主管戰情LINE結果);
-    }
-    return 輸出JSON_(主管戰情LINE結果);
-  }
-}
+```text
+doPost(e)
+處理API請求_(action, p)
+主程式_安全輸出JSON_(obj)
 ```
+
+Apps Script 專案內只能保留一個 `doPost(e)`。
 
 ## 必要設定
 
@@ -63,17 +69,14 @@ LINE_CHANNEL_ACCESS_TOKEN
 
 ## LINE 驗收
 
-在 LINE Bot 輸入：
-
 ```text
 主管戰情
+今日戰情
+昨日戰情
+戰情 2026-06-14
+總部首頁
+報工
+功能
 ```
 
-正常回覆：
-
-```text
-📊 主管戰情看板
-作業日：yyyy-MM-dd
-
-主管戰情看板網址
-```
+正常會回覆主管戰情看板網址或對應入口。
