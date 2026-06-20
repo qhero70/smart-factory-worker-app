@@ -1,9 +1,12 @@
 /**
  * 30_LINE主管戰情直連回覆正式版
- * 版本：v30.2.1
+ * 版本：v30.2.2
  *
  * 功能：LINE Bot 文字輸入「主管戰情」時，直接回覆主管戰情看板網址。
  * 機密：不在程式碼放 Token，僅讀 Apps Script 指令碼屬性 LINE_CHANNEL_ACCESS_TOKEN。
+ *
+ * 修正：
+ * - 增加 replyToken 一次性防呆，避免 LINE 重送事件或雙模組重複回覆造成 invalid reply token。
  */
 
 function LINE主管戰情直連_嘗試處理Webhook_(p) {
@@ -19,7 +22,7 @@ function LINE主管戰情直連_嘗試處理Webhook_(p) {
       LINE主管戰情直連_寫紀錄_('失敗', LINE主管戰情直連_事件文字_(events[i]), String(err && err.message ? err.message : err));
     }
   }
-  return { ok: true, handled: handled, failed: failed, 已處理: handled > 0, message: handled > 0 ? '已回覆主管戰情 LINE 指令' : '沒有主管戰情指令' };
+  return { ok: true, handled: handled, failed: failed, 已處理: handled > 0, message: handled > 0 ? '已處理主管戰情 LINE 指令' : '沒有主管戰情指令' };
 }
 
 function LINE主管戰情直連_處理事件_(event) {
@@ -28,6 +31,14 @@ function LINE主管戰情直連_處理事件_(event) {
   var text = String(event.message.text || '').trim();
   var replyText = LINE主管戰情直連_建立回覆_(text);
   if (!replyText) return false;
+
+  // LINE replyToken 只能回覆一次。先標記，避免 Apps Script / LINE 重送時再次回覆。
+  if (LINE主管戰情直連_已使用ReplyToken_(event.replyToken)) {
+    LINE主管戰情直連_寫紀錄_('略過', text, 'replyToken 已處理，避免重複回覆');
+    return true;
+  }
+  LINE主管戰情直連_標記ReplyToken_(event.replyToken);
+
   LINE主管戰情直連_送出回覆_(event.replyToken, replyText);
   LINE主管戰情直連_寫紀錄_('成功', text, '已回覆主管戰情指令');
   return true;
@@ -40,13 +51,14 @@ function LINE主管戰情直連_建立回覆_(text) {
   var homeUrl = 'https://qhero70.github.io/smart-factory-worker-app/?v=30';
   var reportUrl = 'https://qhero70.github.io/smart-factory-worker-app/work-report-v2.html?v=250';
 
+  // 日期快選由 31_LINE主管戰情日期快選正式模組優先處理。
   if (['主管戰情', '戰情看板', '主管看板', '每日戰情', '戰情'].indexOf(text) >= 0) {
     return ['📊 主管戰情看板', '作業日：' + today, '', boardUrl, '', '可查看：AI 摘要、風險清單、未報工追蹤、工站效率、自動化與 LINE 推播狀態'].join('\n');
   }
   if (text === '總部首頁' || text === '首頁' || text === '智慧製造總部') return ['🏭 製造部智慧製造應用總部', '', homeUrl].join('\n');
   if (text === '報工' || text === '報工作業' || text === '報工系統') return ['✅ 報工作業 V2', '', reportUrl].join('\n');
   if (text === '功能' || text === '指令' || text === '幫助' || String(text).toLowerCase() === 'help') {
-    return ['📌 智慧製造 LINE 指令', '', '主管戰情：取得主管戰情看板', '總部首頁：取得智慧製造總部入口', '報工：取得報工作業 V2 入口', 'AI摘要：取得目前 AI 摘要', '主檔檢查：檢查主資料筆數'].join('\n');
+    return ['📌 智慧製造 LINE 指令', '', '主管戰情：取得主管戰情看板', '今日戰情：取得今日主管戰情', '昨日戰情：取得昨日主管戰情', '戰情 2026-06-14：指定日期主管戰情', '總部首頁：取得智慧製造總部入口', '報工：取得報工作業 V2 入口', 'AI摘要：取得目前 AI 摘要', '主檔檢查：檢查主資料筆數'].join('\n');
   }
   return null;
 }
@@ -67,6 +79,27 @@ function LINE主管戰情直連_送出回覆_(replyToken, text) {
   var code = res.getResponseCode();
   var content = res.getContentText();
   if (code < 200 || code >= 300) throw new Error('LINE Reply API HTTP ' + code + '：' + content);
+}
+
+function LINE主管戰情直連_已使用ReplyToken_(replyToken) {
+  try {
+    var key = LINE主管戰情直連_replyTokenKey_(replyToken);
+    return CacheService.getScriptCache().get(key) === '1';
+  } catch (err) {
+    return false;
+  }
+}
+
+function LINE主管戰情直連_標記ReplyToken_(replyToken) {
+  try {
+    var key = LINE主管戰情直連_replyTokenKey_(replyToken);
+    CacheService.getScriptCache().put(key, '1', 1800);
+  } catch (err) {}
+}
+
+function LINE主管戰情直連_replyTokenKey_(replyToken) {
+  var s = String(replyToken || '').trim();
+  return 'LINE_REPLY_USED_' + s.slice(-120);
 }
 
 function LINE主管戰情直連_寫紀錄_(status, command, message) {
