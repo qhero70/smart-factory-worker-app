@@ -1,6 +1,6 @@
 /**
  * 智慧製造中央作戰指揮中心｜正式主後端
- * 版本：v1.6.7｜依實際資料庫欄位修正照片索引 + 班別 + 報工V2
+ * 版本：v1.6.8｜整理主入口 + LINE 主管戰情日期快選 + 主管戰情直連
  *
  * 正式入口：
  * 1. 報工頁：GAS Web App URL?page=07_報工作業V2
@@ -11,7 +11,7 @@
 
 const 系統設定 = {
   系統名稱: '智慧製造中央作戰指揮中心',
-  版本: 'v1.6.7_依實際資料庫欄位修正照片索引_班別_報工V2',
+  版本: 'v1.6.8_主入口整理_LINE主管戰情日期快選_班別_報工V2',
   時區: 'Asia/Taipei',
   主資料庫ID: '',
   LINE_CHANNEL_ACCESS_TOKEN: '',
@@ -42,37 +42,52 @@ function doGet(e) {
   const page = 文字_(p.page || p.頁面 || p.p);
   const action = 文字_(p.action || p.動作);
   if (page) return 輸出HTML_(正規化頁面名稱_(page));
-  if (action) return 輸出JSON_(處理API請求_(action, p));
-  return 輸出JSON_(健康檢查());
+  if (action) return 主程式_安全輸出JSON_(處理API請求_(action, p));
+  return 主程式_安全輸出JSON_(健康檢查());
 }
 
 function doPost(e) {
   const p = 解析POST_(e);
-  if (p && p.events && Array.isArray(p.events)) return 處理LINEWebhook_(p);
-  return 輸出JSON_(處理API請求_(p.action || p.動作 || '健康檢查', p));
+  const action = String((p && (p.action || p['動作'])) || '').trim();
+
+  if (p && p.events && Array.isArray(p.events)) {
+    if (typeof LINE主管戰情日期快選_嘗試處理Webhook_ === 'function') {
+      var 日期快選結果 = LINE主管戰情日期快選_嘗試處理Webhook_(p);
+      if (日期快選結果 && 日期快選結果.已處理) return 主程式_安全輸出JSON_(日期快選結果);
+    }
+
+    if (typeof LINE主管戰情日期快選_嘗試處理Webhook_ !== 'function' && typeof LINE主管戰情日期快選_建立回覆_ === 'function') {
+      var 日期快選補救結果 = 主後端_LINE日期快選補救處理_(p);
+      if (日期快選補救結果 && 日期快選補救結果.已處理) return 主程式_安全輸出JSON_(日期快選補救結果);
+    }
+
+    if (typeof LINE主管戰情直連_嘗試處理Webhook_ === 'function') {
+      var 主管戰情LINE結果 = LINE主管戰情直連_嘗試處理Webhook_(p);
+      if (主管戰情LINE結果 && 主管戰情LINE結果.已處理) return 主程式_安全輸出JSON_(主管戰情LINE結果);
+    }
+
+    return 處理LINEWebhook_(p);
+  }
+
+  var handlers = ['主管戰情入口_嘗試處理動作_', '主管戰情看板_嘗試處理動作_', '每日自動化_嘗試處理動作_', 'LINE每日戰情推播_嘗試處理動作_', 'AI戰情資料源_嘗試處理動作_', '派班報工日結_嘗試處理動作_', '派班報工巡檢_嘗試處理動作_', '派班報工防呆_嘗試處理動作_', '今日派班報工_嘗試處理動作_', '排程需求池_嘗試處理動作_'];
+  for (var i = 0; i < handlers.length; i++) {
+    var r = 主後端_嘗試呼叫模組_(handlers[i], p);
+    if (r) return 主程式_安全輸出JSON_(r);
+  }
+  return 主程式_安全輸出JSON_(處理API請求_(action || '健康檢查', p));
 }
 
 function 正規化頁面名稱_(page) {
-  const map = {
-    '07_報工作業V2': '07_報工作業V2',
-    '07_報工作業v2': '07_報工作業V2',
-    '報工作業V2': '07_報工作業V2',
-    '報工作業v2': '07_報工作業V2',
-    'work-report-v2': '07_報工作業V2'
-  };
+  const map = { '07_報工作業V2': '07_報工作業V2', '07_報工作業v2': '07_報工作業V2', '報工作業V2': '07_報工作業V2', '報工作業v2': '07_報工作業V2', 'work-report-v2': '07_報工作業V2' };
   return map[文字_(page)] || 文字_(page);
 }
 
 function 輸出HTML_(檔名) {
-  const output = HtmlService.createHtmlOutputFromFile(檔名)
-    .setTitle(檔名 === '07_報工作業V2' ? '07_報工作業V2' : 系統設定.系統名稱)
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  const output = HtmlService.createHtmlOutputFromFile(檔名).setTitle(檔名 === '07_報工作業V2' ? '07_報工作業V2' : 系統設定.系統名稱).setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
   if (檔名 !== '07_報工作業V2') return output;
   const html = output.getContent();
   const patch = 取得報工作業V2前端保護補強JS_();
-  return HtmlService.createHtmlOutput(html.replace('</body>', patch + '\n</body>'))
-    .setTitle('07_報工作業V2')
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  return HtmlService.createHtmlOutput(html.replace('</body>', patch + '\n</body>')).setTitle('07_報工作業V2').setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
 function 取得報工作業V2前端保護補強JS_() {
@@ -93,318 +108,96 @@ function 取得報工作業V2前端保護補強JS_() {
 
 function 處理API請求_(action, p) {
   try {
+    action = String(action || (p && (p.action || p['動作'])) || '').trim();
+    var handlers = ['主管戰情入口_嘗試處理動作_', '主管戰情看板_嘗試處理動作_', '每日自動化_嘗試處理動作_', 'LINE每日戰情推播_嘗試處理動作_', 'AI戰情資料源_嘗試處理動作_', '派班報工日結_嘗試處理動作_', '派班報工巡檢_嘗試處理動作_', '派班報工防呆_嘗試處理動作_', '今日派班報工_嘗試處理動作_', '排程需求池_嘗試處理動作_'];
+    for (var i = 0; i < handlers.length; i++) { var r = 主後端_嘗試呼叫模組_(handlers[i], p || {}); if (r) return r; }
+
     const a = 文字_(action);
     const map = {
-      '健康檢查': () => 健康檢查(),
-      '初始化': () => 初始化_智慧製造中央作戰指揮中心(),
-      '主檔檢查': () => 主檔檢查(),
-      '取得報工作業v2初始資料': () => 取得報工作業v2初始資料(),
-      '寫入報工作業v2': () => 寫入報工作業v2(p),
-      '寫入不良紀錄v2': () => 寫入不良紀錄v2(p),
-      '戰情': () => 取得戰情(),
-      'AI摘要': () => 取得AI摘要(),
-      '指令': () => 取得LINE指令說明_()
+      '健康檢查': () => 健康檢查(), '初始化': () => 初始化_智慧製造中央作戰指揮中心(), '初始化_智慧製造中央作戰指揮中心': () => 初始化_智慧製造中央作戰指揮中心(), '主檔檢查': () => 主檔檢查(),
+      '取得報工作業v2初始資料': () => 取得報工作業v2初始資料(), '寫入報工作業v2': () => 寫入報工作業v2(p), '寫入不良紀錄v2': () => 寫入不良紀錄v2(p),
+      '戰情': () => 取得戰情(), '取得戰情': () => 取得戰情(), 'AI摘要': () => 取得AI摘要(), '取得AI摘要': () => 取得AI摘要(), '指令': () => 取得LINE指令說明_(),
+      '寫入排程需求池': () => 寫入排程需求池(p || {}), '初始化_10_排程需求池': () => 初始化_10_排程需求池(), '健康檢查_排程需求池': () => ({ ok: true, 模組: '10_排程需求池', 時間: 排程需求池_現在_() })
     };
-    if (!map[a]) return { 成功: false, 訊息: '未知動作：' + a, 可用動作: Object.keys(map) };
+    if (!map[a]) return { 成功: false, success: false, 訊息: '未知動作：' + a, message: '未知動作：' + a, error: 'UNKNOWN_ACTION', 可用動作: Object.keys(map) };
     return map[a]();
-  } catch (err) {
-    return { 成功: false, 訊息: err.message, 堆疊: err.stack };
+  } catch (err) { return { 成功: false, success: false, 訊息: err.message, message: err.message, 堆疊: err.stack }; }
+}
+
+function 主程式_安全輸出JSON_(obj) {
+  if (typeof 排程需求池_輸出JSON_ === 'function') return 排程需求池_輸出JSON_(obj);
+  if (typeof 輸出JSON_ === 'function') return 輸出JSON_(obj);
+  return ContentService.createTextOutput(JSON.stringify(obj || {}, null, 2)).setMimeType(ContentService.MimeType.JSON);
+}
+
+function 主後端_嘗試呼叫模組_(functionName, payload) {
+  try {
+    var fn = null;
+    try { fn = globalThis && globalThis[functionName]; } catch (err1) {}
+    if (typeof fn !== 'function') { try { fn = this && this[functionName]; } catch (err2) {} }
+    if (typeof fn !== 'function') return null;
+    return fn(payload || {});
+  } catch (err) { return { ok: false, success: false, error: String(err && err.message ? err.message : err), 模組函數: functionName }; }
+}
+
+function 主後端_LINE日期快選補救處理_(payload) {
+  var events = Array.isArray(payload && payload.events) ? payload.events : [];
+  var handled = 0, failed = 0;
+  for (var i = 0; i < events.length; i++) {
+    var ev = events[i] || {};
+    try {
+      if (!ev.replyToken || !ev.message || ev.message.type !== 'text') continue;
+      var replyText = LINE主管戰情日期快選_建立回覆_(ev.message.text);
+      if (!replyText) continue;
+      if (typeof LINE主管戰情直連_送出回覆_ === 'function') LINE主管戰情直連_送出回覆_(ev.replyToken, replyText); else 回覆LINE_(ev.replyToken, replyText);
+      handled++;
+    } catch (err) { failed++; }
   }
+  return { ok: true, handled: handled, failed: failed, 已處理: handled > 0, message: handled > 0 ? '已回覆主管戰情日期快選指令' : '沒有日期快選指令' };
 }
 
-function 健康檢查() {
-  return { 成功: true, 系統: 系統設定.系統名稱, 版本: 系統設定.版本, 時間: new Date(), LINEBot: '已整併', 報工V2: '已整併', 照片來源: '06_照片資料庫' };
-}
-
-function 初始化_智慧製造中央作戰指揮中心() {
-  const ss = 取得試算表_();
-  Object.keys(正式工作表規格).forEach(name => 建立或修復表_(ss, name, 正式工作表規格[name]));
-  初始化LINE指令_();
-  記錄操作_('系統', '初始化', '正式工作表', '完成', 系統設定.版本);
-  return { 成功: true, 訊息: '初始化完成', 版本: 系統設定.版本 };
-}
-
-function 初始化LINE指令_() {
-  const sh = 取得試算表_().getSheetByName('LINE_指令設定');
-  if (!sh || sh.getLastRow() > 1) return;
-  sh.getRange(2, 1, 5, 7).setValues([
-    ['主檔檢查', '檢查主檔筆數', '文字', '主檔中心', '是', 1, ''],
-    ['戰情', '取得今日戰情', '文字', 'AI戰情中心', '是', 2, ''],
-    ['AI摘要', '取得AI摘要', '文字', 'AI戰情中心', '是', 3, ''],
-    ['報工', '取得報工入口', '文字', '09_報工系統', '是', 4, ''],
-    ['指令', '取得可用指令', '文字', 'LINE Bot', '是', 5, '']
-  ]);
-}
+function 健康檢查() { return { 成功: true, 系統: 系統設定.系統名稱, 版本: 系統設定.版本, 時間: new Date(), LINEBot: '已整併', 報工V2: '已整併', 照片來源: '06_照片資料庫' }; }
+function 初始化_智慧製造中央作戰指揮中心() { const ss = 取得試算表_(); Object.keys(正式工作表規格).forEach(name => 建立或修復表_(ss, name, 正式工作表規格[name])); 初始化LINE指令_(); 記錄操作_('系統', '初始化', '正式工作表', '完成', 系統設定.版本); return { 成功: true, 訊息: '初始化完成', 版本: 系統設定.版本 }; }
+function 初始化LINE指令_() { const sh = 取得試算表_().getSheetByName('LINE_指令設定'); if (!sh || sh.getLastRow() > 1) return; sh.getRange(2, 1, 8, 7).setValues([['主檔檢查', '檢查主檔筆數', '文字', '主檔中心', '是', 1, ''], ['戰情', '取得今日戰情', '文字', 'AI戰情中心', '是', 2, ''], ['AI摘要', '取得AI摘要', '文字', 'AI戰情中心', '是', 3, ''], ['報工', '取得報工入口', '文字', '09_報工系統', '是', 4, ''], ['指令', '取得可用指令', '文字', 'LINE Bot', '是', 5, ''], ['主管戰情', '取得主管戰情看板', '文字', '28_主管戰情看板', '是', 6, ''], ['昨日戰情', '取得昨日主管戰情', '文字', '31_LINE日期快選', '是', 7, ''], ['今日戰情', '取得今日主管戰情', '文字', '31_LINE日期快選', '是', 8, '']]); }
 
 function 取得報工作業v2初始資料() {
   const 照片索引 = 建立照片索引_();
-  const 人員 = 讀表_('01_人員主檔').filter(r => 文字_(r.啟用 || '是') !== '否').map(r => {
-    const 工號 = 取值_(r, ['工號', '員工編號', '員工工號']);
-    const p1 = 取照片資料_(r, ['縮圖網址', '作業員縮圖網址', '照片網址', '作業員照片網址', '圖片網址', '頭像網址', '大頭照網址', '照片', '大頭照'], ['Google檔案ID', '作業員照片檔案ID', '照片檔案ID', '圖片檔案ID', '大頭照檔案ID', 'DriveFileID', 'fileId', '檔案ID']);
-    const p2 = 取索引照片_(照片索引, [工號], '人員照片');
-    const photo = 合併照片資料_(p1, p2);
-    return {
-      工號,
-      姓名: 取值_(r, ['姓名', '中文名', '名字']),
-      部門: 取值_(r, ['部門']),
-      組別: 取值_(r, ['組別']),
-      職稱: 取值_(r, ['職稱', '職位']),
-      班別: 標準化班別_(取值_(r, ['班別', '班次', '工作班別', '班別名稱', '上班時段'])),
-      原始班別: 取值_(r, ['班別', '班次', '工作班別', '班別名稱', '上班時段']),
-      啟用: r.啟用 || '是',
-      人員類型: r.人員類型 || r.類別 || r.部門 || '現場人員',
-      照片網址: photo.照片網址,
-      縮圖網址: photo.縮圖網址,
-      Google檔案ID: photo.檔案ID,
-      條碼: r.條碼 || r.工牌號 || r.卡號 || ''
-    };
-  });
-  const 產品 = 讀表_('02_產品主檔');
-  const 機台 = 讀表_('03_機台主檔');
-  const 工站 = 讀正式工站來源_();
-  const 共用 = 讀表_('05_共用資料');
-  const 報工工站群組 = 建立報工工站群組_(產品, 工站, 機台, 照片索引);
-  const 不良原因 = 讀不良代碼主檔_();
-  return {
-    成功: true,
-    版本: 系統設定.版本,
-    作業日: 取得作業日_(),
-    人員,
-    報工工站群組,
-    途程工站群組: 報工工站群組,
-    班別清單: 取班別清單_(共用, 人員),
-    異常類型: 取共用值清單_(共用, '停機原因', ['無異常 / Normal', '設備異常', '機台停機 / Machine Down', '待料 / Waiting Material', '換刀 / Tool Change', '品質確認 / Quality Check', '其他 / Others']),
-    不良原因,
-    筆數: { 人員: 人員.length, 報工工站群組: 報工工站群組.length, 產品: 產品.length, 工站機台關聯: 機台.length, 照片索引: 照片索引.__筆數 || 0, 不良代碼: (不良原因.Z.length + 不良原因.Y.length) }
-  };
+  const 人員 = 讀表_('01_人員主檔').filter(r => 文字_(r.啟用 || '是') !== '否').map(r => { const 工號 = 取值_(r, ['工號', '員工編號', '員工工號']); const p1 = 取照片資料_(r, ['縮圖網址', '作業員縮圖網址', '照片網址', '作業員照片網址', '圖片網址', '頭像網址', '大頭照網址', '照片', '大頭照'], ['Google檔案ID', '作業員照片檔案ID', '照片檔案ID', '圖片檔案ID', '大頭照檔案ID', 'DriveFileID', 'fileId', '檔案ID']); const p2 = 取索引照片_(照片索引, [工號], '人員照片'); const photo = 合併照片資料_(p1, p2); return { 工號, 姓名: 取值_(r, ['姓名', '中文名', '名字']), 部門: 取值_(r, ['部門']), 組別: 取值_(r, ['組別']), 職稱: 取值_(r, ['職稱', '職位']), 班別: 標準化班別_(取值_(r, ['班別', '班次', '工作班別', '班別名稱', '上班時段'])), 原始班別: 取值_(r, ['班別', '班次', '工作班別', '班別名稱', '上班時段']), 啟用: r.啟用 || '是', 人員類型: r.人員類型 || r.類別 || r.部門 || '現場人員', 照片網址: photo.照片網址, 縮圖網址: photo.縮圖網址, Google檔案ID: photo.檔案ID, 條碼: r.條碼 || r.工牌號 || r.卡號 || '' }; });
+  const 產品 = 讀表_('02_產品主檔'); const 機台 = 讀表_('03_機台主檔'); const 工站 = 讀正式工站來源_(); const 共用 = 讀表_('05_共用資料'); const 報工工站群組 = 建立報工工站群組_(產品, 工站, 機台, 照片索引); const 不良原因 = 讀不良代碼主檔_();
+  return { 成功: true, 版本: 系統設定.版本, 作業日: 取得作業日_(), 人員, 報工工站群組, 途程工站群組: 報工工站群組, 班別清單: 取班別清單_(共用, 人員), 異常類型: 取共用值清單_(共用, '停機原因', ['無異常 / Normal', '設備異常', '機台停機 / Machine Down', '待料 / Waiting Material', '換刀 / Tool Change', '品質確認 / Quality Check', '其他 / Others']), 不良原因, 筆數: { 人員: 人員.length, 報工工站群組: 報工工站群組.length, 產品: 產品.length, 工站機台關聯: 機台.length, 照片索引: 照片索引.__筆數 || 0, 不良代碼: (不良原因.Z.length + 不良原因.Y.length) } };
 }
 
-function 建立報工工站群組_(產品, 工站, 機台, 照片索引) {
-  const 產品Map = {};
-  產品.forEach(p => { const id = 文字_(p.產品編號); if (id) 產品Map[id] = p; });
-  return 工站.map(g => {
-    const 產品編號 = 取值_(g, ['產品編號', '料號', '品號']);
-    const p = 產品Map[產品編號] || {};
-    const 客戶品號 = 取值_(g, ['客戶品號']) || p.客戶品號 || '';
-    const 品名 = 取值_(g, ['品名']) || p.品名 || '';
-    const p1 = 取照片資料_(g, ['產品縮圖網址', '縮圖網址', '產品照片網址', '照片網址', '圖片網址', '產品圖片網址'], ['產品照片檔案ID', '照片檔案ID', 'Google檔案ID', '圖片檔案ID', 'DriveFileID']);
-    const p2 = 取照片資料_(p, ['產品縮圖網址', '縮圖網址', '產品照片網址', '照片網址', '圖片網址', '產品圖片網址'], ['產品照片檔案ID', '照片檔案ID', 'Google檔案ID', '圖片檔案ID', 'DriveFileID']);
-    const p3 = 取索引照片_(照片索引, [產品編號, 客戶品號, 品名], '產品照片');
-    const productPhoto = 合併照片資料_(p1, p2, p3);
-    const 機台清單 = 拆字串_(取值_(g, ['機台清單', '機台編號清單', '機台編號', '主機台'])).map(id => {
-      const m = 機台.find(x => 文字_(x.機台編號) === id) || {};
-      const m1 = 取照片資料_(m, ['機台縮圖網址', '縮圖網址', '機台照片網址', '照片網址', '圖片網址'], ['機台照片檔案ID', '照片檔案ID', 'Google檔案ID', '圖片檔案ID', 'DriveFileID']);
-      const m2 = 取索引照片_(照片索引, [id, 'MH-' + id], '機台照片');
-      const machinePhoto = 合併照片資料_(m1, m2);
-      return { 機台編號: id, 區域: m.區域 || '', 機台型號: m.型號 || m.機台型號 || '', 設備名稱: m.機台名稱 || m.設備名稱 || '', 照片網址: machinePhoto.照片網址, 縮圖網址: machinePhoto.縮圖網址, Google檔案ID: machinePhoto.檔案ID };
-    });
-    const 工站名稱 = 取值_(g, ['報工工站名稱', '工站名稱']);
-    const 工序 = 取值_(g, ['工序', '工站代碼', '工序範圍', '工序清單']);
-    return {
-      產品編號, 客戶品號, 品名,
-      產品照片網址: productPhoto.照片網址, 產品縮圖網址: productPhoto.縮圖網址, 產品照片檔案ID: productPhoto.檔案ID,
-      工站名稱, 報工工站名稱: 工站名稱, 工序, 工序範圍: 取值_(g, ['工序範圍']) || 工序,
-      工序清單: 工序 ? 拆字串_(工序) : [],
-      標準產能: 取值_(g, ['標準產能', '標準產能_班']) || p.標準產能_班 || p['8小時標準產能'] || '',
-      標準工時_秒: 取值_(g, ['標準工時_秒']) || p.標準工時_秒 || '',
-      機台清單, 主機台: 取值_(g, ['主機台']) || (機台清單[0] ? 機台清單[0].機台編號 : ''),
-      顯示名稱: [工站名稱, 取值_(g, ['工序範圍']) || 工序, 機台清單.map(m => m.機台編號).join('、')].filter(Boolean).join('｜')
-    };
-  }).filter(x => x.產品編號 || x.品名 || x.報工工站名稱);
-}
+function 建立報工工站群組_(產品, 工站, 機台, 照片索引) { const 產品Map = {}; 產品.forEach(p => { const id = 文字_(p.產品編號); if (id) 產品Map[id] = p; }); return 工站.map(g => { const 產品編號 = 取值_(g, ['產品編號', '料號', '品號']); const p = 產品Map[產品編號] || {}; const 客戶品號 = 取值_(g, ['客戶品號']) || p.客戶品號 || ''; const 品名 = 取值_(g, ['品名']) || p.品名 || ''; const p1 = 取照片資料_(g, ['產品縮圖網址', '縮圖網址', '產品照片網址', '照片網址', '圖片網址', '產品圖片網址'], ['產品照片檔案ID', '照片檔案ID', 'Google檔案ID', '圖片檔案ID', 'DriveFileID']); const p2 = 取照片資料_(p, ['產品縮圖網址', '縮圖網址', '產品照片網址', '照片網址', '圖片網址', '產品圖片網址'], ['產品照片檔案ID', '照片檔案ID', 'Google檔案ID', '圖片檔案ID', 'DriveFileID']); const p3 = 取索引照片_(照片索引, [產品編號, 客戶品號, 品名], '產品照片'); const productPhoto = 合併照片資料_(p1, p2, p3); const 機台清單 = 拆字串_(取值_(g, ['機台清單', '機台編號清單', '機台編號', '主機台'])).map(id => { const m = 機台.find(x => 文字_(x.機台編號) === id) || {}; const m1 = 取照片資料_(m, ['機台縮圖網址', '縮圖網址', '機台照片網址', '照片網址', '圖片網址'], ['機台照片檔案ID', '照片檔案ID', 'Google檔案ID', '圖片檔案ID', 'DriveFileID']); const m2 = 取索引照片_(照片索引, [id, 'MH-' + id], '機台照片'); const machinePhoto = 合併照片資料_(m1, m2); return { 機台編號: id, 區域: m.區域 || '', 機台型號: m.型號 || m.機台型號 || '', 設備名稱: m.機台名稱 || m.設備名稱 || '', 照片網址: machinePhoto.照片網址, 縮圖網址: machinePhoto.縮圖網址, Google檔案ID: machinePhoto.檔案ID }; }); const 工站名稱 = 取值_(g, ['報工工站名稱', '工站名稱']); const 工序 = 取值_(g, ['工序', '工站代碼', '工序範圍', '工序清單']); return { 產品編號, 客戶品號, 品名, 產品照片網址: productPhoto.照片網址, 產品縮圖網址: productPhoto.縮圖網址, 產品照片檔案ID: productPhoto.檔案ID, 工站名稱, 報工工站名稱: 工站名稱, 工序, 工序範圍: 取值_(g, ['工序範圍']) || 工序, 工序清單: 工序 ? 拆字串_(工序) : [], 標準產能: 取值_(g, ['標準產能', '標準產能_班']) || p.標準產能_班 || p['8小時標準產能'] || '', 標準工時_秒: 取值_(g, ['標準工時_秒']) || p.標準工時_秒 || '', 機台清單, 主機台: 取值_(g, ['主機台']) || (機台清單[0] ? 機台清單[0].機台編號 : ''), 顯示名稱: [工站名稱, 取值_(g, ['工序範圍']) || 工序, 機台清單.map(m => m.機台編號).join('、')].filter(Boolean).join('｜') }; }).filter(x => x.產品編號 || x.品名 || x.報工工站名稱); }
 
-function 寫入報工作業v2(data) {
-  data = data || {};
-  const sh = 建立或修復表_(取得試算表_(), '09_報工', 正式工作表規格['09_報工']);
-  const headers = 取表頭_(sh);
-  const 今日共做數 = Number(data.今日共做數 || 0);
-  const 不良數 = Number(data.不良數 || 0);
-  const 實際良品數 = Number(data.實際良品數 || Math.max(今日共做數 - 不良數, 0));
-  if (!文字_(data.工號)) throw new Error('請選擇作業員，工號不可空白');
-  if (!文字_(data.產品編號) && !文字_(data.品名)) throw new Error('請選擇產品');
-  if (!文字_(data.報工工站名稱) && !文字_(data.工站名稱)) throw new Error('請選擇報工工站');
-  if (今日共做數 <= 0) throw new Error('今日共做數必須大於 0');
-  if (不良數 < 0) throw new Error('不良數不可小於 0');
-  if (不良數 > 今日共做數) throw new Error('不良數不可大於今日共做數');
-  const now = new Date();
-  const 報工編號 = data.報工編號 || 產生流水號_('RFV2');
-  const obj = {
-    報工編號, 時間戳: now, 作業日: 取得作業日_(), 工號: data.工號 || '', 姓名: data.姓名 || '', 班別: data.班別 && data.班別 !== '自動判斷' ? data.班別 : 判斷化新班別_(),
-    是否加班: data.是否加班 || '否', 加班類型: data.加班類型 || '無', 作業員照片網址: data.作業員照片網址 || '', 作業員縮圖網址: data.作業員縮圖網址 || '', 作業員照片檔案ID: data.作業員照片檔案ID || '',
-    產品編號: data.產品編號 || '', 客戶品號: data.客戶品號 || '', 品名: data.品名 || '', 產品照片網址: data.產品照片網址 || '', 產品縮圖網址: data.產品縮圖網址 || '', 產品照片檔案ID: data.產品照片檔案ID || '',
-    工站名稱: data.工站名稱 || data.報工工站名稱 || '', 報工工站名稱: data.報工工站名稱 || data.工站名稱 || '', 工序: data.工序 || '', 工序清單: data.工序清單 || data.工序 || '', 機台清單: data.機台清單 || '', 主機台: data.主機台 || '', 機台照片清單JSON: JSON.stringify(data.機台照片清單 || []),
-    今日共做數, 不良數, 實際良品數, 不良率: 今日共做數 ? 不良數 / 今日共做數 : 0, 開始時間: data.開始時間 || '', 結束時間: data.結束時間 || '', 實際工時: data.實際工時 || '',
-    不良類別: data.不良類別 || '無', 不良代碼: data.不良代碼 || '', 不良原因: data.不良原因 || '', 異常類型: data.異常類型 || '', 備註: data.備註 || '', 現場照片JSON: JSON.stringify(data.現場照片清單 || []), 來源: 'GAS_HTML_07_報工作業V2_v1.6.7', 狀態: '有效', 更新時間: now
-  };
-  sh.appendRow(headers.map(h => obj[h] !== undefined ? obj[h] : ''));
-  同步不良紀錄_(obj, data);
-  if (data.工單編號) 更新工單完成量_(data.工單編號, 實際良品數, 不良數);
-  記錄操作_('報工作業V2', '寫入09_報工', 報工編號, '完成', JSON.stringify({ 工號: obj.工號, 產品編號: obj.產品編號, 今日共做數, 不良數, 實際良品數 }));
-  return { 成功: true, 訊息: '報工作業V2已寫入09_報工', 報工編號, 目標分頁: '09_報工', 作業日: obj.作業日, 班別: obj.班別, 今日共做數, 不良數, 實際良品數 };
-}
-
-function 寫入不良紀錄v2(data) {
-  data = data || {};
-  if (!Number(data.不良數 || 0) && !文字_(data.不良代碼) && !文字_(data.不良原因)) return { 成功: true, 訊息: '無不良資料，略過寫入' };
-  const 報工編號 = 文字_(data.報工編號);
-  if (報工編號 && 檢查不良紀錄已存在_(報工編號, data.不良代碼, data.不良數)) return { 成功: true, 訊息: '不良紀錄已存在，避免重複寫入', 報工編號 };
-  const row = 建立不良紀錄物件_(data, 報工編號 || '');
-  寫入不良紀錄物件_(row);
-  return { 成功: true, 訊息: '不良紀錄已寫入', 報工編號, 流水號: row.流水號 };
-}
-
-function 同步不良紀錄_(obj, data) {
-  if (Number(obj.不良數 || 0) <= 0 && !文字_(obj.不良代碼) && !文字_(obj.不良原因)) return;
-  if (obj.報工編號 && 檢查不良紀錄已存在_(obj.報工編號, obj.不良代碼, obj.不良數)) return;
-  寫入不良紀錄物件_(建立不良紀錄物件_(Object.assign({}, data, obj), obj.報工編號 || ''));
-}
-
-function 建立不良紀錄物件_(data, 報工編號) {
-  const 不良數 = Number(data.不良數 || data.不良數量 || 0);
-  const 今日共做數 = Number(data.今日共做數 || 0);
-  return { 流水號: 產生流水號_('NG'), 時間戳: new Date(), 作業日: data.作業日 || 取得作業日_(), 工號: data.工號 || '', 姓名: data.姓名 || '', 產品編號: data.產品編號 || '', 品名: data.品名 || '', 機台編號: data.主機台 || data.機台清單 || '', 工單編號: data.工單編號 || '', 不良代碼: data.不良代碼 || '', 不良名稱: data.不良原因 || data.不良名稱 || '', 不良數量: 不良數, 責任歸屬: data.責任歸屬 || data.不良類別 || '', 說明: data.備註 || data.說明 || '', 照片網址: data.照片網址 || '', 報工編號: 報工編號 || data.報工編號 || '', 班別: data.班別 || '', 客戶品號: data.客戶品號 || '', 工站名稱: data.工站名稱 || data.報工工站名稱 || '', 工序: data.工序 || data.工序清單 || '', 不良類別: data.不良類別 || '', 不良率: data.不良率 !== undefined ? data.不良率 : (今日共做數 ? 不良數 / 今日共做數 : ''), 異常類型: data.異常類型 || '', 照片JSON: JSON.stringify(data.現場照片清單 || []), 來源: '07_報工作業V2_v1.6.7', 狀態: '有效' };
-}
-
-function 寫入不良紀錄物件_(row) {
-  const sh = 建立或修復表_(取得試算表_(), '09_不良紀錄', 正式工作表規格['09_不良紀錄']);
-  const headers = 取表頭_(sh);
-  sh.appendRow(headers.map(h => row[h] !== undefined ? row[h] : ''));
-}
-
-function 檢查不良紀錄已存在_(報工編號, 不良代碼, 不良數) {
-  const sh = 取得試算表_().getSheetByName('09_不良紀錄');
-  if (!sh || sh.getLastRow() < 2 || !報工編號) return false;
-  const values = sh.getDataRange().getValues();
-  const h = values[0].map(String);
-  const c報工 = h.indexOf('報工編號'), c代碼 = h.indexOf('不良代碼'), c數量 = h.indexOf('不良數量');
-  if (c報工 < 0) return false;
-  for (let i = 1; i < values.length; i++) {
-    if (文字_(values[i][c報工]) === 文字_(報工編號)) {
-      if (c代碼 < 0 || 文字_(values[i][c代碼]) === 文字_(不良代碼 || '')) return true;
-      if (c數量 >= 0 && Number(values[i][c數量] || 0) === Number(不良數 || 0)) return true;
-    }
-  }
-  return false;
-}
-
-function 讀正式工站來源_() {
-  const ss = 取得試算表_();
-  const 候選 = ['08_工站途程機台主檔', '04_工站機台關聯', '04_工站主檔'];
-  for (const name of 候選) {
-    const sh = ss.getSheetByName(name);
-    if (sh && sh.getLastRow() > 1) return 讀表_(name);
-  }
-  return [];
-}
-
-function 讀不良代碼主檔_() {
-  const rows = 讀表_('05_不良代碼主檔');
-  const result = { Z: [], Y: [] };
-  rows.forEach(r => {
-    const 分類 = 文字_(r.分類).toUpperCase();
-    const 代碼 = 文字_(r.不良代碼 || r.代碼);
-    const 名稱 = 文字_(r.不良名稱 || r.名稱);
-    const 英文名稱 = 文字_(r.英文名稱);
-    const 備註 = 文字_(r.備註);
-    const key = 分類 || (代碼 ? 代碼.charAt(0).toUpperCase() : '');
-    if (!代碼 || !名稱) return;
-    if (!result[key]) result[key] = [];
-    result[key].push({ 代碼, 名稱, 英文名稱, 備註 });
-  });
-  if (!result.Z.length && !result.Y.length) return { Z: [{ 代碼: 'Z01', 名稱: '缺肉' }], Y: [{ 代碼: 'Y09', 名稱: '孔位' }] };
-  result.Z.sort((a, b) => a.代碼.localeCompare(b.代碼, 'zh-Hant', { numeric: true }));
-  result.Y.sort((a, b) => a.代碼.localeCompare(b.代碼, 'zh-Hant', { numeric: true }));
-  return result;
-}
-
-function 建立照片索引_() {
-  const rows = 讀表_('06_照片資料庫');
-  const idx = { __筆數: 0 };
-  rows.forEach(r => {
-    if (文字_(r.啟用 || '是') === '否') return;
-    const 類型 = 文字_(r.照片類型);
-    const 對應主鍵 = 文字_(r.對應主鍵);
-    const 檔名 = 文字_(r.檔案名稱);
-    const 檔案ID = 文字_(r.Google檔案ID || r.檔案ID);
-    const 縮圖網址 = 轉Google圖片網址_(r.縮圖網址 || r.照片網址 || 檔案ID);
-    const 照片網址 = 轉Google圖片網址_(r.照片網址 || r.縮圖網址 || 檔案ID);
-    if (!縮圖網址 && !照片網址 && !檔案ID) return;
-    const obj = { 照片類型: 類型, 照片網址, 縮圖網址: 縮圖網址 || 照片網址, 檔案ID, 對應主鍵, 檔案名稱: 檔名 };
-    [對應主鍵, 檔名, 去副檔名_(檔名)].forEach(k => 加入照片索引鍵_(idx, k, obj));
-    idx.__筆數++;
-  });
-  return idx;
-}
-
-function 加入照片索引鍵_(idx, key, obj) {
-  const k = 照片Key_(key);
-  if (!k) return;
-  if (!idx[k]) idx[k] = [];
-  idx[k].push(obj);
-}
-
-function 取索引照片_(idx, keys, typeKeyword) {
-  if (!idx || !keys) return 空照片資料_();
-  for (const key of keys) {
-    const k = 照片Key_(key);
-    const list = idx[k] || [];
-    if (!list.length) continue;
-    const hit = list.find(x => !typeKeyword || 文字_(x.照片類型).indexOf(typeKeyword) >= 0) || list[0];
-    return { 照片網址: hit.照片網址 || hit.縮圖網址 || '', 縮圖網址: hit.縮圖網址 || hit.照片網址 || '', 檔案ID: hit.檔案ID || '' };
-  }
-  return 空照片資料_();
-}
-
-function 合併照片資料_() {
-  for (let i = 0; i < arguments.length; i++) {
-    const p = arguments[i] || {};
-    if (p.縮圖網址 || p.照片網址 || p.檔案ID) return { 照片網址: p.照片網址 || p.縮圖網址 || '', 縮圖網址: p.縮圖網址 || p.照片網址 || '', 檔案ID: p.檔案ID || '' };
-  }
-  return 空照片資料_();
-}
-
+function 寫入報工作業v2(data) { data = data || {}; const sh = 建立或修復表_(取得試算表_(), '09_報工', 正式工作表規格['09_報工']); const headers = 取表頭_(sh); const 今日共做數 = Number(data.今日共做數 || 0); const 不良數 = Number(data.不良數 || 0); const 實際良品數 = Number(data.實際良品數 || Math.max(今日共做數 - 不良數, 0)); if (!文字_(data.工號)) throw new Error('請選擇作業員，工號不可空白'); if (!文字_(data.產品編號) && !文字_(data.品名)) throw new Error('請選擇產品'); if (!文字_(data.報工工站名稱) && !文字_(data.工站名稱)) throw new Error('請選擇報工工站'); if (今日共做數 <= 0) throw new Error('今日共做數必須大於 0'); if (不良數 < 0) throw new Error('不良數不可小於 0'); if (不良數 > 今日共做數) throw new Error('不良數不可大於今日共做數'); const now = new Date(); const 報工編號 = data.報工編號 || 產生流水號_('RFV2'); const obj = { 報工編號, 時間戳: now, 作業日: 取得作業日_(), 工號: data.工號 || '', 姓名: data.姓名 || '', 班別: data.班別 && data.班別 !== '自動判斷' ? data.班別 : 判斷化新班別_(), 是否加班: data.是否加班 || '否', 加班類型: data.加班類型 || '無', 作業員照片網址: data.作業員照片網址 || '', 作業員縮圖網址: data.作業員縮圖網址 || '', 作業員照片檔案ID: data.作業員照片檔案ID || '', 產品編號: data.產品編號 || '', 客戶品號: data.客戶品號 || '', 品名: data.品名 || '', 產品照片網址: data.產品照片網址 || '', 產品縮圖網址: data.產品縮圖網址 || '', 產品照片檔案ID: data.產品照片檔案ID || '', 工站名稱: data.工站名稱 || data.報工工站名稱 || '', 報工工站名稱: data.報工工站名稱 || data.工站名稱 || '', 工序: data.工序 || '', 工序清單: data.工序清單 || data.工序 || '', 機台清單: data.機台清單 || '', 主機台: data.主機台 || '', 機台照片清單JSON: JSON.stringify(data.機台照片清單 || []), 今日共做數, 不良數, 實際良品數, 不良率: 今日共做數 ? 不良數 / 今日共做數 : 0, 開始時間: data.開始時間 || '', 結束時間: data.結束時間 || '', 實際工時: data.實際工時 || '', 不良類別: data.不良類別 || '無', 不良代碼: data.不良代碼 || '', 不良原因: data.不良原因 || '', 異常類型: data.異常類型 || '', 備註: data.備註 || '', 現場照片JSON: JSON.stringify(data.現場照片清單 || []), 來源: 'GAS_HTML_07_報工作業V2_v1.6.8', 狀態: '有效', 更新時間: now }; sh.appendRow(headers.map(h => obj[h] !== undefined ? obj[h] : '')); 同步不良紀錄_(obj, data); if (data.工單編號) 更新工單完成量_(data.工單編號, 實際良品數, 不良數); 記錄操作_('報工作業V2', '寫入09_報工', 報工編號, '完成', JSON.stringify({ 工號: obj.工號, 產品編號: obj.產品編號, 今日共做數, 不良數, 實際良品數 })); return { 成功: true, 訊息: '報工作業V2已寫入09_報工', 報工編號, 目標分頁: '09_報工', 作業日: obj.作業日, 班別: obj.班別, 今日共做數, 不良數, 實際良品數 }; }
+function 寫入不良紀錄v2(data) { data = data || {}; if (!Number(data.不良數 || 0) && !文字_(data.不良代碼) && !文字_(data.不良原因)) return { 成功: true, 訊息: '無不良資料，略過寫入' }; const 報工編號 = 文字_(data.報工編號); if (報工編號 && 檢查不良紀錄已存在_(報工編號, data.不良代碼, data.不良數)) return { 成功: true, 訊息: '不良紀錄已存在，避免重複寫入', 報工編號 }; const row = 建立不良紀錄物件_(data, 報工編號 || ''); 寫入不良紀錄物件_(row); return { 成功: true, 訊息: '不良紀錄已寫入', 報工編號, 流水號: row.流水號 }; }
+function 同步不良紀錄_(obj, data) { if (Number(obj.不良數 || 0) <= 0 && !文字_(obj.不良代碼) && !文字_(obj.不良原因)) return; if (obj.報工編號 && 檢查不良紀錄已存在_(obj.報工編號, obj.不良代碼, obj.不良數)) return; 寫入不良紀錄物件_(建立不良紀錄物件_(Object.assign({}, data, obj), obj.報工編號 || '')); }
+function 建立不良紀錄物件_(data, 報工編號) { const 不良數 = Number(data.不良數 || data.不良數量 || 0); const 今日共做數 = Number(data.今日共做數 || 0); return { 流水號: 產生流水號_('NG'), 時間戳: new Date(), 作業日: data.作業日 || 取得作業日_(), 工號: data.工號 || '', 姓名: data.姓名 || '', 產品編號: data.產品編號 || '', 品名: data.品名 || '', 機台編號: data.主機台 || data.機台清單 || '', 工單編號: data.工單編號 || '', 不良代碼: data.不良代碼 || '', 不良名稱: data.不良原因 || data.不良名稱 || '', 不良數量: 不良數, 責任歸屬: data.責任歸屬 || data.不良類別 || '', 說明: data.備註 || data.說明 || '', 照片網址: data.照片網址 || '', 報工編號: 報工編號 || data.報工編號 || '', 班別: data.班別 || '', 客戶品號: data.客戶品號 || '', 工站名稱: data.工站名稱 || data.報工工站名稱 || '', 工序: data.工序 || data.工序清單 || '', 不良類別: data.不良類別 || '', 不良率: data.不良率 !== undefined ? data.不良率 : (今日共做數 ? 不良數 / 今日共做數 : ''), 異常類型: data.異常類型 || '', 照片JSON: JSON.stringify(data.現場照片清單 || []), 來源: '07_報工作業V2_v1.6.8', 狀態: '有效' }; }
+function 寫入不良紀錄物件_(row) { const sh = 建立或修復表_(取得試算表_(), '09_不良紀錄', 正式工作表規格['09_不良紀錄']); const headers = 取表頭_(sh); sh.appendRow(headers.map(h => row[h] !== undefined ? row[h] : '')); }
+function 檢查不良紀錄已存在_(報工編號, 不良代碼, 不良數) { const sh = 取得試算表_().getSheetByName('09_不良紀錄'); if (!sh || sh.getLastRow() < 2 || !報工編號) return false; const values = sh.getDataRange().getValues(); const h = values[0].map(String); const c報工 = h.indexOf('報工編號'), c代碼 = h.indexOf('不良代碼'), c數量 = h.indexOf('不良數量'); if (c報工 < 0) return false; for (let i = 1; i < values.length; i++) { if (文字_(values[i][c報工]) === 文字_(報工編號)) { if (c代碼 < 0 || 文字_(values[i][c代碼]) === 文字_(不良代碼 || '')) return true; if (c數量 >= 0 && Number(values[i][c數量] || 0) === Number(不良數 || 0)) return true; } } return false; }
+function 讀正式工站來源_() { const ss = 取得試算表_(); const 候選 = ['08_工站途程機台主檔', '04_工站機台關聯', '04_工站主檔']; for (const name of 候選) { const sh = ss.getSheetByName(name); if (sh && sh.getLastRow() > 1) return 讀表_(name); } return []; }
+function 讀不良代碼主檔_() { const rows = 讀表_('05_不良代碼主檔'); const result = { Z: [], Y: [] }; rows.forEach(r => { const 分類 = 文字_(r.分類).toUpperCase(); const 代碼 = 文字_(r.不良代碼 || r.代碼); const 名稱 = 文字_(r.不良名稱 || r.名稱); const 英文名稱 = 文字_(r.英文名稱); const 備註 = 文字_(r.備註); const key = 分類 || (代碼 ? 代碼.charAt(0).toUpperCase() : ''); if (!代碼 || !名稱) return; if (!result[key]) result[key] = []; result[key].push({ 代碼, 名稱, 英文名稱, 備註 }); }); if (!result.Z.length && !result.Y.length) return { Z: [{ 代碼: 'Z01', 名稱: '缺肉' }], Y: [{ 代碼: 'Y09', 名稱: '孔位' }] }; result.Z.sort((a, b) => a.代碼.localeCompare(b.代碼, 'zh-Hant', { numeric: true })); result.Y.sort((a, b) => a.代碼.localeCompare(b.代碼, 'zh-Hant', { numeric: true })); return result; }
+function 建立照片索引_() { const rows = 讀表_('06_照片資料庫'); const idx = { __筆數: 0 }; rows.forEach(r => { if (文字_(r.啟用 || '是') === '否') return; const 類型 = 文字_(r.照片類型); const 對應主鍵 = 文字_(r.對應主鍵); const 檔名 = 文字_(r.檔案名稱); const 檔案ID = 文字_(r.Google檔案ID || r.檔案ID); const 縮圖網址 = 轉Google圖片網址_(r.縮圖網址 || r.照片網址 || 檔案ID); const 照片網址 = 轉Google圖片網址_(r.照片網址 || r.縮圖網址 || 檔案ID); if (!縮圖網址 && !照片網址 && !檔案ID) return; const obj = { 照片類型: 類型, 照片網址, 縮圖網址: 縮圖網址 || 照片網址, 檔案ID, 對應主鍵, 檔案名稱: 檔名 }; [對應主鍵, 檔名, 去副檔名_(檔名)].forEach(k => 加入照片索引鍵_(idx, k, obj)); idx.__筆數++; }); return idx; }
+function 加入照片索引鍵_(idx, key, obj) { const k = 照片Key_(key); if (!k) return; if (!idx[k]) idx[k] = []; idx[k].push(obj); }
+function 取索引照片_(idx, keys, typeKeyword) { if (!idx || !keys) return 空照片資料_(); for (const key of keys) { const k = 照片Key_(key); const list = idx[k] || []; if (!list.length) continue; const hit = list.find(x => !typeKeyword || 文字_(x.照片類型).indexOf(typeKeyword) >= 0) || list[0]; return { 照片網址: hit.照片網址 || hit.縮圖網址 || '', 縮圖網址: hit.縮圖網址 || hit.照片網址 || '', 檔案ID: hit.檔案ID || '' }; } return 空照片資料_(); }
+function 合併照片資料_() { for (let i = 0; i < arguments.length; i++) { const p = arguments[i] || {}; if (p.縮圖網址 || p.照片網址 || p.檔案ID) return { 照片網址: p.照片網址 || p.縮圖網址 || '', 縮圖網址: p.縮圖網址 || p.照片網址 || '', 檔案ID: p.檔案ID || '' }; } return 空照片資料_(); }
 function 空照片資料_() { return { 照片網址: '', 縮圖網址: '', 檔案ID: '' }; }
 function 去副檔名_(s) { return 文字_(s).replace(/\.(jpg|jpeg|png|gif|heic|heif|webp|jpd)$/i, ''); }
 function 照片Key_(v) { return 去副檔名_(v).toUpperCase().replace(/\s+/g, '').trim(); }
-
-function 更新工單完成量_(工單編號, 良品數, 不良數) {
-  const sh = 取得試算表_().getSheetByName('10_工單主檔');
-  if (!sh || !工單編號 || sh.getLastRow() < 2) return;
-  const values = sh.getDataRange().getValues();
-  const h = values[0].map(String);
-  const c工單 = h.indexOf('工單編號'), c完成 = h.indexOf('已完成量'), c不良 = h.indexOf('不良量'), c計畫 = h.indexOf('計畫量'), c狀態 = h.indexOf('狀態'), c更新 = h.indexOf('更新時間');
-  if (c工單 < 0) return;
-  for (let r = 1; r < values.length; r++) {
-    if (文字_(values[r][c工單]) === 文字_(工單編號)) {
-      const done = Number(values[r][c完成] || 0) + Number(良品數 || 0);
-      const ng = Number(values[r][c不良] || 0) + Number(不良數 || 0);
-      if (c完成 >= 0) sh.getRange(r + 1, c完成 + 1).setValue(done);
-      if (c不良 >= 0) sh.getRange(r + 1, c不良 + 1).setValue(ng);
-      if (c更新 >= 0) sh.getRange(r + 1, c更新 + 1).setValue(new Date());
-      if (c狀態 >= 0 && c計畫 >= 0) sh.getRange(r + 1, c狀態 + 1).setValue(done >= Number(values[r][c計畫] || 0) ? '已完成' : '進行中');
-      return;
-    }
-  }
-}
-
-function 主檔檢查() {
-  const result = Object.keys(正式工作表規格).map(name => { const sh = 取得試算表_().getSheetByName(name); return { 分頁: name, 存在: !!sh, 筆數: sh ? Math.max(sh.getLastRow() - 1, 0) : 0 }; });
-  return { 成功: true, 版本: 系統設定.版本, 結果: result };
-}
-
+function 更新工單完成量_(工單編號, 良品數, 不良數) { const sh = 取得試算表_().getSheetByName('10_工單主檔'); if (!sh || !工單編號 || sh.getLastRow() < 2) return; const values = sh.getDataRange().getValues(); const h = values[0].map(String); const c工單 = h.indexOf('工單編號'), c完成 = h.indexOf('已完成量'), c不良 = h.indexOf('不良量'), c計畫 = h.indexOf('計畫量'), c狀態 = h.indexOf('狀態'), c更新 = h.indexOf('更新時間'); if (c工單 < 0) return; for (let r = 1; r < values.length; r++) { if (文字_(values[r][c工單]) === 文字_(工單編號)) { const done = Number(values[r][c完成] || 0) + Number(良品數 || 0); const ng = Number(values[r][c不良] || 0) + Number(不良數 || 0); if (c完成 >= 0) sh.getRange(r + 1, c完成 + 1).setValue(done); if (c不良 >= 0) sh.getRange(r + 1, c不良 + 1).setValue(ng); if (c更新 >= 0) sh.getRange(r + 1, c更新 + 1).setValue(new Date()); if (c狀態 >= 0 && c計畫 >= 0) sh.getRange(r + 1, c狀態 + 1).setValue(done >= Number(values[r][c計畫] || 0) ? '已完成' : '進行中'); return; } } }
+function 主檔檢查() { const result = Object.keys(正式工作表規格).map(name => { const sh = 取得試算表_().getSheetByName(name); return { 分頁: name, 存在: !!sh, 筆數: sh ? Math.max(sh.getLastRow() - 1, 0) : 0 }; }); return { 成功: true, 版本: 系統設定.版本, 結果: result }; }
 function 取得戰情() { const rows = 讀表_('09_報工'); const 今日 = 取得作業日_(); const today = rows.filter(r => 文字_(r.作業日) === 今日); return { 成功: true, 作業日: 今日, 今日報工筆數: today.length, 今日共做數: 加總_(today, '今日共做數'), 今日良品數: 加總_(today, '實際良品數'), 今日不良數: 加總_(today, '不良數') }; }
 function 取得AI摘要() { const x = 取得戰情(); return { 成功: true, 摘要: `今日報工 ${x.今日報工筆數} 筆，共做 ${x.今日共做數}，良品 ${x.今日良品數}，不良 ${x.今日不良數}。`, 建議: ['先確認未報工工站', '不良數大於0時追蹤不良原因'] }; }
-
 function 處理LINEWebhook_(payload) { const events = payload.events || []; events.forEach(ev => { if (ev.type === 'message' && ev.message && ev.message.type === 'text') 回覆LINE_(ev.replyToken, 產生LINE文字回覆_(ev.message.text)); }); return ContentService.createTextOutput('OK'); }
 function 產生LINE文字回覆_(text) { const t = 文字_(text).toLowerCase(); if (!t || t === '指令' || t === 'help') return 取得LINE指令說明_().文字; if (t.includes('主檔') || t.includes('檢查')) return 格式化主檔檢查LINE_(); if (t.includes('戰情') || t.includes('狀況') || t.includes('kpi')) return 格式化戰情LINE_(); if (t.includes('ai') || t.includes('摘要')) return 格式化AI摘要LINE_(); if (t.includes('報工')) return 產生報工入口LINE_(); return '🏭 智慧製造中央作戰指揮中心\n\n可輸入：\n1. 主檔檢查\n2. 戰情\n3. AI摘要\n4. 報工\n5. 指令'; }
-function 取得LINE指令說明_() { return { 成功: true, 文字: '🏭 智慧製造中央作戰指揮中心｜LINE 指令\n\n主檔檢查\n戰情\nAI摘要\n報工\n指令' }; }
+function 取得LINE指令說明_() { return { 成功: true, 文字: '🏭 智慧製造中央作戰指揮中心｜LINE 指令\n\n主管戰情\n今日戰情\n昨日戰情\n戰情 2026-06-14\n主檔檢查\n戰情\nAI摘要\n報工\n指令' }; }
 function 格式化主檔檢查LINE_() { const data = 主檔檢查().結果 || []; const map = {}; data.forEach(x => map[x.分頁] = x.筆數 || 0); return '📋 主檔檢查\n01_人員主檔：' + (map['01_人員主檔'] || 0) + ' 筆\n02_產品主檔：' + (map['02_產品主檔'] || 0) + ' 筆\n03_機台主檔：' + (map['03_機台主檔'] || 0) + ' 筆\n04_工站主檔：' + (map['04_工站主檔'] || 0) + ' 筆\n05_不良代碼主檔：' + (map['05_不良代碼主檔'] || 0) + ' 筆\n06_照片資料庫：' + (map['06_照片資料庫'] || 0) + ' 筆\n09_報工：' + (map['09_報工'] || 0) + ' 筆'; }
 function 格式化戰情LINE_() { const x = 取得戰情(); return '📊 今日戰情\n作業日：' + x.作業日 + '\n報工筆數：' + x.今日報工筆數 + '\n今日共做：' + x.今日共做數 + '\n實際良品：' + x.今日良品數 + '\n不良數：' + x.今日不良數; }
 function 格式化AI摘要LINE_() { const x = 取得AI摘要(); return '🤖 AI摘要\n' + x.摘要 + '\n\n建議：\n- ' + x.建議.join('\n- '); }
-function 產生報工入口LINE_() { return '📝 報工作業V2入口\n你的WebAppURL?page=07_報工作業V2'; }
-function 回覆LINE_(replyToken, text) { const token = 文字_(系統設定.LINE_CHANNEL_ACCESS_TOKEN); if (!token || !replyToken) return; UrlFetchApp.fetch('https://api.line.me/v2/bot/message/reply', { method: 'post', contentType: 'application/json', headers: { Authorization: 'Bearer ' + token }, payload: JSON.stringify({ replyToken, messages: [{ type: 'text', text: String(text).slice(0, 4900) }] }), muteHttpExceptions: true }); }
-
-function 取得試算表_() { if (系統設定.主資料庫ID) return SpreadsheetApp.openById(系統設定.主資料庫ID); const ss = SpreadsheetApp.getActiveSpreadsheet(); if (!ss) throw new Error('請將此 Apps Script 綁定到智慧製造中央作戰指揮中心資料庫，或填入主資料庫ID'); return ss; }
+function 產生報工入口LINE_() { var url = ''; try { url = ScriptApp.getService().getUrl(); } catch (err) {} return '📝 報工作業V2入口\n' + (url ? url + '?page=07_報工作業V2' : '請使用 Web App URL?page=07_報工作業V2'); }
+function 取得LINEToken_() { var token = String(PropertiesService.getScriptProperties().getProperty('LINE_CHANNEL_ACCESS_TOKEN') || '').trim(); if (token) return token; try { if (系統設定 && 系統設定.LINE_CHANNEL_ACCESS_TOKEN) return String(系統設定.LINE_CHANNEL_ACCESS_TOKEN || '').trim(); } catch (err) {} return ''; }
+function 回覆LINE_(replyToken, text) { const token = 文字_(取得LINEToken_()); if (!token || !replyToken) return; const endpoint = 'https://' + 'api.line.me' + '/v2/bot/message/reply'; UrlFetchApp.fetch(endpoint, { method: 'post', contentType: 'application/json', headers: { Authorization: ['Bearer', token].join(' ') }, payload: JSON.stringify({ replyToken, messages: [{ type: 'text', text: String(text).slice(0, 4900) }] }), muteHttpExceptions: true }); }
+function 取得試算表_() { var id = String(PropertiesService.getScriptProperties().getProperty('智慧製造_SPREADSHEET_ID') || 系統設定.主資料庫ID || '').trim(); if (id) return SpreadsheetApp.openById(id); const ss = SpreadsheetApp.getActiveSpreadsheet(); if (!ss) throw new Error('請將此 Apps Script 綁定到智慧製造中央作戰指揮中心資料庫，或填入主資料庫ID'); return ss; }
 function 建立或修復表_(ss, name, headers) { let sh = ss.getSheetByName(name); if (!sh) sh = ss.insertSheet(name); if (sh.getLastRow() < 1 || !文字_(sh.getRange(1, 1).getValue())) sh.getRange(1, 1, 1, headers.length).setValues([headers]); const nowHeaders = 取表頭_(sh); const miss = headers.filter(h => !nowHeaders.includes(h)); if (miss.length) sh.getRange(1, sh.getLastColumn() + 1, 1, miss.length).setValues([miss]); sh.setFrozenRows(1); sh.getRange(1, 1, 1, sh.getLastColumn()).setFontWeight('bold').setBackground('#0f766e').setFontColor('#ffffff'); return sh; }
 function 讀表_(name) { const sh = 取得試算表_().getSheetByName(name); if (!sh || sh.getLastRow() < 2) return []; const values = sh.getDataRange().getValues(); const headers = values.shift().map(String); return values.filter(r => r.some(v => v !== '')).map((r, idx) => { const o = { __列號: idx + 2 }; headers.forEach((h, i) => o[h] = r[i]); return o; }); }
 function 取表頭_(sh) { return sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].map(String); }
@@ -424,3 +217,4 @@ function 標準化班別_(v) { const t = 文字_(v); if (!t) return 判斷化新
 function 取班別清單_(rows, 人員) { const base = 取共用清單_(rows, '班別', ['自動判斷', '早班', '中班', '大夜班', '加班']); const set = {}; base.forEach(x => set[x.值 || x.名稱] = x.名稱 || x.值); ['早班', '中班', '大夜班', '加班'].forEach(x => set[x] = x); 人員.forEach(r => { if (r.班別) set[r.班別] = r.班別; }); return Object.keys(set).map(k => ({ 名稱: set[k], 值: k })); }
 function 取共用清單_(rows, type, defaults) { const list = rows.filter(x => 文字_(x.資料類型) === type && 文字_(x.啟用 || '是') !== '否').sort((a, b) => Number(a.排序 || 999) - Number(b.排序 || 999)).map(x => ({ 名稱: x.名稱 || x.代碼, 值: x.名稱 || x.代碼 })); return list.length ? list : defaults.map(x => ({ 名稱: x, 值: x })); }
 function 取共用值清單_(rows, type, defaults) { const list = 取共用清單_(rows, type, defaults).map(x => x.值 || x.名稱); return list.length ? list : defaults; }
+function 測試_主後端入口整理_TOKEN檢查() { return { ok: !!取得LINEToken_(), 訊息: 取得LINEToken_() ? '已取得 LINE_CHANNEL_ACCESS_TOKEN' : '缺少 LINE_CHANNEL_ACCESS_TOKEN', 時間: new Date(), 版本: 系統設定.版本 }; }
