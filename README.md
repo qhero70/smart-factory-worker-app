@@ -1,6 +1,6 @@
 # 智慧製造中央作戰指揮中心
 
-目前正式基準：**v1.7.5｜38_LINE 指令中心 Rich Menu 快捷按鈕優化完成｜38.5 GAS 主檔與模組整理盤點中**。
+目前正式基準：**v1.7.5｜38.6 Git 同步 GAS 主後端完成｜LINE doPost 最終接線版**。
 
 本專案是製造部智慧製造中央作戰系統，不是單一報工表單，也不是單一 LINE Bot。核心包含：
 
@@ -20,8 +20,8 @@ GitHub Pages PWA 行動入口
 |---|---|
 | 正式基準 | v1.7.5 |
 | 已完成階段 | 38_LINE 指令中心 Rich Menu 快捷按鈕優化 |
-| 目前階段 | 38.5_GAS 主檔與模組整理盤點 |
-| 下一階段 | 先做 38.6 主後端 doPost 同步 37 接線，再進 39 |
+| 目前階段 | 38.6_Git 同步 GAS 主後端完成 |
+| 下一階段 | 39_LINE 每日戰情推播升級與主管提醒補強 |
 | 39 原則 | 只能補強 26，不可重做每日推播 |
 
 ---
@@ -51,13 +51,6 @@ docs/gas-bridge.js
 docs/manifest.webmanifest
 ```
 
-`docs/app.html` 會讀取：
-
-```text
-docs/pwa-config.js
-docs/gas-bridge.js
-```
-
 正式 GAS Web App URL 固定放在：
 
 ```text
@@ -69,10 +62,18 @@ GAS_WEB_APP_URL
 
 GAS 主程式與各正式模組來源。
 
-新增索引：
+目前 38.6 正式接線檔：
 
 ```text
-smart-factory-command-center/01_GAS後端/00_GAS模組索引.md
+smart-factory-command-center/01_GAS後端/總控_38_6_doPost最終接線.gs
+```
+
+此檔用途：
+
+```text
+讓 GitHub 主線與 GAS 實際 doPost 接線一致。
+保留舊主檔，不刪檔。
+以 38.6 最終接線模組提供最新 LINE Webhook 入口順序。
 ```
 
 ### smart-factory-command-center/02_HTML前端/
@@ -94,35 +95,20 @@ GAS HTML 前端來源。
 ```text
 00_目前進度盤點_架構與GAS整理報告_v1.7.5.md
 38.5_GAS主檔與模組整理盤點_v1.7.5.md
+38.6_Git同步GAS主後端_v1.7.5.md
 ```
 
 ---
 
-## 三、目前最重要風險
+## 三、主後端 doPost 接線狀態
 
-GitHub 主檔：
-
-```text
-smart-factory-command-center/01_GAS後端/智慧製造中央作戰指揮中心.gs
-```
-
-目前仍顯示 v1.6.8，doPost 尚未同步 37 最新接線。
-
-目前主檔 doPost 只看得到：
+GAS 實際執行版已接上最新版。GitHub 也已新增 38.6 最終接線模組：
 
 ```text
-31_LINE 主管戰情日期快選
-→ 30_LINE 主管戰情直連
-→ 一般 LINE Webhook
+smart-factory-command-center/01_GAS後端/總控_38_6_doPost最終接線.gs
 ```
 
-正確 doPost 接線基準在：
-
-```text
-smart-factory-command-center/01_GAS後端/37_LINE_主後端doPost正式替換段.gs
-```
-
-正確順序：
+正式 doPost 順序：
 
 ```text
 37_LINE 指令中心
@@ -132,6 +118,14 @@ smart-factory-command-center/01_GAS後端/37_LINE_主後端doPost正式替換段
 → 30_LINE 主管戰情直連
 → 一般 LINE Webhook
 ```
+
+此階段不刪除原主檔：
+
+```text
+smart-factory-command-center/01_GAS後端/智慧製造中央作戰指揮中心.gs
+```
+
+原主檔仍保留主入口、API handler、工作表規格、報工 V2 與共用函數；38.6 最終接線模組負責把 LINE Webhook 入口同步到最新順序。
 
 ---
 
@@ -143,6 +137,7 @@ smart-factory-command-center/01_GAS後端/37_LINE_主後端doPost正式替換段
 智慧製造中央作戰指揮中心.gs
 系統維護工具.gs
 appsscript.json
+總控_38_6_doPost最終接線.gs
 ```
 
 ### 報工、派班、工單主線
@@ -200,15 +195,9 @@ appsscript.json
 
 ```text
 26_LINE每日戰情推播正式模組.gs 是每日推播主引擎，不可刪、不可重做。
-37_LINE_主後端doPost正式替換段.gs 是目前最新 doPost 基準，不可刪。
+37_LINE_主後端doPost正式替換段.gs 是目前 doPost 基準來源，不可刪。
+總控_38_6_doPost最終接線.gs 是 38.6 Git 最新接線模組，不可刪。
 32～38 是目前 LINE 權限、選單、指令中心主線，不可直接刪。
-```
-
-待封存與待比對的完整清單請看：
-
-```text
-smart-factory-command-center/01_GAS後端/00_GAS模組索引.md
-smart-factory-command-center/03_部署文件/38.5_GAS主檔與模組整理盤點_v1.7.5.md
 ```
 
 ---
@@ -289,6 +278,7 @@ Greeting messages：可關閉
 ```text
 健康檢查
 主檔檢查
+測試38_6_doPost最終接線_靜態檢查
 初始化33_LINE主管權限與身份綁定
 初始化37_LINE指令中心與快捷指令總表
 測試34_LINE角色分流_本機規格
@@ -315,13 +305,7 @@ Greeting messages：可關閉
 
 ## 九、下一步
 
-目前不要進 39。下一步先做：
-
-```text
-38.6_主後端 doPost 同步 37 最新接線
-```
-
-完成 38.6 並測試通過後，再做：
+38.6 已完成，下一步可進：
 
 ```text
 39_LINE 每日戰情推播升級與主管提醒補強
