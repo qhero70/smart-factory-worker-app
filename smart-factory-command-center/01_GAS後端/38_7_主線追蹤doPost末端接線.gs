@@ -13,5 +13,8 @@ function 排程需求池_嘗試處理動作_(payload) {
   if (action === '人員註冊38_7_查詢工號' && typeof 人員註冊38_7_查詢工號 === 'function') return 人員註冊38_7_查詢工號(p);
   if (action === '人員註冊38_7_綁定' && typeof 人員註冊38_7_綁定 === 'function') return 人員註冊38_7_綁定(p);
   if (action === '測試_人員註冊38_7' && typeof 測試_人員註冊38_7 === 'function') return 測試_人員註冊38_7();
+  if (action === '主線實機驗收38_7' && typeof 主線實機驗收38_7 === 'function') return 主線實機驗收38_7(p);
+  if (action === '主線一鍵修復38_7' && typeof 主線一鍵修復38_7 === 'function') return 主線一鍵修復38_7(p);
+  if (action === '測試_主線實機驗收38_7' && typeof 測試_主線實機驗收38_7 === 'function') return 測試_主線實機驗收38_7();
   return null;
 }
