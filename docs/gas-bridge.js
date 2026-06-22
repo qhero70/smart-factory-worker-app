@@ -65,7 +65,8 @@
     url.searchParams.set('action', action);
     url.searchParams.set('_ts', String(Date.now()));
     const timeoutMs = Number(options?.timeoutMs || 預設逾時);
-    const body = JSON.stringify(payload || {});
+    const bodyObj = Object.assign({}, payload || {}, { action: action, 動作: action });
+    const body = JSON.stringify(bodyObj);
 
     try {
       return await 逾時Fetch(url.toString(), {
@@ -77,7 +78,7 @@
         body
       }, timeoutMs).then(解析回應);
     } catch (postError) {
-      const 降級Payload = { payload: body, 資料: body, json: body };
+      const 降級Payload = { payload: body, 資料: body, json: body, action: action, 動作: action };
       try { return await GET(action, 降級Payload, { timeoutMs }); }
       catch (getError) { throw new Error(`POST 失敗：${postError.message}；GET 降級也失敗：${getError.message}`); }
     }
