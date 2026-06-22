@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#0f172a"/>
+      <stop offset="0.45" stop-color="#164e63"/>
+      <stop offset="1" stop-color="#10b981"/>
+    </linearGradient>
+    <linearGradient id="m" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0" stop-color="#67e8f9"/>
+      <stop offset="1" stop-color="#a7f3d0"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#g)"/>
+  <circle cx="256" cy="256" r="174" fill="none" stroke="rgba(255,255,255,.28)" stroke-width="18"/>
+  <path d="M140 318V180h38l74 92V180h42v138h-36l-76-94v94h-42Z" fill="white"/>
+  <path d="M324 180h50l-62 68 70 70h-56l-58-62v62h-42V180h42v58l56-58Z" fill="url(#m)" opacity=".95"/>
+  <path d="M128 360h256" stroke="url(#m)" stroke-width="18" stroke-linecap="round"/>
+  <circle cx="384" cy="128" r="20" fill="#34d399"/>
+  <text x="256" y="424" text-anchor="middle" font-family="Arial, sans-serif" font-size="34" font-weight="800" fill="white">NEXUS OS</text>
+</svg>
