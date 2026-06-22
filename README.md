@@ -1,14 +1,14 @@
 # 智慧製造中央作戰指揮中心
 
-目前正式基準：**v1.7.5｜38.6 Git 同步 GAS 主後端完成｜LINE doPost 最終接線版**。
+目前正式基準：**v1.7.5｜38.7 主線優化啟動｜NEXUS OS · 工業 5.0 智慧製造矩陣**。
 
-本專案是製造部智慧製造中央作戰系統，不是單一報工表單，也不是單一 LINE Bot。核心包含：
+本專案是製造部智慧製造中央作戰系統，不是單一報工表單，也不是單一 LINE Bot。
 
 ```text
 Google Sheets 中央資料庫
 Google Apps Script 後端 API
-LINE Bot 指令中心與 Rich Menu
-GitHub Pages PWA 行動入口
+GitHub Pages PWA：NEXUS OS 主入口
+LINE Bot：通知、註冊、查詢、主管戰情
 報工、派班、工單、戰情、AI 摘要模組
 ```
 
@@ -19,36 +19,57 @@ GitHub Pages PWA 行動入口
 | 項目 | 狀態 |
 |---|---|
 | 正式基準 | v1.7.5 |
-| 已完成階段 | 38_LINE 指令中心 Rich Menu 快捷按鈕優化 |
-| 目前階段 | 38.6_Git 同步 GAS 主後端完成 |
-| 下一階段 | 39_LINE 每日戰情推播升級與主管提醒補強 |
-| 39 原則 | 只能補強 26，不可重做每日推播 |
+| 已完成 | 38.6 Git 同步 GAS 主後端 |
+| 目前階段 | 38.7 主線優化第一輪 |
+| 39 狀態 | 暫停 |
+| 39 原則 | 只補強 26，不可重做每日推播 |
 
 ---
 
-## 二、GitHub 主要資料夾
+## 二、38.7 主線目標
 
 ```text
-README.md
-.nojekyll
-docs/
-smart-factory-command-center/01_GAS後端/
-smart-factory-command-center/02_HTML前端/
-smart-factory-command-center/03_部署文件/
+生產計劃表清洗
+↓
+產品品名修正
+↓
+10_排程需求池
+↓
+自動排程
+↓
+依人員規則派班
+↓
+今日任務
+↓
+作業員 PWA 報工
+↓
+09_報工 / 10_工單 / 21_派班報工回寫
 ```
 
-### docs/
+---
 
-GitHub Pages PWA 前端資料夾。
+## 三、PWA 主入口
 
-重點檔案：
+正式入口：
 
 ```text
 docs/app.html
-docs/index.html
+```
+
+首頁名稱：
+
+```text
+NEXUS OS
+工業 5.0 智慧製造矩陣
+製造部製一組｜智慧製造中央作戰指揮中心｜PWA 正式主入口
+```
+
+PWA 設定：
+
+```text
 docs/pwa-config.js
-docs/gas-bridge.js
 docs/manifest.webmanifest
+docs/assets/icons/nexus-os.svg
 ```
 
 正式 GAS Web App URL 固定放在：
@@ -58,257 +79,141 @@ docs/pwa-config.js
 GAS_WEB_APP_URL
 ```
 
-### smart-factory-command-center/01_GAS後端/
+---
 
-GAS 主程式與各正式模組來源。
+## 四、38.7 新增與更新檔案
 
-目前 38.6 正式接線檔：
+### 新增
+
+```text
+smart-factory-command-center/01_GAS後端/38_7_主線優化_唯一資料庫_計劃清洗_排班規則.gs
+docs/assets/icons/nexus-os.svg
+docs/work-report-v2-photo-fix-252.js
+smart-factory-command-center/03_部署文件/38.7_主線優化需求盤點與方案_v1.7.5.md
+smart-factory-command-center/03_部署文件/38.7_主線優化實作紀錄_v1.7.5.md
+```
+
+### 更新
 
 ```text
 smart-factory-command-center/01_GAS後端/總控_38_6_doPost最終接線.gs
-```
-
-此檔用途：
-
-```text
-讓 GitHub 主線與 GAS 實際 doPost 接線一致。
-保留舊主檔，不刪檔。
-以 38.6 最終接線模組提供最新 LINE Webhook 入口順序。
-```
-
-### smart-factory-command-center/02_HTML前端/
-
-GAS HTML 前端來源。
-
-核心檔案：
-
-```text
-07_報工作業V2.html
-```
-
-### smart-factory-command-center/03_部署文件/
-
-部署、盤點、架構與版本紀錄。
-
-目前正式盤點文件：
-
-```text
-00_目前進度盤點_架構與GAS整理報告_v1.7.5.md
-38.5_GAS主檔與模組整理盤點_v1.7.5.md
-38.6_Git同步GAS主後端_v1.7.5.md
-```
-
----
-
-## 三、主後端 doPost 接線狀態
-
-GAS 實際執行版已接上最新版。GitHub 也已新增 38.6 最終接線模組：
-
-```text
-smart-factory-command-center/01_GAS後端/總控_38_6_doPost最終接線.gs
-```
-
-正式 doPost 順序：
-
-```text
-37_LINE 指令中心
-→ 34_LINE 角色選單分流
-→ 33_LINE 身份權限檢查
-→ 31_LINE 主管戰情日期快選
-→ 30_LINE 主管戰情直連
-→ 一般 LINE Webhook
-```
-
-此階段不刪除原主檔：
-
-```text
-smart-factory-command-center/01_GAS後端/智慧製造中央作戰指揮中心.gs
-```
-
-原主檔仍保留主入口、API handler、工作表規格、報工 V2 與共用函數；38.6 最終接線模組負責把 LINE Webhook 入口同步到最新順序。
-
----
-
-## 四、GAS 主線模組
-
-### 核心主檔
-
-```text
-智慧製造中央作戰指揮中心.gs
-系統維護工具.gs
-appsscript.json
-總控_38_6_doPost最終接線.gs
-```
-
-### 報工、派班、工單主線
-
-```text
-07_報工作業V2.html
-報工PWA_V2_正式整合版.gs
-09報工V2_欄位對齊登入正式模組.gs
-11_需求池轉工單正式模組.gs
-12_拆工單正式模組.gs
-13_工單主檔修復重建正式模組.gs
-14_工單欄位格式重建狀態正式模組.gs
-15_排程池口吻查重正式模組.gs
-16_品名補正正式模組.gs
-17_排程補齊工作台正式模組.gs
-19_派班需求轉自動派班正式模組.gs
-20_今日派班整理正式模組.gs
-21_今日派班報工對接正式模組.gs
-22_派班報工防重複超量保護.gs
-23_派班報工巡檢修復正式模組.gs
-24_派班報工每日結算正式模組.gs
-```
-
-### 戰情、AI、每日推播
-
-```text
-25_AI戰情摘要資料源.gs
-26_LINE每日戰情推播正式模組.gs
-27_每日自動化排程觸發器正式模組.gs
-28_主管戰情看板API正式模組.gs
-29_主管戰情看板入口整合正式模組.gs
-30_LINE主管戰情直連回覆正式版.gs
-31_LINE主管戰情日期快選正式模組.gs
-```
-
-### LINE 權限、角色分流、指令中心、Rich Menu
-
-```text
-32_LINE_RichMenu_主管入口與快捷選單.gs
-33_LINE_主管權限與身份綁定.gs
-34_LINE_使用者角色分流與一般員工選單.gs
-34_LINE_一般員工RichMenu建立.gs
-36_LINE_角色選單維護與權限異常修復工具.gs
-37_LINE_指令中心與快捷指令總表.gs
-38_LINE_指令中心RichMenu快捷按鈕優化.gs
-```
-
----
-
-## 五、不可刪除規則
-
-目前全部先保留，不做刪除。
-
-特別注意：
-
-```text
-26_LINE每日戰情推播正式模組.gs 是每日推播主引擎，不可刪、不可重做。
-37_LINE_主後端doPost正式替換段.gs 是目前 doPost 基準來源，不可刪。
-總控_38_6_doPost最終接線.gs 是 38.6 Git 最新接線模組，不可刪。
-32～38 是目前 LINE 權限、選單、指令中心主線，不可直接刪。
-```
-
----
-
-## 六、正式架構
-
-```text
-LINE 使用者
-  ↓
-Rich Menu 主管入口 / 一般員工入口
-  ↓
-GAS Web App doPost(e)
-  ↓
-37_LINE 指令中心
-  ↓
-34_LINE 角色選單分流
-  ↓
-33_LINE 身份權限檢查
-  ↓
-31_LINE 主管戰情日期快選
-  ↓
-30_LINE 主管戰情直連
-  ↓
-一般 LINE Webhook / API Handler
-  ↓
-Google Sheets 中央作戰資料庫
-```
-
-PWA：
-
-```text
 docs/app.html
-  ↓
-docs/pwa-config.js
-  ↓
 docs/gas-bridge.js
-  ↓
-GAS Web App URL
-```
-
-報工：
-
-```text
-報工作業 V2
-  ↓
-09_報工
-  ↓
-09_不良紀錄
-  ↓
-10_工單主檔 / 今日派班 / 每日結算
+docs/pwa-config.js
+docs/manifest.webmanifest
+README.md
 ```
 
 ---
 
-## 七、部署基本設定
-
-GAS Web App 部署：
+## 五、38.7 GAS 動作
 
 ```text
-執行身分：我
-誰可以存取：任何人
-```
-
-LINE Developers：
-
-```text
-Use webhook：開啟
-Auto-reply messages：關閉
-Greeting messages：可關閉
+健康檢查_主線優化38_7
+初始化_主線優化38_7
+初始化_唯一資料庫鎖定38_7
+初始化_19_人員排班規則
+清洗生產計劃表38_7
+自動排程38_7
+取得今日任務38_7
+取得主線儀表板38_7
+測試_主線優化38_7
 ```
 
 ---
 
-## 八、目前測試標準
+## 六、排班硬規則
 
-### GAS 後端
+```text
+幹部不排班
+工程師不進一般作業員自動排程
+主任不排班
+助理工程師不排班
+學生不加班
+留職停薪不排班
+不加班人員不可排加班
+專責人員優先派專責工站 / 專責產品 / 專責機台
+```
+
+正式分頁：
+
+```text
+19_人員排班規則
+```
+
+---
+
+## 七、唯一資料庫原則
+
+只允許一份主資料庫：
+
+```text
+智慧製造中央作戰指揮中心資料庫
+```
+
+系統鎖定：
+
+```text
+PropertiesService：智慧製造_SPREADSHEET_ID
+docs/pwa-config.js：SPREADSHEET_ID
+```
+
+初始化只能修復分頁與欄位，不應建立新的專案試算表。
+
+---
+
+## 八、照片修復
+
+報工作業機台照片統一轉為：
+
+```text
+https://drive.google.com/thumbnail?id=檔案ID&sz=w800
+```
+
+前端修復外掛：
+
+```text
+docs/work-report-v2-photo-fix-252.js
+```
+
+---
+
+## 九、啟動順序
+
+PWA 操作：
+
+```text
+1. 初始化 38.7
+2. 鎖定唯一資料庫
+3. 清洗生產計劃表
+4. 自動排程派班
+5. 讀取今日任務
+6. 開啟報工作業
+```
+
+GAS 測試：
 
 ```text
 健康檢查
 主檔檢查
 測試38_6_doPost最終接線_靜態檢查
-初始化33_LINE主管權限與身份綁定
-初始化37_LINE指令中心與快捷指令總表
-測試34_LINE角色分流_本機規格
-測試38_LINE快捷RichMenu_本機規格
-```
-
-### LINE 指令
-
-```text
-指令
-主管指令
-員工指令
-我的狀態
-選單說明
-權限檢查
-選單更新
-主管戰情
-今日戰情
-昨日戰情
-報工作業
+測試_主線優化38_7
+初始化_主線優化38_7
+清洗生產計劃表38_7
+自動排程38_7
+取得今日任務38_7
 ```
 
 ---
 
-## 九、下一步
-
-38.6 已完成，下一步可進：
+## 十、保留規則
 
 ```text
-39_LINE 每日戰情推播升級與主管提醒補強
+39 暫停
+26_LINE每日戰情推播正式模組 不重做
+37_LINE_主後端doPost正式替換段 保留
+38.6 doPost 最終接線模組 保留
+32～38 LINE 權限、角色分流、指令中心、Rich Menu 主線保留
 ```
 
-39 只補強 26，不重做 26。
+下一步繼續 38.7 主線優化，不進 39。
