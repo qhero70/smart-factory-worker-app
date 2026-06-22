@@ -59,11 +59,13 @@
   function hookFetch(){
     if(window.__NEXUS_TASK_FETCH_HOOKED__)return; window.__NEXUS_TASK_FETCH_HOOKED__=true;
     var orig=window.fetch;
-    window.fetch=function(){
+    window.fetch=function(input,init){
+      var url=String((input && input.url) || input || '');
+      var body=String((init && init.body) || '');
       return orig.apply(this,arguments).then(function(res){
         try{
-          var url=String(arguments[0]||'');
-          if(url.indexOf('寫入報工作業v2')>=0 || url.indexOf('寫入今日派班報工')>=0){
+          var isReport=url.indexOf('寫入報工作業v2')>=0 || url.indexOf('寫入今日派班報工')>=0 || body.indexOf('寫入報工作業v2')>=0 || body.indexOf('寫入今日派班報工')>=0;
+          if(isReport){
             res.clone().json().then(function(j){if(j && (j.成功||j.success!==false))回寫派班狀態(j)}).catch(function(){});
           }
         }catch(e){}
