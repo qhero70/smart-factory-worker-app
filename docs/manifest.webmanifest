@@ -1,18 +1,18 @@
 {
-  "name": "製造部智慧製造應用總部",
-  "short_name": "製造應用總部",
-  "description": "智慧製造中央作戰指揮中心現場手機 PWA，提供報工 V2、戰情入口與 GAS API 對接。",
+  "name": "NEXUS OS · 工業 5.0 智慧製造矩陣",
+  "short_name": "化新精密",
+  "description": "製造部製一組智慧製造中央作戰指揮中心 PWA，提供生產計劃清洗、自動排程、今日任務與報工 V2。",
   "start_url": "./app.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#07111f",
-  "theme_color": "#0f766e",
+  "background_color": "#eef7ff",
+  "theme_color": "#0f172a",
   "lang": "zh-Hant-TW",
   "orientation": "portrait-primary",
   "categories": ["business", "productivity", "utilities"],
   "icons": [
     {
-      "src": "./assets/icons/智慧製造圖示.svg",
+      "src": "./assets/icons/nexus-os.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
