@@ -4,6 +4,7 @@
   var KEY='NEXUS_OS_今日報工任務';
   function text(v){return String(v===null||v===undefined?'':v).trim()}
   function $(id){return document.getElementById(id)}
+  function val(ids){for(var i=0;i<ids.length;i++){var el=$(ids[i])||document.querySelector('[name="'+ids[i]+'"]');if(el&&text(el.value))return text(el.value)}return''}
   function setVal(ids,value){
     var v=text(value); if(!v)return false;
     for(var i=0;i<ids.length;i++){
@@ -22,8 +23,7 @@
     var box=document.createElement('div');
     box.id='今日任務帶入提示253';
     box.style.cssText='position:sticky;top:0;z-index:9999;margin:8px 0 10px;padding:12px 14px;border-radius:16px;background:linear-gradient(135deg,rgba(0,210,255,.18),rgba(16,185,129,.18));border:1px solid rgba(0,210,255,.55);color:#e2f8ff;font-weight:900;line-height:1.55;box-shadow:0 10px 28px rgba(0,0,0,.28);';
-    box.innerHTML='✅ 已帶入今日任務<br><span style="font-size:12px;color:#a7e8ff">'+
-      '派班：'+text(task.派班編號)+'｜'+text(task.姓名)+'｜'+(text(task.品名)||text(task.產品編號))+'｜工站：'+text(task.工站名稱)+'｜機台：'+text(task.機台編號)+'</span>';
+    box.innerHTML='✅ 已帶入今日任務<br><span style="font-size:12px;color:#a7e8ff">派班：'+text(task.派班編號)+'｜'+text(task.姓名)+'｜'+(text(task.品名)||text(task.產品編號))+'｜工站：'+text(task.工站名稱)+'｜機台：'+text(task.機台編號)+'</span>';
     var target=document.querySelector('.外框')||document.body;
     target.insertBefore(box,target.firstChild);
   }
@@ -45,12 +45,24 @@
     window.NEXUS_OS_今日報工任務=task;
     putBanner(task);
   }
+  function pickQty(reportResult,task){
+    return text((reportResult&&reportResult.報工數量)||(reportResult&&reportResult.今日共做數)||(reportResult&&reportResult.實際良品數)||(reportResult&&reportResult.良品數)||val(['今日共做數','報工數量','實際良品數','良品數','完成數量'])||task.預計數量||task.需求量||0);
+  }
   async function 回寫派班狀態(reportResult){
     var task=getTask();
     if(!task || !text(task.派班編號) || !window.GAS橋接器)return;
     var reportNo=text((reportResult&&reportResult.報工編號)||(reportResult&&reportResult.id)||(reportResult&&reportResult.流水號));
+    var payload={
+      派班編號:task.派班編號,
+      報工編號:reportNo,
+      狀態:'已報工',
+      報工數量:pickQty(reportResult,task),
+      工單編號:task.工單編號 || task.來源需求編號,
+      來源需求編號:task.來源需求編號,
+      action:'更新今日派班狀態38_7'
+    };
     try{
-      var res=await window.GAS橋接器.呼叫('更新今日派班狀態38_7',{派班編號:task.派班編號,報工編號:reportNo,狀態:'已報工',action:'更新今日派班狀態38_7'},{method:'POST',timeoutMs:12000});
+      var res=await window.GAS橋接器.呼叫('更新今日派班狀態38_7',payload,{method:'POST',timeoutMs:12000});
       console.log('[NEXUS OS] 今日派班回寫完成',res);
       localStorage.removeItem(KEY);
       return res;
@@ -65,9 +77,7 @@
       return orig.apply(this,arguments).then(function(res){
         try{
           var isReport=url.indexOf('寫入報工作業v2')>=0 || url.indexOf('寫入今日派班報工')>=0 || body.indexOf('寫入報工作業v2')>=0 || body.indexOf('寫入今日派班報工')>=0;
-          if(isReport){
-            res.clone().json().then(function(j){if(j && (j.成功||j.success!==false))回寫派班狀態(j)}).catch(function(){});
-          }
+          if(isReport){res.clone().json().then(function(j){if(j && (j.成功||j.success!==false))回寫派班狀態(j)}).catch(function(){});}
         }catch(e){}
         return res;
       });
