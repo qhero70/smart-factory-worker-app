@@ -1,137 +1,19 @@
-name: 38.6_同步GAS主後端
+name: 38.6_手動檢查
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  同步主後端:
+  check:
     runs-on: ubuntu-latest
     steps:
-      - name: 取出程式碼
+      - name: checkout
         uses: actions/checkout@v4
-        with:
-          persist-credentials: true
-
-      - name: 同步 doPost 與版本文件
+      - name: check files
         run: |
-          python3 <<'PY'
-          from pathlib import Path
-
-          主檔 = Path('smart-factory-command-center/01_GAS後端/智慧製造中央作戰指揮中心.gs')
-          替換段 = Path('smart-factory-command-center/01_GAS後端/37_LINE_主後端doPost正式替換段.gs')
-          索引 = Path('smart-factory-command-center/01_GAS後端/00_GAS模組索引.md')
-          讀我 = Path('README.md')
-          報告38_6 = Path('smart-factory-command-center/03_部署文件/38.6_Git同步GAS主後端_v1.7.5.md')
-          工作流 = Path('.github/workflows/38_6_同步GAS主後端.yml')
-
-          def 找函數結尾(text, start):
-              i = start
-              brace = 0
-              started = False
-              quote = None
-              escape = False
-              line_comment = False
-              block_comment = False
-              while i < len(text):
-                  ch = text[i]
-                  nxt = text[i + 1] if i + 1 < len(text) else ''
-                  if line_comment:
-                      if ch == '\n':
-                          line_comment = False
-                      i += 1
-                      continue
-                  if block_comment:
-                      if ch == '*' and nxt == '/':
-                          block_comment = False
-                          i += 2
-                          continue
-                      i += 1
-                      continue
-                  if quote:
-                      if escape:
-                          escape = False
-                      elif ch == '\\':
-                          escape = True
-                      elif ch == quote:
-                          quote = None
-                      i += 1
-                      continue
-                  if ch in ('"', "'", '`'):
-                      quote = ch
-                      i += 1
-                      continue
-                  if ch == '/' and nxt == '/':
-                      line_comment = True
-                      i += 2
-                      continue
-                  if ch == '/' and nxt == '*':
-                      block_comment = True
-                      i += 2
-                      continue
-                  if ch == '{':
-                      brace += 1
-                      started = True
-                  elif ch == '}':
-                      brace -= 1
-                      if started and brace == 0:
-                          return i + 1
-                  i += 1
-              raise RuntimeError('找不到 doPost 結尾')
-
-          main_text = 主檔.read_text(encoding='utf-8')
-          seg_text = 替換段.read_text(encoding='utf-8').strip()
-          func_start = main_text.index('function doPost(e) {')
-          comment_start = main_text.rfind('/**', 0, func_start)
-          replace_start = comment_start if comment_start > main_text.rfind('function doGet', 0, func_start) else func_start
-          func_end = 找函數結尾(main_text, func_start)
-          main_text = main_text[:replace_start].rstrip() + '\n\n' + seg_text + '\n' + main_text[func_end:]
-          main_text = main_text.replace('版本：v1.6.8｜整理主入口 + LINE 主管戰情日期快選 + 主管戰情直連', '版本：v1.7.5｜38.6 Git 同步 GAS 主後端｜37 指令中心接線')
-          main_text = main_text.replace("版本: 'v1.6.8_主入口整理_LINE主管戰情日期快選_班別_報工V2'", "版本: 'v1.7.5_38_6_Git同步GAS主後端_37指令中心接線_報工V2'")
-          主檔.write_text(main_text, encoding='utf-8')
-
-          if 索引.exists():
-              text = 索引.read_text(encoding='utf-8')
-              text = text.replace('階段：38.5_GAS 主檔與模組整理盤點', '階段：38.6_Git 同步 GAS 主後端')
-              text = text.replace('狀態：盤點完成、未刪檔、未進入 39', '狀態：GAS 已接上，Git 主檔已同步 37 接線、未刪檔、未進入 39')
-              text = text.replace('目前仍是舊版 doPost 接線，主檔標頭仍為：', 'GAS 實際執行版已接上，Git 主檔已同步為：')
-              text = text.replace('v1.6.8｜整理主入口 + LINE 主管戰情日期快選 + 主管戰情直連', 'v1.7.5｜38.6 Git 同步 GAS 主後端｜37 指令中心接線')
-              text = text.replace('目前主檔 doPost 實際可見接線：', '目前主檔 doPost 正式接線：')
-              text = text.replace('31_LINE 主管戰情日期快選\n→ 30_LINE 主管戰情直連\n→ 一般 LINE Webhook', '37_LINE 指令中心\n→ 34_LINE 角色選單分流\n→ 33_LINE 身份權限檢查\n→ 31_LINE 主管戰情日期快選\n→ 30_LINE 主管戰情直連\n→ 一般 LINE Webhook')
-              text = text.replace('| GitHub 主檔 doPost 是否已同步 37 | 尚未同步 |', '| GitHub 主檔 doPost 是否已同步 37 | 已同步 |')
-              text = text.replace('| 主入口 | 智慧製造中央作戰指揮中心.gs | 正式主檔 | 保留，需同步 doPost |', '| 主入口 | 智慧製造中央作戰指揮中心.gs | 正式主檔 | 保留，已同步 37 doPost |')
-              索引.write_text(text, encoding='utf-8')
-
-          if 讀我.exists():
-              text = 讀我.read_text(encoding='utf-8')
-              text = text.replace('目前正式基準：**v1.7.5｜38_LINE 指令中心 Rich Menu 快捷按鈕優化完成｜38.5 GAS 主檔與模組整理盤點中**。', '目前正式基準：**v1.7.5｜38.6 Git 同步 GAS 主後端完成｜37 指令中心接線版**。')
-              text = text.replace('| 目前階段 | 38.5_GAS 主檔與模組整理盤點 |', '| 目前階段 | 38.6_Git 同步 GAS 主後端完成 |')
-              text = text.replace('| 下一階段 | 先做 38.6 主後端 doPost 同步 37 接線，再進 39 |', '| 下一階段 | 39_LINE 每日戰情推播升級與主管提醒補強 |')
-              text = text.replace('## 三、目前最重要風險', '## 三、主後端 doPost 接線狀態')
-              text = text.replace('目前仍顯示 v1.6.8，doPost 尚未同步 37 最新接線。', '目前 Git 主檔已同步 37 最新接線。')
-              text = text.replace('目前主檔 doPost 只看得到：', '目前主檔 doPost 正式順序：')
-              text = text.replace('31_LINE 主管戰情日期快選\n→ 30_LINE 主管戰情直連\n→ 一般 LINE Webhook', '37_LINE 指令中心\n→ 34_LINE 角色選單分流\n→ 33_LINE 身份權限檢查\n→ 31_LINE 主管戰情日期快選\n→ 30_LINE 主管戰情直連\n→ 一般 LINE Webhook')
-              text = text.replace('目前不要進 39。下一步先做：\n\n```text\n38.6_主後端 doPost 同步 37 最新接線\n```\n\n完成 38.6 並測試通過後，再做：', '38.6 已完成。下一步再做：')
-              讀我.write_text(text, encoding='utf-8')
-
-          報告38_6.write_text('# 38.6_Git同步GAS主後端報告｜v1.7.5\n\n狀態：已完成。\n\n## 完成內容\n\n```text\nGAS 已接上\nGit 主檔已同步 37 最新 doPost 接線\n未刪檔\n未進入 39\n```\n\n## 正式 doPost 順序\n\n```text\n37_LINE 指令中心\n→ 34_LINE 角色選單分流\n→ 33_LINE 身份權限檢查\n→ 31_LINE 主管戰情日期快選\n→ 30_LINE 主管戰情直連\n→ 一般 LINE Webhook\n```\n\n## 下一步\n\n```text\n39_LINE 每日戰情推播升級與主管提醒補強\n```\n\n39 只補強 26，不重做 26。\n', encoding='utf-8')
-
-          if 工作流.exists():
-              工作流.unlink()
-          PY
-
-      - name: 提交同步結果
-        run: |
-          if git diff --quiet; then
-            echo "沒有需要提交的變更"
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -m "chore: 完成38.6 Git同步GAS主後端"
-          git push
+          test -f 'smart-factory-command-center/01_GAS後端/總控_38_6_doPost最終接線.gs'
+          test -f 'smart-factory-command-center/03_部署文件/38.6_Git同步GAS主後端_v1.7.5.md'
+          echo '38.6 check passed.'
