@@ -2,7 +2,7 @@ window.PWA_CONFIG={
   GAS_WEB_APP_URL:'https://script.google.com/macros/s/AKfycbwOi-xjKoMD9jVq4HrHBvh7k1DCn70lAPAJiqaWJhvH70PbuRo4ciopCjYcytIalaW4/exec',
   APP_NAME:'NEXUS OS · 工業 5.0 智慧製造矩陣',
   APP_SHORT_NAME:'化新精密',
-  VERSION:'v2.2.2_38.7_今日任務帶入報工',
+  VERSION:'v2.2.3_38.7_排程防重_派班回寫_工單同步',
   SPREADSHEET_ID:'1JA0-kxVO6x3NbCgjmUurkwd8lffolj0pbInissLl8BQ',
   API_TIMEOUT_MS:12000,
   API_ACTIONS:{
@@ -20,12 +20,15 @@ window.PWA_CONFIG={
     初始化_19_人員排班規則:'初始化_19_人員排班規則',
     清洗生產計劃表38_7:'清洗生產計劃表38_7',
     自動排程38_7:'自動排程38_7',
+    自動排程38_7_防重:'自動排程38_7_防重',
     取得今日任務38_7:'取得今日任務38_7',
     取得主線儀表板38_7:'取得主線儀表板38_7',
     更新今日派班狀態38_7:'更新今日派班狀態38_7',
     取得派班任務明細38_7:'取得派班任務明細38_7',
     測試_主線優化38_7:'測試_主線優化38_7',
-    測試_今日派班報工回寫38_7:'測試_今日派班報工回寫38_7'
+    測試_今日派班報工回寫38_7:'測試_今日派班報工回寫38_7',
+    測試_自動排程防重38_7:'測試_自動排程防重38_7',
+    測試_工單扣帳38_7:'測試_工單扣帳38_7'
   }
 };
 (function(){
