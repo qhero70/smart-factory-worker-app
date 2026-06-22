@@ -2,7 +2,7 @@ window.PWA_CONFIG={
   GAS_WEB_APP_URL:'https://script.google.com/macros/s/AKfycbwOi-xjKoMD9jVq4HrHBvh7k1DCn70lAPAJiqaWJhvH70PbuRo4ciopCjYcytIalaW4/exec',
   APP_NAME:'NEXUS OS · 工業 5.0 智慧製造矩陣',
   APP_SHORT_NAME:'化新精密',
-  VERSION:'v2.3.1_38.7_報工派班送出合併',
+  VERSION:'v2.3.3_38.7_報工派班強制選定264',
   SPREADSHEET_ID:'1JA0-kxVO6x3NbCgjmUurkwd8lffolj0pbInissLl8BQ',
   API_TIMEOUT_MS:12000,
   API_ACTIONS:{
@@ -20,7 +20,7 @@ window.PWA_CONFIG={
 };
 (function(){
   'use strict';
-  var v='262';
+  var v='264';
   var path=(location.pathname||'').toLowerCase();
   var isReport=/work-report-v2\.html$/.test(path);
   var isApp=/app\.html$|\/$/.test(path);
@@ -37,6 +37,7 @@ window.PWA_CONFIG={
     load('./work-report-v2-task-prefill-253.js?v='+v,'今日任務帶入報工253');
     load('./work-report-v2-dispatch-card-261.js?v='+v,'報工派班任務卡261');
     load('./work-report-v2-dispatch-submit-262.js?v='+v,'報工派班送出合併262');
+    load('./work-report-v2-dispatch-force-select-264.js?v='+v,'報工派班強制選定264');
   }
   if(isApp){
     load('./nexus-quick-module-258.js?v='+v,'NEXUS主線快速模組258');
