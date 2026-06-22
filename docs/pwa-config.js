@@ -2,7 +2,7 @@ window.PWA_CONFIG={
   GAS_WEB_APP_URL:'https://script.google.com/macros/s/AKfycbwOi-xjKoMD9jVq4HrHBvh7k1DCn70lAPAJiqaWJhvH70PbuRo4ciopCjYcytIalaW4/exec',
   APP_NAME:'NEXUS OS · 工業 5.0 智慧製造矩陣',
   APP_SHORT_NAME:'化新精密',
-  VERSION:'v2.2.7_38.7_快速模組_外掛隔離',
+  VERSION:'v2.2.8_38.7_主線GET直連',
   SPREADSHEET_ID:'1JA0-kxVO6x3NbCgjmUurkwd8lffolj0pbInissLl8BQ',
   API_TIMEOUT_MS:12000,
   API_ACTIONS:{
@@ -20,7 +20,7 @@ window.PWA_CONFIG={
 };
 (function(){
   'use strict';
-  var v='257';
+  var v='258';
   var path=(location.pathname||'').toLowerCase();
   var isReport=/work-report-v2\.html$/.test(path);
   var isApp=/app\.html$|\/$/.test(path);
@@ -37,7 +37,7 @@ window.PWA_CONFIG={
     load('./work-report-v2-task-prefill-253.js?v='+v,'今日任務帶入報工253');
   }
   if(isApp){
-    load('./nexus-quick-module-257.js?v='+v,'NEXUS主線快速模組257');
+    load('./nexus-quick-module-258.js?v='+v,'NEXUS主線快速模組258');
   }
   if(isRegister){
     // register.html 只需要 PWA_CONFIG 與 gas-bridge，不載入報工或主管追蹤外掛，避免畫面外溢。
