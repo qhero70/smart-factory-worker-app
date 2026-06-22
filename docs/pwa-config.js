@@ -2,7 +2,7 @@ window.PWA_CONFIG={
   GAS_WEB_APP_URL:'https://script.google.com/macros/s/AKfycbwOi-xjKoMD9jVq4HrHBvh7k1DCn70lAPAJiqaWJhvH70PbuRo4ciopCjYcytIalaW4/exec',
   APP_NAME:'NEXUS OS · 工業 5.0 智慧製造矩陣',
   APP_SHORT_NAME:'化新精密',
-  VERSION:'v2.2.1_38.7_主線優化_照片修復',
+  VERSION:'v2.2.2_38.7_今日任務帶入報工',
   SPREADSHEET_ID:'1JA0-kxVO6x3NbCgjmUurkwd8lffolj0pbInissLl8BQ',
   API_TIMEOUT_MS:12000,
   API_ACTIONS:{
@@ -22,12 +22,15 @@ window.PWA_CONFIG={
     自動排程38_7:'自動排程38_7',
     取得今日任務38_7:'取得今日任務38_7',
     取得主線儀表板38_7:'取得主線儀表板38_7',
-    測試_主線優化38_7:'測試_主線優化38_7'
+    更新今日派班狀態38_7:'更新今日派班狀態38_7',
+    取得派班任務明細38_7:'取得派班任務明細38_7',
+    測試_主線優化38_7:'測試_主線優化38_7',
+    測試_今日派班報工回寫38_7:'測試_今日派班報工回寫38_7'
   }
 };
 (function(){
   'use strict';
-  var v='252';
+  var v='253';
   function load(src,id){
     if(document.getElementById(id))return;
     var s=document.createElement('script');
@@ -50,4 +53,5 @@ window.PWA_CONFIG={
   load('./work-report-v2-dispatch-guard-ui-249.js?v='+v,'報工今日派班防呆提示249');
   load('./work-report-v2-manager-entry-250.js?v='+v,'報工主管戰情入口250');
   load('./work-report-v2-photo-fix-252.js?v='+v,'報工機台照片修復252');
+  load('./work-report-v2-task-prefill-253.js?v='+v,'今日任務帶入報工253');
 })();
