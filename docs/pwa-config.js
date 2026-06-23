@@ -2,8 +2,8 @@ window.PWA_CONFIG={
   GAS_WEB_APP_URL:'https://script.google.com/macros/s/AKfycbwOi-xjKoMD9jVq4HrHBvh7k1DCn70lAPAJiqaWJhvH70PbuRo4ciopCjYcytIalaW4/exec',
   APP_NAME:'NEXUS OS · 工業 5.0 智慧製造矩陣',
   APP_SHORT_NAME:'化新精密',
-  VERSION:'v2.3.5_38.7_正式完整主檔資料庫',
-  SPREADSHEET_ID:'10j1009HMaZol47urKrwt6sWYc3KyxjZGnlHBX5qItnU',
+  VERSION:'v2.3.6_38.7_正式主庫上線檢查版',
+  SPREADSHEET_ID:'1JA0-kxVO6x3NbCgjmUurkwd8lffolj0pbInissLl8BQ',
   API_TIMEOUT_MS:12000,
   API_ACTIONS:{
     健康檢查:'健康檢查',主檔檢查:'主檔檢查',
@@ -20,7 +20,7 @@ window.PWA_CONFIG={
 };
 (function(){
   'use strict';
-  var v='266';
+  var v='267';
   var path=(location.pathname||'').toLowerCase();
   var isReport=/work-report-v2\.html$/.test(path);
   var isApp=/app\.html$|\/$/.test(path);
