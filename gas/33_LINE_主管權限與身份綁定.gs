@@ -1,20 +1,21 @@
 /**
  * 33_LINE_主管權限與身份綁定.gs
- * 智慧製造中央作戰指揮中心 v1.7.1
+ * 智慧製造中央作戰指揮中心 v1.7.2
  *
  * 正式用途：
  * 1. LINE 使用者輸入「綁定 工號」時，完成身份綁定。
- * 2. 寫入 / 更新正式主庫「33_LINE身份權限」。
- * 3. 維持既有主管權限、現場人員權限、RichMenu 更新邏輯可接。
- * 4. 防止 LINE 已回覆成功但 33_LINE身份權限未更新。
+ * 2. 強制寫入正式主庫「33_LINE身份權限」。
+ * 3. 不再優先呼叫舊的 取得試算表_()，避免寫到其他舊資料庫。
+ * 4. 維持既有主管權限、現場人員權限、RichMenu 更新邏輯可接。
  *
  * Git 管理原則：
  * 本檔為 Apps Script 正式同名檔版本。
  * 請複製本檔完整內容覆蓋 Apps Script：33_LINE_主管權限與身份綁定.gs
- * 不再使用額外補丁檔。
+ * 不使用額外補丁檔、不使用追加段落檔。
  */
 
-const LINE身份權限33_版本 = 'v1.7.1_33_LINE主管權限與身份綁定_正式33表同步版';
+const LINE身份權限33_版本 = 'v1.7.2_33_LINE主管權限與身份綁定_強制正式主庫同步版';
+const LINE身份權限33_正式主庫ID = '1JA0-kxVO6x3NbCgjmUurkwd8lffolj0pbInissLl8BQ';
 const LINE身份權限33_身份表 = '33_LINE身份權限';
 const LINE身份權限33_紀錄表 = '33_LINE權限紀錄';
 const LINE身份權限33_人員表 = '01_人員主檔';
@@ -29,9 +30,6 @@ const LINE身份權限33_紀錄欄位 = [
   '時間戳', 'LINE_USER_ID', '工號', '姓名', '動作', '結果', '備註'
 ];
 
-/**
- * 初始化本模組需要的正式分頁。
- */
 function 初始化33_LINE主管權限與身份綁定() {
   const ss = 取得_LINE身份權限33_試算表_();
   LINE身份權限33_建立或修復表_(ss, LINE身份權限33_身份表, LINE身份權限33_身份欄位);
@@ -39,7 +37,21 @@ function 初始化33_LINE主管權限與身份綁定() {
   return {
     ok: true,
     version: LINE身份權限33_版本,
+    spreadsheetId: ss.getId(),
     sheets: [LINE身份權限33_身份表, LINE身份權限33_紀錄表]
+  };
+}
+
+function 測試33_LINE身份權限_確認正式主庫() {
+  const ss = 取得_LINE身份權限33_試算表_();
+  const sh = ss.getSheetByName(LINE身份權限33_身份表);
+  return {
+    ok: true,
+    version: LINE身份權限33_版本,
+    spreadsheetId: ss.getId(),
+    spreadsheetName: ss.getName(),
+    targetIsFormal: ss.getId() === LINE身份權限33_正式主庫ID,
+    sheetName: sh ? sh.getName() : '找不到33_LINE身份權限'
   };
 }
 
@@ -87,10 +99,6 @@ function LINE身份權限_嘗試處理Webhook_(payload) {
   };
 }
 
-/**
- * LINE文字事件分流。
- * 支援：綁定 工號 / 解除綁定 / 我的任務 / 權限檢查
- */
 function 處理_LINE文字事件_身份綁定模組(event) {
   const 文字 = String(event?.message?.text || '').trim();
   if (!文字) return { handled: false, text: '' };
@@ -117,9 +125,6 @@ function 處理_LINE文字事件_身份綁定模組(event) {
   return { handled: false, text: '' };
 }
 
-/**
- * 綁定指令：綁定 工號
- */
 function 處理_LINE_綁定指令(LINE_USER_ID, 工號, event) {
   LINE_USER_ID = String(LINE_USER_ID || '').trim();
   工號 = String(工號 || '').trim();
@@ -127,7 +132,8 @@ function 處理_LINE_綁定指令(LINE_USER_ID, 工號, event) {
   if (!LINE_USER_ID) return '無法取得 LINE_USER_ID，請確認此訊息來自 LINE Bot webhook。';
   if (!工號) return '格式錯誤。\n請輸入：綁定 工號\n例如：綁定 fhfi546';
 
-  const sync = LINE身份權限33_同步舊綁定結果_(LINE_USER_ID, 工號);
+  // ✅ 唯一正式同步點：這裡會強制寫入正式主庫 33_LINE身份權限。
+  const sync = LINE身份權限33_同步正式身份表_(LINE_USER_ID, 工號);
   if (!sync.ok) {
     LINE身份權限33_寫紀錄_(LINE_USER_ID, 工號, '', '綁定', '失敗', sync.message);
     return sync.message;
@@ -139,8 +145,6 @@ function 處理_LINE_綁定指令(LINE_USER_ID, 工號, event) {
   const 權限等級 = LINE身份權限33_取得權限等級_(身份);
 
   LINE身份權限33_寫紀錄_(LINE_USER_ID, 工號, 姓名, '綁定', '成功', sync.message);
-
-  // 保留既有 RichMenu 更新機制：若舊系統有這些函數，就讓它接著跑。
   LINE身份權限33_嘗試更新RichMenu_(LINE_USER_ID, 身份);
 
   return [
@@ -160,10 +164,9 @@ function 處理_LINE_綁定指令(LINE_USER_ID, 工號, event) {
 }
 
 /**
- * 正式同步：寫入 33_LINE身份權限。
- * 這是修正「LINE顯示綁定成功但33表未更新」的核心。
+ * 正式同步：強制寫入正式主庫 33_LINE身份權限。
  */
-function LINE身份權限33_同步舊綁定結果_(LINE_USER_ID, 工號) {
+function LINE身份權限33_同步正式身份表_(LINE_USER_ID, 工號) {
   LINE_USER_ID = String(LINE_USER_ID || '').trim();
   工號 = String(工號 || '').trim();
 
@@ -198,37 +201,33 @@ function LINE身份權限33_同步舊綁定結果_(LINE_USER_ID, 工號) {
     人員.職稱,
     人員.角色,
     '是',
-    'LINE真實綁定完成；33_LINE主管權限正式版同步',
+    'LINE真實綁定完成；33_LINE主管權限v1.7.2強制正式主庫同步',
     LINE身份權限33_現在_()
   ]];
 
   if (sameEmp && sameEmp.__row) {
     sh.getRange(sameEmp.__row, 1, 1, 10).setValues(values);
-    return { ok: true, message: '已更新33_LINE身份權限：' + 工號, row: sameEmp.__row };
+    return { ok: true, message: '已更新正式主庫33_LINE身份權限：' + 工號, row: sameEmp.__row };
   }
 
   sh.appendRow(values[0]);
-  return { ok: true, message: '已新增33_LINE身份權限：' + 工號, row: sh.getLastRow() };
+  return { ok: true, message: '已新增正式主庫33_LINE身份權限：' + 工號, row: sh.getLastRow() };
 }
 
-/**
- * 若舊流程手上是 event + 工號，可呼叫此函數。
- */
+// 舊函數名相容：避免其他檔案仍呼叫舊名稱。
+function LINE身份權限33_同步舊綁定結果_(LINE_USER_ID, 工號) {
+  return LINE身份權限33_同步正式身份表_(LINE_USER_ID, 工號);
+}
+
 function LINE身份權限33_同步綁定成功_BY事件_(event, 工號) {
   const LINE_USER_ID = String(event?.source?.userId || '').trim();
-  return LINE身份權限33_同步舊綁定結果_(LINE_USER_ID, 工號);
+  return LINE身份權限33_同步正式身份表_(LINE_USER_ID, 工號);
 }
 
-/**
- * 短別名。
- */
 function 同步_LINE身份權限33_(LINE_USER_ID, 工號) {
-  return LINE身份權限33_同步舊綁定結果_(LINE_USER_ID, 工號);
+  return LINE身份權限33_同步正式身份表_(LINE_USER_ID, 工號);
 }
 
-/**
- * 解除綁定：停用，不刪資料。
- */
 function 處理_LINE_解除綁定(LINE_USER_ID) {
   LINE_USER_ID = String(LINE_USER_ID || '').trim();
   if (!LINE_USER_ID) return '無法取得 LINE_USER_ID，請確認此訊息來自 LINE Bot webhook。';
@@ -243,13 +242,9 @@ function 處理_LINE_解除綁定(LINE_USER_ID) {
   sh.getRange(身份.__row, 10).setValue(LINE身份權限33_現在_());
 
   LINE身份權限33_寫紀錄_(LINE_USER_ID, 身份['工號'], 身份['姓名'], '解除綁定', '成功', '啟用改為否');
-
   return '已解除綁定。\n如需重新使用個人任務，請再次輸入：綁定 工號';
 }
 
-/**
- * 我的任務：依 LINE_USER_ID 找工號後查 20_今日派班。
- */
 function 處理_LINE_我的任務(LINE_USER_ID) {
   LINE_USER_ID = String(LINE_USER_ID || '').trim();
   if (!LINE_USER_ID) return '無法取得 LINE_USER_ID，請確認此訊息來自 LINE Bot webhook。';
@@ -261,9 +256,7 @@ function 處理_LINE_我的任務(LINE_USER_ID) {
 
   const 工號 = String(身份['工號'] || '').trim();
   const 任務 = 查詢_今日派班待報工_BY_工號(工號);
-  if (!任務.length) {
-    return '目前沒有待報工任務。\n工號：' + 工號 + '\n姓名：' + 身份['姓名'];
-  }
+  if (!任務.length) return '目前沒有待報工任務。\n工號：' + 工號 + '\n姓名：' + 身份['姓名'];
 
   const lines = ['今日待報工任務：'];
   任務.slice(0, 10).forEach(function(r, i) {
@@ -280,9 +273,7 @@ function 處理_LINE_我的任務(LINE_USER_ID) {
 
 function 處理_LINE_權限檢查(LINE_USER_ID) {
   const 身份 = 查詢_LINE身份_BY_LINE_USER_ID(LINE_USER_ID);
-  if (!身份 || String(身份['啟用'] || '').trim() !== '是') {
-    return '尚未完成 LINE 綁定，請輸入：綁定 工號';
-  }
+  if (!身份 || String(身份['啟用'] || '').trim() !== '是') return '尚未完成 LINE 綁定，請輸入：綁定 工號';
 
   return [
     '權限檢查',
@@ -290,7 +281,8 @@ function 處理_LINE_權限檢查(LINE_USER_ID) {
     '工號：' + 身份['工號'],
     '角色：' + LINE身份權限33_轉顯示角色_(身份['角色']),
     '權限等級：' + LINE身份權限33_取得權限等級_(身份),
-    '啟用：' + 身份['啟用']
+    '啟用：' + 身份['啟用'],
+    '資料庫：正式主庫'
   ].join('\n');
 }
 
@@ -299,7 +291,6 @@ function 查詢_人員主檔_BY_工號(工號) {
   const key = String(工號 || '').trim();
   const r = rows.find(x => String(x['工號'] || '').trim() === key);
   if (!r) return null;
-
   return {
     工號: String(r['工號'] || '').trim(),
     姓名: String(r['姓名'] || '').trim(),
@@ -327,29 +318,15 @@ function 查詢_LINE身份_BY_工號(工號) {
 function 查詢_今日派班待報工_BY_工號(工號) {
   const rows = LINE身份權限33_讀取表格物件陣列_(LINE身份權限33_今日派班表);
   const key = String(工號 || '').trim();
-  return rows.filter(x =>
-    String(x['工號'] || '').trim() === key &&
-    String(x['狀態'] || '').trim() === '待報工'
-  );
+  return rows.filter(x => String(x['工號'] || '').trim() === key && String(x['狀態'] || '').trim() === '待報工');
 }
 
 function LINE身份權限33_嘗試更新RichMenu_(LINE_USER_ID, 身份) {
   try {
-    if (typeof 更新LINE主選單_BY身份權限33_ === 'function') {
-      更新LINE主選單_BY身份權限33_(LINE_USER_ID, 身份);
-      return;
-    }
-    if (typeof LINE_RichMenu_依身份更新主選單_ === 'function') {
-      LINE_RichMenu_依身份更新主選單_(LINE_USER_ID, 身份);
-      return;
-    }
-    if (typeof 設定_LINE_RichMenu_一般員工入口_ === 'function') {
-      設定_LINE_RichMenu_一般員工入口_(LINE_USER_ID);
-      return;
-    }
-  } catch (err) {
-    // RichMenu 失敗不得影響身份表寫入。
-  }
+    if (typeof 更新LINE主選單_BY身份權限33_ === 'function') return 更新LINE主選單_BY身份權限33_(LINE_USER_ID, 身份);
+    if (typeof LINE_RichMenu_依身份更新主選單_ === 'function') return LINE_RichMenu_依身份更新主選單_(LINE_USER_ID, 身份);
+    if (typeof 設定_LINE_RichMenu_一般員工入口_ === 'function') return 設定_LINE_RichMenu_一般員工入口_(LINE_USER_ID);
+  } catch (err) {}
 }
 
 function LINE身份權限33_取得目標選單名稱_(身份) {
@@ -397,10 +374,8 @@ function LINE身份權限33_讀取表格物件陣列_(sheetName) {
   const ss = 取得_LINE身份權限33_試算表_();
   const sh = ss.getSheetByName(sheetName);
   if (!sh) throw new Error('缺少分頁：' + sheetName);
-
   const values = sh.getDataRange().getValues();
   if (values.length < 2) return [];
-
   const headers = values[0].map(h => String(h || '').trim());
   return values.slice(1).map(function(row, i) {
     const o = { __row: i + 2 };
@@ -411,16 +386,11 @@ function LINE身份權限33_讀取表格物件陣列_(sheetName) {
   });
 }
 
+/**
+ * v1.7.2 關鍵修正：強制開正式主庫，不走舊 取得試算表_()。
+ */
 function 取得_LINE身份權限33_試算表_() {
-  if (typeof 取得試算表_ === 'function') return 取得試算表_();
-
-  const prop = PropertiesService.getScriptProperties();
-  const id = String(prop.getProperty('智慧製造_SPREADSHEET_ID') || '').trim();
-  if (id) return SpreadsheetApp.openById(id);
-
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  if (!ss) throw new Error('找不到智慧製造中央作戰指揮中心資料庫');
-  return ss;
+  return SpreadsheetApp.openById(LINE身份權限33_正式主庫ID);
 }
 
 function LINE身份權限33_寫紀錄_(LINE_USER_ID, 工號, 姓名, 動作, 結果, 備註) {
@@ -428,15 +398,7 @@ function LINE身份權限33_寫紀錄_(LINE_USER_ID, 工號, 姓名, 動作, 結
     const ss = 取得_LINE身份權限33_試算表_();
     LINE身份權限33_建立或修復表_(ss, LINE身份權限33_紀錄表, LINE身份權限33_紀錄欄位);
     const sh = ss.getSheetByName(LINE身份權限33_紀錄表);
-    sh.appendRow([
-      LINE身份權限33_現在_(),
-      LINE_USER_ID,
-      工號,
-      姓名,
-      動作,
-      結果,
-      備註
-    ]);
+    sh.appendRow([LINE身份權限33_現在_(), LINE_USER_ID, 工號, 姓名, 動作, 結果, 備註]);
   } catch (err) {}
 }
 
