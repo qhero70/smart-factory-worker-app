@@ -8,54 +8,28 @@
 <meta name="apple-mobile-web-app-title" content="NEXUS OS">
 <title>NEXUS OS｜製造部智慧製造應用總部</title>
 <link rel="manifest" href="./manifest.webmanifest">
-<link rel="icon" href="./assets/icons/智慧製造圖示.svg" type="image/svg+xml">
 <style>
-:root{--bg:#e3e6e8;--card:#e3e6e8;--light:#fff;--shadow:#b8c1cc;--accent:#514DFB;--cyan:#00f3ff;--text:#1e2a3a;--muted:#4a5c6e;--danger:#ff3366;--ok:#00a66a}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at top,#f7fbff 0,#e3e6e8 42%,#cfd7df 100%);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","Microsoft JhengHei",Arial,sans-serif}.bg{position:fixed;inset:0;pointer-events:none;background:linear-gradient(120deg,rgba(81,77,251,.16),transparent 35%,rgba(0,243,255,.18));z-index:-1}.app{display:grid;grid-template-columns:280px 1fr;min-height:100vh}.side{padding:30px 20px;background:rgba(255,255,255,.35);backdrop-filter:blur(18px);border-right:1px solid rgba(255,255,255,.65);box-shadow:8px 0 24px rgba(80,91,108,.25)}.logo{font-size:30px;font-weight:1000;letter-spacing:3px;background:linear-gradient(135deg,#514DFB,#7c4dff);-webkit-background-clip:text;color:transparent;text-align:center;margin-bottom:26px}.nav{display:grid;gap:14px}.nav a,.card,.pill,.btn{background:var(--card);box-shadow:8px 8px 16px var(--shadow),-8px -8px 16px var(--light);border-radius:20px}.nav a{display:flex;gap:12px;align-items:center;text-decoration:none;color:var(--muted);font-weight:900;padding:15px 18px}.nav a.active{box-shadow:inset 5px 5px 10px rgba(184,193,204,.85),inset -5px -5px 10px rgba(255,255,255,.72);color:var(--accent)}.main{padding:28px 30px 80px;overflow:auto}.top{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:20px}.title h1{margin:0;font-size:clamp(28px,5vw,54px);line-height:1.05;font-weight:1000}.title p{margin:10px 0 0;color:var(--muted);font-weight:700}.badge{display:inline-flex;align-items:center;gap:8px;border-radius:999px;background:rgba(255,255,255,.45);border:1px solid rgba(255,255,255,.65);padding:10px 14px;font-weight:900;color:var(--accent)}.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:18px 0}.card{padding:18px;border:1px solid rgba(255,255,255,.38)}.label{font-size:12px;color:var(--muted);font-weight:900;letter-spacing:.08em;text-transform:uppercase}.value{font-size:32px;font-weight:1000;margin-top:8px}.sub{font-size:12px;color:var(--muted);font-weight:700;line-height:1.7}.quick{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:18px 0}.quick a{display:block;text-decoration:none;color:var(--text);min-height:132px}.quick b{display:block;font-size:18px;margin-bottom:8px}.quick span{display:block;color:var(--muted);font-size:13px;line-height:1.7}.modules{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:14px}.module{aspect-ratio:1/1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;text-decoration:none;color:var(--text);font-weight:900;transition:.16s}.module:active{transform:scale(.96);box-shadow:inset 5px 5px 10px rgba(184,193,204,.85),inset -5px -5px 10px rgba(255,255,255,.72)}.ico{font-size:30px;margin-bottom:8px}.sectionTitle{margin:26px 0 12px;font-size:20px;font-weight:1000}.footer{margin-top:22px;color:var(--muted);font-size:13px;line-height:1.8}.bottom{display:none;position:fixed;left:18px;right:18px;bottom:16px;height:68px;background:rgba(255,255,255,.55);backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.75);border-radius:28px;box-shadow:8px 8px 18px rgba(184,193,204,.7),-8px -8px 18px rgba(255,255,255,.8);z-index:5}.bottom a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-decoration:none;color:var(--muted);font-size:12px;font-weight:900}.statusDot{width:10px;height:10px;border-radius:50%;background:var(--ok);box-shadow:0 0 12px var(--ok)}@media(max-width:900px){.app{grid-template-columns:1fr}.side{display:none}.main{padding:18px 14px 100px}.kpis,.quick{grid-template-columns:repeat(2,minmax(0,1fr))}.bottom{display:flex}}@media(max-width:560px){.kpis,.quick{grid-template-columns:1fr}.title h1{font-size:34px}.modules{grid-template-columns:repeat(3,minmax(0,1fr))}}
+body{margin:0;min-height:100vh;background:linear-gradient(135deg,#eef3f9,#dce8f5);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","Microsoft JhengHei",Arial,sans-serif;color:#14243a}.wrap{max-width:1080px;margin:0 auto;padding:28px 18px 90px}.badge{display:inline-block;background:#fff;border-radius:999px;padding:10px 14px;font-weight:900;color:#0b74ff;box-shadow:0 8px 20px #c8d6e6}h1{font-size:clamp(34px,6vw,64px);line-height:1.05;margin:18px 0 10px}.sub{color:#4a5c6e;font-weight:700;line-height:1.8}.kpis,.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:22px 0}.card{background:#fff;border-radius:22px;padding:18px;box-shadow:0 16px 40px rgba(20,36,58,.12)}.label{font-size:12px;color:#5d6d82;font-weight:900}.value{font-size:36px;font-weight:1000;margin-top:8px}.ok{color:#0c9f6e}.warn{color:#f59e0b}.bad{color:#e11d48}.quick a{min-height:118px;text-decoration:none;color:#14243a}.quick b{display:block;font-size:18px;margin-bottom:8px}.quick span{color:#5d6d82;font-weight:700;line-height:1.7}.foot{color:#5d6d82;font-size:13px;line-height:1.8}@media(max-width:760px){.kpis,.quick{grid-template-columns:1fr 1fr}}@media(max-width:520px){.kpis,.quick{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<div class="bg"></div>
-<div class="app">
-<aside class="side">
-  <div class="logo">NEXUS OS</div>
-  <nav class="nav">
-    <a class="active" href="#home">📊 首頁儀表板</a>
-    <a href="./manager-war-room-v28.html?v=29">🧠 主管戰情看板</a>
-    <a href="./work-report-v2.html?v=249">✅ 報工作業 V2</a>
-    <a href="./production-plan-cleaner-v3.html?v=302">🧹 生產計畫清洗</a>
-    <a href="./app.html">🛰 行動戰情室</a>
-  </nav>
-</aside>
-<main class="main" id="home">
-  <div class="top">
-    <div class="title">
-      <div class="badge"><i class="statusDot"></i>Huaxin Smart Manufacturing HS</div>
-      <h1>工業 5.0 智慧製造矩陣</h1>
-      <p>製造部製一組｜智慧製造中央作戰指揮中心｜GitHub Pages 正式總部入口</p>
-    </div>
-  </div>
-  <section class="kpis">
-    <div class="card"><div class="label">今日排程數</div><div class="value">43</div><div class="sub">今日派班總量</div></div>
-    <div class="card"><div class="label">已報工</div><div class="value" style="color:var(--ok)">7</div><div class="sub">完成報工派班</div></div>
-    <div class="card"><div class="label">未報工追蹤</div><div class="value" style="color:var(--danger)">36</div><div class="sub">需班長確認</div></div>
-    <div class="card"><div class="label">LINE Bot</div><div class="value" style="font-size:22px;color:var(--ok)">正常</div><div class="sub">每日戰情推播已接通</div></div>
-  </section>
-  <section class="quick">
-    <a class="card" href="./manager-war-room-v28.html?v=29"><b>📊 主管戰情看板</b><span>AI 摘要、風險清單、未報工追蹤、LINE 推播狀態。</span></a>
-    <a class="card" href="./work-report-v2.html?v=249"><b>✅ 報工作業 V2</b><span>今日派班、派班報工、防重複超量、工序扣量。</span></a>
-    <a class="card" href="./production-plan-cleaner-v3.html?v=302"><b>🧹 生產計畫清洗</b><span>月計畫 Excel 清洗、每日明細、排程需求池。</span></a>
-    <a class="card" href="./app.html"><b>🛰 行動戰情室</b><span>PWA 狀態、GAS URL、API 健康檢查。</span></a>
-  </section>
-  <h2 class="sectionTitle">24 組完整管理模組</h2>
-  <section class="modules" id="modules"></section>
-  <div class="footer">NEXUS OS · 工業 5.0 智慧製造矩陣｜此版本依上傳之總部首頁視覺規格重建，保留快速入口、24 模組矩陣、NEXUS OS 風格與手機優先操作。</div>
+<main class="wrap">
+<div class="badge">Huaxin Smart Manufacturing HS｜v2.3.6 / 267</div>
+<h1>製造部智慧製造應用總部</h1>
+<p class="sub">智慧製造中央作戰指揮中心｜正式主庫上線檢查版｜主線入口以 app.html 為準。</p>
+<section class="kpis">
+<div class="card"><div class="label">今日派班</div><div class="value">42</div><div class="sub">20_今日派班</div></div>
+<div class="card"><div class="label">已報工</div><div class="value ok">1</div><div class="sub">09_報工正式紀錄</div></div>
+<div class="card"><div class="label">待報工</div><div class="value warn">41</div><div class="sub">等待現場回報</div></div>
+<div class="card"><div class="label">主檔阻擋</div><div class="value bad">158</div><div class="sub">產品116 / 途程42</div></div>
+</section>
+<section class="quick">
+<a class="card" href="./app.html?v=267"><b>🛰 行動戰情室</b><span>PWA 今日任務、主線操作、AI 決策中心。</span></a>
+<a class="card" href="./work-report-v2.html?v=267"><b>✅ 報工作業 V2</b><span>派班帶入、報工送出、防重防超扣。</span></a>
+<a class="card" href="./production-plan-cleaner-v3.html?v=302"><b>🧹 生產計畫清洗</b><span>Excel 清洗、需求池建立、異常追蹤。</span></a>
+<a class="card" href="./manager-war-room-v28.html?v=29"><b>🧠 主管戰情看板</b><span>AI 摘要、阻擋清單、未報工追蹤。</span></a>
+</section>
+<p class="foot">正式主庫 ID：1JA0-kxVO6x3NbCgjmUurkwd8lffolj0pbInissLl8BQ。已補機台 1101，REQ_202606_0008 已解除機台阻擋，下一輪可進工單防重。</p>
 </main>
-</div>
-<nav class="bottom"><a href="#home">📊<span>首頁</span></a><a href="./manager-war-room-v28.html?v=29">🧠<span>戰情</span></a><a href="./work-report-v2.html?v=249">✅<span>報工</span></a><a href="./production-plan-cleaner-v3.html?v=302">🧹<span>清洗</span></a></nav>
-<script>
-const mods=[['👥','人員管理'],['📦','產品管理'],['🧩','BOM管理'],['⚙️','機台管理'],['📑','訂單管理'],['📊','生產計畫管理'],['🛒','採購管理'],['📋','工單管理'],['🔍','檢具管理'],['🔪','刀具管理'],['🗜️','治具管理'],['🔄','流程管理'],['📅','排程管理'],['📦','包裝管理'],['✅','報工管理'],['⚠️','不良品管理'],['📚','知識庫管理'],['👔','幹部指派PM管理'],['📆','行事曆管理'],['📹','WebRTC視訊通話'],['🏭','廠區監控'],['🤖','AI決策中心'],['💬','LINE Bot通知中心'],['⚙️','系統設定']];
-document.getElementById('modules').innerHTML=mods.map(m=>`<a class="module card" href="#"><span class="ico">${m[0]}</span><span>${m[1]}</span></a>`).join('');
-console.log('NEXUS OS · 智慧製造總部首頁已就緒');
-</script>
 </body>
 </html>
