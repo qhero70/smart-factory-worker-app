@@ -3,22 +3,25 @@
 
   /**
    * work-report-v2-core.js
-   * 製造部報工作業核心穩定版 v2.1.9
+   * 製造部報工作業核心穩定版 v2.2.0
    *
    * 本次正式修正：
-   * 1. 恢復下拉卡片式樣式：本檔會主動載入 work-report-v2-ui.css。
-   * 2. 機台照片若舊核心沒有渲染，本檔會依目前工站主機台自行渲染。
-   * 3. 機台照片必須依目前選定工站過濾，不再混入同產品其他工站機台。
-   * 4. M/C加工｜OP110｜489 → 只顯示 489。
-   * 5. 清洗+目視｜OP130｜77 → 只顯示 77。
+   * 1. 選擇完人員後，只保留選到的人員卡片。
+   * 2. 選擇完產品後，只保留選到的產品卡片。
+   * 3. 選擇完工站後，只保留該工站主機台卡片。
+   * 4. 保留重新選擇能力：點人員/產品下拉控制時會重新展開全部卡片。
+   * 5. 恢復下拉卡片式樣式與機台照片渲染。
    * 6. 不改 09_報工、不改 20_今日派班回寫、不改 10_工單主檔扣帳。
    */
 
-  var 正式版號 = '219';
+  var 正式版號 = '220';
   var 遠端穩定核心 = 'https://cdn.jsdelivr.net/gh/qhero70/smart-factory-worker-app@eb33ca85a8bca1746614659b41596d3b9a9f8bf8/docs/work-report-v2-core.js';
   var 已載入遠端核心 = false;
   var 已安裝工站機台修正 = false;
+  var 已安裝選定卡片收斂 = false;
   var 上次工站機台簽章 = '';
+  var 選定人員卡 = null;
+  var 選定產品卡 = null;
 
   function $(id){ return document.getElementById(id); }
 
@@ -212,7 +215,7 @@
     box.style.setProperty('opacity', '1', 'important');
 
     window.智慧製造機台照片狀態 = {
-      版本: 'v2.1.9_下拉卡片與機台照片恢復版',
+      版本: 'v2.2.0_選定卡片收斂版',
       修復來源: '直接依目前工站主機台渲染',
       工站: 取目前工站下拉文字_(),
       顯示機台: rows.map(function(m){ return m.機台編號; }),
@@ -229,12 +232,172 @@
       productList.style.setProperty('max-height', 'none', 'important');
       productList.style.setProperty('overflow', 'visible', 'important');
     }
+    var peopleList = $('人員列表');
+    if(peopleList && document.body.classList.contains('人員下拉展開')){
+      peopleList.style.setProperty('display', 'grid', 'important');
+      peopleList.style.setProperty('height', 'auto', 'important');
+      peopleList.style.setProperty('max-height', 'none', 'important');
+      peopleList.style.setProperty('overflow', 'visible', 'important');
+    }
+  }
+
+  function 取卡片設定_(type){
+    return type === '人員'
+      ? { box: $('人員列表'), selector: '.人員卡片', store: function(v){ 選定人員卡 = v; }, get: function(){ return 選定人員卡; }, expandClass: '人員下拉展開' }
+      : { box: $('產品列表'), selector: '.產品卡片', store: function(v){ 選定產品卡 = v; }, get: function(){ return 選定產品卡; }, expandClass: '產品下拉展開' };
+  }
+
+  function 取卡片候選_(cfg){
+    if(!cfg.box) return [];
+    var cards = Array.prototype.slice.call(cfg.box.querySelectorAll(cfg.selector));
+    if(!cards.length){
+      cards = Array.prototype.slice.call(cfg.box.children).filter(function(el){
+        return el && el.nodeType === 1 && !el.classList.contains('導航箭頭') && el.tagName !== 'SCRIPT' && el.tagName !== 'STYLE';
+      });
+    }
+    return cards;
+  }
+
+  function 找目前選中卡_(type, clicked){
+    var cfg = 取卡片設定_(type);
+    var cards = 取卡片候選_(cfg);
+    if(!cards.length) return null;
+
+    if(clicked && cfg.box && cfg.box.contains(clicked)){
+      var hit = clicked.closest ? clicked.closest(cfg.selector) : null;
+      if(hit && cfg.box.contains(hit)) return hit;
+      if(cards.indexOf(clicked) >= 0) return clicked;
+    }
+
+    var saved = cfg.get();
+    if(saved && cfg.box.contains(saved)) return saved;
+
+    return cards.find(function(card){
+      return card.classList.contains('選中') ||
+        card.classList.contains('active') ||
+        card.classList.contains('selected') ||
+        card.dataset.selected === 'true' ||
+        card.dataset.selected === '是' ||
+        card.dataset.keepSelected === '是' ||
+        card.getAttribute('aria-selected') === 'true';
+    }) || null;
+  }
+
+  function 套用選定卡片收斂_(type, clicked, force){
+    var cfg = 取卡片設定_(type);
+    var box = cfg.box;
+    if(!box) return;
+    var cards = 取卡片候選_(cfg);
+    if(!cards.length) return;
+
+    var selected = 找目前選中卡_(type, clicked);
+    if(!selected) return;
+    cfg.store(selected);
+    selected.dataset.keepSelected = '是';
+    selected.classList.add('選中');
+
+    cards.forEach(function(card){
+      var keep = card === selected;
+      card.style.setProperty('display', keep ? 'grid' : 'none', 'important');
+      card.style.setProperty('visibility', keep ? 'visible' : 'hidden', 'important');
+      card.style.setProperty('opacity', keep ? '1' : '0', 'important');
+      card.style.setProperty('pointer-events', keep ? 'auto' : 'none', 'important');
+      card.dataset.keepSelected = keep ? '是' : '否';
+    });
+
+    box.style.setProperty('display', 'grid', 'important');
+    box.style.setProperty('height', 'auto', 'important');
+    box.style.setProperty('min-height', '0', 'important');
+    box.style.setProperty('max-height', 'none', 'important');
+    box.style.setProperty('overflow', 'visible', 'important');
+    box.dataset.onlySelected = '是';
+
+    window.智慧製造選定卡片狀態 = window.智慧製造選定卡片狀態 || {};
+    window.智慧製造選定卡片狀態[type] = {
+      版本: 'v2.2.0_選擇完成只留選定卡片',
+      卡片文字: 文字(selected.textContent).slice(0, 80),
+      總卡片: cards.length,
+      顯示卡片: 1
+    };
+  }
+
+  function 展開卡片重新選擇_(type){
+    var cfg = 取卡片設定_(type);
+    if(!cfg.box) return;
+    var cards = 取卡片候選_(cfg);
+    cards.forEach(function(card){
+      card.style.setProperty('display', 'grid', 'important');
+      card.style.setProperty('visibility', 'visible', 'important');
+      card.style.setProperty('opacity', '1', 'important');
+      card.style.setProperty('pointer-events', 'auto', 'important');
+      card.dataset.keepSelected = '';
+    });
+    cfg.box.dataset.onlySelected = '否';
+    cfg.box.style.setProperty('display', 'grid', 'important');
+    cfg.box.style.setProperty('height', 'auto', 'important');
+    cfg.box.style.setProperty('max-height', '56vh', 'important');
+    cfg.box.style.setProperty('overflow', 'auto', 'important');
+    document.body.classList.add(cfg.expandClass);
+  }
+
+  function 安裝選定卡片收斂_(){
+    if(已安裝選定卡片收斂) return;
+    已安裝選定卡片收斂 = true;
+
+    function later(type, clicked, force){
+      setTimeout(function(){ 套用選定卡片收斂_(type, clicked, !!force); }, 90);
+      setTimeout(function(){ 套用選定卡片收斂_(type, clicked, !!force); }, 280);
+      setTimeout(function(){ 套用選定卡片收斂_(type, clicked, !!force); }, 850);
+    }
+
+    document.addEventListener('click', function(e){
+      var target = e.target;
+      if(!target || !target.closest) return;
+
+      if(target.closest('#人員下拉控制,#人員下拉按鈕')){
+        展開卡片重新選擇_('人員');
+        return;
+      }
+      if(target.closest('#產品下拉控制,#產品下拉按鈕')){
+        展開卡片重新選擇_('產品');
+        return;
+      }
+
+      var person = target.closest('.人員卡片');
+      if(person && $('人員列表') && $('人員列表').contains(person)){
+        later('人員', person, true);
+        return;
+      }
+
+      var product = target.closest('.產品卡片');
+      if(product && $('產品列表') && $('產品列表').contains(product)){
+        later('產品', product, true);
+        return;
+      }
+
+      var quickPerson = target.closest('.常用人員');
+      if(quickPerson){
+        later('人員', null, true);
+      }
+    }, true);
+
+    var people = $('人員列表');
+    if(people) new MutationObserver(function(){ setTimeout(function(){ 套用選定卡片收斂_('人員', null, false); }, 120); }).observe(people, {childList:true, subtree:true, attributes:true, attributeFilter:['class','data-selected','aria-selected']});
+
+    var products = $('產品列表');
+    if(products) new MutationObserver(function(){ setTimeout(function(){ 套用選定卡片收斂_('產品', null, false); }, 120); }).observe(products, {childList:true, subtree:true, attributes:true, attributeFilter:['class','data-selected','aria-selected']});
+
+    setInterval(function(){
+      套用選定卡片收斂_('人員', null, false);
+      套用選定卡片收斂_('產品', null, false);
+    }, 1800);
   }
 
   function 安裝工站機台照片修正_(){
     if(已安裝工站機台修正) return;
     已安裝工站機台修正 = true;
     載入正式樣式_();
+    安裝選定卡片收斂_();
 
     function later(force){
       setTimeout(function(){ 修正下拉卡片樣式_(); 渲染目前工站機台照片_(!!force); }, 80);
@@ -274,26 +437,31 @@
       ev.initEvent('DOMContentLoaded', true, true);
       document.dispatchEvent(ev);
       安裝工站機台照片修正_();
+      安裝選定卡片收斂_();
       setTimeout(安裝工站機台照片修正_, 300);
       setTimeout(function(){ 渲染目前工站機台照片_(true); }, 1000);
       setTimeout(function(){ 渲染目前工站機台照片_(true); }, 2200);
     };
     s.onerror = function(){
       安裝工站機台照片修正_();
+      安裝選定卡片收斂_();
       setTimeout(function(){ 渲染目前工站機台照片_(true); }, 1000);
     };
     document.head.appendChild(s);
   }
 
   載入正式樣式_();
+  安裝選定卡片收斂_();
 
   if(document.readyState === 'loading'){
     document.addEventListener('DOMContentLoaded', function(){
       載入遠端穩定核心_();
       安裝工站機台照片修正_();
+      安裝選定卡片收斂_();
     });
   }else{
     載入遠端穩定核心_();
     安裝工站機台照片修正_();
+    安裝選定卡片收斂_();
   }
 })();
