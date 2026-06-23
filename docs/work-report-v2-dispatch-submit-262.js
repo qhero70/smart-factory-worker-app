@@ -6,10 +6,19 @@
   function q(id){var el=document.getElementById(id);return el?s(el.value):'';}
   function gas(){return window.PWA_CONFIG&&window.PWA_CONFIG.GAS_WEB_APP_URL||'';}
   function set(obj,k,v){if(obj&&s(v)&&!s(obj[k]))obj[k]=s(v);}
+  function pickWorkOrder(t){
+    var direct=s(t['工單編號']||t['來源工單編號']||t['工單']);
+    if(direct)return direct;
+    var memo=s(t['備註']);
+    var m=memo.match(/(?:來源工單|工單編號|WO)\s*[=：:]\s*(WO_[A-Za-z0-9_\-]+)/i);
+    if(m&&m[1])return m[1];
+    return '';
+  }
   function merge(obj){
     var t=task(); if(!t||!Object.keys(t).length||!obj)return obj;
     set(obj,'派班編號',t['派班編號']); set(obj,'來源派班編號',t['派班編號']); set(obj,'今日派班編號',t['派班編號']);
-    set(obj,'來源需求編號',t['來源需求編號']); set(obj,'工單編號',t['來源需求編號']);
+    set(obj,'來源需求編號',t['來源需求編號']);
+    set(obj,'工單編號',pickWorkOrder(t));
     set(obj,'產品編號',t['產品編號']); set(obj,'客戶品號',t['客戶品號']); set(obj,'品名',t['品名']);
     set(obj,'工號',t['工號']); set(obj,'姓名',t['姓名']); set(obj,'班別',t['班別']);
     set(obj,'工站名稱',t['工站名稱']||q('今日任務工站261')||q('工站選擇'));
@@ -35,6 +44,7 @@
     var t=task(); if(!t||!Object.keys(t).length)return body;
     var sp=new URLSearchParams(body);
     ['派班編號','來源需求編號','產品編號','客戶品號','品名','工號','姓名','班別'].forEach(function(k){if(!sp.get(k)&&t[k])sp.set(k,t[k]);});
+    var wo=pickWorkOrder(t); if(!sp.get('工單編號')&&wo)sp.set('工單編號',wo);
     if(!sp.get('報工數量')&&q('今日共做數'))sp.set('報工數量',q('今日共做數'));
     sp.set('NEXUS派班報工','是'); sp.set('NEXUS任務版本','262');
     return sp.toString();
