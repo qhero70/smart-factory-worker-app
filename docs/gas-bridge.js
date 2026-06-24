@@ -4,9 +4,7 @@
   const 預設逾時 = Number(設定.API_TIMEOUT_MS || 15000);
   const 臨時URL_KEY = '智慧製造_臨時GAS_WEB_APP_URL';
 
-  function 清理網址(url){
-    return String(url || '').trim().replace(/\?.*$/,'');
-  }
+  function 清理網址(url){ return String(url || '').trim().replace(/\?.*$/,''); }
 
   function 取得GAS網址(){
     const 臨時URL = 清理網址(localStorage.getItem(臨時URL_KEY));
@@ -34,8 +32,12 @@
     return url.toString();
   }
 
+  function 建立BodyObj(action, payload){
+    return Object.assign({}, payload || {}, { action: action, 動作: action, _ts: String(Date.now()) });
+  }
+
   function 建立表單Body(action, payload){
-    const bodyObj = Object.assign({}, payload || {}, { action: action, 動作: action });
+    const bodyObj = 建立BodyObj(action, payload);
     const sp = new URLSearchParams();
     Object.keys(bodyObj).forEach(key => {
       const value = bodyObj[key];
@@ -43,7 +45,6 @@
       sp.set(key, typeof value === 'object' ? JSON.stringify(value) : String(value));
     });
     const json = JSON.stringify(bodyObj);
-    // 小資料同時放 payload/json，讓不同版本 GAS 路由都能解析；有照片時避免 body 膨脹過大。
     if (json.length < 220000) {
       sp.set('payload', json);
       sp.set('資料', json);
@@ -57,9 +58,7 @@
     const timer = setTimeout(() => controller.abort(), timeoutMs);
     return fetch(url, Object.assign({}, options || {}, { signal: controller.signal }))
       .catch(error => {
-        if (error && error.name === 'AbortError') {
-          throw new Error(`API 逾時：${timeoutMs} ms，請檢查 GAS Web App 部署權限、網路或 Webhook/API 是否回應。`);
-        }
+        if (error && error.name === 'AbortError') throw new Error(`API 逾時：${timeoutMs} ms，請檢查 GAS Web App 部署權限、網路或 Webhook/API 是否回應。`);
         throw error;
       })
       .finally(() => clearTimeout(timer));
@@ -76,13 +75,83 @@
     if (!res || typeof res !== 'object') return true;
     if (res.成功 === false || res.success === false || res.ok === false) return true;
     const msg = String(res.訊息 || res.message || res.error || res.原始回應 || '');
-    return /UNKNOWN_ACTION|Unknown action|找不到|未接入|沒有.*動作|不支援/.test(msg);
+    return /UNKNOWN_ACTION|Unknown action|找不到|未接入|沒有.*動作|不支援|未部署/.test(msg);
   }
 
   async function GET(action, payload, options){
     const url = 建立網址(action, payload);
     const timeoutMs = Number(options?.timeoutMs || 預設逾時);
     return 逾時Fetch(url, { method:'GET', cache:'no-store', mode:'cors', credentials:'omit' }, timeoutMs).then(解析回應);
+  }
+
+  function 表單送出(action, payload, reason){
+    const base = 取得GAS網址();
+    if (!base) throw new Error('尚未設定 GAS Web App URL。');
+    const bodyObj = 建立BodyObj(action, payload);
+    const iframeName = 'gas_submit_' + Date.now() + '_' + Math.floor(Math.random()*10000);
+    const iframe = document.createElement('iframe');
+    iframe.name = iframeName;
+    iframe.style.cssText = 'position:absolute;width:1px;height:1px;left:-9999px;top:-9999px;opacity:0;border:0;';
+    const form = document.createElement('form');
+    const url = new URL(base);
+    url.searchParams.set('action', action);
+    url.searchParams.set('動作', action);
+    url.searchParams.set('_ts', String(Date.now()));
+    form.method = 'POST';
+    form.action = url.toString();
+    form.target = iframeName;
+    form.acceptCharset = 'UTF-8';
+    form.style.display = 'none';
+
+    function add(name, value){
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = name;
+      input.value = value === undefined || value === null ? '' : (typeof value === 'object' ? JSON.stringify(value) : String(value));
+      form.appendChild(input);
+    }
+
+    Object.keys(bodyObj).forEach(k => add(k, bodyObj[k]));
+    const json = JSON.stringify(bodyObj);
+    if (json.length < 220000) { add('payload', json); add('資料', json); add('json', json); }
+
+    document.body.appendChild(iframe);
+    document.body.appendChild(form);
+    form.submit();
+
+    setTimeout(() => { try { form.remove(); iframe.remove(); } catch(e){} }, 15000);
+    return Promise.resolve({
+      成功:true,
+      success:true,
+      opaque:true,
+      transport:'hidden_form_post',
+      action:action,
+      訊息:'已使用表單通道送出至 GAS；此模式避開 iOS/Safari FetchEvent Load failed。請以 09_報工 / 09_不良紀錄為準。',
+      原因:reason || ''
+    });
+  }
+
+  async function POST_NO_CORS(action, payload, reason){
+    const base = 取得GAS網址();
+    if (!base) throw new Error('尚未設定 GAS Web App URL。');
+    const url = new URL(base);
+    url.searchParams.set('action', action);
+    url.searchParams.set('動作', action);
+    url.searchParams.set('_ts', String(Date.now()));
+    const body = 建立表單Body(action, payload);
+    try {
+      await fetch(url.toString(), {
+        method:'POST',
+        cache:'no-store',
+        mode:'no-cors',
+        credentials:'omit',
+        headers:{ 'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8' },
+        body
+      });
+      return { 成功:true, success:true, opaque:true, transport:'no_cors_post', action:action, 訊息:'已使用 no-cors 通道送出至 GAS；請以 09_報工 / 09_不良紀錄為準。', 原因:reason || '' };
+    } catch(e) {
+      return 表單送出(action, payload, 'no-cors 也失敗：' + (e.message || String(e)));
+    }
   }
 
   async function POST(action, payload, options){
@@ -106,13 +175,21 @@
       }, timeoutMs).then(解析回應);
 
       if (!是失敗回應(res)) return res;
-
-      // GAS 舊路由如果只吃 GET 參數，POST 回失敗時立即降級 GET。
-      const getRes = await GET(action, payload, { timeoutMs });
-      return getRes;
+      try {
+        const getRes = await GET(action, payload, { timeoutMs });
+        if (!是失敗回應(getRes)) return getRes;
+        return POST_NO_CORS(action, payload, 'POST/GET 都有回應但不是成功：' + (getRes.訊息 || getRes.message || '')); 
+      } catch(getError) {
+        return POST_NO_CORS(action, payload, 'POST 回應非成功，GET 失敗：' + getError.message);
+      }
     } catch (postError) {
-      try { return await GET(action, payload, { timeoutMs }); }
-      catch (getError) { throw new Error(`POST 失敗：${postError.message}；GET 降級也失敗：${getError.message}`); }
+      try {
+        const getRes = await GET(action, payload, { timeoutMs });
+        if (!是失敗回應(getRes)) return getRes;
+        return POST_NO_CORS(action, payload, 'POST 失敗，GET 回應非成功：' + (getRes.訊息 || getRes.message || ''));
+      } catch (getError) {
+        return POST_NO_CORS(action, payload, `POST/GET fetch 均失敗：${postError.message}；${getError.message}`);
+      }
     }
   }
 
@@ -134,14 +211,5 @@
     return 呼叫(設定.API_ACTIONS?.寫入不良紀錄v2 || '寫入不良紀錄v2', payload, { method:'POST', timeoutMs: Number(設定.API_TIMEOUT_MS || 預設逾時) });
   }
 
-  window.GAS橋接器 = {
-    取得GAS網址,
-    建立網址,
-    呼叫,
-    GET,
-    POST,
-    取得報工初始資料,
-    寫入報工,
-    寫入不良紀錄
-  };
+  window.GAS橋接器 = { 取得GAS網址, 建立網址, 呼叫, GET, POST, 取得報工初始資料, 寫入報工, 寫入不良紀錄 };
 })();
