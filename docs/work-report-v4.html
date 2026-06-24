@@ -1,34 +1,3341 @@
+
 <!doctype html>
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="theme-color" content="#05050a">
-<title>製造部・報工作業 V4</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<base target="_top">
+<title>製一組 報工表單 V4 |化新 智慧製造 </title>
 <style>
-html,body{margin:0;min-height:100vh;background:#05050a;color:#e5f7ff;font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC','Microsoft JhengHei',system-ui,sans-serif} .boot{padding:28px;line-height:1.8}.boot h1{margin:0 0 8px;color:#c8f7ff}.boot b{color:#22d3ee}.err{color:#fecdd3;background:rgba(251,113,133,.12);border:1px solid rgba(251,113,133,.45);border-radius:16px;padding:16px;margin-top:16px;white-space:pre-wrap}
+/* ═══════════════════════════════════════════════════════
+   GOOGLE FONTS IMPORT
+═══════════════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700;900&family=Roboto+Mono:wght@400;600&display=swap');
+
+/* ═══════════════════════════════════════════════════════
+   DESIGN TOKENS — Google Brand × Glassmorphism
+═══════════════════════════════════════════════════════ */
+:root {
+  /* Google Brand Colors */
+  --g-blue:       #4285F4;
+  --g-blue-dark:  #1967D2;
+  --g-blue-light: #8AB4F8;
+  --g-blue-ultra: #E8F0FE;
+  --g-red:        #EA4335;
+  --g-red-dark:   #C5221F;
+  --g-red-light:  #F28B82;
+  --g-red-ultra:  #FCE8E6;
+  --g-yellow:     #FBBC04;
+  --g-yellow-dark:#E37400;
+  --g-yellow-lt:  #FDE68A;
+  --g-yellow-ultra:#FEF7E0;
+  --g-green:      #34A853;
+  --g-green-dark: #188038;
+  --g-green-light:#81C995;
+  --g-green-ultra:#E6F4EA;
+
+  /* Surface & Ghost White */
+  --bg-canvas:    #F8F9FC;
+  --bg-surface:   #FFFFFF;
+  --ghost-white:  rgba(255,255,255,0.72);
+  --ghost-card:   rgba(255,255,255,0.60);
+  --ghost-strong: rgba(255,255,255,0.88);
+
+  /* Glass Effect */
+  --glass-blur:   blur(18px);
+  --glass-border: rgba(255,255,255,0.55);
+  --glass-shadow: 0 8px 32px rgba(66,133,244,0.13), 0 2px 8px rgba(0,0,0,0.07);
+  --glass-shadow-lg: 0 16px 48px rgba(66,133,244,0.18), 0 4px 16px rgba(0,0,0,0.10);
+  --glass-shadow-xl: 0 24px 64px rgba(66,133,244,0.22), 0 8px 24px rgba(0,0,0,0.12);
+
+  /* Text */
+  --text-primary:   #202124;
+  --text-secondary: #5F6368;
+  --text-tertiary:  #80868B;
+  --text-on-blue:   #FFFFFF;
+  --text-link:      #1967D2;
+
+  /* Borders */
+  --border-subtle:  rgba(0,0,0,0.08);
+  --border-soft:    rgba(66,133,244,0.20);
+  --border-active:  #4285F4;
+
+  /* Animation */
+  --ease-spring:  cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out:     cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-in-out:  cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-fast:     0.15s;
+  --dur-mid:      0.25s;
+  --dur-slow:     0.40s;
+
+  /* Radius */
+  --r-xs:   8px;
+  --r-sm:   12px;
+  --r-md:   16px;
+  --r-lg:   20px;
+  --r-xl:   24px;
+  --r-2xl:  32px;
+  --r-pill: 999px;
+
+  /* Safe area */
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top:    env(safe-area-inset-top, 0px);
+}
+
+/* ═══════════════════════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  font-family: 'Google Sans', 'Noto Sans TC', 'PingFang TC', 'SF Pro TC', Arial, sans-serif;
+  background: var(--bg-canvas);
+  color: var(--text-primary);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+  overscroll-behavior: none;
+  min-height: 100vh;
+  /* Animated background gradient */
+  background:
+    radial-gradient(ellipse 80% 50% at 20% -10%, rgba(66,133,244,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 110%, rgba(52,168,83,0.08) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 60% at 100% 30%, rgba(251,188,4,0.06) 0%, transparent 50%),
+    #F0F4FF;
+  background-attachment: fixed;
+}
+
+/* ═══════════════════════════════════════════════════════
+   SCROLLBAR STYLING
+═══════════════════════════════════════════════════════ */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(66,133,244,0.35); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(66,133,244,0.55); }
+
+/* ═══════════════════════════════════════════════════════
+   LOADING SCREEN
+═══════════════════════════════════════════════════════ */
+.loading-screen {
+  position: fixed; inset: 0; z-index: 9999;
+  background: linear-gradient(135deg, #0D1B3E 0%, #1A237E 30%, #1565C0 60%, #0288D1 100%);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 28px; overflow: hidden;
+}
+.loading-screen.hide { animation: fadeOutScreen 0.6s var(--ease-out) forwards; }
+@keyframes fadeOutScreen { to { opacity: 0; pointer-events: none; } }
+
+.load-bg-orbs {
+  position: absolute; inset: 0; pointer-events: none; overflow: hidden;
+}
+.load-orb {
+  position: absolute; border-radius: 50%;
+  filter: blur(60px); opacity: 0.35;
+  animation: orbFloat 8s ease-in-out infinite;
+}
+.load-orb:nth-child(1) { width:300px; height:300px; background:#4285F4; top:-10%; left:-5%; animation-delay:0s; }
+.load-orb:nth-child(2) { width:250px; height:250px; background:#34A853; bottom:-5%; right:-5%; animation-delay:2.5s; }
+.load-orb:nth-child(3) { width:200px; height:200px; background:#FBBC04; top:40%; left:60%; animation-delay:5s; }
+@keyframes orbFloat {
+  0%,100% { transform: translate(0,0) scale(1); }
+  33% { transform: translate(20px,-20px) scale(1.1); }
+  66% { transform: translate(-15px,15px) scale(0.95); }
+}
+
+.load-logo-ring {
+  position: relative; width: 120px; height: 120px;
+}
+.load-ring {
+  position: absolute; border-radius: 50%; border: 3px solid transparent;
+  animation: ringRotate linear infinite;
+}
+.load-ring:nth-child(1) {
+  inset: 0; border-top-color: #4285F4; border-right-color: rgba(66,133,244,0.4);
+  animation-duration: 2s;
+  box-shadow: 0 0 20px rgba(66,133,244,0.5);
+}
+.load-ring:nth-child(2) {
+  inset: 15px; border-bottom-color: #34A853; border-left-color: rgba(52,168,83,0.4);
+  animation-duration: 2.8s; animation-direction: reverse;
+  box-shadow: 0 0 16px rgba(52,168,83,0.4);
+}
+.load-ring:nth-child(3) {
+  inset: 30px; border-top-color: #FBBC04; border-bottom-color: rgba(251,188,4,0.4);
+  animation-duration: 3.5s;
+  box-shadow: 0 0 12px rgba(251,188,4,0.4);
+}
+.load-center-icon {
+  position: absolute; top:50%; left:50%; transform: translate(-50%,-50%);
+  font-size: 36px; animation: iconPulse 2s ease-in-out infinite;
+}
+@keyframes ringRotate { to { transform: rotate(360deg); } }
+@keyframes iconPulse {
+  0%,100% { transform: translate(-50%,-50%) scale(1); }
+  50% { transform: translate(-50%,-50%) scale(1.15); }
+}
+
+.load-brand {
+  text-align: center; color: #fff;
+}
+.load-brand-name {
+  font-size: 26px; font-weight: 900; letter-spacing: 2px;
+  text-shadow: 0 2px 16px rgba(66,133,244,0.6);
+  animation: loadTextEntry 0.8s var(--ease-spring) 0.3s both;
+}
+.load-brand-sub {
+  font-size: 11px; opacity: 0.7; letter-spacing: 3px; margin-top: 4px;
+  animation: loadTextEntry 0.8s var(--ease-spring) 0.5s both;
+}
+.load-title {
+  font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.9);
+  letter-spacing: 0.5px;
+  animation: loadTextEntry 0.8s var(--ease-spring) 0.7s both;
+}
+@keyframes loadTextEntry {
+  from { opacity:0; transform: translateY(16px); }
+  to { opacity:1; transform: translateY(0); }
+}
+
+.load-google-dots {
+  display: flex; gap: 12px; align-items: center;
+  animation: loadTextEntry 0.8s var(--ease-spring) 0.9s both;
+}
+.load-dot {
+  width: 12px; height: 12px; border-radius: 50%;
+  animation: dotBounce 1.4s ease-in-out infinite;
+}
+.load-dot:nth-child(1) { background:#4285F4; animation-delay:0s; }
+.load-dot:nth-child(2) { background:#EA4335; animation-delay:0.2s; }
+.load-dot:nth-child(3) { background:#FBBC04; animation-delay:0.4s; }
+.load-dot:nth-child(4) { background:#34A853; animation-delay:0.6s; }
+@keyframes dotBounce {
+  0%,100% { transform: translateY(0); opacity:0.6; }
+  50% { transform: translateY(-14px); opacity:1; }
+}
+
+.load-progress-bar {
+  width: 220px; height: 3px; background: rgba(255,255,255,0.2);
+  border-radius: 3px; overflow: hidden;
+  animation: loadTextEntry 0.8s var(--ease-spring) 1.1s both;
+}
+.load-progress-fill {
+  height: 100%; border-radius: 3px;
+  background: linear-gradient(90deg, #4285F4, #34A853, #FBBC04, #EA4335, #4285F4);
+  background-size: 400% 100%;
+  animation: progressFlow 2s linear infinite;
+  width: 60%;
+}
+@keyframes progressFlow {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 400% 50%; }
+}
+
+/* ═══════════════════════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════════════════════ */
+.outer-wrap {
+  max-width: 640px; margin: 0 auto;
+  padding: 0 12px 160px;
+  position: relative;
+}
+
+/* ═══════════════════════════════════════════════════════
+   STICKY HEADER — GLASSMORPHISM
+═══════════════════════════════════════════════════════ */
+.site-header {
+  position: sticky; top: 0; z-index: 100;
+  margin: 0 -12px;
+  padding: 0;
+  background: rgba(25, 103, 210, 0.88);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-bottom: 1px solid rgba(255,255,255,0.18);
+  box-shadow: 0 4px 24px rgba(25,103,210,0.28), 0 1px 4px rgba(0,0,0,0.10);
+}
+.header-gradient-bar {
+  height: 3px;
+  background: linear-gradient(90deg, #4285F4 0%, #34A853 33%, #FBBC04 66%, #EA4335 100%);
+}
+.header-inner {
+  padding: 10px 14px 8px;
+}
+.header-top-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+}
+.header-brand {
+  display: flex; align-items: center; gap: 10px;
+}
+.header-icon-wrap {
+  width: 40px; height: 40px; border-radius: 12px;
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+  backdrop-filter: blur(8px);
+}
+.header-title-group {}
+.header-title {
+  font-size: 18px; font-weight: 900; color: #fff;
+  letter-spacing: -0.3px; line-height: 1.2;
+}
+.header-subtitle {
+  font-size: 10px; color: rgba(255,255,255,0.75);
+  letter-spacing: 0.3px; margin-top: 1px;
+}
+.header-actions {
+  display: flex; gap: 6px; align-items: center;
+}
+.header-btn {
+  width: 36px; height: 36px; border: none; border-radius: 10px;
+  background: rgba(255,255,255,0.18);
+  border: 1px solid rgba(255,255,255,0.28);
+  color: #fff; font-size: 15px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all var(--dur-mid) var(--ease-out);
+  backdrop-filter: blur(4px); flex-shrink: 0;
+  position: relative; overflow: hidden;
+}
+.header-btn:hover { background: rgba(255,255,255,0.30); transform: scale(1.06); }
+.header-btn:active { transform: scale(0.90); background: rgba(255,255,255,0.38); }
+
+.status-pill {
+  margin-top: 8px;
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(0,0,0,0.22);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: var(--r-pill);
+  padding: 5px 12px;
+  font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.9);
+  letter-spacing: 0.2px;
+  backdrop-filter: blur(6px);
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.status-dot {
+  width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+  background: #FBBC04;
+  animation: dotPulse 1.5s ease-in-out infinite;
+}
+.status-dot.connected { background: #34A853; animation: none; }
+.status-dot.error { background: #EA4335; animation: none; }
+@keyframes dotPulse {
+  0%,100% { opacity:1; transform:scale(1); }
+  50% { opacity:0.5; transform:scale(1.4); }
+}
+
+/* ═══════════════════════════════════════════════════════
+   STEP PROGRESS — STEPPER
+═══════════════════════════════════════════════════════ */
+.stepper-wrap {
+  margin: 12px 0;
+  background: var(--ghost-strong);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-xl);
+  box-shadow: var(--glass-shadow);
+  padding: 10px 8px;
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
+}
+.stepper {
+  display: flex; align-items: center;
+  gap: 0; flex-wrap: nowrap;
+  min-width: max-content;
+  padding: 0 4px;
+}
+.step-item {
+  display: flex; align-items: center; gap: 5px;
+  padding: 5px 7px; border-radius: var(--r-md);
+  cursor: pointer;
+  transition: all var(--dur-mid) var(--ease-out);
+  flex-shrink: 0; position: relative;
+}
+.step-item:hover { background: rgba(66,133,244,0.08); }
+.step-item:active { transform: scale(0.93); }
+.step-circle {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 900; font-size: 13px;
+  transition: all var(--dur-slow) var(--ease-spring);
+  flex-shrink: 0; position: relative;
+  border: 2.5px solid #D2D9E4;
+  background: #F8FAFC; color: #9AA5B4;
+}
+.step-item.is-done .step-circle {
+  background: var(--g-green); border-color: var(--g-green); color: #fff;
+  animation: stepDone 0.5s var(--ease-spring);
+  box-shadow: 0 4px 12px rgba(52,168,83,0.4);
+}
+@keyframes stepDone {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+.step-item.is-active .step-circle {
+  background: var(--g-blue); border-color: var(--g-blue); color: #fff;
+  box-shadow: 0 0 0 5px rgba(66,133,244,0.20), 0 4px 14px rgba(66,133,244,0.40);
+  animation: stepBreath 2.5s ease-in-out infinite;
+}
+@keyframes stepBreath {
+  0%,100% { box-shadow: 0 0 0 5px rgba(66,133,244,0.20), 0 4px 14px rgba(66,133,244,0.40); }
+  50% { box-shadow: 0 0 0 12px rgba(66,133,244,0.08), 0 4px 20px rgba(66,133,244,0.30); }
+}
+.step-label {
+  font-size: 10.5px; font-weight: 700;
+  line-height: 1.25; letter-spacing: -0.1px;
+  transition: color var(--dur-mid);
+}
+.step-label .en { font-size: 9px; opacity: 0.65; display: block; }
+.step-item.is-active .step-label { color: var(--g-blue); font-weight: 900; }
+.step-item.is-done .step-label { color: var(--g-green); }
+.step-item.is-todo .step-label { color: #9AA5B4; }
+.step-connector {
+  width: 18px; height: 2.5px; background: #DCE3ED;
+  border-radius: 2px; flex-shrink: 0;
+  transition: all var(--dur-slow);
+}
+.step-connector.done { background: var(--g-green); }
+.step-connector.active {
+  background: linear-gradient(90deg, var(--g-green) 0%, var(--g-blue) 100%);
+}
+
+/* ═══════════════════════════════════════════════════════
+   GUIDE CARD
+═══════════════════════════════════════════════════════ */
+.guide-card {
+  display: flex; align-items: flex-start; gap: 12px;
+  background: rgba(255,248,224,0.85);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1.5px solid rgba(251,188,4,0.35);
+  border-radius: var(--r-lg);
+  padding: 13px 14px;
+  margin-bottom: 12px;
+  position: relative; overflow: hidden;
+  animation: guideIn 0.4s var(--ease-spring);
+  box-shadow: 0 4px 16px rgba(251,188,4,0.12);
+}
+.guide-card::before {
+  content:''; position:absolute; left:0; top:0; bottom:0; width:4px;
+  background: linear-gradient(180deg, #FBBC04, #E37400, #FBBC04);
+  border-radius: 4px 0 0 4px;
+}
+@keyframes guideIn {
+  from { opacity:0; transform: translateY(-10px); }
+  to { opacity:1; transform: translateY(0); }
+}
+.guide-icon {
+  font-size: 30px; flex-shrink: 0; line-height: 1;
+  animation: guideIconBob 2s ease-in-out infinite;
+}
+@keyframes guideIconBob {
+  0%,100% { transform: translateY(0); }
+  40% { transform: translateY(-6px); }
+}
+.guide-body {}
+.guide-title {
+  font-weight: 900; font-size: 14px; color: #6B4700;
+  margin-bottom: 3px; letter-spacing: -0.1px;
+}
+.guide-desc {
+  font-size: 11.5px; color: #8A6820;
+  line-height: 1.55; letter-spacing: 0.1px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   GLASS CARD
+═══════════════════════════════════════════════════════ */
+.glass-card {
+  background: var(--ghost-card);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-xl);
+  padding: 16px;
+  margin: 10px 0;
+  box-shadow: var(--glass-shadow);
+  transition: box-shadow var(--dur-mid), transform var(--dur-mid);
+}
+.glass-card:hover {
+  box-shadow: var(--glass-shadow-lg);
+}
+.glass-card.interactive {
+  cursor: pointer; border: 2px solid transparent;
+  transition: all var(--dur-mid) var(--ease-out);
+}
+.glass-card.interactive:hover {
+  border-color: var(--g-blue); transform: translateY(-3px);
+  box-shadow: var(--glass-shadow-xl);
+}
+.glass-card.interactive:active { transform: scale(0.97); }
+
+/* Card Section Header */
+.section-head {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 16px; font-weight: 900;
+  color: var(--text-primary);
+  margin-bottom: 12px; letter-spacing: -0.2px;
+}
+.section-head .badge {
+  font-size: 10px; font-weight: 700;
+  padding: 2px 8px; border-radius: var(--r-pill);
+  background: var(--g-blue-ultra); color: var(--g-blue-dark);
+  letter-spacing: 0.2px;
+}
+.section-head .en {
+  font-size: 11px; color: var(--text-tertiary); font-weight: 600;
+}
+
+/* Utility */
+.hidden { display: none !important; }
+.caption { font-size: 11px; color: var(--text-tertiary); line-height: 1.5; letter-spacing: 0.1px; }
+
+/* ═══════════════════════════════════════════════════════
+   FORM ELEMENTS
+═══════════════════════════════════════════════════════ */
+label.field-label {
+  display: block; font-weight: 800; font-size: 12.5px;
+  color: #3C4250; letter-spacing: -0.1px;
+  margin: 12px 0 4px;
+}
+label.field-label.required::after { content: ' *'; color: var(--g-red); font-weight: 900; }
+
+input[type="text"], input[type="number"], input[type="datetime-local"],
+input[type="email"], textarea, select {
+  width: 100%;
+  background: rgba(255,255,255,0.78);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1.5px solid rgba(0,0,0,0.12);
+  border-radius: var(--r-md);
+  padding: 11px 13px;
+  font-size: 14.5px; color: var(--text-primary);
+  font-family: inherit;
+  transition: all var(--dur-mid) var(--ease-out);
+  appearance: auto; -webkit-appearance: auto;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.04);
+}
+input:hover, textarea:hover, select:hover {
+  border-color: rgba(66,133,244,0.40);
+  background: rgba(255,255,255,0.90);
+}
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--g-blue);
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(66,133,244,0.14), inset 0 1px 3px rgba(0,0,0,0.04);
+  transform: translateY(-1px);
+}
+input[readonly], input[disabled] {
+  background: rgba(240,244,255,0.70);
+  color: #3D4A5C; cursor: default;
+  border-color: rgba(0,0,0,0.07);
+}
+input[readonly]:focus { transform: none; box-shadow: none; }
+textarea { min-height: 86px; resize: vertical; line-height: 1.5; }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 9px; }
+
+/* ═══════════════════════════════════════════════════════
+   SCAN BUTTON
+═══════════════════════════════════════════════════════ */
+.scan-btn {
+  width: 100%;
+  background: rgba(66,133,244,0.08);
+  border: 2px dashed rgba(66,133,244,0.40);
+  border-radius: var(--r-lg);
+  padding: 14px 16px;
+  font-weight: 800; font-size: 14.5px;
+  color: var(--g-blue-dark); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  transition: all var(--dur-mid) var(--ease-out);
+  letter-spacing: 0.1px; position: relative; overflow: hidden;
+  font-family: inherit;
+}
+.scan-btn::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(66,133,244,0.15) 0%, transparent 70%);
+  opacity: 0; transition: opacity 0.3s;
+}
+.scan-btn:hover { background: rgba(66,133,244,0.13); border-color: var(--g-blue); transform: translateY(-2px); }
+.scan-btn:hover::before { opacity: 1; }
+.scan-btn:active { transform: scale(0.96); background: rgba(66,133,244,0.18); }
+.scan-btn .s-icon { font-size: 22px; flex-shrink: 0; }
+
+/* ═══════════════════════════════════════════════════════
+   SEARCH INPUT
+═══════════════════════════════════════════════════════ */
+.search-input {
+  width: 100%;
+  background: rgba(255,255,255,0.82);
+  backdrop-filter: blur(8px);
+  border: 1.5px solid rgba(0,0,0,0.09);
+  border-radius: var(--r-pill);
+  padding: 11px 18px;
+  font-size: 13.5px; font-family: inherit;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+  transition: all var(--dur-mid);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.search-input:focus {
+  outline: none; border-color: var(--g-blue);
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(66,133,244,0.12), 0 2px 8px rgba(0,0,0,0.04);
+}
+
+/* ═══════════════════════════════════════════════════════
+   RECENT PERSONS BAR
+═══════════════════════════════════════════════════════ */
+.recent-bar {
+  display: flex; gap: 7px; flex-wrap: wrap;
+  align-items: center; margin-bottom: 10px; padding: 2px 0;
+}
+.recent-bar .bar-label {
+  font-size: 11px; font-weight: 700; color: var(--text-tertiary);
+  white-space: nowrap; flex-shrink: 0;
+}
+.recent-chip {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--ghost-strong);
+  backdrop-filter: blur(6px);
+  border: 1.5px solid rgba(66,133,244,0.18);
+  border-radius: var(--r-pill);
+  padding: 5px 12px 5px 5px;
+  cursor: pointer; font-weight: 700; font-size: 12px;
+  transition: all var(--dur-mid) var(--ease-out);
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+.recent-chip:hover { border-color: var(--g-blue); background: #fff; transform: translateY(-2px); box-shadow: 0 4px 14px rgba(66,133,244,0.15); }
+.recent-chip:active { transform: scale(0.93); }
+.mini-avatar {
+  width: 26px; height: 26px; border-radius: 50%;
+  overflow: hidden; background: var(--g-blue-ultra);
+  flex-shrink: 0; font-size: 11px; display: flex; align-items: center; justify-content: center;
+  font-weight: 900; color: var(--g-blue-dark);
+}
+.mini-avatar img { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; }
+
+/* ═══════════════════════════════════════════════════════
+   PERSON CARD GRID
+═══════════════════════════════════════════════════════ */
+.person-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 9px; max-height: 440px; overflow-y: auto;
+  padding: 2px 2px 4px;
+}
+.person-card {
+  background: rgba(255,255,255,0.70);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1.5px solid rgba(255,255,255,0.60);
+  border-radius: var(--r-lg);
+  padding: 12px 7px 10px;
+  text-align: center; cursor: pointer;
+  transition: all var(--dur-mid) var(--ease-out);
+  position: relative; min-height: 126px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  overflow: hidden;
+}
+.person-card::after {
+  content:''; position:absolute; inset:0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, transparent 100%);
+  pointer-events: none;
+}
+.person-card:hover {
+  border-color: rgba(66,133,244,0.40); transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(66,133,244,0.16);
+  background: rgba(255,255,255,0.90);
+}
+.person-card:active { transform: scale(0.93); }
+
+/* Shift color themes */
+.person-card.shift-day { border-color: rgba(26,111,219,0.25); background: linear-gradient(145deg, rgba(232,240,255,0.9), rgba(255,255,255,0.8)); }
+.person-card.shift-swing { border-color: rgba(224,163,0,0.25); background: linear-gradient(145deg, rgba(255,249,232,0.9), rgba(255,255,255,0.8)); }
+.person-card.shift-night { border-color: rgba(139,108,245,0.25); background: linear-gradient(145deg, rgba(243,239,255,0.9), rgba(255,255,255,0.8)); }
+
+.person-card.selected {
+  background: linear-gradient(135deg, #1A237E, #1565C0, #0277BD) !important;
+  border-color: rgba(255,255,255,0.50) !important;
+  box-shadow: 0 0 0 3px rgba(66,133,244,0.30), 0 12px 32px rgba(25,103,210,0.45) !important;
+  animation: selectedPop 0.4s var(--ease-spring);
+}
+@keyframes selectedPop {
+  0%,100% { transform: scale(1); }
+  30% { transform: scale(1.06); }
+  60% { transform: scale(0.97); }
+}
+.person-card.selected .person-name { color: #fff; }
+.person-card.selected .person-id { color: rgba(255,255,255,0.70); }
+.person-card.selected .avatar-ring { border-color: rgba(255,255,255,0.60); }
+
+.selected-badge {
+  display: none; position: absolute; top: 6px; left: 50%; transform: translateX(-50%);
+  background: rgba(255,255,255,0.22); color: #fff;
+  border-radius: var(--r-pill); padding: 2px 9px;
+  font-size: 9.5px; font-weight: 900; letter-spacing: 0.5px;
+  white-space: nowrap; z-index: 5; border: 1px solid rgba(255,255,255,0.3);
+}
+.person-card.selected .selected-badge { display: block; }
+
+.shift-badge {
+  position: absolute; top: 7px; right: 7px;
+  font-size: 9px; font-weight: 800; padding: 2px 7px;
+  border-radius: var(--r-pill); letter-spacing: 0.2px;
+  backdrop-filter: blur(4px);
+}
+.shift-badge.day { background: #1967D2; color: #fff; }
+.shift-badge.swing { background: #C67C00; color: #fff; }
+.shift-badge.night { background: #5C35B8; color: #fff; }
+
+.avatar-ring {
+  width: 72px; height: 72px; border-radius: 50%;
+  overflow: hidden; background: var(--g-blue-ultra);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; font-weight: 900; color: var(--g-blue-dark);
+  border: 2.5px solid rgba(66,133,244,0.25);
+  transition: all var(--dur-mid); flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(66,133,244,0.15);
+}
+.avatar-ring img { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; }
+.person-card:hover .avatar-ring { transform: scale(1.08); border-color: rgba(66,133,244,0.45); }
+.person-name { font-weight: 800; font-size: 12.5px; line-height: 1.2; color: #1A2840; }
+.person-id { font-size: 10px; color: var(--text-tertiary); font-weight: 600; letter-spacing: 0.3px; }
+
+/* ═══════════════════════════════════════════════════════
+   SELECTED PERSON DISPLAY
+═══════════════════════════════════════════════════════ */
+.selected-person-display {
+  display: flex; align-items: center; gap: 14px;
+  background: rgba(232,240,255,0.60);
+  backdrop-filter: blur(10px);
+  border: 1.5px dashed rgba(66,133,244,0.30);
+  border-radius: var(--r-lg); padding: 13px;
+  min-height: 90px; transition: all var(--dur-mid);
+  box-shadow: 0 2px 12px rgba(66,133,244,0.08);
+}
+.selected-person-display.populated {
+  background: rgba(230,244,234,0.70);
+  border: 1.5px solid rgba(52,168,83,0.35);
+  box-shadow: 0 4px 18px rgba(52,168,83,0.12);
+}
+.person-photo-lg {
+  width: 80px; height: 80px; border-radius: var(--r-md);
+  overflow: hidden; flex-shrink: 0;
+  background: var(--g-blue-ultra);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 800; color: var(--g-blue-dark);
+  text-align: center; line-height: 1.3;
+  border: 1.5px solid rgba(255,255,255,0.70);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.10);
+}
+.person-photo-lg img { width: 80px; height: 80px; object-fit: cover; border-radius: var(--r-md); }
+.person-info-name { font-size: 18px; font-weight: 900; letter-spacing: -0.2px; line-height: 1.2; }
+.person-info-sub { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+.employee-id-highlight {
+  display: inline-block; margin-top: 8px;
+  background: rgba(232,240,255,0.90);
+  border: 1.5px solid rgba(66,133,244,0.30);
+  color: #1967D2; border-radius: var(--r-sm);
+  padding: 6px 13px; font-size: 18px; font-weight: 900;
+  letter-spacing: 1.5px; font-family: 'Roboto Mono', monospace;
+  box-shadow: 0 2px 8px rgba(66,133,244,0.12);
+}
+
+/* ═══════════════════════════════════════════════════════
+   PRODUCT GRID
+═══════════════════════════════════════════════════════ */
+.product-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: 9px; max-height: 380px; overflow-y: auto; padding: 2px;
+}
+.product-card {
+  background: rgba(255,255,255,0.72);
+  backdrop-filter: blur(10px);
+  border: 1.5px solid rgba(255,255,255,0.60);
+  border-radius: var(--r-lg);
+  overflow: hidden; cursor: pointer;
+  transition: all var(--dur-mid) var(--ease-out);
+  display: flex; flex-direction: column;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+}
+.product-card:hover { border-color: rgba(66,133,244,0.40); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(66,133,244,0.16); }
+.product-card:active { transform: scale(0.93); }
+.product-card.selected {
+  border-color: var(--g-blue) !important; background: rgba(232,240,255,0.90) !important;
+  box-shadow: 0 0 0 4px rgba(66,133,244,0.16), 0 8px 24px rgba(66,133,244,0.20) !important;
+  animation: selectedPop 0.4s var(--ease-spring);
+}
+.product-thumb {
+  width: 100%; aspect-ratio: 4/3; overflow: hidden;
+  background: linear-gradient(135deg, #E8EEF8, #D8E8F5);
+  display: flex; align-items: center; justify-content: center;
+  color: #6A80A0; font-size: 14px; font-weight: 700;
+}
+.product-thumb img { width:100%; height:100%; object-fit:cover; }
+.product-name { font-weight: 900; font-size: 13.5px; text-align:center; line-height:1.3; color:#1A2E48; padding: 8px 6px 3px; }
+.product-code { font-size: 10.5px; color: var(--text-tertiary); font-weight: 600; text-align: center; padding-bottom: 9px; }
+
+/* ═══════════════════════════════════════════════════════
+   MACHINE GRID
+═══════════════════════════════════════════════════════ */
+.machine-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px; margin-top: 8px; }
+.machine-card {
+  background: rgba(255,255,255,0.68);
+  backdrop-filter: blur(8px);
+  border: 1.5px solid rgba(255,255,255,0.55);
+  border-radius: var(--r-md); padding: 10px;
+  transition: all var(--dur-mid); cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+.machine-card:hover { border-color: rgba(66,133,244,0.35); transform: translateY(-2px); box-shadow: 0 6px 18px rgba(66,133,244,0.12); }
+.machine-card:active { transform: scale(0.95); }
+.machine-card img { width:100%; height:82px; border-radius: var(--r-sm); object-fit:cover; background:#E8EEF8; }
+.machine-no-img { height:82px; border-radius: var(--r-sm); background: linear-gradient(135deg, #E8EEF8, #D5E4F5); display:flex; align-items:center; justify-content:center; color:#6A80A0; font-weight:800; font-size:12.5px; }
+.machine-number { font-size: 17px; font-weight: 900; color: var(--g-blue-dark); margin-top: 6px; letter-spacing: 0.3px; }
+.machine-info { font-size: 10.5px; color: var(--text-secondary); margin-top: 2px; }
+
+/* ═══════════════════════════════════════════════════════
+   STATS SUMMARY
+═══════════════════════════════════════════════════════ */
+.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
+.stat-card {
+  background: rgba(255,255,255,0.72);
+  backdrop-filter: blur(10px);
+  border: 1.5px solid rgba(255,255,255,0.55);
+  border-radius: var(--r-lg); padding: 12px 8px;
+  text-align: center; transition: all var(--dur-mid);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  position: relative; overflow: hidden;
+}
+.stat-card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:3px;
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
+}
+.stat-card.blue::before { background: var(--g-blue); }
+.stat-card.red::before { background: var(--g-red); }
+.stat-card.green::before { background: var(--g-green); }
+.stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.10); }
+.stat-label { font-size: 10.5px; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.1px; display: block; margin-bottom: 4px; }
+.stat-value { font-size: 28px; font-weight: 900; letter-spacing: -0.5px; display: block; font-family: 'Google Sans', 'Roboto Mono', monospace; }
+.stat-card.blue .stat-value { color: var(--g-blue-dark); }
+.stat-card.red .stat-value { color: var(--g-red-dark); }
+.stat-card.green .stat-value { color: var(--g-green-dark); }
+
+/* ═══════════════════════════════════════════════════════
+   DEFECT ALLOCATION
+═══════════════════════════════════════════════════════ */
+.defect-row {
+  display: flex; align-items: center; gap: 7px;
+  flex-wrap: nowrap;
+  background: rgba(255,248,240,0.85);
+  backdrop-filter: blur(8px);
+  border: 1.5px solid rgba(234,67,53,0.18);
+  border-radius: var(--r-md);
+  padding: 9px 11px; margin-bottom: 8px;
+  transition: all var(--dur-mid);
+  animation: defectRowIn 0.3s var(--ease-spring);
+  box-shadow: 0 2px 8px rgba(234,67,53,0.06);
+}
+@keyframes defectRowIn {
+  from { opacity:0; transform: translateX(-18px); }
+  to { opacity:1; transform: translateX(0); }
+}
+.defect-row:hover { border-color: rgba(234,67,53,0.30); box-shadow: 0 4px 14px rgba(234,67,53,0.10); }
+.defect-row select, .defect-row input { border-color: rgba(234,67,53,0.20); font-size: 13.5px; padding: 9px 11px; border-radius: 10px; flex: 1; min-width: 0; }
+.defect-row .qty-input { flex: 0 0 95px !important; min-width: 85px !important; width: 95px !important; flex-shrink: 0 !important; text-align: center; font-weight: 700; }
+.defect-delete-btn {
+  width: 28px; height: 28px; border: none; border-radius: 9px;
+  background: rgba(234,67,53,0.12); color: var(--g-red-dark);
+  font-size: 13px; font-weight: 900; cursor: pointer; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: all var(--dur-mid);
+}
+.defect-delete-btn:hover { background: rgba(234,67,53,0.22); transform: scale(1.12); }
+.defect-delete-btn:active { background: rgba(234,67,53,0.32); transform: scale(0.88); }
+
+.add-defect-btn {
+  width: 100%; border: 2px dashed rgba(234,67,53,0.30);
+  background: rgba(255,248,244,0.70);
+  backdrop-filter: blur(6px);
+  border-radius: var(--r-md); padding: 12px;
+  font-weight: 800; font-size: 13.5px; cursor: pointer;
+  color: #9A3020; transition: all var(--dur-mid);
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  font-family: inherit;
+}
+.add-defect-btn:hover { background: rgba(255,244,240,0.90); border-color: var(--g-red); }
+.add-defect-btn:active { transform: scale(0.96); }
+
+.defect-summary {
+  margin-top: 10px; padding: 11px 13px;
+  background: rgba(232,240,255,0.70);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(66,133,244,0.20);
+  border-radius: var(--r-md);
+  font-weight: 700; font-size: 13.5px; text-align: center;
+  box-shadow: 0 2px 8px rgba(66,133,244,0.06);
+}
+
+/* ═══════════════════════════════════════════════════════
+   ANOMALY TIME SECTION
+═══════════════════════════════════════════════════════ */
+.anomaly-section {
+  background: rgba(254,252,244,0.80);
+  backdrop-filter: blur(8px);
+  border: 1.5px solid rgba(251,188,4,0.30);
+  border-radius: var(--r-lg); padding: 13px;
+  margin-top: 6px;
+  box-shadow: 0 4px 14px rgba(251,188,4,0.08);
+}
+.anomaly-section .section-head { font-size: 14px; margin-bottom: 8px; }
+
+/* ═══════════════════════════════════════════════════════
+   PHOTO UPLOAD
+═══════════════════════════════════════════════════════ */
+.photo-toolbar { display: flex; gap: 8px; margin-bottom: 8px; }
+.photo-tool-btn {
+  flex: 1; border: 1.5px solid rgba(0,0,0,0.10);
+  background: rgba(255,255,255,0.72);
+  backdrop-filter: blur(8px);
+  border-radius: var(--r-md); padding: 10px 7px;
+  font-weight: 800; font-size: 12.5px; cursor: pointer;
+  color: #2D3A50; transition: all var(--dur-mid);
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+  font-family: inherit;
+}
+.photo-tool-btn:hover { background: rgba(240,247,255,0.90); border-color: rgba(66,133,244,0.35); }
+.photo-tool-btn:active { transform: scale(0.93); }
+.photo-tool-btn.danger { color: var(--g-red-dark); border-color: rgba(234,67,53,0.20); }
+.photo-tool-btn.danger:hover { background: rgba(255,244,242,0.90); border-color: var(--g-red); }
+
+.photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; max-height: 350px; overflow-y: auto; }
+.photo-item {
+  position: relative; border-radius: var(--r-md); overflow: hidden;
+  border: 1.5px solid rgba(255,255,255,0.60); aspect-ratio: 1/1;
+  background: linear-gradient(135deg, #E8EEF8, #D8E4F5);
+  cursor: pointer; transition: all var(--dur-mid);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.10);
+}
+.photo-item:hover { transform: scale(1.05); box-shadow: 0 6px 18px rgba(66,133,244,0.20); border-color: var(--g-blue); }
+.photo-item img { width:100%; height:100%; object-fit:cover; display:block; }
+.photo-delete-btn {
+  position: absolute; top: 5px; right: 5px;
+  width: 24px; height: 24px;
+  background: rgba(0,0,0,0.62); color: #fff;
+  border: none; border-radius: 8px;
+  font-size: 12px; font-weight: 900; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all var(--dur-mid);
+}
+.photo-delete-btn:hover { background: rgba(180,0,0,0.82); transform: scale(1.12); }
+.photo-delete-btn:active { transform: scale(0.88); }
+.photo-note-overlay {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: rgba(0,0,0,0.58); color: #fff;
+  font-size: 10px; font-weight: 700;
+  padding: 3px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.photo-count { text-align: center; font-size: 11px; color: var(--text-tertiary); margin-top: 6px; font-weight: 600; }
+
+/* ═══════════════════════════════════════════════════════
+   DEFECT SYNC BADGE
+═══════════════════════════════════════════════════════ */
+.sync-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: rgba(254,243,199,0.90); color: #854D0E;
+  border: 1px solid rgba(234,179,8,0.35);
+  border-radius: var(--r-pill); padding: 4px 12px;
+  font-size: 11px; font-weight: 700; margin-top: 7px;
+  animation: badgePulse 1.4s ease-in-out infinite;
+  backdrop-filter: blur(4px);
+}
+@keyframes badgePulse {
+  0%,100% { opacity:1; }
+  50% { opacity:0.55; }
+}
+
+/* ═══════════════════════════════════════════════════════
+   PREVIEW CODE BLOCK
+═══════════════════════════════════════════════════════ */
+.preview-block {
+  white-space: pre-wrap;
+  background: rgba(8,15,28,0.92);
+  backdrop-filter: blur(12px);
+  color: #A8C8F0; border-radius: var(--r-lg);
+  padding: 14px; font-family: 'Roboto Mono', 'SF Mono', monospace;
+  font-size: 11.5px; line-height: 1.7;
+  overflow-x: auto; max-height: 300px; overflow-y: auto;
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.20);
+}
+
+/* ═══════════════════════════════════════════════════════
+   CONFIRM CARD
+═══════════════════════════════════════════════════════ */
+.confirm-card {
+  background: linear-gradient(135deg, rgba(240,255,244,0.95), rgba(232,248,234,0.90));
+  backdrop-filter: var(--glass-blur);
+  border: 2px solid rgba(52,168,83,0.40);
+  border-radius: var(--r-xl); padding: 18px;
+  box-shadow: 0 8px 28px rgba(52,168,83,0.14);
+  animation: confirmIn 0.5s var(--ease-spring);
+}
+@keyframes confirmIn {
+  from { opacity:0; transform: translateY(16px); }
+  to { opacity:1; transform: translateY(0); }
+}
+.confirm-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 0; border-bottom: 1px dashed rgba(52,168,83,0.25); gap: 8px;
+}
+.confirm-row:last-child { border-bottom: none; }
+.confirm-label { font-weight: 700; font-size: 11.5px; color: #3A6B4A; flex-shrink: 0; }
+.confirm-value { font-weight: 800; font-size: 13px; color: #1A3A28; text-align: right; word-break: break-all; }
+
+/* ═══════════════════════════════════════════════════════
+   MODAL — GLASS
+═══════════════════════════════════════════════════════ */
+.modal-mask {
+  position: fixed; inset: 0;
+  background: rgba(8,15,35,0.75);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 200;
+  display: flex; align-items: center; justify-content: center;
+  animation: maskIn 0.25s var(--ease-out);
+}
+@keyframes maskIn { from { opacity:0; } to { opacity:1; } }
+
+.modal-box {
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid rgba(255,255,255,0.80);
+  border-radius: var(--r-2xl); padding: 18px;
+  width: 92%; max-width: 460px;
+  box-shadow: var(--glass-shadow-xl);
+  position: relative;
+  animation: modalIn 0.35s var(--ease-spring);
+}
+@keyframes modalIn {
+  from { transform: scale(0.85) translateY(20px); opacity:0; }
+  to { transform: scale(1) translateY(0); opacity:1; }
+}
+.modal-title {
+  font-weight: 900; font-size: 16px; text-align: center;
+  margin-bottom: 10px; color: var(--text-primary);
+}
+.video-area {
+  width: 100%; aspect-ratio: 4/3; background: #000;
+  border-radius: var(--r-lg); overflow: hidden;
+  position: relative; margin-bottom: 10px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.30);
+}
+.video-area video { width:100%; height:100%; object-fit:cover; }
+.scan-frame {
+  position: absolute; inset: 14%;
+  border: 3px solid rgba(52,255,130,0.80);
+  border-radius: var(--r-sm); pointer-events: none;
+  animation: scanPulse 2.2s ease-in-out infinite;
+  box-shadow: 0 0 0 4px rgba(52,255,130,0.10), inset 0 0 0 4px rgba(52,255,130,0.05);
+}
+.scan-frame::before, .scan-frame::after {
+  content:''; position:absolute; width:20px; height:20px;
+  border-color: #0f0; border-style: solid;
+}
+.scan-frame::before { top:-2px; left:-2px; border-width: 4px 0 0 4px; border-radius: 4px 0 0 4px; }
+.scan-frame::after { bottom:-2px; right:-2px; border-width: 0 4px 4px 0; border-radius: 0 0 4px 4px; }
+@keyframes scanPulse {
+  0%,100% { box-shadow: 0 0 0 4px rgba(52,255,130,0.10); }
+  50% { box-shadow: 0 0 0 20px rgba(52,255,130,0.03); }
+}
+.scan-laser {
+  position: absolute; left: 14%; right: 14%; height: 2px;
+  background: linear-gradient(90deg, transparent, #00FF66, transparent);
+  box-shadow: 0 0 12px #00FF66;
+  animation: laserMove 2s linear infinite; pointer-events: none;
+}
+@keyframes laserMove {
+  0% { top: 14%; } 50% { top: 86%; } 100% { top: 14%; }
+}
+.modal-hint { text-align: center; font-size: 11px; color: var(--text-tertiary); margin: 4px 0; }
+.manual-input {
+  width: 100%; margin-top: 8px;
+  border: 2px solid var(--g-yellow);
+  border-radius: var(--r-md); padding: 12px;
+  font-size: 15px; font-weight: 700; text-align: center;
+  letter-spacing: 2px; background: rgba(254,251,235,0.95);
+  font-family: 'Roboto Mono', monospace;
+  box-shadow: 0 4px 16px rgba(251,188,4,0.15);
+}
+.manual-input::placeholder { letter-spacing: 0; font-weight: 400; color: #A0AAB4; font-family: inherit; }
+.modal-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.modal-btns button {
+  flex: 1; min-width: 80px; border: none; border-radius: var(--r-md);
+  padding: 12px; font-weight: 800; font-size: 13.5px; cursor: pointer;
+  transition: all var(--dur-mid); font-family: inherit;
+}
+.modal-btns button:hover { transform: translateY(-2px); }
+.modal-btns button:active { transform: scale(0.93); }
+.btn-close { background: #F1F5F9; color: #475569; }
+.btn-manual { background: #fff; color: var(--g-blue-dark); border: 1.5px solid rgba(66,133,244,0.30) !important; }
+.scan-status { text-align:center; font-size:11.5px; margin-top:5px; color:var(--text-secondary); }
+
+/* Photo Note Modal */
+.photo-note-modal {
+  position: fixed; inset: 0;
+  background: rgba(8,15,35,0.80);
+  backdrop-filter: blur(6px);
+  z-index: 210; display: flex; align-items: center; justify-content: center;
+  animation: maskIn 0.25s var(--ease-out);
+}
+.photo-note-box {
+  background: rgba(255,255,255,0.97);
+  backdrop-filter: var(--glass-blur);
+  border-radius: var(--r-xl); padding: 20px;
+  width: 88%; max-width: 400px;
+  box-shadow: var(--glass-shadow-xl);
+  animation: modalIn 0.30s var(--ease-spring);
+}
+.photo-note-box img { width:100%; max-height:190px; object-fit:contain; border-radius: var(--r-md); margin-bottom: 12px; background:#F0F4FF; }
+.photo-note-btns { display:flex; gap:8px; margin-top:10px; }
+.photo-note-btns button { flex:1; border:none; border-radius: var(--r-md); padding:12px; font-weight:800; font-size:13.5px; cursor:pointer; transition:all var(--dur-mid); font-family:inherit; }
+.photo-note-btns .btn-confirm { background: var(--g-blue); color:#fff; box-shadow: 0 4px 14px rgba(66,133,244,0.35); }
+.photo-note-btns .btn-confirm:hover { transform:translateY(-2px); box-shadow: 0 6px 20px rgba(66,133,244,0.45); }
+.photo-note-btns .btn-cancel { background: #F1F5F9; color: #475569; }
+.photo-note-btns button:active { transform: scale(0.93); }
+
+/* ═══════════════════════════════════════════════════════
+   SUBMIT OVERLAY
+═══════════════════════════════════════════════════════ */
+.submit-overlay {
+  position: fixed; inset: 0;
+  background: rgba(8,15,35,0.80);
+  backdrop-filter: blur(10px);
+  z-index: 300; display: flex; align-items: center; justify-content: center;
+  animation: maskIn 0.2s var(--ease-out);
+}
+.submit-card {
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid rgba(255,255,255,0.80);
+  border-radius: var(--r-2xl); padding: 32px 36px;
+  box-shadow: var(--glass-shadow-xl); text-align: center;
+  animation: modalIn 0.35s var(--ease-spring);
+  min-width: 190px;
+}
+.spinner {
+  width: 56px; height: 56px; border-radius: 50%;
+  border: 5px solid rgba(66,133,244,0.16);
+  border-top-color: var(--g-blue);
+  animation: spin 0.85s linear infinite;
+  margin: 0 auto 16px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.submit-card .submit-title { font-weight: 900; font-size: 15px; color: #1A306A; margin: 0; }
+.submit-card .submit-sub { font-size: 12px; color: var(--text-tertiary); margin-top: 5px; }
+
+/* ═══════════════════════════════════════════════════════
+   ROAR NOTIFICATIONS
+═══════════════════════════════════════════════════════ */
+.roar-container {
+  position: fixed; top: 14px; right: 12px; z-index: 400;
+  display: flex; flex-direction: column; gap: 8px;
+  pointer-events: none; max-width: 290px;
+}
+.roar-notif {
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: var(--r-lg); padding: 11px 13px;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.08);
+  border-left: 4px solid var(--g-blue);
+  pointer-events: all;
+  animation: roarIn 0.35s var(--ease-spring);
+  display: flex; align-items: flex-start; gap: 9px;
+}
+.roar-notif.success { border-left-color: var(--g-green); }
+.roar-notif.error { border-left-color: var(--g-red); }
+.roar-notif.warning { border-left-color: var(--g-yellow); }
+@keyframes roarIn {
+  from { opacity:0; transform: translateX(40px); }
+  to { opacity:1; transform: translateX(0); }
+}
+@keyframes roarOut {
+  from { opacity:1; transform: translateX(0); }
+  to { opacity:0; transform: translateX(50px); }
+}
+.roar-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.roar-text { flex: 1; min-width: 0; }
+.roar-title { font-weight: 800; font-size: 12.5px; color: var(--text-primary); line-height: 1.3; }
+.roar-sub { font-size: 10.5px; color: var(--text-secondary); margin-top: 2px; line-height: 1.4; }
+.roar-close {
+  width: 22px; height: 22px; border: none; border-radius: 7px;
+  background: rgba(0,0,0,0.05); color: var(--text-tertiary);
+  font-size: 11px; cursor: pointer; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: all var(--dur-mid);
+}
+.roar-close:hover { background: rgba(0,0,0,0.10); }
+.roar-close:active { transform: scale(0.88); }
+
+/* ═══════════════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════════════ */
+.toast {
+  position: fixed; left: 12px; right: 12px; bottom: 88px;
+  background: rgba(20,28,45,0.92);
+  backdrop-filter: blur(14px);
+  color: #fff; border-radius: var(--r-lg);
+  padding: 12px 16px; box-shadow: var(--glass-shadow-xl);
+  z-index: 50; font-weight: 700; font-size: 13px; text-align: center;
+  animation: toastUp 0.35s var(--ease-spring);
+  pointer-events: none;
+  border: 1px solid rgba(255,255,255,0.10);
+}
+@keyframes toastUp {
+  from { opacity:0; transform: translateY(18px); }
+  to { opacity:1; transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════════════════════
+   BOTTOM ACTION BAR
+═══════════════════════════════════════════════════════ */
+.bottom-bar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 90;
+  background: rgba(240,244,255,0.94);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-top: 1px solid rgba(66,133,244,0.15);
+  box-shadow: 0 -4px 24px rgba(66,133,244,0.12), 0 -1px 4px rgba(0,0,0,0.06);
+  padding: 10px 14px calc(10px + var(--safe-bottom));
+  display: grid; grid-template-columns: 1fr 1.65fr; gap: 9px;
+}
+.btn-primary, .btn-secondary {
+  border: none; border-radius: var(--r-lg);
+  padding: 14px 10px; font-size: 14.5px; font-weight: 900;
+  cursor: pointer; letter-spacing: 0.1px;
+  transition: all var(--dur-mid) var(--ease-out);
+  position: relative; overflow: hidden; font-family: inherit;
+}
+.btn-primary {
+  background: linear-gradient(135deg, #1967D2, #4285F4, #1565C0);
+  color: #fff; box-shadow: 0 6px 20px rgba(66,133,244,0.40);
+}
+.btn-primary::before {
+  content:''; position:absolute; inset:0;
+  background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.25) 0%, transparent 70%);
+  opacity: 0; transition: opacity 0.3s;
+}
+.btn-primary:hover::before { opacity:1; }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(66,133,244,0.50); }
+.btn-primary:active { transform: scale(0.93); box-shadow: 0 3px 10px rgba(66,133,244,0.25); }
+.btn-primary:disabled { background: linear-gradient(135deg, #9DBDE8, #B8CCEE); box-shadow: none; cursor:not-allowed; transform: none; }
+.btn-primary.submitting { animation: submitPulse 0.9s ease-in-out infinite; }
+@keyframes submitPulse {
+  0%,100% { box-shadow: 0 6px 20px rgba(66,133,244,0.40); }
+  50% { box-shadow: 0 8px 32px rgba(66,133,244,0.65); }
+}
+.btn-primary.green-submit {
+  background: linear-gradient(135deg, #188038, #34A853, #1E8540);
+  box-shadow: 0 6px 20px rgba(52,168,83,0.40);
+}
+.btn-primary.green-submit:hover { box-shadow: 0 10px 28px rgba(52,168,83,0.50); }
+.btn-secondary {
+  background: rgba(255,255,255,0.88);
+  backdrop-filter: blur(8px);
+  color: var(--g-blue-dark); border: 1.5px solid rgba(66,133,244,0.28);
+  box-shadow: 0 2px 10px rgba(66,133,244,0.08);
+}
+.btn-secondary:hover { background: rgba(240,247,255,0.96); border-color: var(--g-blue); transform: translateY(-1px); }
+.btn-secondary:active { transform: scale(0.93); }
+
+/* ═══════════════════════════════════════════════════════
+   RIPPLE EFFECT
+═══════════════════════════════════════════════════════ */
+.ripple { position: relative; overflow: hidden; }
+.ripple-wave {
+  position: absolute; border-radius: 50%;
+  background: rgba(255,255,255,0.45);
+  transform: scale(0); pointer-events: none;
+  animation: rippleAnim 0.65s ease-out forwards;
+}
+@keyframes rippleAnim { to { transform: scale(4); opacity: 0; } }
+
+/* ═══════════════════════════════════════════════════════
+   PAGE SECTIONS (step content)
+═══════════════════════════════════════════════════════ */
+.step-section { padding-top: 4px; }
+
+/* ═══════════════════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════════════════ */
+@media (max-width: 420px) {
+  .header-title { font-size: 15px; }
+  .header-subtitle { font-size: 9px; }
+  .person-grid { grid-template-columns: repeat(2, 1fr); max-height: 350px; }
+  .avatar-ring { width: 58px; height: 58px; font-size: 22px; }
+  .avatar-ring img { width: 58px; height: 58px; }
+  .person-card { min-height: 106px; padding: 10px 5px 8px; }
+  .person-name { font-size: 11px; }
+  .person-id { font-size: 9px; }
+  .product-grid { grid-template-columns: 1fr; }
+  .machine-grid { grid-template-columns: 1fr; }
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  .stepper-wrap { padding: 7px 4px; }
+  .step-circle { width: 28px; height: 28px; font-size: 12px; }
+  .step-label { font-size: 9.5px; }
+  .step-connector { width: 12px; }
+  .modal-box { width: 96%; padding: 13px; }
+  .outer-wrap { padding-bottom: 140px; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .defect-row { flex-wrap: wrap; }
+  .defect-row .qty-input { flex: 0 0 80px !important; min-width: 75px !important; width: 80px !important; }
+}
+@media (min-width: 421px) and (max-width: 768px) {
+  .person-grid { grid-template-columns: repeat(3, 1fr); }
+  .product-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 769px) {
+  .outer-wrap { max-width: 720px; }
+  .person-grid { grid-template-columns: repeat(4, 1fr); max-height: 480px; }
+  .machine-grid { grid-template-columns: repeat(3, 1fr); }
+  .product-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
 </style>
+
+<!-- PWA / GitHub Pages 資料對接：只新增資料橋接，不改原 HTML/CSS 結構 -->
+<script src="./pwa-config.js?v=411"></script>
+<script src="./gas-bridge.js?v=213"></script>
 </head>
 <body>
-<div class="boot" id="boot"><h1>🏭 製造部・報工作業 V4</h1><div>正在載入 <b>V4 報工單</b>｜沿用 V3 作業邏輯規則與報工扣工單流程...</div></div>
+
+<!-- ════════════════════════════════════════════════
+  LOADING SCREEN
+════════════════════════════════════════════════ -->
+<div id="loadingScreen" class="loading-screen">
+  <div class="load-bg-orbs">
+    <div class="load-orb"></div>
+    <div class="load-orb"></div>
+    <div class="load-orb"></div>
+  </div>
+  <div class="load-logo-ring">
+    <div class="load-ring"></div>
+    <div class="load-ring"></div>
+    <div class="load-ring"></div>
+    <div class="load-center-icon">🏭</div>
+  </div>
+  <div class="load-brand">
+    <div class="load-brand-name">化新精密</div>
+    <div class="load-brand-sub">HUA HSIN PRECISION</div>
+  </div>
+  <div class="load-title">智慧製造中央作戰指揮中心 · Production Reporting V4</div>
+  <div class="load-google-dots">
+    <div class="load-dot"></div>
+    <div class="load-dot"></div>
+    <div class="load-dot"></div>
+    <div class="load-dot"></div>
+  </div>
+  <div class="load-progress-bar">
+    <div class="load-progress-fill"></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+  SUBMIT OVERLAY
+════════════════════════════════════════════════ -->
+<div id="submitOverlay" class="submit-overlay hidden">
+  <div class="submit-card">
+    <div class="spinner"></div>
+    <p class="submit-title" id="submitTitle">📤 報工送出中...</p>
+    <div class="submit-sub" id="submitSub">Writing production record...</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+  PERSON SCAN MODAL
+════════════════════════════════════════════════ -->
+<div id="personScanModal" class="modal-mask hidden">
+  <div class="modal-box">
+    <div class="modal-title">📷 掃描工牌條碼 / Scan Badge QR Code</div>
+    <div class="video-area" id="personVideoArea">
+      <video id="personVideo" autoplay playsinline muted></video>
+      <div class="scan-frame"></div>
+      <div class="scan-laser"></div>
+    </div>
+    <div class="modal-hint">請將條碼對準掃描框 / Align barcode to frame</div>
+    <input type="text" id="personManualInput" class="manual-input hidden" placeholder="手動輸入工號 / Enter Employee ID, press Enter" onkeydown="personManualConfirm(event)">
+    <div class="modal-btns">
+      <button class="btn-close ripple" onclick="closePersonScan()">✕ 關閉 / Close</button>
+      <button class="btn-manual ripple" onclick="togglePersonManual()">⌨ 手動 / Manual</button>
+    </div>
+    <div class="scan-status" id="personScanStatus">📡 啟動相機中... / Starting camera...</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+  PRODUCT SCAN MODAL
+════════════════════════════════════════════════ -->
+<div id="productScanModal" class="modal-mask hidden">
+  <div class="modal-box">
+    <div class="modal-title">📷 掃描產品條碼 / Scan Product Barcode</div>
+    <div class="video-area" id="productVideoArea">
+      <video id="productVideo" autoplay playsinline muted></video>
+      <div class="scan-frame"></div>
+      <div class="scan-laser"></div>
+    </div>
+    <div class="modal-hint">請將產品條碼對準框內 / Align product barcode</div>
+    <input type="text" id="productManualInput" class="manual-input hidden" placeholder="輸入產品編號 / Enter Product Code" onkeydown="productManualConfirm(event)">
+    <div class="modal-btns">
+      <button class="btn-close ripple" onclick="closeProductScan()">✕ 關閉 / Close</button>
+      <button class="btn-manual ripple" onclick="toggleProductManual()">⌨ 手動 / Manual</button>
+    </div>
+    <div class="scan-status" id="productScanStatus">📡 啟動相機中... / Starting camera...</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+  PHOTO NOTE MODAL
+════════════════════════════════════════════════ -->
+<div id="photoNoteModal" class="photo-note-modal hidden">
+  <div class="photo-note-box">
+    <div style="font-weight:900;font-size:15px;margin-bottom:10px;">✏️ 編輯照片備註 / Edit Photo Note</div>
+    <img id="photoNotePreview" src="" alt="photo preview">
+    <label class="field-label">備註 / Note</label>
+    <textarea id="photoNoteText" placeholder="輸入此照片的說明備註... / Add note for this photo..."></textarea>
+    <div class="photo-note-btns">
+      <button class="btn-cancel ripple" onclick="closePhotoNote()">取消 / Cancel</button>
+      <button class="btn-confirm ripple" onclick="savePhotoNote()">✓ 儲存 / Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+  ROAR CONTAINER
+════════════════════════════════════════════════ -->
+<div id="roarContainer" class="roar-container"></div>
+
+<!-- ════════════════════════════════════════════════
+  TOAST
+════════════════════════════════════════════════ -->
+<div id="toast" class="toast hidden"></div>
+
+<!-- ════════════════════════════════════════════════
+  MAIN WRAPPER
+════════════════════════════════════════════════ -->
+<div class="outer-wrap">
+
+  <!-- ── STICKY HEADER ── -->
+  <header class="site-header">
+    <div class="header-gradient-bar"></div>
+    <div class="header-inner">
+      <div class="header-top-row">
+        <div class="header-brand">
+          <div class="header-icon-wrap">🏭</div>
+          <div class="header-title-group">
+            <div class="header-title">製一組 報工表單 V4</div>
+            <div class="header-subtitle">化新精密｜智慧製造指揮中心｜引導式報工 · Smart Production Reporting</div>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button class="header-btn ripple" id="fullscreenBtn" onclick="toggleFullscreen()" title="全螢幕 / Fullscreen">⛶</button>
+          <button class="header-btn ripple" onclick="reloadData()" title="重新載入 / Reload">↻</button>
+        </div>
+      </div>
+      <div id="statusPill" class="status-pill">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">🟡 正在連線主資料庫... Connecting to database...</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── STEPPER ── -->
+  <nav class="stepper-wrap">
+    <div class="stepper" id="stepper">
+      <div class="step-item is-active" data-step="0" onclick="jumpToStep(0)">
+        <div class="step-circle">1</div>
+        <div class="step-label">人員<span class="en">Operator</span></div>
+      </div>
+      <div class="step-connector" data-line="0"></div>
+      <div class="step-item is-todo" data-step="1" onclick="jumpToStep(1)">
+        <div class="step-circle">2</div>
+        <div class="step-label">工件<span class="en">Workpiece</span></div>
+      </div>
+      <div class="step-connector" data-line="1"></div>
+      <div class="step-item is-todo" data-step="2" onclick="jumpToStep(2)">
+        <div class="step-circle">3</div>
+        <div class="step-label">產出<span class="en">Output</span></div>
+      </div>
+      <div class="step-connector" data-line="2"></div>
+      <div class="step-item is-todo" data-step="3" onclick="jumpToStep(3)">
+        <div class="step-circle">4</div>
+        <div class="step-label">品質<span class="en">Quality</span></div>
+      </div>
+      <div class="step-connector" data-line="3"></div>
+      <div class="step-item is-todo" data-step="4" onclick="jumpToStep(4)">
+        <div class="step-circle">5</div>
+        <div class="step-label">確認<span class="en">Confirm</span></div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ══════════════════════════════════════
+    STEP 1: 人員 Operator
+  ══════════════════════════════════════ -->
+  <section id="stepPage0" class="step-section">
+    <div class="guide-card">
+      <div class="guide-icon">👆</div>
+      <div class="guide-body">
+        <div class="guide-title">Step 1：選擇作業員 / Select Operator</div>
+        <div class="guide-desc">
+          請透過下方任一方式選擇作業員：<b>① 點擊人員卡片</b> ② 掃描工牌條碼 ③ 搜尋姓名或工號。選定後系統自動帶入班別與工時資訊。<br>
+          Choose an operator: ① Click a card ② Scan badge QR ③ Search by name/ID. Shift &amp; hours will auto-fill.
+        </div>
+      </div>
+    </div>
+
+    <button class="scan-btn ripple" onclick="openPersonScan()">
+      <span class="s-icon">📷</span>
+      掃描 / 感應工牌（條碼 / QR Code）&nbsp;·&nbsp;Scan Badge
+    </button>
+
+    <div style="height:8px;"></div>
+
+    <!-- Recent quick select -->
+    <div id="recentBar" class="recent-bar hidden">
+      <span class="bar-label">⭐ 最近使用 / Recent:</span>
+      <div id="recentPersonContent" style="display:flex;gap:7px;flex-wrap:wrap;"></div>
+    </div>
+
+    <input type="text" id="personSearch" class="search-input" placeholder="🔍 搜尋人員 / Search: 姓名、工號、班別 (Name, ID, Shift)..." oninput="filterPersons()">
+
+    <div id="personGrid" class="person-grid"></div>
+    <div id="personGridEmpty" class="caption hidden" style="text-align:center;padding:20px;">沒有符合條件的人員 / No matching operators found</div>
+
+    <!-- Selected person info card -->
+    <div class="glass-card" style="margin-top:12px;">
+      <div class="section-head">👤 選定人員 <span class="en">Selected Operator</span></div>
+      <div id="selectedPersonDisplay" class="selected-person-display">
+        <div class="person-photo-lg">點擊卡片<br>Click Card</div>
+        <div>
+          <div class="person-info-name" style="color:var(--text-secondary);">尚未選擇 / Not Selected</div>
+          <div class="caption" style="margin-top:4px;">請點擊上方人員卡片、掃碼或搜尋選擇<br>Click a card, scan, or search above</div>
+        </div>
+      </div>
+      <div id="empIdHighlight" class="employee-id-highlight" style="margin-top:10px;">未輸入 / Not Set</div>
+
+      <div class="grid-2">
+        <div>
+          <label class="field-label">姓名 / Name</label>
+          <input id="personName" readonly placeholder="自動帶入 / Auto-filled">
+        </div>
+        <div>
+          <label class="field-label">工號 / Employee ID</label>
+          <input id="personId" readonly placeholder="自動帶入 / Auto-filled">
+        </div>
+      </div>
+      <div class="grid-2">
+        <div>
+          <label class="field-label">班別 / Shift</label>
+          <select id="shiftSelect"></select>
+        </div>
+        <div>
+          <label class="field-label">是否加班 / Overtime</label>
+          <select id="overtimeSelect">
+            <option value="否">否 / No</option>
+            <option value="是">是 / Yes</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label class="field-label">加班類型 / Overtime Type</label>
+        <select id="overtimeType">
+          <option value="無">無 / None</option>
+          <option value="平日加班">平日加班 / Weekday OT</option>
+          <option value="休息日加班">休息日加班 / Day-off OT</option>
+          <option value="例假日加班">例假日加班 / Holiday OT</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+    STEP 2: 工件 Workpiece
+  ══════════════════════════════════════ -->
+  <section id="stepPage1" class="step-section hidden">
+    <div class="guide-card">
+      <div class="guide-icon">📦</div>
+      <div class="guide-body">
+        <div class="guide-title">Step 2：選擇產品與工站 / Select Product &amp; Workstation</div>
+        <div class="guide-desc">
+          請選擇要報工的產品，接著選取對應的報工工站與主機台。可透過掃描產品條碼快速定位。<br>
+          Select the product, then choose the workstation and machine. Use barcode scan for quick lookup.
+        </div>
+      </div>
+    </div>
+
+    <div class="glass-card">
+      <div class="section-head">🔧 工件與工站 <span class="en">Product / Workstation</span></div>
+
+      <button class="scan-btn ripple" onclick="openProductScan()" style="margin-bottom:10px;">
+        <span class="s-icon">📷</span> 掃描產品條碼 / Scan Product Barcode
+      </button>
+
+      <input type="text" id="productSearch" class="search-input" placeholder="🔍 搜尋產品 / Search Product: 品名、產品編號..." oninput="filterProducts()">
+
+      <div id="productGrid" class="product-grid"></div>
+      <div id="productGridEmpty" class="caption hidden" style="text-align:center;padding:16px;">沒有符合條件的產品 / No matching products</div>
+
+      <!-- Selected product info -->
+      <div id="selectedProductArea" class="hidden" style="margin-top:10px;">
+        <div id="selectedProductDisplay" class="selected-person-display">
+          <div class="person-photo-lg">產品<br>Product</div>
+          <div>
+            <div class="person-info-name" style="color:var(--text-secondary);">尚未選產品</div>
+            <div class="caption" style="margin-top:3px;">選擇後顯示產品資訊</div>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top:10px;">
+          <div>
+            <label class="field-label">產品編號 / Product Code</label>
+            <input id="productCode" readonly>
+          </div>
+          <div>
+            <label class="field-label">品名 / Product Name</label>
+            <input id="productName" readonly>
+          </div>
+        </div>
+
+        <label class="field-label required">報工工站 / Workstation</label>
+        <select id="workstationSelect" onchange="onWorkstationChange()"></select>
+
+        <div class="grid-3" style="margin-top:4px;">
+          <div>
+            <label class="field-label">工序範圍 / Process Range</label>
+            <input id="processRange" readonly>
+          </div>
+          <div>
+            <label class="field-label">標準產能 / Std. Capacity</label>
+            <input id="stdCapacity" readonly>
+          </div>
+          <div>
+            <label class="field-label">標準工時(秒) / Std. Time(s)</label>
+            <input id="stdTimeSec" readonly>
+          </div>
+        </div>
+
+        <label class="field-label">主機台 / Main Machine</label>
+        <select id="mainMachineSelect" onchange="updatePreview();updateConfirmSummary();"></select>
+
+        <div id="machineListGrid" class="machine-grid"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+    STEP 3: 產出 Output
+  ══════════════════════════════════════ -->
+  <section id="stepPage2" class="step-section hidden">
+    <div class="guide-card">
+      <div class="guide-icon">📊</div>
+      <div class="guide-body">
+        <div class="guide-title">Step 3：輸入產出數量 / Enter Output Quantity</div>
+        <div class="guide-desc">
+          請輸入今日共做數與不良數。系統將自動計算實際良品數與工時。時間會根據班別自動帶入，您也可手動調整。<br>
+          Enter total qty and NG qty. Good qty &amp; working hours are auto-calculated. Time pre-fills by shift.
+        </div>
+      </div>
+    </div>
+
+    <div class="glass-card">
+      <div class="section-head">📊 產出數量 <span class="en">Output Quantity</span></div>
+
+      <div class="grid-2">
+        <div>
+          <label class="field-label required">今日共做數 / Total Qty</label>
+          <input id="totalQty" type="number" min="0" inputmode="numeric" placeholder="0" oninput="calcQty()">
+        </div>
+        <div>
+          <label class="field-label">不良數 / NG Qty</label>
+          <input id="ngQty" type="number" min="0" value="0" inputmode="numeric" placeholder="0" oninput="calcQty()">
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card blue">
+          <span class="stat-label">📦 今日共做 / Total</span>
+          <span class="stat-value" id="displayTotal">0</span>
+        </div>
+        <div class="stat-card red">
+          <span class="stat-label">❌ 不良 / NG</span>
+          <span class="stat-value" id="displayNG">0</span>
+        </div>
+        <div class="stat-card green">
+          <span class="stat-label">✅ 實際良品 / Good</span>
+          <span class="stat-value" id="displayGood">0</span>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top:4px;">
+        <div>
+          <label class="field-label">開始時間 / Start Time</label>
+          <input id="startTime" type="datetime-local" onchange="calcWorkingHours()">
+        </div>
+        <div>
+          <label class="field-label">結束時間 / End Time</label>
+          <input id="endTime" type="datetime-local" onchange="calcWorkingHours()">
+        </div>
+      </div>
+
+      <label class="field-label">實際工時 / Working Hours</label>
+      <input id="workingHours" readonly placeholder="自動計算 / Auto-calculated">
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+    STEP 4: 品質 Quality
+  ══════════════════════════════════════ -->
+  <section id="stepPage3" class="step-section hidden">
+    <div class="guide-card">
+      <div class="guide-icon">🔍</div>
+      <div class="guide-body">
+        <div class="guide-title">Step 4：品質與不良記錄 / Quality &amp; Defect Records</div>
+        <div class="guide-desc">
+          若有不良品，請分配不良原因與數量。可上傳現場照片（最多12張），並記錄異常時間與備註。此步驟資料將同步寫入不良紀錄。<br>
+          Allocate defect reasons &amp; qty. Upload photos (max 12), record anomaly time &amp; remarks. Data syncs to defect records.
+        </div>
+      </div>
+    </div>
+
+    <div class="glass-card">
+      <div class="section-head">🔍 品質與不良 <span class="en">Quality &amp; Defects</span></div>
+
+      <!-- Defect allocation -->
+      <label class="field-label" style="margin-top:4px;">
+        📋 不良原因數量分配 / NG Reason Allocation
+        <span class="caption">（分配數量需等於總不良數 / Total must match NG qty）</span>
+      </label>
+      <div id="defectContainer"></div>
+      <button class="add-defect-btn ripple" onclick="addDefectRow()">＋ 新增不良分配項目 / Add Allocation Row</button>
+      <div id="defectSummary" class="defect-summary hidden"></div>
+
+      <!-- Anomaly type -->
+      <label class="field-label" style="margin-top:14px;">異常類型 / Abnormal Type</label>
+      <select id="anomalyType" onchange="updatePreview()">
+        <option value="無異常">無異常 / Normal Operation</option>
+        <option value="支援調度">支援調度 / Staff Reassignment</option>
+        <option value="材質異常">材質異常 / Material Defect</option>
+        <option value="換刀">換刀 / Tool Change</option>
+        <option value="機台停機">機台停機 / Machine Down</option>
+        <option value="待料">待料 / Waiting for Material</option>
+        <option value="品質確認">品質確認 / Quality Check</option>
+        <option value="其他">其他 / Others</option>
+      </select>
+
+      <!-- Anomaly time range -->
+      <div class="anomaly-section">
+        <div class="section-head">⏱ 異常時間 <span class="en">Anomaly Duration</span></div>
+        <div class="grid-2">
+          <div>
+            <label class="field-label">異常開始 / Start</label>
+            <input id="anomalyStart" type="datetime-local" onchange="calcAnomalyTime()">
+          </div>
+          <div>
+            <label class="field-label">異常結束 / End</label>
+            <input id="anomalyEnd" type="datetime-local" onchange="calcAnomalyTime()">
+          </div>
+        </div>
+        <label class="field-label">異常持續時間 / Duration</label>
+        <input id="anomalyDuration" readonly placeholder="自動計算 / Auto-calculated">
+      </div>
+
+      <!-- Photos -->
+      <label class="field-label" style="margin-top:14px;">
+        現場照片 / Field &amp; Defect Photos
+        <span class="caption">（最多12張 / Max 12）</span>
+      </label>
+      <div class="photo-toolbar">
+        <button class="photo-tool-btn ripple" onclick="triggerCamera()">📸 拍照 / Take Photo</button>
+        <button class="photo-tool-btn ripple" onclick="triggerFileSelect()">🖼 選圖 / Choose File</button>
+        <button class="photo-tool-btn danger ripple" onclick="clearAllPhotos()">🗑 清除 / Clear All</button>
+      </div>
+      <input id="cameraInput" type="file" accept="image/*" capture="environment" multiple class="hidden" onchange="onPhotoChange(event,'camera')">
+      <input id="fileInput" type="file" accept="image/*" multiple class="hidden" onchange="onPhotoChange(event,'file')">
+      <div id="photoGrid" class="photo-grid"></div>
+      <div class="photo-count" id="photoCount">0 / 12 張照片 / photos</div>
+
+      <!-- Defect sync notification -->
+      <div id="defectSyncNotice" style="margin-top:8px;"></div>
+
+      <!-- Remarks -->
+      <label class="field-label" style="margin-top:12px;">備註 / Remarks</label>
+      <textarea id="remarks" placeholder="輸入異常描述、備註事項... / Enter anomaly description, remarks..." oninput="updatePreview()"></textarea>
+
+      <!-- Preview -->
+      <label class="field-label" style="margin-top:14px;">報工預覽 / Report Preview</label>
+      <div id="reportPreview" class="preview-block">📋 尚未產生預覽，請依序填寫各步驟資料
+Production report preview will appear here after filling in the steps above...</div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+    STEP 5: 確認 Confirm
+  ══════════════════════════════════════ -->
+  <section id="stepPage4" class="step-section hidden">
+    <div class="guide-card">
+      <div class="guide-icon">✅</div>
+      <div class="guide-body">
+        <div class="guide-title">Step 5：確認並送出報工 / Confirm &amp; Submit Report</div>
+        <div class="guide-desc">
+          請仔細核對以下報工摘要資訊，確認無誤後點擊「送出報工」按鈕。送出後資料將寫入08_報工與09_不良紀錄。<br>
+          Review the summary carefully. Click "Submit" to write to production &amp; defect records.
+        </div>
+      </div>
+    </div>
+
+    <div class="confirm-card" id="confirmCard">
+      <div style="font-weight:900;font-size:15.5px;text-align:center;margin-bottom:12px;color:#1A3A28;">
+        📋 報工摘要確認 / Report Summary Confirmation
+      </div>
+      <div id="confirmSummaryContent">
+        <div class="caption" style="text-align:center;padding:14px;">請先完成前面步驟再回來確認 / Please complete previous steps first</div>
+      </div>
+    </div>
+
+    <div class="glass-card" style="margin-top:12px;">
+      <div class="section-head">📋 完整預覽 <span class="en">Full Preview</span></div>
+      <div id="confirmPreview" class="preview-block">📋 尚未產生預覽...</div>
+    </div>
+  </section>
+
+</div><!-- /outer-wrap -->
+
+<!-- ── BOTTOM ACTION BAR ── -->
+<div class="bottom-bar">
+  <button id="btnBack" class="btn-secondary ripple hidden" onclick="goBack()">← 上一步 / Back</button>
+  <button id="btnNext" class="btn-primary ripple" onclick="goNextOrSubmit()" style="grid-column: 1 / -1;">下一步 → / Next</button>
+</div>
+
+<!-- ════════════════════════════════════════════════
+  JAVASCRIPT
+════════════════════════════════════════════════ -->
 <script>
-(function(){
-  'use strict';
-  var target='./work-report-v3.html?v=410';
-  fetch(target,{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error('讀取 work-report-v3.html 失敗：HTTP '+r.status);return r.text();}).then(function(html){
-    html=html
-      .replace(/<title>[^<]*<\/title>/,'<title>製造部・報工作業 V4</title>')
-      .replace(/製造部・報工作業 V3\.1/g,'製造部・報工作業 V4')
-      .replace(/乾淨正式版｜含 08_工站途程備援｜主線報工扣工單/g,'V4正式版｜沿用V3作業邏輯規則｜主線報工扣工單')
-      .replace(/const VERSION='v3\.1\.0_route_fallback'/,"const VERSION='v4.0.1_v3logic_entry'")
-      .replace(/GitHub Pages PWA 報工作業V3\.1/g,'GitHub Pages PWA 報工作業V4');
-    document.open();
-    document.write(html);
-    document.close();
-  }).catch(function(e){
-    document.getElementById('boot').innerHTML='<h1>🔴 V4 載入失敗</h1><div class="err">'+String(e&&e.message||e)+'\n請確認 docs/work-report-v3.html 存在。</div><p><a style="color:#22d3ee" href="./work-report-v3.html">改開穩定報工核心</a></p>';
+'use strict';
+
+/* ══════════════════════════════════════
+   GLOBAL STATE
+══════════════════════════════════════ */
+let DB = {
+  persons: [],
+  workstationGroups: [],
+  shiftList: [],
+  ngReasons: { Z: [], Y: [] },
+  anomalyTypes: [],
+  counts: {}
+};
+
+let STATE = {
+  currentStep: 0,
+  operator: null,
+  productGroupList: [],
+  currentProductGroup: null,
+  currentWorkstation: null,
+  photos: [],
+  personStream: null,
+  personDetector: null,
+  personTimer: null,
+  productStream: null,
+  productDetector: null,
+  productTimer: null,
+  defectRows: [],
+  editPhotoIndex: -1,
+  stepDone: [false, false, false, false, false]
+};
+
+const TOTAL_STEPS = 5;
+const STEP_NAMES = ['人員', '工件', '產出', '品質', '確認'];
+const STEP_EN = ['Operator', 'Workpiece', 'Output', 'Quality', 'Confirm'];
+const LS_KEY = 'rg_v4_recent_persons';
+const MAX_RECENT = 6;
+const MAX_PHOTOS = 12;
+let defectRowIdCounter = 0;
+let scanBuffer = '';
+let scanTimer = null;
+const SCAN_GAP_MS = 80;
+
+/* ══════════════════════════════════════
+   RIPPLE
+══════════════════════════════════════ */
+document.addEventListener('click', e => {
+  const el = e.target.closest('.ripple');
+  if (!el) return;
+  const wave = document.createElement('span');
+  wave.className = 'ripple-wave';
+  const r = el.getBoundingClientRect();
+  const sz = Math.max(r.width, r.height);
+  wave.style.cssText = `width:${sz}px;height:${sz}px;left:${e.clientX-r.left-sz/2}px;top:${e.clientY-r.top-sz/2}px`;
+  el.appendChild(wave);
+  wave.addEventListener('animationend', () => wave.remove());
+});
+
+/* ══════════════════════════════════════
+   INIT
+══════════════════════════════════════ */
+window.addEventListener('load', () => {
+  setDefaultTimes();
+  initAnomalyTypeSelect();
+  reloadData();
+  listenScannerGun();
+  listenFullscreenChange();
+  addDefectRow();
+  updateStepperUI();
+  updateBottomBar();
+});
+
+/* ══════════════════════════════════════
+   BACKEND CALLS
+══════════════════════════════════════ */
+function reloadData() {
+  showLoading(true);
+  callBackend('取得報工作業v2初始資料', null, onDataLoaded, err => {
+    showLoading(false);
+    roar('❌', '讀取失敗 / Load Failed', (err.message || String(err)), 'error');
   });
-})();
+}
+
+function callBackend(fn, arg, ok, fail) {
+  const onFail = fail || (e => roar('⚠️', '連線錯誤', e.message || String(e), 'error'));
+
+  // 1) Apps Script 原生環境：完全保留原 google.script.run 行為
+  if (typeof google !== 'undefined' && google.script && google.script.run) {
+    try {
+      let runner = google.script.run
+        .withSuccessHandler(ok)
+        .withFailureHandler(onFail);
+      arg === null ? runner[fn]() : runner[fn](arg);
+      return;
+    } catch(e) {
+      onFail(e);
+      return;
+    }
+  }
+
+  // 2) GitHub Pages / PWA 環境：改走 gas-bridge.js，但不改原 V4 畫面與操作邏輯
+  (async () => {
+    if (!window.GAS橋接器) throw new Error('找不到 gas-bridge.js，請確認 pwa-config.js 與 gas-bridge.js 已載入。');
+
+    let res;
+    if (fn === '取得報工作業v2初始資料') {
+      res = await GAS橋接器.取得報工初始資料();
+      res = V4資料對接_標準化初始資料_(res);
+    } else if (fn === '寫入報工作業v2') {
+      res = await V4資料對接_寫入報工_沿用V3邏輯_(arg || {});
+    } else if (fn === '寫入不良紀錄v2') {
+      res = await GAS橋接器.寫入不良紀錄(V4資料對接_補齊不良資料_(arg || {}));
+      res = V4資料對接_標準化回應_(res);
+    } else {
+      const method = arg == null ? 'GET' : 'POST';
+      res = await GAS橋接器.呼叫(fn, arg || {}, { method: method });
+      res = V4資料對接_標準化回應_(res);
+    }
+
+    ok(res);
+  })().catch(onFail);
+}
+
+/* ══════════════════════════════════════
+   PWA V4 資料對接擴充層
+   原則：只補資料橋接 / 備援 / V3報工扣工單 payload，不動原 V4 HTML/CSS/UI 流程
+══════════════════════════════════════ */
+
+const V4資料對接_版本 = 'v4.1.0_資料對接_沿用V3報工邏輯';
+const V4資料對接_正式途程備援 = [
+  ['A002900000','148928-01751','12AY MOUNTING FOOT 沉頭43 (489)','M/C加工','OP110','489','489、1044、1075、1016、1069、496、1088'],
+  ['A002900000','148928-01751','12AY MOUNTING FOOT 沉頭43 (489)','清洗+目視','OP130','77','77'],
+  ['Z907200000','148960-01653','12AY MOUNTING FOOT M16 (489)','M/C加工','OP110','489','489、1044、1075、1016、1069、496、1088'],
+  ['Z907200000','148960-01653','12AY MOUNTING FOOT M16 (489)','清洗+目視','OP130','77','77'],
+  ['A500900000','1A8060-32310','CARRIER,DIFFERENTIA (大) 171→449→406','車床加工+M/C加工','OP110','171','171、451、449'],
+  ['A500900000','1A8060-32310','CARRIER,DIFFERENTIA (大) 171→449→406','清洗+目視','OP140','77','77'],
+  ['A401800000','1A8042-32310','CARRIER,DIFFERENTIAL (小) 170→171→406','車床加工+M/C加工','OP110','171','171、451、449'],
+  ['A401800000','1A8042-32310','CARRIER,DIFFERENTIAL (小) 170→171→406','清洗+目視','OP140','77','77'],
+  ['A503203008','ACW1799170','COVER FOR O/P AGCO 66/74待組 (5034共線)','M/C加工','OP110','489','489、1044、1075、1016、1069、496、1088'],
+  ['A503302008','ACW1838780','COVER FOR O/P AGCO D24待組','M/C加工','OP110','489','489、1044、1075、1016、1069、496、1088'],
+  ['A503402008','ACW1823910','COVER FOR O/P AGCO D38待組','M/C加工','OP110','489','489、1044、1075、1016、1069、496、1088'],
+  ['Z907400020','837081039','FRONT COVER ASSEMBLY(大米) (設變)','組裝','OP110','84','84、1063、204、1103、1059'],
+  ['Z907400020','837081039','FRONT COVER ASSEMBLY(大米) (設變)','測試油轉速+紫外燈檢漏','OP120','1100','1100'],
+  ['Z907500010','837081039','FRONT COVER ASSEMBLY(小米)','組裝','OP110','84','84、1063、204、1103、1059'],
+  ['Z907500010','837081039','FRONT COVER ASSEMBLY(小米)','測試油轉','OP120','1100','1100、1082、1057'],
+  ['Z907100000','1A8310-14250','GEAR BOX, FRONT L','M/C加工','OP110','489','489、1044、1075、1016、1069、496、1088'],
+  ['Z907100000','1A8310-14250','GEAR BOX, FRONT L','試漏(水/氣)','OP140','482','482、478、296、292、396、535'],
+  ['Z907100000','1A8310-14250','GEAR BOX, FRONT L','清洗+目視','OP150','77','77'],
+  ['Z907000000','1A8310-14240','GEAR BOX, FRONT R','M/C加工','OP110','489','489、1044、1075、1016、1069、496、1088'],
+  ['Z907000000','1A8310-14240','GEAR BOX, FRONT R','清洗+目視','OP150','77','77'],
+  ['B300200000','C00577459','KNUCKLE RR STEERING (G50+)','車床加工','OP110','450','450、99、66、1023、485'],
+  ['B300200000','C00577459','KNUCKLE RR STEERING (G50+)','研磨','OP140','1098','1098、348、347、1072'],
+  ['B300200000','C00577459','KNUCKLE RR STEERING (G50+)','M/C加工','OP150','489','489、1044、1075、1016、1069、496、1088'],
+  ['A900200000','ACX2946990','OIL PUMP AP50 (AP3K 4CYL)','組裝','OP110','84','84、1063、204、1103、1059'],
+  ['A900200000','ACX2946990','OIL PUMP AP50 (AP3K 4CYL)','測試油轉','OP150','1100','1100、1082、1057'],
+  ['A801900000','ACX3320230','OIL PUMP AP75 (AP3K 6CYL)','M/C加工','OP110','489','489、1044、1075、1016、1069、496、1088'],
+  ['A801900000','ACX3320230','OIL PUMP AP75 (AP3K 6CYL)','測試油轉','OP150','1100','1100、1082、1057'],
+  ['A503200000','ACW1799230','OIL PUMP ASSY AGCO 66/74','組裝','OP110','84','84、1063、204、1103、1059'],
+  ['A503200000','ACW1799230','OIL PUMP ASSY AGCO 66/74','測試油轉','OP120','1100','1100、1082、1057'],
+  ['Z005900000','119717-21650','V-PULLEY CRANKSHAFT (1064→1072→1073→1083)','自動化','OP110','1101','1101'],
+  ['Z005900000','119717-21650','V-PULLEY CRANKSHAFT (1064→1072→1073→1083)','(精)車床N/C+M/C加工','OP140','1064','1064'],
+  ['Z005900000','119717-21650','V-PULLEY CRANKSHAFT (1064→1072→1073→1083)','研磨','OP170','1098','1098、348、347、1072'],
+  ['A402300020','AK21511210','AK21511210','委外加工','OP110','',''],
+  ['A402300020','AK21511210','AK21511210','試漏(水/氣)','OP120','482','482、478、296、292、396、535'],
+  ['A402301020','AJ80511210','AJ80511210','委外加工','OP110','',''],
+  ['A402301020','AJ80511210','AJ80511210','試漏(水/氣)','OP120','482','482、478、296、292、396、535']
+];
+
+const V4資料對接_照片備援 = {
+  產品: {
+    A503203008:'https://drive.google.com/thumbnail?id=1I6O1zGcDkqxGo4lP65OI0o4GnlXBV9_B&sz=w900',
+    A401800000:'https://drive.google.com/thumbnail?id=12JgM6j8_KipUKdz_nhXIV_rbfYJ21hCC&sz=w900',
+    A402301020:'https://drive.google.com/thumbnail?id=1ZEqwxEZmZuu5ZNv-pCvO_8nf7mM0tMjw&sz=w900',
+    A402300020:'https://drive.google.com/thumbnail?id=1l0BaMP7WyiEi9s1XjyzaZHJTXFd2KVJ5&sz=w900',
+    Z907500010:'https://drive.google.com/thumbnail?id=17rcFPqGjO0WN1m4SrFddMoeXuMqLZiS9&sz=w900',
+    Z005300000:'https://drive.google.com/thumbnail?id=1H1HaUy0gDyW6Cv7oyp4z0xuBgI452Yqq&sz=w900'
+  },
+  機台: {
+    77:'https://drive.google.com/thumbnail?id=1Q6V44wBAFkXcUXbfX2Xk-6g5lPmSgf0F&sz=w900',
+    1072:'https://drive.google.com/thumbnail?id=1tswECGJpdkfjHzHfaXy79bBGhMEDrLZB&sz=w900',
+    390:'https://drive.google.com/thumbnail?id=1fbQZs1DCfLNz64ENo_TwOKndpTdg1o9k&sz=w900',
+    204:'https://drive.google.com/thumbnail?id=1DApcuqdreyehEEHsAJaB45Qp8aPrRD69&sz=w900'
+  }
+};
+
+function V4資料對接_標準化回應_(res) {
+  res = res || {};
+  if (res.成功 === undefined) res.成功 = !!(res.success || res.ok || res.status === 'ok');
+  if (!res.訊息) res.訊息 = res.message || res.msg || (res.成功 ? '完成' : '未回傳成功狀態');
+  if (!res.報工編號) res.報工編號 = res.reportId || res.報工ID || res.id || '';
+  return res;
+}
+
+function V4資料對接_標準化初始資料_(raw) {
+  raw = raw || {};
+  const out = Object.assign({}, raw);
+  if (out.成功 === undefined) out.成功 = !!(out.success || out.ok || Array.isArray(out.人員) || Array.isArray(out.people));
+  if (!out.訊息) out.訊息 = out.message || 'PWA資料對接完成';
+
+  out.人員 = V4資料對接_取陣列_(raw, ['人員','people','staff','人員主檔','01_人員主檔']);
+  out.報工工站群組 = V4資料對接_取陣列_(raw, ['報工工站群組','途程工站群組','工站群組','routes','途程','08_工站途程機台主檔']);
+  out.報工工站群組 = out.報工工站群組.map(V4資料對接_標準化工站群組_);
+  if (!out.報工工站群組.length) out.報工工站群組 = V4資料對接_建立途程備援_();
+
+  out.不良原因 = out.不良原因 || raw.defects || raw.不良代號 || { Z: [], Y: [] };
+  if (!out.不良原因.Z) out.不良原因.Z = [];
+  if (!out.不良原因.Y) out.不良原因.Y = [];
+  if (!out.不良原因.Z.length && !out.不良原因.Y.length) {
+    out.不良原因 = {
+      Z: [
+        { 代碼:'Z01', 名稱:'素材裂縫', 英文名稱:'Surface Crack' },
+        { 代碼:'Z02', 名稱:'加工砂孔', 英文名稱:'Sand Porosity' },
+        { 代碼:'Z03', 名稱:'外觀刮傷', 英文名稱:'Surface Scratch' }
+      ],
+      Y: [
+        { 代碼:'Y01', 名稱:'內徑超差', 英文名稱:'Inner Diameter OOT' },
+        { 代碼:'Y02', 名稱:'外徑超差', 英文名稱:'Outer Diameter OOT' },
+        { 代碼:'Y03', 名稱:'長度超差', 英文名稱:'Length OOT' },
+        { 代碼:'Y04', 名稱:'表面粗糙度', 英文名稱:'Surface Roughness' }
+      ]
+    };
+  }
+
+  out.異常類型 = Array.isArray(out.異常類型) ? out.異常類型 : ['無異常','支援調度','材質異常','換刀','機台停機','待料','品質確認','其他'];
+  out.班別清單 = Array.isArray(out.班別清單) ? out.班別清單 : [{名稱:'早班',值:'早班'},{名稱:'中班',值:'中班'},{名稱:'大夜班',值:'大夜班'}];
+  out.筆數 = out.筆數 || {};
+  out.筆數.人員 = out.筆數.人員 || out.人員.length;
+  out.筆數.報工工站群組 = out.筆數.報工工站群組 || out.報工工站群組.length;
+  return out;
+}
+
+function V4資料對接_同步正式資料狀態() {
+  try {
+    const task = V4資料對接_讀今日任務_();
+    if (task && task.派班編號) {
+      STATE.今日派班任務 = task;
+      setTimeout(V4資料對接_套用今日任務_, 0);
+    }
+  } catch(e) {}
+}
+
+function V4資料對接_套用今日任務_() {
+  const task = V4資料對接_讀今日任務_();
+  if (!task) return;
+  STATE.今日派班任務 = task;
+
+  const emp = V4資料對接_取值_(task, ['工號','員工編號']);
+  if (emp && Array.isArray(DB.persons)) {
+    const i = DB.persons.findIndex(p => String(p.工號 || p.員工編號 || '').trim().toUpperCase() === String(emp).trim().toUpperCase());
+    if (i >= 0) selectPerson(i);
+  }
+
+  const productCode = V4資料對接_取值_(task, ['產品編號','料號']);
+  const productName = V4資料對接_取值_(task, ['品名','產品名稱']);
+  const group = (DB.workstationGroups || []).find(g =>
+    V4資料對接_norm_(g.產品編號) === V4資料對接_norm_(productCode) ||
+    (productName && String(g.品名 || '').trim() === String(productName).trim())
+  );
+  if (group) {
+    selectProduct((group.產品編號 || '') + '|' + (group.品名 || ''));
+    const station = V4資料對接_取值_(task, ['工站名稱','報工工站名稱','工站']);
+    const machine = V4資料對接_取值_(task, ['機台編號','主機台','機台']);
+    const idx = (STATE.productGroupList || []).findIndex(g =>
+      (!station || String(g.報工工站名稱 || g.工站名稱 || '').indexOf(station) >= 0 || String(station).indexOf(g.報工工站名稱 || '') >= 0) &&
+      (!machine || JSON.stringify(g.機台清單 || []).indexOf(String(machine)) >= 0 || String(g.主機台 || '').indexOf(String(machine)) >= 0)
+    );
+    if (idx >= 0) {
+      setVal('workstationSelect', String(idx));
+      onWorkstationChange();
+    }
+  }
+
+  const shift = V4資料對接_取值_(task, ['班別']);
+  if (shift) setVal('shiftSelect', shift);
+  const workDate = V4資料對接_取值_(task, ['作業日','日期']);
+  if (workDate) {
+    // V4原表單沒有獨立作業日欄位，保留任務資料於送出payload。
+  }
+
+  updatePreview();
+  updateConfirmSummary();
+  roar('✅', '今日派班已帶入 V4', '派班：' + (task.派班編號 || '') + '｜工單：' + (task.工單編號 || task.來源工單編號 || ''), 'success');
+}
+
+function V4資料對接_寫入報工_沿用V3邏輯_(d) {
+  const task = V4資料對接_讀今日任務_() || STATE.今日派班任務 || {};
+  const p = V4資料對接_轉V3報工Payload_(d, task);
+  const hasDispatch = !!p.派班編號;
+  const action = (window.PWA_CONFIG && PWA_CONFIG.API_ACTIONS && PWA_CONFIG.API_ACTIONS.寫入今日派班報工) || '寫入今日派班報工';
+
+  if (hasDispatch && window.GAS橋接器 && GAS橋接器.POST) {
+    return GAS橋接器.POST(action, p).then(V4資料對接_標準化回應_);
+  }
+  return GAS橋接器.寫入報工(p).then(V4資料對接_標準化回應_);
+}
+
+function V4資料對接_轉V3報工Payload_(d, task) {
+  d = d || {};
+  task = task || {};
+  const total = Number(d.今日共做數 || d.產出數量 || 0);
+  const bad = Number(d.不良數 || d.不良數量 || 0);
+  const good = Number(d.實際良品數 || Math.max(0, total - bad));
+  const workOrder = V4資料對接_取值_(task, ['工單編號','來源工單編號','工單']) || V4資料對接_解析工單_(task.備註) || d.工單編號 || '';
+
+  return Object.assign({}, d, {
+    來源: 'GitHub Pages PWA 報工作業V4',
+    版本: V4資料對接_版本,
+    派班編號: V4資料對接_取值_(task, ['派班編號']) || d.派班編號 || '',
+    來源需求編號: V4資料對接_取值_(task, ['來源需求編號','需求編號']) || d.來源需求編號 || '',
+    工單編號: workOrder,
+    作業日: V4資料對接_取值_(task, ['作業日','日期']) || d.作業日 || V4資料對接_今天_(),
+    工號: d.工號 || V4資料對接_取值_(task, ['工號']),
+    姓名: d.姓名 || V4資料對接_取值_(task, ['姓名']),
+    班別: d.班別 || V4資料對接_取值_(task, ['班別']),
+    產品編號: d.產品編號 || V4資料對接_取值_(task, ['產品編號']),
+    客戶品號: d.客戶品號 || V4資料對接_取值_(task, ['客戶品號']),
+    品名: d.品名 || V4資料對接_取值_(task, ['品名']),
+    工站名稱: d.報工工站名稱 || d.工站名稱 || V4資料對接_取值_(task, ['工站名稱','工站']),
+    報工工站名稱: d.報工工站名稱 || d.工站名稱 || V4資料對接_取值_(task, ['工站名稱','工站']),
+    機台編號: d.主機台 || d.機台編號 || V4資料對接_取值_(task, ['機台編號','機台']),
+    今日共做數: total,
+    產出數量: total,
+    不良數量: bad,
+    不良數: bad,
+    實際良品數: good,
+    良品數量: good,
+    狀態: '完成',
+    備註: [d.備註 || '', task.派班編號 ? ('V4沿用V3派班報工扣工單；來源派班=' + task.派班編號) : 'V4一般報工'].filter(Boolean).join('；')
+  });
+}
+
+function V4資料對接_補齊不良資料_(d) {
+  const task = V4資料對接_讀今日任務_() || STATE.今日派班任務 || {};
+  return Object.assign({}, d, {
+    派班編號: d.派班編號 || task.派班編號 || '',
+    來源需求編號: d.來源需求編號 || task.來源需求編號 || '',
+    工單編號: d.工單編號 || task.工單編號 || task.來源工單編號 || V4資料對接_解析工單_(task.備註)
+  });
+}
+
+function V4資料對接_建立途程備援_() {
+  return V4資料對接_正式途程備援.map(r => V4資料對接_標準化工站群組_({
+    產品編號: r[0],
+    客戶品號: r[1],
+    品名: r[2],
+    報工工站名稱: r[3],
+    工序範圍: r[4],
+    主機台: r[5],
+    機台清單: String(r[6] || r[5] || '').split(/[、,，;；\s]+/).filter(Boolean).map(id => ({
+      機台編號: id,
+      設備名稱: '機台' + id,
+      照片網址: V4資料對接_照片備援.機台[id] || '',
+      縮圖網址: V4資料對接_照片備援.機台[id] || ''
+    })),
+    產品照片網址: V4資料對接_照片備援.產品[r[0]] || '',
+    產品縮圖網址: V4資料對接_照片備援.產品[r[0]] || ''
+  }));
+}
+
+function V4資料對接_標準化工站群組_(g) {
+  g = Object.assign({}, g || {});
+  g.產品編號 = V4資料對接_取值_(g, ['產品編號','料號','品號']);
+  g.客戶品號 = V4資料對接_取值_(g, ['客戶品號','客戶料號']);
+  g.品名 = V4資料對接_取值_(g, ['品名','產品名稱']);
+  g.報工工站名稱 = V4資料對接_取值_(g, ['報工工站名稱','工站名稱','建議工站','工站']);
+  g.工序範圍 = V4資料對接_取值_(g, ['工序範圍','工序','OP','作業順序']);
+  g.主機台 = V4資料對接_取值_(g, ['主機台','主機台編號','機台編號','建議機台']);
+  if (!Array.isArray(g.機台清單)) {
+    const raw = g.機台清單 || g.機台編號清單 || g.可用機台 || g.主機台 || '';
+    if (typeof raw === 'string' && raw.trim().startsWith('[')) {
+      try { g.機台清單 = JSON.parse(raw); } catch(e) { g.機台清單 = []; }
+    } else {
+      g.機台清單 = String(raw).split(/[、,，;；\s]+/).filter(Boolean).map(id => ({ 機台編號: id }));
+    }
+  }
+  g.機台清單 = (g.機台清單 || []).map(m => {
+    if (typeof m === 'string') m = { 機台編號: m };
+    m = Object.assign({}, m || {});
+    const id = V4資料對接_取值_(m, ['機台編號','主機台','設備編號','編號']) || g.主機台;
+    m.機台編號 = id;
+    m.設備名稱 = m.設備名稱 || m.機台名稱 || ('機台' + id);
+    m.照片網址 = m.照片網址 || m.縮圖網址 || V4資料對接_照片備援.機台[id] || '';
+    m.縮圖網址 = m.縮圖網址 || m.照片網址 || '';
+    return m;
+  }).filter(m => m.機台編號);
+  if (!g.機台清單.length && g.主機台) g.機台清單 = [{ 機台編號:g.主機台, 設備名稱:'機台' + g.主機台, 照片網址:V4資料對接_照片備援.機台[g.主機台] || '' }];
+  g.產品照片網址 = g.產品照片網址 || g.產品縮圖網址 || V4資料對接_照片備援.產品[g.產品編號] || '';
+  g.產品縮圖網址 = g.產品縮圖網址 || g.產品照片網址 || '';
+  g.顯示名稱 = g.顯示名稱 || [g.報工工站名稱, g.工序範圍, g.主機台].filter(Boolean).join('｜');
+  return g;
+}
+
+function V4資料對接_取陣列_(obj, keys) {
+  for (const k of keys) if (Array.isArray(obj && obj[k])) return obj[k];
+  if (obj && typeof obj === 'object') {
+    for (const k of Object.keys(obj)) if (Array.isArray(obj[k]) && keys.some(x => String(k).indexOf(x) >= 0)) return obj[k];
+  }
+  return [];
+}
+function V4資料對接_取值_(obj, keys) {
+  obj = obj || {};
+  for (const k of keys) {
+    const v = obj[k];
+    if (v !== undefined && v !== null && String(v).trim() !== '') return String(v).trim();
+  }
+  return '';
+}
+function V4資料對接_讀今日任務_() {
+  const keys = ['NEXUS_OS_今日報工任務','智慧製造_今日報工任務','今日報工任務'];
+  for (const k of keys) {
+    const raw = sessionStorage.getItem(k) || localStorage.getItem(k);
+    if (!raw) continue;
+    try { return JSON.parse(raw); } catch(e) {}
+  }
+  return null;
+}
+function V4資料對接_解析工單_(text) {
+  const m = String(text || '').match(/(?:來源工單|工單)[=:：]\s*([A-Za-z0-9_-]+)/);
+  return m ? m[1] : '';
+}
+function V4資料對接_norm_(v) {
+  return String(v || '').replace(/[^A-Za-z0-9]/g,'').toUpperCase();
+}
+function V4資料對接_今天_() {
+  const d = new Date();
+  const z = n => String(n).padStart(2,'0');
+  return d.getFullYear() + '-' + z(d.getMonth()+1) + '-' + z(d.getDate());
+}
+
+function onDataLoaded(data) {
+  showLoading(false);
+  if (!data || !data.成功) {
+    roar('❌', '資料讀取失敗 / Load Failed', (data && data.訊息) || '請檢查後端連線', 'error');
+    return;
+  }
+  DB.persons = data.人員 || [];
+  DB.workstationGroups = (data.報工工站群組 || data.途程工站群組 || []).map(normalizeGroup);
+  DB.ngReasons = data.不良原因 || { Z: [], Y: [] };
+  DB.anomalyTypes = data.異常類型 || [];
+  DB.shiftList = data.班別清單 || [];
+  DB.counts = data.筆數 || {};
+  V4資料對接_同步正式資料狀態();
+  fillStatusPill();
+  buildShiftSelect();
+  buildPersonGrid();
+  buildProductGrid();
+  initAnomalyTypeSelect();
+  loadRecentPersons();
+  const dot = g('statusDot');
+  if (dot) { dot.className = 'status-dot connected'; }
+  roar('✅', '資料已載入 / Data Loaded',
+    '人員 ' + DB.persons.length + ' 筆｜工站群組 ' + DB.workstationGroups.length + ' 筆', 'success');
+}
+
+function normalizeGroup(g) {
+  g = g || {};
+  if (typeof g.機台清單 === 'string') { try { g.機台清單 = JSON.parse(g.機台清單); } catch(e) { g.機台清單 = []; } }
+  if (!Array.isArray(g.機台清單)) g.機台清單 = [];
+  if (!Array.isArray(g.工序清單)) g.工序清單 = String(g.工序清單 || g.工序 || '').split(/[、,，;；\s]+/).filter(Boolean);
+  g.報工工站名稱 = g.報工工站名稱 || g.工站名稱 || '';
+  g.顯示名稱 = g.顯示名稱 || [g.報工工站名稱, g.工序範圍 || g.工序,
+    g.機台編號清單 ? (g.機台編號清單.join ? g.機台編號清單.join('、') : g.機台編號清單) : ''
+  ].filter(Boolean).join('｜');
+  return g;
+}
+
+function fillStatusPill() {
+  const p = DB.counts || {};
+  const text = '🟢 資料已載入 / Loaded｜人員：' + (p.人員||DB.persons.length) +
+    '｜工站群組：' + (p.報工工站群組||DB.workstationGroups.length) +
+    '｜機台：' + (p.工站機台關聯||0);
+  g('statusText').textContent = text;
+}
+
+/* ══════════════════════════════════════
+   STEPPER UI
+══════════════════════════════════════ */
+function updateStepperUI() {
+  const items = document.querySelectorAll('.step-item');
+  const connectors = document.querySelectorAll('.step-connector');
+  items.forEach((item, i) => {
+    item.classList.remove('is-active', 'is-done', 'is-todo');
+    const circle = item.querySelector('.step-circle');
+    if (i < STATE.currentStep) {
+      item.classList.add('is-done');
+      circle.textContent = '✓';
+    } else if (i === STATE.currentStep) {
+      item.classList.add('is-active');
+      circle.textContent = i + 1;
+    } else {
+      item.classList.add('is-todo');
+      circle.textContent = i + 1;
+    }
+  });
+  connectors.forEach((c, i) => {
+    c.classList.remove('done', 'active');
+    if (i < STATE.currentStep) c.classList.add('done');
+    else if (i === STATE.currentStep) c.classList.add('active');
+  });
+}
+
+function jumpToStep(idx) {
+  if (idx === STATE.currentStep) return;
+  if (idx > STATE.currentStep && !STATE.stepDone[STATE.currentStep]) {
+    roar('⚠️', '請先完成目前步驟 / Complete Current Step First',
+      '請依引導完成步驟 ' + (STATE.currentStep + 1) + ' 再繼續', 'warning');
+    return;
+  }
+  switchStep(idx);
+}
+
+function switchStep(idx) {
+  if (idx < 0 || idx >= TOTAL_STEPS) return;
+  STATE.currentStep = idx;
+  for (let i = 0; i < TOTAL_STEPS; i++) {
+    const el = g('stepPage' + i);
+    if (el) el.classList.toggle('hidden', i !== idx);
+  }
+  updateStepperUI();
+  updateBottomBar();
+  if (idx === 2) setDefaultTimes();
+  if (idx === 4) updateConfirmSummary();
+  updatePreview();
+  if (idx === 3) updateDefectSyncNotice();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  roar('📌', '步驟 ' + (idx+1) + '/' + TOTAL_STEPS + '：' + STEP_NAMES[idx],
+    'Step ' + (idx+1) + ': ' + STEP_EN[idx], 'success');
+}
+
+function updateBottomBar() {
+  const btnBack = g('btnBack');
+  const btnNext = g('btnNext');
+  if (STATE.currentStep === 0) {
+    btnBack.classList.add('hidden');
+    btnNext.style.gridColumn = '1 / -1';
+  } else {
+    btnBack.classList.remove('hidden');
+    btnNext.style.gridColumn = '';
+  }
+  if (STATE.currentStep === TOTAL_STEPS - 1) {
+    btnNext.textContent = '📤 送出報工 / Submit Report';
+    btnNext.classList.add('green-submit');
+  } else {
+    btnNext.textContent = '下一步 → / Next';
+    btnNext.classList.remove('green-submit');
+  }
+  btnNext.disabled = false;
+  btnNext.classList.remove('submitting');
+}
+
+function markStepDone() {
+  STATE.stepDone[STATE.currentStep] = true;
+  updateStepperUI();
+}
+
+function goBack() { if (STATE.currentStep > 0) switchStep(STATE.currentStep - 1); }
+
+function goNextOrSubmit() {
+  const err = validateCurrentStep();
+  if (err) { roar('⚠️', '請完成必填項目 / Required Field Missing', err, 'warning'); return; }
+  markStepDone();
+  if (STATE.currentStep < TOTAL_STEPS - 1) {
+    switchStep(STATE.currentStep + 1);
+  } else {
+    submitReport();
+  }
+}
+
+function validateCurrentStep() {
+  switch (STATE.currentStep) {
+    case 0:
+      if (!STATE.operator && !val('personId')) return '請選擇作業員 / Please select an operator';
+      break;
+    case 1:
+      if (!STATE.currentWorkstation && !val('workstationSelect')) return '請選擇產品與報工工站 / Please select product & workstation';
+      break;
+    case 2:
+      if (num('totalQty') <= 0) return '今日共做數必須大於0 / Total qty must be > 0';
+      break;
+    case 3: break;
+    case 4: return validateReport(buildReportData());
+  }
+  return '';
+}
+
+/* ══════════════════════════════════════
+   PERSON CARDS
+══════════════════════════════════════ */
+function getShiftType(shift) {
+  const t = String(shift || '');
+  if (t.includes('大夜') || t.includes('夜') || t === 'NIGHT') return 'night';
+  if (t.includes('中') || t === 'SWING') return 'swing';
+  return 'day';
+}
+
+function getShiftIcon(shift) {
+  const k = getShiftType(shift);
+  return k === 'night' ? '🌙' : k === 'swing' ? '🌇' : '☀️';
+}
+
+function buildPersonGrid() {
+  const container = g('personGrid');
+  const active = DB.persons.filter(r => r.啟用 !== '否');
+  if (!active.length) {
+    container.innerHTML = '<div class="caption" style="text-align:center;padding:24px;grid-column:1/-1;">尚無啟用的人員資料 / No active operators</div>';
+    return;
+  }
+  container.innerHTML = active.map(r => {
+    const i = DB.persons.indexOf(r);
+    const st = getShiftType(r.班別);
+    const icon = getShiftIcon(r.班別);
+    const avatarContent = r.縮圖網址 || r.照片網址
+      ? `<img src="${safeAttr(r.縮圖網址 || r.照片網址)}" onerror="this.parentElement.innerHTML='${safeAttr(nameInitial(r.姓名))}'">`
+      : nameInitial(r.姓名);
+    return `<div class="person-card shift-${st} ripple" data-index="${i}" onclick="selectPerson(${i})" id="personCard_${i}">
+      <span class="shift-badge ${st}">${icon} ${(r.班別||'').slice(0,2)}</span>
+      <span class="selected-badge">✓ 已選取</span>
+      <div class="avatar-ring">${avatarContent}</div>
+      <div class="person-name">${safeTxt(r.姓名||'未知')}</div>
+      <div class="person-id">${safeTxt(r.工號||'')}</div>
+    </div>`;
+  }).join('');
+}
+
+function nameInitial(name) {
+  const n = String(name||'?').trim();
+  return n ? n.charAt(0).toUpperCase() : '?';
+}
+
+function filterPersons() {
+  const kw = (val('personSearch')||'').toUpperCase().trim();
+  const cards = document.querySelectorAll('.person-card');
+  let any = false;
+  cards.forEach(card => {
+    const idx = parseInt(card.getAttribute('data-index'));
+    const r = DB.persons[idx];
+    if (!r) { card.classList.add('hidden'); return; }
+    const txt = [r.姓名, r.工號, r.班別, r.部門].join(' ').toUpperCase();
+    if (!kw || txt.includes(kw)) { card.classList.remove('hidden'); any = true; }
+    else card.classList.add('hidden');
+  });
+  g('personGridEmpty').classList.toggle('hidden', any);
+}
+
+function selectPerson(i) {
+  const r = DB.persons[i];
+  if (!r) return;
+  STATE.operator = r;
+  document.querySelectorAll('.person-card').forEach(c => c.classList.remove('selected'));
+  const card = g('personCard_' + i);
+  if (card) { card.classList.add('selected'); card.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
+  setVal('personId', r.工號||'');
+  setVal('personName', r.姓名||'');
+  if (r.班別 || r.班別名稱) setVal('shiftSelect', r.班別名稱 || inferShift(r.班別));
+  g('empIdHighlight').textContent = r.工號 || '未輸入';
+  // Update selected display
+  const disp = g('selectedPersonDisplay');
+  disp.className = 'selected-person-display populated';
+  disp.innerHTML = imgHTML(r.縮圖網址||r.照片網址, '無頭像', true) +
+    `<div><div class="person-info-name">${safeTxt(r.姓名||'')} <span style="font-size:12px;color:var(--text-secondary);">${safeTxt(r.工號||'')}</span></div>
+    <div class="caption" style="margin-top:4px;">${safeTxt([r.部門, r.班別名稱||r.班別, r.職稱||''].filter(Boolean).join('｜'))}</div></div>`;
+  saveRecentPerson(i);
+  setDefaultTimes();
+  markStepDone();
+  updatePreview();
+  updateConfirmSummary();
+  roar('👤', '已選定作業員 / Operator Selected', (r.姓名||'') + '（' + (r.工號||'') + '）', 'success');
+}
+
+function buildShiftSelect() {
+  const s = g('shiftSelect');
+  s.innerHTML = '';
+  if (DB.shiftList && DB.shiftList.length)
+    DB.shiftList.forEach(x => s.add(new Option(x.名稱||x.值, x.值||x.名稱)));
+  else ['早班', '中班', '大夜班', '加班'].forEach(x => s.add(new Option(x, x)));
+}
+
+function inferShift(v) {
+  const t = String(v||'').trim();
+  if (t === 'DAY') return '早班';
+  if (t === 'SWING') return '中班';
+  if (t === 'NIGHT') return '大夜班';
+  if (t.includes('大夜')||t.includes('夜')) return '大夜班';
+  if (t.includes('中班')) return '中班';
+  return '早班';
+}
+
+/* ══════════════════════════════════════
+   RECENT PERSONS
+══════════════════════════════════════ */
+function loadRecentPersons() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    renderRecentPersons(raw ? JSON.parse(raw).slice(0, MAX_RECENT) : []);
+  } catch(e) { renderRecentPersons([]); }
+}
+
+function saveRecentPerson(i) {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    let list = raw ? JSON.parse(raw) : [];
+    list = list.filter(x => x.idx !== i);
+    list.unshift({ idx: i, ts: Date.now() });
+    if (list.length > MAX_RECENT * 3) list = list.slice(0, MAX_RECENT * 3);
+    localStorage.setItem(LS_KEY, JSON.stringify(list));
+    renderRecentPersons(list.slice(0, MAX_RECENT));
+  } catch(e) {}
+}
+
+function renderRecentPersons(list) {
+  const bar = g('recentBar');
+  const content = g('recentPersonContent');
+  if (!list || !list.length) { bar.classList.add('hidden'); content.innerHTML = ''; return; }
+  const html = list.map(item => {
+    const r = DB.persons[item.idx];
+    if (!r || r.啟用 === '否') return '';
+    const head = r.縮圖網址||r.照片網址
+      ? `<img src="${safeAttr(r.縮圖網址||r.照片網址)}" onerror="this.parentElement.innerHTML='${safeAttr(nameInitial(r.姓名))}'"> `
+      : nameInitial(r.姓名);
+    return `<div class="recent-chip ripple" onclick="selectPerson(${item.idx})" title="${safeTxt(r.姓名||'')}｜${safeTxt(r.工號||'')}">
+      <div class="mini-avatar">${head}</div>${safeTxt(r.姓名||'')}
+    </div>`;
+  }).filter(Boolean).join('');
+  content.innerHTML = html;
+  bar.classList.toggle('hidden', !html.trim());
+}
+
+/* ══════════════════════════════════════
+   PERSON SCAN MODAL
+══════════════════════════════════════ */
+function openPersonScan() {
+  g('personScanModal').classList.remove('hidden');
+  g('personScanStatus').textContent = '📡 啟動相機中... / Starting camera...';
+  g('personManualInput').classList.add('hidden');
+  g('personManualInput').value = '';
+  startCamera('person');
+}
+function closePersonScan() { g('personScanModal').classList.add('hidden'); stopCamera('person'); }
+
+async function startCamera(mode) {
+  stopCamera(mode);
+  const vidId = mode === 'product' ? 'productVideo' : 'personVideo';
+  const statusId = mode === 'product' ? 'productScanStatus' : 'personScanStatus';
+  const vid = g(vidId); const statusEl = g(statusId);
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+    });
+    if (mode === 'product') STATE.productStream = stream; else STATE.personStream = stream;
+    vid.srcObject = stream; vid.style.display = 'block';
+    statusEl.textContent = '🔍 掃描中，請將條碼對準框內 / Scanning — align barcode to frame';
+    let detector = null;
+    if ('BarcodeDetector' in window) {
+      try {
+        const fmts = await window.BarcodeDetector.getSupportedFormats();
+        if (fmts.length) detector = new window.BarcodeDetector({ formats: fmts });
+      } catch(e) {}
+    }
+    if (mode === 'product') STATE.productDetector = detector; else STATE.personDetector = detector;
+    startScanLoop(mode);
+    if (!detector) {
+      statusEl.textContent = '⚠️ 瀏覽器不支援自動偵測，請使用手動輸入 / Use manual input';
+      const mid = mode === 'product' ? 'productManualInput' : 'personManualInput';
+      g(mid).classList.remove('hidden'); g(mid).focus();
+    }
+  } catch(e) {
+    statusEl.textContent = '❌ 無法存取相機：' + (e.message || '請確認相機權限');
+    vid.style.display = 'none';
+    const mid = mode === 'product' ? 'productManualInput' : 'personManualInput';
+    g(mid).classList.remove('hidden'); g(mid).focus();
+  }
+}
+
+function startScanLoop(mode) {
+  const timerKey = mode === 'product' ? 'productTimer' : 'personTimer';
+  const detKey = mode === 'product' ? 'productDetector' : 'personDetector';
+  const vidId = mode === 'product' ? 'productVideo' : 'personVideo';
+  if (STATE[timerKey]) clearInterval(STATE[timerKey]);
+  if (!STATE[detKey]) return;
+  STATE[timerKey] = setInterval(async () => {
+    const v = g(vidId);
+    if (!v || !v.srcObject || v.readyState < 2) return;
+    try {
+      const dets = await STATE[detKey].detect(v);
+      if (dets && dets.length) {
+        const val_ = dets[0].rawValue || dets[0].data || '';
+        if (val_) { mode === 'product' ? onProductScanned(val_) : onPersonScanned(val_); }
+      }
+    } catch(e) {}
+  }, 350);
+}
+
+function stopCamera(mode) {
+  const timerKey = mode === 'product' ? 'productTimer' : 'personTimer';
+  const streamKey = mode === 'product' ? 'productStream' : 'personStream';
+  const detKey = mode === 'product' ? 'productDetector' : 'personDetector';
+  const vidId = mode === 'product' ? 'productVideo' : 'personVideo';
+  if (STATE[timerKey]) { clearInterval(STATE[timerKey]); STATE[timerKey] = null; }
+  if (STATE[streamKey]) { STATE[streamKey].getTracks().forEach(t => t.stop()); STATE[streamKey] = null; }
+  STATE[detKey] = null;
+  const v = g(vidId);
+  if (v) { v.srcObject = null; v.style.display = 'none'; }
+}
+
+function onPersonScanned(val_) {
+  stopCamera('person'); closePersonScan();
+  const clean = String(val_).trim();
+  const found = DB.persons.find(r => String(r.工號||'').trim() === clean && r.啟用 !== '否') ||
+    DB.persons.find(r => String(r.工號||'').includes(clean) && r.啟用 !== '否') ||
+    DB.persons.find(r => String(r.姓名||'').trim() === clean && r.啟用 !== '否') ||
+    DB.persons.find(r => (String(r.條碼||r.工牌號||r.卡號||'') === clean) && r.啟用 !== '否');
+  if (found) {
+    selectPerson(DB.persons.indexOf(found));
+    roar('✅', '掃碼成功 / Scan Success', '已自動選定作業員，可前往下一步', 'success');
+  } else {
+    roar('⚠️', '找不到此工號 / Employee Not Found', '條碼：' + clean + '，請手動選擇', 'warning');
+  }
+}
+function togglePersonManual() {
+  const f = g('personManualInput');
+  f.classList.toggle('hidden');
+  if (!f.classList.contains('hidden')) { f.focus(); g('personScanStatus').textContent = '⌨ 請輸入工號後按 Enter'; }
+}
+function personManualConfirm(e) {
+  if (e.key === 'Enter') { e.preventDefault(); const v = g('personManualInput').value.trim(); if (v) onPersonScanned(v); }
+}
+
+/* ══════════════════════════════════════
+   PRODUCT SCAN MODAL
+══════════════════════════════════════ */
+function openProductScan() {
+  g('productScanModal').classList.remove('hidden');
+  g('productScanStatus').textContent = '📡 啟動相機中... / Starting camera...';
+  g('productManualInput').classList.add('hidden');
+  g('productManualInput').value = '';
+  startCamera('product');
+}
+function closeProductScan() { g('productScanModal').classList.add('hidden'); stopCamera('product'); }
+function onProductScanned(val_) {
+  stopCamera('product'); closeProductScan();
+  const clean = String(val_).trim();
+  const found = DB.workstationGroups.find(g_ =>
+    String(g_.產品編號||'').trim() === clean ||
+    String(g_.客戶品號||'').trim() === clean ||
+    String(g_.品名||'').trim() === clean);
+  if (found) {
+    selectProduct(found.產品編號 + '|' + found.品名);
+    roar('✅', '產品掃碼成功 / Product Scanned', (found.品名||'') + '（' + (found.產品編號||'') + '）', 'success');
+  } else {
+    roar('⚠️', '找不到此產品 / Product Not Found', '條碼：' + clean, 'warning');
+  }
+}
+function toggleProductManual() {
+  const f = g('productManualInput');
+  f.classList.toggle('hidden');
+  if (!f.classList.contains('hidden')) { f.focus(); g('productScanStatus').textContent = '⌨ 請輸入產品編號後按 Enter'; }
+}
+function productManualConfirm(e) {
+  if (e.key === 'Enter') { e.preventDefault(); const v = g('productManualInput').value.trim(); if (v) onProductScanned(v); }
+}
+
+/* ══════════════════════════════════════
+   SCANNER GUN
+══════════════════════════════════════ */
+function listenScannerGun() {
+  document.addEventListener('keydown', e => {
+    const tag = document.activeElement?.tagName?.toLowerCase();
+    if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+    if (e.key.length > 1 && e.key !== 'Enter') return;
+    if (e.key === 'Enter') {
+      if (scanBuffer.length >= 3) { e.preventDefault(); const v = scanBuffer.trim(); scanBuffer = ''; onPersonScanned(v); }
+      else scanBuffer = '';
+      return;
+    }
+    scanBuffer += e.key;
+    if (scanTimer) clearTimeout(scanTimer);
+    scanTimer = setTimeout(() => { if (scanBuffer.length < 6) scanBuffer = ''; }, SCAN_GAP_MS * 2);
+  });
+}
+
+/* ══════════════════════════════════════
+   PRODUCT CARDS
+══════════════════════════════════════ */
+function buildProductGrid() {
+  const container = g('productGrid');
+  const map = {};
+  DB.workstationGroups.forEach(gr => {
+    const key = (gr.產品編號||'') + '|' + (gr.品名||'');
+    if (!map[key]) map[key] = gr;
+  });
+  const keys = Object.keys(map);
+  if (!keys.length) {
+    container.innerHTML = '<div class="caption" style="text-align:center;padding:20px;grid-column:1/-1;">尚無產品資料 / No products</div>';
+    return;
+  }
+  container.innerHTML = keys.sort((a,b) => (map[a].品名||'').localeCompare(map[b].品名||'')).map(key => {
+    const gr = map[key];
+    const dname = cleanProductName(gr.品名||'');
+    const thumb = gr.產品縮圖網址 || gr.產品照片網址
+      ? `<img src="${safeAttr(gr.產品縮圖網址||gr.產品照片網址)}" onerror="this.parentElement.innerHTML='<span>📦</span>'">`
+      : '<span>📦</span>';
+    return `<div class="product-card ripple" data-key="${safeAttr(key)}" onclick="selectProduct('${safeAttr(key)}')">
+      <div class="product-thumb">${thumb}</div>
+      <div class="product-name">${safeTxt(dname)}</div>
+      <div class="product-code">${safeTxt(gr.產品編號||'')}</div>
+    </div>`;
+  }).join('');
+}
+
+function cleanProductName(name) {
+  return String(name||'').replace(/^[-/：；（）$@「」。，、？！._—|～《》¥\[\]{}#%^*+=·\s]+/g,'')
+    .replace(/[-/：；（）$@「」。，、？！._—|～《》¥\[\]{}#%^*+=·\s]+$/g,'').trim() || name;
+}
+
+function filterProducts() {
+  const kw = (val('productSearch')||'').toUpperCase().trim();
+  const cards = document.querySelectorAll('.product-card');
+  let any = false;
+  cards.forEach(card => {
+    const key = card.getAttribute('data-key') || '';
+    const parts = key.split('|');
+    const txt = parts.join(' ').toUpperCase();
+    if (!kw || txt.includes(kw)) { card.classList.remove('hidden'); any = true; }
+    else card.classList.add('hidden');
+  });
+  g('productGridEmpty').classList.toggle('hidden', any);
+}
+
+function selectProduct(key) {
+  document.querySelectorAll('.product-card').forEach(c => c.classList.remove('selected'));
+  const t = document.querySelector(`.product-card[data-key="${safeAttr(key)}"]`);
+  if (t) { t.classList.add('selected'); t.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
+  const parts = key.split('|');
+  const pid = parts[0] || '', pname = parts.slice(1).join('|') || '';
+  STATE.productGroupList = DB.workstationGroups.filter(gr => (gr.產品編號||'') === pid && (gr.品名||'') === pname);
+  STATE.currentProductGroup = STATE.productGroupList[0] || null;
+  const gr = STATE.currentProductGroup || {};
+  setVal('productCode', gr.產品編號||'');
+  setVal('productName', cleanProductName(gr.品名||''));
+  showProductPhoto(gr);
+  buildWorkstationSelect();
+  g('selectedProductArea').classList.remove('hidden');
+  updatePreview(); updateConfirmSummary();
+  roar('📦', '已選定產品 / Product Selected', (gr.品名||'') + '（' + (gr.產品編號||'') + '）', 'success');
+}
+
+function showProductPhoto(gr) {
+  const disp = g('selectedProductDisplay');
+  disp.className = 'selected-person-display populated';
+  disp.innerHTML = imgHTML((gr&&gr.產品縮圖網址)||(gr&&gr.產品照片網址), '無產品照', false) +
+    `<div><div class="person-info-name">${safeTxt(gr&&gr.品名 ? cleanProductName(gr.品名) : '尚未選產品')}</div>
+    <div class="caption" style="margin-top:3px;">${safeTxt(gr&&gr.產品編號||'')}</div></div>`;
+}
+
+function buildWorkstationSelect() {
+  const s = g('workstationSelect');
+  s.innerHTML = '<option value="">── 請選擇報工工站 / Select Workstation ──</option>';
+  STATE.productGroupList.forEach((gr, i) => s.add(new Option(gr.顯示名稱 || [gr.報工工站名稱, gr.工序範圍, gr.主機台].filter(Boolean).join('｜'), i)));
+  clearWorkstationFields();
+}
+
+function onWorkstationChange() {
+  const i = val('workstationSelect');
+  STATE.currentWorkstation = i === '' ? null : STATE.productGroupList[Number(i)];
+  const gr = STATE.currentWorkstation || {};
+  setVal('processRange', gr.工序範圍||gr.工序||'');
+  setVal('stdCapacity', gr.標準產能||'');
+  setVal('stdTimeSec', gr.標準工時_秒||'');
+  buildMachineSelect(gr.機台清單||[]);
+  renderMachineGrid(gr.機台清單||[]);
+  if (STATE.currentWorkstation) markStepDone();
+  updatePreview(); updateConfirmSummary();
+}
+
+function clearWorkstationFields() {
+  STATE.currentWorkstation = null;
+  setVal('processRange',''); setVal('stdCapacity',''); setVal('stdTimeSec','');
+  g('mainMachineSelect').innerHTML = '';
+  g('machineListGrid').innerHTML = '';
+}
+
+function buildMachineSelect(list) {
+  const s = g('mainMachineSelect');
+  s.innerHTML = '';
+  if (!list.length) { s.add(new Option('無固定機台 / No Fixed Machine', '')); return; }
+  list.forEach(m => s.add(new Option([m.機台編號, m.區域, m.機台型號].filter(Boolean).join('｜'), m.機台編號||'')));
+}
+
+function renderMachineGrid(list) {
+  const box = g('machineListGrid');
+  if (!list.length) { box.innerHTML = '<div class="caption" style="padding:8px;">此工站無固定機台 / No dedicated machines</div>'; return; }
+  box.innerHTML = list.map(m => `<div class="machine-card ripple">
+    ${m.縮圖網址||m.照片網址
+      ? `<img src="${safeAttr(m.縮圖網址||m.照片網址)}" onerror="this.outerHTML='<div class=machine-no-img>無機台照</div>'">`
+      : '<div class="machine-no-img">無機台照</div>'}
+    <div class="machine-number">${safeTxt(m.機台編號||'')}</div>
+    <div class="machine-info">${safeTxt([m.區域,m.機台型號,m.設備名稱].filter(Boolean).join('｜'))}</div>
+  </div>`).join('');
+}
+
+/* ══════════════════════════════════════
+   DEFECT ALLOCATION
+══════════════════════════════════════ */
+function initAnomalyTypeSelect() {
+  const s = g('anomalyType');
+  if (!s) return;
+  const existing = Array.from(s.options).map(o => o.value);
+  (DB.anomalyTypes||[]).forEach(x => { if (!existing.includes(x)) s.add(new Option(x,x)); });
+}
+
+function addDefectRow() {
+  const id = ++defectRowIdCounter;
+  STATE.defectRows.push({ id, category:'', code:'', name:'', enName:'', qty:0 });
+  renderDefectRows();
+}
+
+function deleteDefectRow(id) {
+  STATE.defectRows = STATE.defectRows.filter(r => r.id !== id);
+  renderDefectRows(); updatePreview(); updateConfirmSummary();
+}
+
+function renderDefectRows() {
+  const container = g('defectContainer');
+  if (!STATE.defectRows.length) {
+    container.innerHTML = '<div class="caption" style="padding:6px;">尚無分配項目 / No allocation items yet</div>';
+    updateDefectSummaryDisplay(); return;
+  }
+  let zOpts = (DB.ngReasons.Z||[]).map(x =>
+    `<option value="${safeAttr(x.代碼+'|Z')}">${safeTxt(x.代碼+'｜'+x.名稱+'｜'+(x.英文名稱||''))}</option>`).join('');
+  let yOpts = (DB.ngReasons.Y||[]).map(x =>
+    `<option value="${safeAttr(x.代碼+'|Y')}">${safeTxt(x.代碼+'｜'+x.名稱+'｜'+(x.英文名稱||''))}</option>`).join('');
+  if (!zOpts && !yOpts) {
+    zOpts = ['Z01|素材裂縫|Surface Crack','Z02|加工砂孔|Sand Porosity','Z03|外觀刮傷|Surface Scratch'].map(s=>{
+      const [c,n,e]=s.split('|'); return `<option value="${c}|Z">${c}｜${n}｜${e}</option>`;}).join('');
+    yOpts = ['Y01|內徑超差|Inner Diameter OOT','Y02|外徑超差|Outer Diameter OOT','Y03|長度超差|Length OOT','Y04|表面粗糙度|Surface Roughness'].map(s=>{
+      const [c,n,e]=s.split('|'); return `<option value="${c}|Y">${c}｜${n}｜${e}</option>`;}).join('');
+  }
+  container.innerHTML = STATE.defectRows.map(row => {
+    const selVal = row.code ? (row.code + '|' + row.category) : '';
+    return `<div class="defect-row" id="defectRow_${row.id}">
+      <button class="defect-delete-btn ripple" onclick="deleteDefectRow(${row.id})">✕</button>
+      <select style="flex:2;min-width:0;" onchange="onDefectReasonChange(${row.id},this.value)">
+        <option value="">── 選擇不良原因 / Select Defect Reason ──</option>
+        <optgroup label="Z 素材 / 外觀類">${zOpts}</optgroup>
+        <optgroup label="Y 加工 / 尺寸類">${yOpts}</optgroup>
+      </select>
+      <input class="qty-input" type="number" min="0" value="${row.qty}" inputmode="numeric" placeholder="pcs"
+        onchange="onDefectQtyChange(${row.id},this.value)" oninput="onDefectQtyChange(${row.id},this.value)">
+    </div>`;
+  }).join('');
+  // Re-set selections
+  STATE.defectRows.forEach(row => {
+    if (!row.code) return;
+    const sel = document.querySelector(`#defectRow_${row.id} select`);
+    if (sel) sel.value = row.code + '|' + row.category;
+  });
+  updateDefectSummaryDisplay();
+}
+
+function onDefectReasonChange(id, val_) {
+  const row = STATE.defectRows.find(r => r.id === id);
+  if (!row) return;
+  const parts = String(val_).split('|');
+  row.code = parts[0]||''; row.category = parts[1]||'';
+  const list = row.category === 'Z' ? (DB.ngReasons.Z||[]) : (DB.ngReasons.Y||[]);
+  const found = list.find(x => x.代碼 === row.code);
+  row.name = found ? (found.名稱||'') : '';
+  row.enName = found ? (found.英文名稱||'') : '';
+  updateDefectSummaryDisplay(); updatePreview(); updateConfirmSummary();
+}
+
+function onDefectQtyChange(id, v) {
+  const row = STATE.defectRows.find(r => r.id === id);
+  if (!row) return;
+  row.qty = Math.max(0, Number(v)||0);
+  updateDefectSummaryDisplay(); updatePreview(); updateConfirmSummary();
+}
+
+function updateDefectSummaryDisplay() {
+  const box = g('defectSummary');
+  const totalNG = num('ngQty');
+  const allocated = STATE.defectRows.reduce((s,r) => s + (Number(r.qty)||0), 0);
+  if (totalNG > 0 || allocated > 0) {
+    const diff = totalNG - allocated;
+    const color = diff === 0 ? 'var(--g-green)' : 'var(--g-red)';
+    box.innerHTML = `📊 分配總和：<b>${allocated}</b> / 總不良：<b>${totalNG}</b>（<span style="color:${color}">${diff===0 ? '✓ 已平衡 / Balanced' : '⚠ 差 '+diff+' pcs'}</span>）`;
+    box.classList.remove('hidden');
+  } else {
+    box.classList.add('hidden');
+  }
+}
+
+/* ══════════════════════════════════════
+   ANOMALY TIME
+══════════════════════════════════════ */
+function calcAnomalyTime() {
+  const s = g('anomalyStart').value, e = g('anomalyEnd').value;
+  if (s && e) {
+    let diff = (new Date(e) - new Date(s)) / 3600000;
+    if (diff < 0) diff += 24;
+    setVal('anomalyDuration', diff >= 0 ? diff.toFixed(2) + ' hrs' : '');
+  } else setVal('anomalyDuration', '');
+  updatePreview(); updateConfirmSummary();
+}
+
+/* ══════════════════════════════════════
+   PHOTOS
+══════════════════════════════════════ */
+function triggerCamera() { g('cameraInput').click(); }
+function triggerFileSelect() { g('fileInput').click(); }
+
+function onPhotoChange(e, source) {
+  const files = [...e.target.files];
+  const remaining = MAX_PHOTOS - STATE.photos.length;
+  if (remaining <= 0) { roar('⚠️', '已達上限 / Max Reached', '最多 ' + MAX_PHOTOS + ' 張照片', 'warning'); e.target.value=''; return; }
+  files.slice(0, remaining).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      STATE.photos.push({ base64: String(ev.target.result), mime: file.type, filename: file.name, note: '', source });
+      renderPhotoGrid(); updatePreview(); updateConfirmSummary();
+    };
+    reader.readAsDataURL(file);
+  });
+  e.target.value = '';
+}
+
+function renderPhotoGrid() {
+  const grid = g('photoGrid');
+  grid.innerHTML = STATE.photos.map((p, i) =>
+    `<div class="photo-item ripple" onclick="openPhotoNote(${i})">
+      <img src="${p.base64}" alt="photo${i+1}">
+      ${p.note ? `<div class="photo-note-overlay">${safeTxt(p.note)}</div>` : ''}
+      <button class="photo-delete-btn ripple" onclick="event.stopPropagation();deletePhoto(${i})">✕</button>
+    </div>`).join('');
+  g('photoCount').textContent = STATE.photos.length + ' / ' + MAX_PHOTOS + ' 張照片 / photos';
+}
+
+function deletePhoto(i) { STATE.photos.splice(i, 1); renderPhotoGrid(); updatePreview(); updateConfirmSummary(); }
+
+function clearAllPhotos() {
+  if (!STATE.photos.length) return;
+  if (!confirm('確認清除所有照片？/ Clear all photos?')) return;
+  STATE.photos = []; renderPhotoGrid(); updatePreview(); updateConfirmSummary();
+}
+
+function openPhotoNote(i) {
+  STATE.editPhotoIndex = i;
+  const p = STATE.photos[i];
+  if (!p) return;
+  g('photoNotePreview').src = p.base64;
+  g('photoNoteText').value = p.note||'';
+  g('photoNoteModal').classList.remove('hidden');
+  setTimeout(() => g('photoNoteText').focus(), 200);
+}
+function closePhotoNote() { g('photoNoteModal').classList.add('hidden'); STATE.editPhotoIndex = -1; }
+function savePhotoNote() {
+  const i = STATE.editPhotoIndex;
+  if (i >= 0 && STATE.photos[i]) { STATE.photos[i].note = g('photoNoteText').value; renderPhotoGrid(); updatePreview(); updateConfirmSummary(); }
+  closePhotoNote();
+}
+
+/* ══════════════════════════════════════
+   CALCULATIONS
+══════════════════════════════════════ */
+function calcQty() {
+  let total = num('totalQty'), ng = num('ngQty');
+  if (ng > total && total > 0) { setVal('ngQty', total); ng = total; }
+  const good = Math.max(total - ng, 0);
+  g('displayTotal').textContent = total;
+  g('displayNG').textContent = ng;
+  g('displayGood').textContent = good;
+  if (total > 0) markStepDone();
+  updateDefectSummaryDisplay();
+  updateDefectSyncNotice();
+  updatePreview(); updateConfirmSummary();
+}
+
+function calcWorkingHours() {
+  const s = val('startTime'), e = val('endTime');
+  if (s && e) {
+    let diff = (new Date(e) - new Date(s)) / 3600000;
+    if (diff < 0) diff += 24;
+    setVal('workingHours', diff >= 0 ? diff.toFixed(2) + ' hrs' : '');
+  }
+  updatePreview(); updateConfirmSummary();
+}
+
+/* ══════════════════════════════════════
+   DEFAULT TIMES
+══════════════════════════════════════ */
+function getShiftRule() {
+  const op = STATE.operator || {};
+  const shift = op.班別名稱 || op.班別 || val('shiftSelect') || '早班';
+  if (shift.includes('大夜')||shift.includes('夜')||shift==='NIGHT')
+    return { name:'大夜班', start: op.班別開始時間||'23:00', end: op.班別結束時間||'07:50', overnight:true, hrs: Number(op.班別實際工時||8) };
+  if (shift.includes('中')||shift==='SWING')
+    return { name:'中班', start: op.班別開始時間||'16:50', end: op.班別結束時間||'01:40', overnight:true, hrs: Number(op.班別實際工時||8) };
+  return { name:'早班', start: op.班別開始時間||'08:00', end: op.班別結束時間||'16:50', overnight:false, hrs: Number(op.班別實際工時||8) };
+}
+
+function toDateTimeVal(time, nextDay) {
+  const now = new Date();
+  const [hh, mm] = String(time||'00:00').split(':').map(Number);
+  const d = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hh||0, mm||0, 0, 0);
+  if (nextDay) d.setDate(d.getDate() + 1);
+  return new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,16);
+}
+
+function setDefaultTimes() {
+  const rule = getShiftRule();
+  setVal('shiftSelect', rule.name);
+  setVal('startTime', toDateTimeVal(rule.start, false));
+  setVal('endTime', toDateTimeVal(rule.end, rule.overnight));
+  setVal('workingHours', rule.hrs + ' hrs');
+  updatePreview(); updateConfirmSummary();
+}
+
+/* ══════════════════════════════════════
+   BUILD REPORT DATA
+══════════════════════════════════════ */
+function buildReportData() {
+  const op = STATE.operator || {};
+  const gr = STATE.currentWorkstation || STATE.currentProductGroup || {};
+  const total = num('totalQty'), ng = num('ngQty');
+  const machines = (gr && gr.機台清單) || [];
+  const defectLines = STATE.defectRows.filter(r => r.code).map(r => ({
+    category: r.category, code: r.code, name: r.name, enName: r.enName, qty: r.qty
+  }));
+  return {
+    工號: op.工號||val('personId'),
+    姓名: op.姓名||val('personName'),
+    班別: val('shiftSelect'),
+    是否加班: val('overtimeSelect'),
+    加班類型: val('overtimeType'),
+    作業員照片網址: op.照片網址||'',
+    作業員縮圖網址: op.縮圖網址||'',
+    作業員照片檔案ID: op.Google檔案ID||'',
+    產品編號: gr.產品編號||val('productCode'),
+    客戶品號: gr.客戶品號||'',
+    品名: gr.品名||val('productName'),
+    產品照片網址: gr.產品照片網址||'',
+    產品縮圖網址: gr.產品縮圖網址||'',
+    報工工站名稱: gr.報工工站名稱||gr.工站名稱||'',
+    工序: Array.isArray(gr.工序清單) ? gr.工序清單.join(',') : (gr.工序||''),
+    機台清單: machines.map(m => m.機台編號).filter(Boolean).join(','),
+    主機台: val('mainMachineSelect'),
+    今日共做數: total, 不良數: ng,
+    實際良品數: Math.max(total - ng, 0),
+    不良率: total > 0 ? ng / total : 0,
+    開始時間: val('startTime'), 結束時間: val('endTime'), 實際工時: val('workingHours'),
+    不良行清單: defectLines,
+    異常類型: val('anomalyType'),
+    異常開始時間: g('anomalyStart')?.value||'',
+    異常結束時間: g('anomalyEnd')?.value||'',
+    異常工時: val('anomalyDuration'),
+    備註: val('remarks'),
+    現場照片清單: STATE.photos.map(p => ({
+      照片類型: '現場照片', 檔案名稱: p.filename, MIME類型: p.mime,
+      Base64: (p.base64||'').split(',')[1]||'', 備註: p.note, 來源: p.source
+    }))
+  };
+}
+
+function updateDefectSyncNotice() {
+  const box = g('defectSyncNotice');
+  const hasDefect = STATE.defectRows.some(r => r.code && r.qty > 0) || num('ngQty') > 0;
+  if (hasDefect) {
+    box.innerHTML = '<div class="sync-badge">⚠ 此報工將同步寫入 09_不良紀錄 / Will sync to defect record</div>';
+  } else { box.innerHTML = ''; }
+}
+
+function updatePreview() {
+  const d = buildReportData();
+  const defectDetails = d.不良行清單.map(r =>
+    `   › ${r.category}類 ${r.code} ${r.name}${r.enName ? ' / ' + r.enName : ''} × ${r.qty} pcs`).join('\n') || '   無不良記錄 / No defects';
+  const text =
+`📋 報工預覽 / Production Report Preview
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+👤 作業員 / Operator：${d.姓名||'—'} / ${d.工號||'—'} ｜ ${d.班別||'—'}
+   加班 / OT：${d.是否加班||'否'} ｜ ${d.加班類型||'無'}
+📦 產品 / Product：${d.產品編號||'—'} ｜ ${d.品名||'—'}
+🔧 工站 / Workstation：${d.報工工站名稱||'—'} ｜ 工序：${d.工序||'—'}
+🖥 機台 / Machine：${d.機台清單||'無'} ｜ 主機台：${d.主機台||'無'}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 今日共做 / Total Qty：${d.今日共做數} pcs
+❌ 不良數 / NG Qty：${d.不良數} pcs
+✅ 實際良品 / Good Qty：${d.實際良品數} pcs
+📉 不良率 / NG Rate：${d.不良率 > 0 ? (d.不良率*100).toFixed(1)+'%' : '0%'}
+🕐 工時 / Working Hrs：${d.實際工時||'未計算 / N/A'}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔍 不良明細 / Defect Details：
+${defectDetails}
+🚨 異常類型 / Abnormal Type：${d.異常類型||'無異常'}
+⏱ 異常時間 / Anomaly Duration：${d.異常工時||'N/A'}
+📸 照片 / Photos：${d.現場照片清單.length} 張
+📝 備註 / Remarks：${d.備註||'無'}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${(d.不良數>0||d.不良行清單.length>0)
+  ? '⚠ 含不良記錄，將同步寫入 09_不良紀錄 / Contains defects, will sync'
+  : '✅ 無不良記錄 / No defect records'}`;
+  if (g('reportPreview')) g('reportPreview').textContent = text;
+  if (g('confirmPreview')) g('confirmPreview').textContent = text;
+}
+
+function updateConfirmSummary() {
+  const d = buildReportData();
+  const container = g('confirmSummaryContent');
+  if (!container) return;
+  if (!d.工號 && !d.產品編號) {
+    container.innerHTML = '<div class="caption" style="text-align:center;padding:12px;">請先完成前面步驟再回來確認 / Please complete previous steps first</div>';
+    return;
+  }
+  const defectHTML = d.不良行清單.length
+    ? d.不良行清單.map(r => `<div class="confirm-row"><span class="confirm-label">不良原因 / Defect</span><span class="confirm-value">${r.category}類 ${r.code} ${r.name} × ${r.qty} pcs</span></div>`).join('')
+    : '<div class="confirm-row"><span class="confirm-label">不良記錄 / Defects</span><span class="confirm-value">無 / None</span></div>';
+  container.innerHTML =
+    `<div class="confirm-row"><span class="confirm-label">👤 作業員 / Operator</span><span class="confirm-value">${d.姓名||'—'} / ${d.工號||'—'}｜${d.班別||'—'}</span></div>
+    <div class="confirm-row"><span class="confirm-label">📦 產品 / Product</span><span class="confirm-value">${d.產品編號||'—'}｜${d.品名||'—'}</span></div>
+    <div class="confirm-row"><span class="confirm-label">🔧 工站 / Workstation</span><span class="confirm-value">${d.報工工站名稱||'—'}</span></div>
+    <div class="confirm-row"><span class="confirm-label">📊 共做 / Total</span><span class="confirm-value">${d.今日共做數} pcs</span></div>
+    <div class="confirm-row"><span class="confirm-label">✅ 良品 / Good</span><span class="confirm-value" style="color:var(--g-green);font-size:16px;font-weight:900;">${d.實際良品數} pcs</span></div>
+    <div class="confirm-row"><span class="confirm-label">❌ 不良 / NG</span><span class="confirm-value" style="color:${d.不良數>0?'var(--g-red)':'var(--text-tertiary)'};">${d.不良數} pcs</span></div>
+    ${defectHTML}
+    <div class="confirm-row"><span class="confirm-label">🕐 工時 / Hours</span><span class="confirm-value">${d.實際工時||'N/A'}</span></div>
+    <div class="confirm-row"><span class="confirm-label">📸 照片 / Photos</span><span class="confirm-value">${d.現場照片清單.length} 張</span></div>
+    <div class="confirm-row"><span class="confirm-label">📝 備註 / Remarks</span><span class="confirm-value">${safeTxt(d.備註||'無')}</span></div>
+    ${d.不良數>0 ? '<div style="text-align:center;margin-top:8px;padding:7px;background:rgba(254,243,199,0.90);border-radius:10px;font-weight:700;font-size:11px;color:#854D0E;">⚠ 此報工將同步寫入 09_不良紀錄 / Will sync to defect records</div>' : ''}`;
+}
+
+/* ══════════════════════════════════════
+   VALIDATE & SUBMIT
+══════════════════════════════════════ */
+function validateReport(d) {
+  if (!d.工號) return '請選擇作業員 / Please select operator';
+  if (!d.產品編號 && !d.品名) return '請選擇產品 / Please select product';
+  if (!d.報工工站名稱) return '請選擇報工工站 / Please select workstation';
+  if (d.今日共做數 <= 0) return '今日共做數必須大於 0 / Total qty must be > 0';
+  if (d.不良數 < 0) return '不良數不可小於 0 / NG qty must be >= 0';
+  if (d.不良數 > d.今日共做數) return '不良數不可大於共做數 / NG qty must not exceed total qty';
+  return '';
+}
+
+function submitReport() {
+  const d = buildReportData();
+  const err = validateReport(d);
+  if (err) { roar('⚠️', '驗證失敗 / Validation Failed', err, 'error'); return; }
+  updatePreview(); updateConfirmSummary();
+  const hasDefects = d.不良數 > 0 || d.不良行清單.length > 0;
+  const msg = `確認送出報工？/ Confirm submit?\n\n實際良品：${d.實際良品數} pcs${hasDefects ? '\n不良數：' + d.不良數 + ' pcs（將同步寫入09_不良紀錄）' : ''}`;
+  if (!confirm(msg)) return;
+  showSubmitOverlay(true, '📤 報工送出中...', 'Submitting production record...');
+  g('btnNext').disabled = true;
+  g('btnNext').classList.add('submitting');
+  callBackend('寫入報工作業v2', d, res => {
+    if (res && res.成功) {
+      const reportNo = res.報工編號||'';
+      if (hasDefects) {
+        g('submitTitle').textContent = '📋 同步不良紀錄中...';
+        g('submitSub').textContent = 'Syncing defect records...';
+        const defectData = buildDefectData(d, reportNo);
+        callBackend('寫入不良紀錄v2', defectData, res2 => {
+          showSubmitOverlay(false);
+          updateBottomBar();
+          roar(res2&&res2.成功 ? '✅' : '⚠️',
+            res2&&res2.成功 ? '報工完成 / Complete' : '報工已寫入但不良記錄同步失敗',
+            res2&&res2.成功 ? '報工編號：' + reportNo + '｜不良紀錄已同步' : ((res2&&res2.訊息)||'請手動確認'), res2&&res2.成功?'success':'warning');
+          resetAfterSubmit();
+        }, err2 => {
+          showSubmitOverlay(false); updateBottomBar();
+          roar('⚠️', '不良記錄同步失敗', (err2.message||String(err2)), 'warning');
+          resetAfterSubmit();
+        });
+      } else {
+        showSubmitOverlay(false); updateBottomBar();
+        roar('✅', '報工完成 / Complete', '報工編號：' + reportNo, 'success');
+        resetAfterSubmit();
+      }
+    } else {
+      showSubmitOverlay(false); updateBottomBar();
+      roar('❌', '寫入失敗 / Submit Failed', (res&&res.訊息)||'未知錯誤', 'error');
+    }
+  }, err => {
+    showSubmitOverlay(false); updateBottomBar();
+    roar('❌', '寫入失敗 / Submit Failed', (err.message||String(err)), 'error');
+  });
+}
+
+function buildDefectData(d, reportNo) {
+  return {
+    報工編號: reportNo, 工號: d.工號, 姓名: d.姓名, 班別: d.班別,
+    產品編號: d.產品編號, 客戶品號: d.客戶品號, 品名: d.品名,
+    工站名稱: d.報工工站名稱, 工序: d.工序, 機台清單: d.機台清單, 主機台: d.主機台,
+    不良數: d.不良數, 不良率: d.不良率, 不良行清單: d.不良行清單,
+    異常類型: d.異常類型, 異常開始時間: d.異常開始時間, 異常結束時間: d.異常結束時間,
+    異常工時: d.異常工時, 備註: d.備註,
+    現場照片清單: d.現場照片清單,
+    開始時間: d.開始時間, 結束時間: d.結束時間, 實際工時: d.實際工時,
+    寫入時間: new Date().toISOString()
+  };
+}
+
+function resetAfterSubmit() {
+  setVal('totalQty',''); setVal('ngQty','0');
+  STATE.defectRows = []; renderDefectRows(); addDefectRow();
+  STATE.photos = []; renderPhotoGrid();
+  g('defectSyncNotice').innerHTML = '';
+  g('remarks').value = '';
+  STATE.stepDone = [false,false,false,false,false];
+  STATE.operator = null; STATE.currentWorkstation = null; STATE.currentProductGroup = null;
+  document.querySelectorAll('.person-card').forEach(c => c.classList.remove('selected'));
+  document.querySelectorAll('.product-card').forEach(c => c.classList.remove('selected'));
+  g('selectedProductArea').classList.add('hidden');
+  const disp = g('selectedPersonDisplay');
+  disp.className = 'selected-person-display';
+  disp.innerHTML = '<div class="person-photo-lg">點擊卡片<br>Click Card</div><div><div class="person-info-name" style="color:var(--text-secondary);">尚未選擇 / Not Selected</div><div class="caption" style="margin-top:4px;">請點擊上方人員卡片、掃碼或搜尋選擇</div></div>';
+  g('empIdHighlight').textContent = '未輸入 / Not Set';
+  setVal('personId',''); setVal('personName','');
+  setVal('productCode',''); setVal('productName','');
+  calcQty(); switchStep(0);
+  roar('🔄', '已重置 / Reset Complete', '可以重新開始報工流程', 'success');
+}
+
+/* ══════════════════════════════════════
+   FULLSCREEN
+══════════════════════════════════════ */
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    (document.documentElement.requestFullscreen ||
+     document.documentElement.webkitRequestFullscreen ||
+     document.documentElement.mozRequestFullScreen ||
+     document.documentElement.msRequestFullscreen)
+    .call(document.documentElement).catch(e => roar('⚠️', '無法全螢幕', e.message||'', 'warning'));
+  } else {
+    (document.exitFullscreen||document.webkitExitFullscreen||document.mozCancelFullScreen||document.msExitFullscreen).call(document);
+  }
+}
+function listenFullscreenChange() {
+  ['fullscreenchange','webkitfullscreenchange','mozfullscreenchange'].forEach(evt =>
+    document.addEventListener(evt, () => {
+      const btn = g('fullscreenBtn');
+      if (btn) btn.title = document.fullscreenElement ? '退出全螢幕 / Exit Fullscreen' : '全螢幕 / Fullscreen';
+    }));
+}
+
+/* ══════════════════════════════════════
+   ROAR NOTIFICATIONS
+══════════════════════════════════════ */
+function roar(icon, title, sub, type) {
+  const container = g('roarContainer');
+  const id = 'roar_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+  const cssClass = type === 'success' ? 'success' : type === 'error' ? 'error' : type === 'warning' ? 'warning' : '';
+  const el = document.createElement('div');
+  el.className = 'roar-notif ' + cssClass;
+  el.id = id;
+  el.innerHTML = `<div class="roar-icon">${icon}</div>
+    <div class="roar-text"><div class="roar-title">${safeTxt(title)}</div><div class="roar-sub">${safeTxt(String(sub||''))}</div></div>
+    <button class="roar-close" onclick="closeRoar('${id}')">✕</button>`;
+  container.appendChild(el);
+  setTimeout(() => closeRoar(id), 5200);
+}
+function closeRoar(id) {
+  const el = g(id);
+  if (!el) return;
+  el.style.animation = 'roarOut .3s ease forwards';
+  setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 320);
+}
+
+/* ══════════════════════════════════════
+   SUBMIT OVERLAY
+══════════════════════════════════════ */
+function showSubmitOverlay(show, title, sub) {
+  const el = g('submitOverlay');
+  if (show) {
+    if (title) g('submitTitle').textContent = title;
+    if (sub) g('submitSub').textContent = sub;
+    el.classList.remove('hidden');
+  } else { el.classList.add('hidden'); }
+}
+
+/* ══════════════════════════════════════
+   LOADING SCREEN
+══════════════════════════════════════ */
+function showLoading(show) {
+  const el = g('loadingScreen');
+  if (!el) return;
+  if (!show) { el.classList.add('hide'); setTimeout(() => el.style.display = 'none', 650); }
+  else { el.style.display = 'flex'; el.classList.remove('hide'); }
+}
+
+/* ══════════════════════════════════════
+   UTILITIES
+══════════════════════════════════════ */
+function g(id) { return document.getElementById(id); }
+function val(id) { const el = g(id); return el ? el.value : ''; }
+function setVal(id, v) { const el = g(id); if (el) el.value = v; }
+function num(id) { const n = Number(val(id)); return isNaN(n) ? 0 : n; }
+function safeTxt(s) {
+  return String(s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+function safeAttr(s) { return safeTxt(s).replace(/\n/g,''); }
+function imgHTML(url, fallbackText, isRound) {
+  const cls = isRound ? 'style="width:80px;height:80px;border-radius:50%;object-fit:cover;"' : 'style="width:80px;height:80px;border-radius:var(--r-md);object-fit:cover;"';
+  const fallback = `<div class="person-photo-lg">${safeTxt(fallbackText)}</div>`;
+  return url ? `<img src="${safeAttr(url)}" ${cls} onerror="this.outerHTML='${safeAttr(fallback)}'">` : fallback;
+}
 </script>
 </body>
 </html>
