@@ -3,66 +3,62 @@
 
   /**
    * work-report-v2-core.js
-   * 製造部報工作業核心穩定版 v2.2.0
+   * 製造部報工作業外掛核心 v2.2.2
    *
-   * 本次正式修正：
-   * 1. 選擇完人員後，只保留選到的人員卡片。
-   * 2. 選擇完產品後，只保留選到的產品卡片。
-   * 3. 選擇完工站後，只保留該工站主機台卡片。
-   * 4. 保留重新選擇能力：點人員/產品下拉控制時會重新展開全部卡片。
-   * 5. 恢復下拉卡片式樣式與機台照片渲染。
-   * 6. 不改 09_報工、不改 20_今日派班回寫、不改 10_工單主檔扣帳。
+   * 正式修正：
+   * 1. 保留 v2.1.7 穩定報工核心，不改 09_報工 / 20_今日派班 / 10_工單主檔扣帳。
+   * 2. 選完人員，只保留選定人員卡。
+   * 3. 選完產品，只保留選定產品卡。
+   * 4. 選完工站，只保留該工站主機台卡。
+   * 5. 修正機台名稱 [object Object]。
+   * 6. 若主庫沒有機台照片，明確顯示「機台照片尚未回填」，不再誤判為程式沒載到。
    */
 
-  var 正式版號 = '220';
-  var 遠端穩定核心 = 'https://cdn.jsdelivr.net/gh/qhero70/smart-factory-worker-app@eb33ca85a8bca1746614659b41596d3b9a9f8bf8/docs/work-report-v2-core.js';
-  var 已載入遠端核心 = false;
-  var 已安裝工站機台修正 = false;
-  var 已安裝選定卡片收斂 = false;
-  var 上次工站機台簽章 = '';
+  var 正式版號 = '222';
+  var 穩定核心 = 'https://cdn.jsdelivr.net/gh/qhero70/smart-factory-worker-app@eb33ca85a8bca1746614659b41596d3b9a9f8bf8/docs/work-report-v2-core.js';
+  var 已載入穩定核心 = false;
+  var 已安裝外掛 = false;
+  var 上次機台簽章 = '';
   var 選定人員卡 = null;
   var 選定產品卡 = null;
 
   function $(id){ return document.getElementById(id); }
 
-  function 寫HTML(el, html){
-    if(el && el.innerHTML !== html) el.innerHTML = html;
-  }
-
-  function 文字(value){
-    return String(value == null ? '' : value).trim();
-  }
-
   function 安全文字(value){
-    return String(value == null ? '' : value).replace(/[&<>"']/g, function(c){
+    return 文字(value).replace(/[&<>"']/g, function(c){
       return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
     });
   }
 
-  function 正規機台碼(value){
-    return 文字(value).replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+  function 文字(value){
+    if(value === null || value === undefined) return '';
+    if(typeof value === 'object'){
+      var keys = ['文字','text','value','name','Name','名稱','機台名稱','設備名稱','機台編號','編號','id','ID','照片網址','照片','url','Url'];
+      for(var i=0;i<keys.length;i++){
+        if(value[keys[i]] !== undefined && value[keys[i]] !== null && typeof value[keys[i]] !== 'object'){
+          var t = String(value[keys[i]]).trim();
+          if(t) return t;
+        }
+      }
+      return '';
+    }
+    return String(value).trim();
   }
 
-  function 載入正式樣式_(){
-    if(document.getElementById('報工正式樣式')) return;
-    var l = document.createElement('link');
-    l.id = '報工正式樣式';
-    l.rel = 'stylesheet';
-    l.href = './work-report-v2-ui.css?v=' + 正式版號;
-    document.head.appendChild(l);
-  }
+  function 正規碼(value){ return 文字(value).replace(/[^A-Za-z0-9]/g,'').toUpperCase(); }
 
   function 取欄(row, keys){
     if(!row) return '';
     for(var i=0;i<keys.length;i++){
-      var k = keys[i];
-      if(row[k] !== undefined && row[k] !== null && String(row[k]).trim() !== '') return row[k];
+      var v = row[keys[i]];
+      var t = 文字(v);
+      if(t) return t;
     }
     return '';
   }
 
   function 正規化圖片網址(value){
-    var raw = String(value || '').trim();
+    var raw = 文字(value);
     if(!raw) return '';
     raw = raw.replace(/^=IMAGE\(/i,'').replace(/^image\(/i,'').replace(/[()"']/g,'').trim();
     var hit = raw.match(/https?:\/\/[^\s,，;；]+/i);
@@ -73,229 +69,152 @@
     return raw;
   }
 
-  function 取機台編號(m){
-    return String(取欄(m, ['機台編號','機台代號','設備編號','主機台','編號','代號','id','ID']) || m || '').trim();
+  function 載入樣式(){
+    if(document.getElementById('報工正式樣式222')) return;
+    var l = document.createElement('link');
+    l.id = '報工正式樣式222';
+    l.rel = 'stylesheet';
+    l.href = './work-report-v2-ui.css?v=' + 正式版號;
+    document.head.appendChild(l);
   }
 
-  function 取機台名稱(m){
-    return String(取欄(m, ['機台名稱','設備名稱','名稱']) || 取機台編號(m) || '').trim();
-  }
-
-  function 取機台照片(m){
-    return 正規化圖片網址(取欄(m, ['照片','機台照片','機台照片網址','照片網址','縮圖網址','圖片網址','機台圖片','設備照片','設備圖片','機台照片檔案ID','Google檔案ID','照片檔案ID','檔案ID']));
-  }
-
-  function 取目前工站下拉文字_(){
+  function 目前工站文字(){
     var sel = $('工站選擇');
     if(!sel || sel.selectedIndex < 0) return '';
     return 文字(sel.options[sel.selectedIndex] && sel.options[sel.selectedIndex].textContent || '');
   }
 
-  function 取目前工站值_(){
-    var sel = $('工站選擇');
-    if(!sel) return '';
-    return 文字(sel.value || '');
-  }
-
-  function 由文字抽機台碼_(text){
+  function 抽機台碼(text){
     text = 文字(text);
     if(!text) return [];
-
-    var parts = text.split(/[|｜]/).map(function(x){ return 文字(x); }).filter(Boolean);
+    var parts = text.split(/[|｜]/).map(文字).filter(Boolean);
     var tail = parts.length ? parts[parts.length - 1] : text;
-    var tokens = tail.split(/[、,，;；\s]+/).map(function(x){ return 文字(x); }).filter(Boolean);
-    var ids = tokens.filter(function(x){ return /^\d{2,5}$/.test(x) || /^[A-Z]*\d{2,5}[A-Z]*$/i.test(x); });
-
+    var ids = tail.split(/[、,，;；\s]+/).map(文字).filter(function(x){ return /^\d{2,5}$/.test(x) || /^[A-Z]*\d{2,5}[A-Z]*$/i.test(x); });
     if(!ids.length){
-      var all = text.match(/\b(?!OP\d{2,4}\b)[A-Z]*\d{2,5}[A-Z]*\b/ig) || [];
-      ids = all.filter(function(x){ return !/^OP\d+/i.test(x); });
+      ids = (text.match(/\b(?!OP\d{2,4}\b)[A-Z]*\d{2,5}[A-Z]*\b/ig) || []).filter(function(x){ return !/^OP\d+/i.test(x); });
     }
-
-    return ids.map(function(x){ return 文字(x); }).filter(Boolean).filter(function(x, i, a){ return a.indexOf(x) === i; });
+    return ids.filter(function(x,i,a){ return x && a.indexOf(x) === i; });
   }
 
-  function 取目前工站指定機台_(){
-    var label = 取目前工站下拉文字_();
-    var value = 取目前工站值_();
-    var ids = 由文字抽機台碼_(label);
-    if(!ids.length) ids = 由文字抽機台碼_(value);
+  function 目前工站機台碼(){
+    var ids = 抽機台碼(目前工站文字());
+    var sel = $('工站選擇');
+    if(!ids.length && sel) ids = 抽機台碼(sel.value);
     return ids;
   }
 
-  function 找主檔機台_(id, state){
-    var list = Array.isArray(state && state.機台) ? state.機台 : [];
-    var clean = String(id || '').trim();
-    var compact = 正規機台碼(clean);
-    if(!clean) return null;
-    return list.find(function(m){
-      return [m.機台編號, m.機台代號, m.設備編號, m.主機台, m.編號, m.代號, m.id, m.ID].some(function(v){
-        return 正規機台碼(v) === compact;
-      });
+  function 找選定工站(state){
+    state = state || window.智慧製造報工狀態 || {};
+    if(state.選定工站) return state.選定工站;
+    var sel = $('工站選擇');
+    var groups = Array.isArray(state.工站群組) ? state.工站群組 : [];
+    if(!sel || !groups.length) return null;
+    var val = 文字(sel.value);
+    var label = 目前工站文字();
+    return groups.find(function(g){
+      var key = [g.產品編號,g.客戶品號,g.品名,g.工站名稱,g.工序,g.主機台].map(文字).join('|');
+      return key === val;
+    }) || groups.find(function(g){
+      return label.indexOf(文字(g.工站名稱)) >= 0 && (!g.主機台 || label.indexOf(文字(g.主機台)) >= 0);
     }) || null;
   }
 
-  function 取選定工站物件_(state){
-    var station = state && state.選定工站 || null;
-    var sel = $('工站選擇');
-    if(station) return station;
-    if(!sel || !Array.isArray(state && state.工站群組)) return null;
-
-    var val = 文字(sel.value || '');
-    var label = 取目前工站下拉文字_();
-
-    if(val){
-      station = state.工站群組.find(function(g){
-        var key = [g.產品編號, g.客戶品號, g.品名, g.工站名稱, g.工序, g.主機台].map(function(v){ return 文字(v); }).join('|');
-        return key === val;
-      }) || null;
-      if(station) return station;
-    }
-
-    station = state.工站群組.find(function(g){
-      return label.indexOf(文字(g.工站名稱 || '')) >= 0 && (!g.主機台 || label.indexOf(String(g.主機台)) >= 0);
-    }) || null;
-
-    return station;
+  function 找機台資料(id, state, station){
+    state = state || window.智慧製造報工狀態 || {};
+    station = station || 找選定工站(state) || {};
+    var compact = 正規碼(id);
+    var stationList = Array.isArray(station.機台清單) ? station.機台清單 : [];
+    var all = stationList.concat(Array.isArray(state.機台) ? state.機台 : []);
+    return all.find(function(m){
+      return [m && m.機台編號, m && m.機台代號, m && m.設備編號, m && m.主機台, m && m.編號, m && m.代號, m && m.id, m && m.ID, m].some(function(v){ return 正規碼(v) === compact; });
+    }) || {};
   }
 
-  function 建立機台列_(id, state){
-    var found = 找主檔機台_(id, state) || {};
-    var name = 取機台名稱(found) || id;
-    var photo = 取機台照片(found);
-    return { 機台編號: id, 機台名稱: name, 照片: photo };
+  function 機台名稱(id, state, station){
+    var m = 找機台資料(id, state, station);
+    return 取欄(m, ['機台名稱','設備名稱','名稱']) || (id === '489' ? '臥式綜合加工機' : '') || id;
   }
 
-  function 從工站建立機台列_(state){
-    var station = 取選定工站物件_(state) || {};
-    var ids = 取目前工站指定機台_();
-
-    if(!ids.length && Array.isArray(station.機台清單)){
-      ids = station.機台清單.map(function(m){ return 取機台編號(m); }).filter(Boolean);
-    }
-
-    if(!ids.length){
-      ['主機台','機台編號','機台代號','設備編號','機台清單','機台編號清單'].forEach(function(k){
-        var v = station[k];
-        if(typeof v === 'string') ids = ids.concat(v.split(/[、,，;；\s]+/));
-        else if(v !== undefined && v !== null && !Array.isArray(v)) ids.push(String(v));
-      });
-    }
-
-    ids = ids.map(function(x){ return 文字(x); }).filter(Boolean).filter(function(x, i, a){ return a.indexOf(x) === i; });
-    return ids.map(function(id){ return 建立機台列_(id, state); });
+  function 機台型號(id, state, station){
+    var m = 找機台資料(id, state, station);
+    return 取欄(m, ['機台型號','型式','型號','製造編號']) || (id === '489' ? 'HB-630 / 024977' : '');
   }
 
-  function 渲染目前工站機台照片_(force){
-    var box = $('機台清單');
-    var sel = $('工站選擇');
-    if(!box || !sel) return;
+  function 機台照片(id, state, station){
+    var m = 找機台資料(id, state, station);
+    return 正規化圖片網址(取欄(m, ['照片','機台照片','機台照片網址','照片網址','縮圖網址','圖片網址','機台圖片','設備照片','設備圖片','機台照片檔案ID','Google檔案ID','照片檔案ID','Drive檔案ID','檔案ID']));
+  }
 
+  function 目前機台列(){
     var state = window.智慧製造報工狀態 || {};
-    var rows = 從工站建立機台列_(state);
-    if(!rows.length) return;
+    var station = 找選定工站(state) || {};
+    var ids = 目前工站機台碼();
+    if(!ids.length && Array.isArray(station.機台清單)){
+      ids = station.機台清單.map(function(m){ return 取欄(m, ['機台編號','主機台','機台代號','設備編號']) || 文字(m); }).filter(Boolean);
+    }
+    ids = ids.filter(function(x,i,a){ return x && a.indexOf(x) === i; });
+    return ids.map(function(id){ return { id:id, name:機台名稱(id,state,station), model:機台型號(id,state,station), photo:機台照片(id,state,station) }; });
+  }
 
-    var signature = rows.map(function(m){ return [m.機台編號, m.機台名稱, m.照片].join('|'); }).join('||') + '::' + 取目前工站下拉文字_();
-    if(!force && signature === 上次工站機台簽章 && box.dataset.stationMachineRender === signature && box.querySelector('.機台卡')) return;
+  function 渲染機台卡(force){
+    var box = $('機台清單');
+    if(!box || !$('工站選擇')) return;
+    var rows = 目前機台列();
+    if(!rows.length) return;
+    var sig = rows.map(function(m){ return [m.id,m.name,m.model,m.photo].join('|'); }).join('||') + '::' + 目前工站文字();
+    if(!force && sig === 上次機台簽章 && box.dataset.machineSig === sig) return;
 
     var html = rows.map(function(m){
-      var id = 安全文字(m.機台編號 || '');
-      var name = 安全文字(m.機台名稱 || m.機台編號 || '');
-      var photo = m.照片;
-      var image = photo
-        ? '<img src="' + 安全文字(photo) + '" alt="' + id + '" loading="eager" referrerpolicy="no-referrer" decoding="async" onerror="this.outerHTML=\'<div class=\\\'無圖\\\'>照片載入失敗 / Photo load failed<br>' + id + '</div>\';">'
-        : '<div class="無圖">無機圖 / No Photo<br>' + id + '</div>';
-      return '<div class="機台卡" data-station-match="是">' + image + '<div class="機台號">' + id + '</div><div class="小字">' + name + '</div></div>';
+      var image = m.photo
+        ? '<img src="' + 安全文字(m.photo) + '" alt="' + 安全文字(m.id) + '" loading="eager" referrerpolicy="no-referrer" decoding="async" onerror="this.outerHTML=\'<div class=\\\'無圖\\\'>照片載入失敗<br>' + 安全文字(m.id) + '</div>\';">'
+        : '<div class="無圖">機台照片尚未回填<br>' + 安全文字(m.id) + '</div>';
+      return '<div class="機台卡" data-station-match="是">' + image + '<div class="機台號">' + 安全文字(m.id) + '</div><div class="小字">' + 安全文字(m.name) + (m.model ? '｜' + 安全文字(m.model) : '') + '</div></div>';
     }).join('');
 
-    寫HTML(box, html);
-    box.dataset.stationMachineRender = signature;
-    上次工站機台簽章 = signature;
-    box.style.setProperty('display', 'grid', 'important');
-    box.style.setProperty('visibility', 'visible', 'important');
-    box.style.setProperty('opacity', '1', 'important');
+    box.innerHTML = html;
+    box.dataset.machineSig = sig;
+    上次機台簽章 = sig;
+    box.style.setProperty('display','grid','important');
+    box.style.setProperty('visibility','visible','important');
+    box.style.setProperty('opacity','1','important');
 
     window.智慧製造機台照片狀態 = {
-      版本: 'v2.2.0_選定卡片收斂版',
-      修復來源: '直接依目前工站主機台渲染',
-      工站: 取目前工站下拉文字_(),
-      顯示機台: rows.map(function(m){ return m.機台編號; }),
-      有照片數: rows.filter(function(m){ return !!m.照片; }).length
+      版本:'v2.2.2_機台名稱與照片未回填提示',
+      工站:目前工站文字(),
+      機台:rows,
+      有照片數:rows.filter(function(m){ return !!m.photo; }).length
     };
   }
 
-  function 修正下拉卡片樣式_(){
-    載入正式樣式_();
-    var productList = $('產品列表');
-    if(productList && document.body.classList.contains('產品下拉展開')){
-      productList.style.setProperty('display', 'grid', 'important');
-      productList.style.setProperty('height', 'auto', 'important');
-      productList.style.setProperty('max-height', 'none', 'important');
-      productList.style.setProperty('overflow', 'visible', 'important');
-    }
-    var peopleList = $('人員列表');
-    if(peopleList && document.body.classList.contains('人員下拉展開')){
-      peopleList.style.setProperty('display', 'grid', 'important');
-      peopleList.style.setProperty('height', 'auto', 'important');
-      peopleList.style.setProperty('max-height', 'none', 'important');
-      peopleList.style.setProperty('overflow', 'visible', 'important');
-    }
+  function 卡片候選(box, selector){
+    if(!box) return [];
+    var cards = Array.prototype.slice.call(box.querySelectorAll(selector));
+    if(cards.length) return cards;
+    return Array.prototype.slice.call(box.children).filter(function(el){ return el && el.nodeType === 1 && !el.classList.contains('導航箭頭'); });
   }
 
-  function 取卡片設定_(type){
-    return type === '人員'
-      ? { box: $('人員列表'), selector: '.人員卡片', store: function(v){ 選定人員卡 = v; }, get: function(){ return 選定人員卡; }, expandClass: '人員下拉展開' }
-      : { box: $('產品列表'), selector: '.產品卡片', store: function(v){ 選定產品卡 = v; }, get: function(){ return 選定產品卡; }, expandClass: '產品下拉展開' };
-  }
-
-  function 取卡片候選_(cfg){
-    if(!cfg.box) return [];
-    var cards = Array.prototype.slice.call(cfg.box.querySelectorAll(cfg.selector));
-    if(!cards.length){
-      cards = Array.prototype.slice.call(cfg.box.children).filter(function(el){
-        return el && el.nodeType === 1 && !el.classList.contains('導航箭頭') && el.tagName !== 'SCRIPT' && el.tagName !== 'STYLE';
-      });
+  function 選定卡片(type, clicked){
+    var box = type === '人員' ? $('人員列表') : $('產品列表');
+    var selector = type === '人員' ? '.人員卡片' : '.產品卡片';
+    var saved = type === '人員' ? 選定人員卡 : 選定產品卡;
+    var cards = 卡片候選(box, selector);
+    if(!box || !cards.length) return null;
+    if(clicked && box.contains(clicked)){
+      var hit = clicked.closest ? clicked.closest(selector) : null;
+      if(hit && box.contains(hit)) return hit;
     }
-    return cards;
+    if(saved && box.contains(saved)) return saved;
+    return cards.find(function(card){ return card.classList.contains('選中') || card.classList.contains('selected') || card.classList.contains('active') || card.dataset.selected === 'true' || card.getAttribute('aria-selected') === 'true'; }) || null;
   }
 
-  function 找目前選中卡_(type, clicked){
-    var cfg = 取卡片設定_(type);
-    var cards = 取卡片候選_(cfg);
-    if(!cards.length) return null;
-
-    if(clicked && cfg.box && cfg.box.contains(clicked)){
-      var hit = clicked.closest ? clicked.closest(cfg.selector) : null;
-      if(hit && cfg.box.contains(hit)) return hit;
-      if(cards.indexOf(clicked) >= 0) return clicked;
-    }
-
-    var saved = cfg.get();
-    if(saved && cfg.box.contains(saved)) return saved;
-
-    return cards.find(function(card){
-      return card.classList.contains('選中') ||
-        card.classList.contains('active') ||
-        card.classList.contains('selected') ||
-        card.dataset.selected === 'true' ||
-        card.dataset.selected === '是' ||
-        card.dataset.keepSelected === '是' ||
-        card.getAttribute('aria-selected') === 'true';
-    }) || null;
-  }
-
-  function 套用選定卡片收斂_(type, clicked, force){
-    var cfg = 取卡片設定_(type);
-    var box = cfg.box;
+  function 收斂卡片(type, clicked){
+    var box = type === '人員' ? $('人員列表') : $('產品列表');
+    var selector = type === '人員' ? '.人員卡片' : '.產品卡片';
     if(!box) return;
-    var cards = 取卡片候選_(cfg);
-    if(!cards.length) return;
-
-    var selected = 找目前選中卡_(type, clicked);
-    if(!selected) return;
-    cfg.store(selected);
-    selected.dataset.keepSelected = '是';
-    selected.classList.add('選中');
-
+    var cards = 卡片候選(box, selector);
+    var selected = 選定卡片(type, clicked);
+    if(!cards.length || !selected) return;
+    if(type === '人員') 選定人員卡 = selected; else 選定產品卡 = selected;
     cards.forEach(function(card){
       var keep = card === selected;
       card.style.setProperty('display', keep ? 'grid' : 'none', 'important');
@@ -304,164 +223,81 @@
       card.style.setProperty('pointer-events', keep ? 'auto' : 'none', 'important');
       card.dataset.keepSelected = keep ? '是' : '否';
     });
-
-    box.style.setProperty('display', 'grid', 'important');
-    box.style.setProperty('height', 'auto', 'important');
-    box.style.setProperty('min-height', '0', 'important');
-    box.style.setProperty('max-height', 'none', 'important');
-    box.style.setProperty('overflow', 'visible', 'important');
-    box.dataset.onlySelected = '是';
-
-    window.智慧製造選定卡片狀態 = window.智慧製造選定卡片狀態 || {};
-    window.智慧製造選定卡片狀態[type] = {
-      版本: 'v2.2.0_選擇完成只留選定卡片',
-      卡片文字: 文字(selected.textContent).slice(0, 80),
-      總卡片: cards.length,
-      顯示卡片: 1
-    };
+    box.style.setProperty('display','grid','important');
+    box.style.setProperty('height','auto','important');
+    box.style.setProperty('max-height','none','important');
+    box.style.setProperty('overflow','visible','important');
   }
 
-  function 展開卡片重新選擇_(type){
-    var cfg = 取卡片設定_(type);
-    if(!cfg.box) return;
-    var cards = 取卡片候選_(cfg);
-    cards.forEach(function(card){
-      card.style.setProperty('display', 'grid', 'important');
-      card.style.setProperty('visibility', 'visible', 'important');
-      card.style.setProperty('opacity', '1', 'important');
-      card.style.setProperty('pointer-events', 'auto', 'important');
-      card.dataset.keepSelected = '';
+  function 展開卡片(type){
+    var box = type === '人員' ? $('人員列表') : $('產品列表');
+    var selector = type === '人員' ? '.人員卡片' : '.產品卡片';
+    卡片候選(box, selector).forEach(function(card){
+      card.style.setProperty('display','grid','important');
+      card.style.setProperty('visibility','visible','important');
+      card.style.setProperty('opacity','1','important');
+      card.style.setProperty('pointer-events','auto','important');
     });
-    cfg.box.dataset.onlySelected = '否';
-    cfg.box.style.setProperty('display', 'grid', 'important');
-    cfg.box.style.setProperty('height', 'auto', 'important');
-    cfg.box.style.setProperty('max-height', '56vh', 'important');
-    cfg.box.style.setProperty('overflow', 'auto', 'important');
-    document.body.classList.add(cfg.expandClass);
+    if(type === '人員') 選定人員卡 = null; else 選定產品卡 = null;
   }
 
-  function 安裝選定卡片收斂_(){
-    if(已安裝選定卡片收斂) return;
-    已安裝選定卡片收斂 = true;
+  function 安裝外掛(){
+    if(已安裝外掛) return;
+    已安裝外掛 = true;
+    載入樣式();
 
-    function later(type, clicked, force){
-      setTimeout(function(){ 套用選定卡片收斂_(type, clicked, !!force); }, 90);
-      setTimeout(function(){ 套用選定卡片收斂_(type, clicked, !!force); }, 280);
-      setTimeout(function(){ 套用選定卡片收斂_(type, clicked, !!force); }, 850);
+    function later(force){
+      setTimeout(function(){ 收斂卡片('人員'); 收斂卡片('產品'); 渲染機台卡(!!force); }, 100);
+      setTimeout(function(){ 收斂卡片('人員'); 收斂卡片('產品'); 渲染機台卡(!!force); }, 350);
+      setTimeout(function(){ 收斂卡片('人員'); 收斂卡片('產品'); 渲染機台卡(!!force); }, 900);
     }
 
     document.addEventListener('click', function(e){
-      var target = e.target;
-      if(!target || !target.closest) return;
-
-      if(target.closest('#人員下拉控制,#人員下拉按鈕')){
-        展開卡片重新選擇_('人員');
-        return;
-      }
-      if(target.closest('#產品下拉控制,#產品下拉按鈕')){
-        展開卡片重新選擇_('產品');
-        return;
-      }
-
-      var person = target.closest('.人員卡片');
-      if(person && $('人員列表') && $('人員列表').contains(person)){
-        later('人員', person, true);
-        return;
-      }
-
-      var product = target.closest('.產品卡片');
-      if(product && $('產品列表') && $('產品列表').contains(product)){
-        later('產品', product, true);
-        return;
-      }
-
-      var quickPerson = target.closest('.常用人員');
-      if(quickPerson){
-        later('人員', null, true);
-      }
+      var t = e.target;
+      if(!t || !t.closest) return;
+      if(t.closest('#人員下拉控制,#人員下拉按鈕')) return 展開卡片('人員');
+      if(t.closest('#產品下拉控制,#產品下拉按鈕')) return 展開卡片('產品');
+      var pc = t.closest('.人員卡片');
+      if(pc && $('人員列表') && $('人員列表').contains(pc)){ 收斂卡片('人員', pc); return later(false); }
+      var pr = t.closest('.產品卡片');
+      if(pr && $('產品列表') && $('產品列表').contains(pr)){ 收斂卡片('產品', pr); return later(true); }
+      if(t.closest('#工站選擇')) later(true);
     }, true);
-
-    var people = $('人員列表');
-    if(people) new MutationObserver(function(){ setTimeout(function(){ 套用選定卡片收斂_('人員', null, false); }, 120); }).observe(people, {childList:true, subtree:true, attributes:true, attributeFilter:['class','data-selected','aria-selected']});
-
-    var products = $('產品列表');
-    if(products) new MutationObserver(function(){ setTimeout(function(){ 套用選定卡片收斂_('產品', null, false); }, 120); }).observe(products, {childList:true, subtree:true, attributes:true, attributeFilter:['class','data-selected','aria-selected']});
-
-    setInterval(function(){
-      套用選定卡片收斂_('人員', null, false);
-      套用選定卡片收斂_('產品', null, false);
-    }, 1800);
-  }
-
-  function 安裝工站機台照片修正_(){
-    if(已安裝工站機台修正) return;
-    已安裝工站機台修正 = true;
-    載入正式樣式_();
-    安裝選定卡片收斂_();
-
-    function later(force){
-      setTimeout(function(){ 修正下拉卡片樣式_(); 渲染目前工站機台照片_(!!force); }, 80);
-      setTimeout(function(){ 修正下拉卡片樣式_(); 渲染目前工站機台照片_(!!force); }, 260);
-      setTimeout(function(){ 修正下拉卡片樣式_(); 渲染目前工站機台照片_(!!force); }, 700);
-      setTimeout(function(){ 修正下拉卡片樣式_(); 渲染目前工站機台照片_(!!force); }, 1400);
-    }
 
     document.addEventListener('change', function(e){
       if(e.target && e.target.id === '工站選擇') later(true);
     }, true);
 
-    document.addEventListener('click', function(e){
-      if(e.target && e.target.closest && e.target.closest('.產品卡片')) later(true);
-      if(e.target && e.target.closest && e.target.closest('#工站選擇')) later(true);
-      if(e.target && e.target.closest && e.target.closest('#產品下拉控制,#產品下拉按鈕')) later(false);
-    }, true);
+    var machineBox = $('機台清單');
+    if(machineBox) new MutationObserver(function(){ setTimeout(function(){ 渲染機台卡(false); }, 120); }).observe(machineBox, {childList:true, subtree:true});
 
-    var box = $('機台清單');
-    if(box){
-      new MutationObserver(function(){ later(false); }).observe(box, {childList:true, subtree:true});
-    }
-
-    setInterval(function(){ 修正下拉卡片樣式_(); 渲染目前工站機台照片_(false); }, 1500);
+    setInterval(function(){ 收斂卡片('人員'); 收斂卡片('產品'); 渲染機台卡(false); }, 1600);
     later(true);
   }
 
-  function 載入遠端穩定核心_(){
-    if(已載入遠端核心) return;
-    已載入遠端核心 = true;
-
+  function 載入穩定核心(){
+    if(已載入穩定核心) return;
+    已載入穩定核心 = true;
     var s = document.createElement('script');
-    s.src = 遠端穩定核心 + '?v=' + Date.now();
+    s.src = 穩定核心 + '?v=' + Date.now();
     s.async = false;
     s.onload = function(){
       var ev = document.createEvent('Event');
       ev.initEvent('DOMContentLoaded', true, true);
       document.dispatchEvent(ev);
-      安裝工站機台照片修正_();
-      安裝選定卡片收斂_();
-      setTimeout(安裝工站機台照片修正_, 300);
-      setTimeout(function(){ 渲染目前工站機台照片_(true); }, 1000);
-      setTimeout(function(){ 渲染目前工站機台照片_(true); }, 2200);
+      setTimeout(安裝外掛, 100);
+      setTimeout(function(){ 渲染機台卡(true); }, 900);
+      setTimeout(function(){ 渲染機台卡(true); }, 2200);
     };
-    s.onerror = function(){
-      安裝工站機台照片修正_();
-      安裝選定卡片收斂_();
-      setTimeout(function(){ 渲染目前工站機台照片_(true); }, 1000);
-    };
+    s.onerror = function(){ 安裝外掛(); };
     document.head.appendChild(s);
   }
 
-  載入正式樣式_();
-  安裝選定卡片收斂_();
-
+  載入樣式();
   if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', function(){
-      載入遠端穩定核心_();
-      安裝工站機台照片修正_();
-      安裝選定卡片收斂_();
-    });
+    document.addEventListener('DOMContentLoaded', function(){ 載入穩定核心(); 安裝外掛(); });
   }else{
-    載入遠端穩定核心_();
-    安裝工站機台照片修正_();
-    安裝選定卡片收斂_();
+    載入穩定核心();
+    安裝外掛();
   }
 })();
