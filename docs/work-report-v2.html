@@ -2,15 +2,30 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv="refresh" content="0;url=./work-report-v4.html">
-<title>報工作業 V4</title>
-<style>body{background:#05050a;color:#e5f7ff;font-family:sans-serif;padding:24px}a{color:#22d3ee;font-size:20px;font-weight:bold}</style>
-<script>location.replace('./work-report-v4.html'+location.search+location.hash);</script>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>報工作業 V4｜PWA資料對接入口</title>
+<style>
+html,body{margin:0;min-height:100vh;background:#05050a;color:#e5f7ff;font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC','Microsoft JhengHei',system-ui,sans-serif}.boot{padding:28px;line-height:1.8}.boot h1{margin:0 0 8px;color:#c8f7ff}.boot b{color:#22d3ee}.err{color:#fecdd3;background:rgba(251,113,133,.12);border:1px solid rgba(251,113,133,.45);border-radius:16px;padding:16px;margin-top:16px;white-space:pre-wrap}</style>
 </head>
 <body>
-<h1>正在開啟報工作業 V4</h1>
-<p>若未自動跳轉，請點下方連結。</p>
-<p><a href="./work-report-v4.html">開啟 work-report-v4.html</a></p>
+<div class="boot" id="boot"><h1>🏭 製造部・報工作業 V4</h1><div>正在載入 <b>V4 原始報工畫面</b>｜僅補上 pwa-config、gas-bridge 與 V3 報工扣工單資料橋接...</div></div>
+<script>
+(function(){
+  'use strict';
+  var target='./work-report-v4.html?v=20260624';
+  function inject(html){
+    var bridge='\n<!-- PWA/GitHub Pages 資料對接：不改 V4 原 HTML/CSS/JS 主體，只增加資料橋接 -->\n'
+      +'<script src="./pwa-config.js?v=411"><\\/script>\n'
+      +'<script src="./gas-bridge.js?v=213"><\\/script>\n'
+      +'<script src="./work-report-v4-pwa-bridge.js?v=20260624"><\\/script>\n';
+    if(html.indexOf('work-report-v4-pwa-bridge.js')<0) html=html.replace(/<\/body>/i, bridge+'</body>');
+    return html;
+  }
+  fetch(target,{cache:'no-store'})
+    .then(function(r){if(!r.ok)throw new Error('讀取 work-report-v4.html 失敗：HTTP '+r.status);return r.text();})
+    .then(function(html){document.open();document.write(inject(html));document.close();})
+    .catch(function(e){document.getElementById('boot').innerHTML='<h1>🔴 V4 載入失敗</h1><div class="err">'+String(e&&e.message||e)+'</div><p><a style="color:#22d3ee" href="./work-report-v4.html">直接開啟 work-report-v4.html</a></p>';});
+})();
+</script>
 </body>
 </html>
