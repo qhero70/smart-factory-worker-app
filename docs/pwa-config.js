@@ -2,7 +2,7 @@ window.PWA_CONFIG={
   GAS_WEB_APP_URL:'https://script.google.com/macros/s/AKfycbwOi-xjKoMD9jVq4HrHBvh7k1DCn70lAPAJiqaWJhvH70PbuRo4ciopCjYcytIalaW4/exec',
   APP_NAME:'NEXUS OS · 工業 5.0 智慧製造矩陣',
   APP_SHORT_NAME:'化新精密',
-  VERSION:'v2.3.7_38.7_PWA正式報工實測版',
+  VERSION:'v4.0.0_報工作業V4_沿用V3派班邏輯',
   SPREADSHEET_ID:'1JA0-kxVO6x3NbCgjmUurkwd8lffolj0pbInissLl8BQ',
   API_TIMEOUT_MS:12000,
   API_ACTIONS:{
@@ -20,14 +20,16 @@ window.PWA_CONFIG={
 };
 (function(){
   'use strict';
-  var v='268';
+  var v='271';
   var path=(location.pathname||'').toLowerCase();
-  var isReport=/work-report-v2\.html$/.test(path);
+  var title=(document.title||'').toLowerCase();
+  var isV4Report=/work-report-v4\.html$/.test(path) || (/work-report-v2\.html$/.test(path) && /v4/.test(title));
+  var isLegacyReport=/work-report-v2\.html$/.test(path) && !isV4Report;
   var isApp=/app\.html$|\/$/.test(path);
   var isRegister=/register\.html$/.test(path);
   function load(src,id){if(document.getElementById(id))return;var s=document.createElement('script');s.id=id;s.src=src;s.async=false;document.head.appendChild(s)}
   function css(){if(document.getElementById('報工正式樣式'))return;var l=document.createElement('link');l.id='報工正式樣式';l.rel='stylesheet';l.href='./work-report-v2-ui.css?v='+v;document.head.appendChild(l)}
-  if(isReport){
+  if(isLegacyReport){
     css();
     load('./work-report-v2-hotfix-245.js?v='+v,'報工穩定熱修復245');
     load('./work-report-v2-dispatch-addon-248.js?v='+v,'報工今日派班外掛248');
