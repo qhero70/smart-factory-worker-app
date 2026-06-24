@@ -1,6 +1,7 @@
 (function(){
+  'use strict';
   const 設定 = window.PWA_CONFIG || {};
-  const 預設逾時 = Number(設定.API_TIMEOUT_MS || 8000);
+  const 預設逾時 = Number(設定.API_TIMEOUT_MS || 15000);
   const 臨時URL_KEY = '智慧製造_臨時GAS_WEB_APP_URL';
 
   function 清理網址(url){
@@ -20,6 +21,7 @@
     if (!base) throw new Error('尚未設定 GAS Web App URL，請先到 docs/pwa-config.js 填入正式 Web App URL。');
     const url = new URL(base);
     url.searchParams.set('action', action);
+    url.searchParams.set('動作', action);
     url.searchParams.set('_ts', String(Date.now()));
     if (payload && typeof payload === 'object') {
       Object.keys(payload).forEach(key => {
@@ -30,6 +32,24 @@
       });
     }
     return url.toString();
+  }
+
+  function 建立表單Body(action, payload){
+    const bodyObj = Object.assign({}, payload || {}, { action: action, 動作: action });
+    const sp = new URLSearchParams();
+    Object.keys(bodyObj).forEach(key => {
+      const value = bodyObj[key];
+      if (value === undefined || value === null) return;
+      sp.set(key, typeof value === 'object' ? JSON.stringify(value) : String(value));
+    });
+    const json = JSON.stringify(bodyObj);
+    // 小資料同時放 payload/json，讓不同版本 GAS 路由都能解析；有照片時避免 body 膨脹過大。
+    if (json.length < 220000) {
+      sp.set('payload', json);
+      sp.set('資料', json);
+      sp.set('json', json);
+    }
+    return sp.toString();
   }
 
   function 逾時Fetch(url, options, timeoutMs){
@@ -47,9 +67,16 @@
 
   async function 解析回應(response){
     const text = await response.text();
-    if (!response.ok) throw new Error(`HTTP ${response.status}：${text.slice(0,160)}`);
+    if (!response.ok) throw new Error(`HTTP ${response.status}：${text.slice(0,220)}`);
     try { return JSON.parse(text); }
-    catch(e) { return { 成功:false, success:false, 訊息:'GAS 回傳不是 JSON', 原始回應:text.slice(0,500) }; }
+    catch(e) { return { 成功:false, success:false, 訊息:'GAS 回傳不是 JSON', 原始回應:text.slice(0,800) }; }
+  }
+
+  function 是失敗回應(res){
+    if (!res || typeof res !== 'object') return true;
+    if (res.成功 === false || res.success === false || res.ok === false) return true;
+    const msg = String(res.訊息 || res.message || res.error || res.原始回應 || '');
+    return /UNKNOWN_ACTION|Unknown action|找不到|未接入|沒有.*動作|不支援/.test(msg);
   }
 
   async function GET(action, payload, options){
@@ -63,23 +90,28 @@
     if (!base) throw new Error('尚未設定 GAS Web App URL，請先到 docs/pwa-config.js 填入正式 Web App URL。');
     const url = new URL(base);
     url.searchParams.set('action', action);
+    url.searchParams.set('動作', action);
     url.searchParams.set('_ts', String(Date.now()));
     const timeoutMs = Number(options?.timeoutMs || 預設逾時);
-    const bodyObj = Object.assign({}, payload || {}, { action: action, 動作: action });
-    const body = JSON.stringify(bodyObj);
+    const formBody = 建立表單Body(action, payload);
 
     try {
-      return await 逾時Fetch(url.toString(), {
+      const res = await 逾時Fetch(url.toString(), {
         method:'POST',
         cache:'no-store',
         mode:'cors',
         credentials:'omit',
-        headers:{ 'Content-Type':'text/plain;charset=utf-8' },
-        body
+        headers:{ 'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8' },
+        body: formBody
       }, timeoutMs).then(解析回應);
+
+      if (!是失敗回應(res)) return res;
+
+      // GAS 舊路由如果只吃 GET 參數，POST 回失敗時立即降級 GET。
+      const getRes = await GET(action, payload, { timeoutMs });
+      return getRes;
     } catch (postError) {
-      const 降級Payload = { payload: body, 資料: body, json: body, action: action, 動作: action };
-      try { return await GET(action, 降級Payload, { timeoutMs }); }
+      try { return await GET(action, payload, { timeoutMs }); }
       catch (getError) { throw new Error(`POST 失敗：${postError.message}；GET 降級也失敗：${getError.message}`); }
     }
   }
@@ -91,15 +123,15 @@
   }
 
   async function 取得報工初始資料(){
-    return 呼叫(設定.API_ACTIONS?.取得報工作業v2初始資料 || '取得報工作業v2初始資料', null, { timeoutMs: Number(設定.API_TIMEOUT_MS || 8000) });
+    return 呼叫(設定.API_ACTIONS?.取得報工作業v2初始資料 || '取得報工作業v2初始資料', null, { timeoutMs: Number(設定.API_TIMEOUT_MS || 預設逾時) });
   }
 
   async function 寫入報工(payload){
-    return 呼叫(設定.API_ACTIONS?.寫入報工作業v2 || '寫入報工作業v2', payload, { method:'POST', timeoutMs: Number(設定.API_TIMEOUT_MS || 8000) });
+    return 呼叫(設定.API_ACTIONS?.寫入報工作業v2 || '寫入報工作業v2', payload, { method:'POST', timeoutMs: Number(設定.API_TIMEOUT_MS || 預設逾時) });
   }
 
   async function 寫入不良紀錄(payload){
-    return 呼叫(設定.API_ACTIONS?.寫入不良紀錄v2 || '寫入不良紀錄v2', payload, { method:'POST', timeoutMs: Number(設定.API_TIMEOUT_MS || 8000) });
+    return 呼叫(設定.API_ACTIONS?.寫入不良紀錄v2 || '寫入不良紀錄v2', payload, { method:'POST', timeoutMs: Number(設定.API_TIMEOUT_MS || 預設逾時) });
   }
 
   window.GAS橋接器 = {
