@@ -12,12 +12,13 @@ html,body{margin:0;min-height:100vh;background:#05050a;color:#e5f7ff;font-family
 <script>
 (function(){
   'use strict';
-  var target='./work-report-v4.html?v=20260624';
+  var ver='412';
+  var target='./work-report-v4.html?v='+ver;
   function inject(html){
     var bridge='\n<!-- PWA/GitHub Pages 資料對接：不改 V4 原 HTML/CSS/JS 主體，只增加資料橋接 -->\n'
-      +'<script src="./pwa-config.js?v=411"><\\/script>\n'
-      +'<script src="./gas-bridge.js?v=213"><\\/script>\n'
-      +'<script src="./work-report-v4-pwa-bridge.js?v=20260624"><\\/script>\n';
+      +'<script src="./pwa-config.js?v='+ver+'"><\\/script>\n'
+      +'<script src="./gas-bridge.js?v='+ver+'"><\\/script>\n'
+      +'<script src="./work-report-v4-pwa-bridge.js?v='+ver+'"><\\/script>\n';
     if(html.indexOf('work-report-v4-pwa-bridge.js')<0) html=html.replace(/<\/body>/i, bridge+'</body>');
     return html;
   }
