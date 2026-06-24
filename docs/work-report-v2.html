@@ -8,17 +8,18 @@
 html,body{margin:0;min-height:100vh;background:#05050a;color:#e5f7ff;font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC','Microsoft JhengHei',system-ui,sans-serif}.boot{padding:28px;line-height:1.8}.boot h1{margin:0 0 8px;color:#c8f7ff}.boot b{color:#22d3ee}.err{color:#fecdd3;background:rgba(251,113,133,.12);border:1px solid rgba(251,113,133,.45);border-radius:16px;padding:16px;margin-top:16px;white-space:pre-wrap}</style>
 </head>
 <body>
-<div class="boot" id="boot"><h1>🏭 製造部・報工作業 V4</h1><div>正在載入 <b>V4 原始報工畫面</b>｜僅補上 pwa-config、gas-bridge 與 V3 報工扣工單資料橋接...</div></div>
+<div class="boot" id="boot"><h1>🏭 製造部・報工作業 V4</h1><div>正在載入 <b>V4 原始報工畫面</b>｜僅補上 pwa-config、gas-bridge、V3 報工扣工單與 Safari 保底主檔...</div></div>
 <script>
 (function(){
   'use strict';
-  var ver='413';
+  var ver='414';
   var target='./work-report-v4.html?v='+ver;
   function inject(html){
     var bridge='\n<!-- PWA/GitHub Pages 資料對接：不改 V4 原 HTML/CSS/JS 主體，只增加資料橋接 -->\n'
       +'<script src="./pwa-config.js?v='+ver+'"><\\/script>\n'
       +'<script src="./gas-bridge.js?v='+ver+'"><\\/script>\n'
-      +'<script src="./work-report-v4-pwa-bridge.js?v='+ver+'"><\\/script>\n';
+      +'<script src="./work-report-v4-pwa-bridge.js?v='+ver+'"><\\/script>\n'
+      +'<script src="./work-report-v4-safari-fix.js?v='+ver+'"><\\/script>\n';
     if(html.indexOf('work-report-v4-pwa-bridge.js')<0) html=html.replace(/<\/body>/i, bridge+'</body>');
     return html;
   }
