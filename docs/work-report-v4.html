@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#05050a">
+<title>製造部・報工作業 V4</title>
+<style>
+html,body{margin:0;min-height:100vh;background:#05050a;color:#e5f7ff;font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC','Microsoft JhengHei',system-ui,sans-serif} .boot{padding:28px;line-height:1.8}.boot h1{margin:0 0 8px;color:#c8f7ff}.boot b{color:#22d3ee}.err{color:#fecdd3;background:rgba(251,113,133,.12);border:1px solid rgba(251,113,133,.45);border-radius:16px;padding:16px;margin-top:16px;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<div class="boot" id="boot"><h1>🏭 製造部・報工作業 V4</h1><div>正在載入 <b>V4 報工單</b>｜沿用 V3 作業邏輯規則與報工扣工單流程...</div></div>
+<script>
+(function(){
+  'use strict';
+  var target='./work-report-v3.html?v=410';
+  fetch(target,{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error('讀取 work-report-v3.html 失敗：HTTP '+r.status);return r.text();}).then(function(html){
+    html=html
+      .replace(/<title>[^<]*<\/title>/,'<title>製造部・報工作業 V4</title>')
+      .replace(/製造部・報工作業 V3\.1/g,'製造部・報工作業 V4')
+      .replace(/乾淨正式版｜含 08_工站途程備援｜主線報工扣工單/g,'V4正式版｜沿用V3作業邏輯規則｜主線報工扣工單')
+      .replace(/const VERSION='v3\.1\.0_route_fallback'/,"const VERSION='v4.0.1_v3logic_entry'")
+      .replace(/GitHub Pages PWA 報工作業V3\.1/g,'GitHub Pages PWA 報工作業V4');
+    document.open();
+    document.write(html);
+    document.close();
+  }).catch(function(e){
+    document.getElementById('boot').innerHTML='<h1>🔴 V4 載入失敗</h1><div class="err">'+String(e&&e.message||e)+'\n請確認 docs/work-report-v3.html 存在。</div><p><a style="color:#22d3ee" href="./work-report-v3.html">改開穩定報工核心</a></p>';
+  });
+})();
+</script>
+</body>
+</html>
