@@ -12,19 +12,19 @@ html,body{margin:0;min-height:100vh;background:#05050a;color:#e5f7ff;font-family
 <script>
 (function(){
   'use strict';
-  var ver='418';
+  var ver='419';
   var target='./work-report-v4.html?v='+ver;
   function inject(html){
-    var early='\n<!-- V4 早期 Fetch Guard：必須在原始 V4 JS 前載入 -->\n'
-      +'<script src="./work-report-v4-early-fetch-guard.js?v='+ver+'"><\\/script>\n';
-    var late='\n<!-- PWA/GitHub Pages 資料橋接：保留 V4 原 HTML/CSS/JS，只補資料層 -->\n'
+    var beforeOriginalScript='\n<!-- V4 前置資料層：必須在原始 V4 JS 前載入，避免 GAS URL 尚未設定與初始 Load failed -->\n'
       +'<script src="./pwa-config.js?v='+ver+'"><\\/script>\n'
       +'<script src="./gas-bridge.js?v='+ver+'"><\\/script>\n'
+      +'<script src="./work-report-v4-early-fetch-guard.js?v='+ver+'"><\\/script>\n';
+    var afterOriginalScript='\n<!-- V4 後置橋接層：只補送出報工、09_不良紀錄、派班/工單同步，不改原 HTML/CSS/JS -->\n'
       +'<script src="./work-report-v4-pwa-bridge.js?v='+ver+'"><\\/script>\n'
       +'<script src="./work-report-v4-safari-fix.js?v='+ver+'"><\\/script>\n'
       +'<script>setTimeout(function(){try{if(typeof reloadData===\'function\')reloadData();}catch(e){}},1800);setTimeout(function(){try{if(typeof reloadData===\'function\')reloadData();}catch(e){}},5200);<\\/script>\n';
-    if(html.indexOf('work-report-v4-early-fetch-guard.js')<0) html=html.replace(/<head>/i,'<head>'+early);
-    if(html.indexOf('work-report-v4-pwa-bridge.js')<0) html=html.replace(/<\/body>/i, late+'</body>');
+    if(html.indexOf('work-report-v4-early-fetch-guard.js')<0) html=html.replace(/<script/i, beforeOriginalScript+'<script');
+    if(html.indexOf('work-report-v4-pwa-bridge.js')<0) html=html.replace(/<\/body>/i, afterOriginalScript+'</body>');
     return html;
   }
   fetch(target,{cache:'no-store'})
