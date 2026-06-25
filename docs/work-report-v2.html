@@ -8,31 +8,72 @@
 html,body{margin:0;min-height:100vh;background:#05050a;color:#e5f7ff;font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC','Microsoft JhengHei',system-ui,sans-serif}.boot{padding:28px;line-height:1.8}.boot h1{margin:0 0 8px;color:#c8f7ff}.boot b{color:#22d3ee}.err{color:#fecdd3;background:rgba(251,113,133,.12);border:1px solid rgba(251,113,133,.45);border-radius:16px;padding:16px;margin-top:16px;white-space:pre-wrap}</style>
 </head>
 <body>
-<div class="boot" id="boot"><h1>🏭 製造部・報工作業 V4</h1><div>正在載入 <b>完整 V4 報工畫面</b>｜保留原 HTML / CSS / JS，只載入正式資料橋接與 UX 防呆...</div></div>
+<div class="boot" id="boot"><h1>🏭 製造部・報工作業 V4</h1><div>正在載入 <b>完整 V4 報工畫面</b>｜這版已直接內建保底主檔，不再卡在 Load Failed...</div></div>
 <script>
 (function(){
   'use strict';
-  var ver='428';
+  var ver='430';
   var target='./work-report-v4.html?v='+ver;
+  var GAS_URL='https://script.google.com/macros/s/AKfycbwOi-xjKoMD9jVq4HrHBvh7k1DCn70lAPAJiqaWJhvH70PbuRo4ciopCjYcytIalaW4/exec';
+
+  function reloadPatch(){
+    return `function reloadData() {
+  showLoading(true);
+  const fallbackData = function(reason){
+    const people = [
+      {工號:'fhfi546',姓名:'黃俊偉',部門:'製造部',組別:'製一組',職稱:'作業員',班別:'早班',啟用:'是',縮圖網址:'https://drive.google.com/thumbnail?id=1jW_-zSDXCHcJBe66dviCl063WQw8V1Fl&sz=w500',照片網址:'https://drive.google.com/thumbnail?id=1jW_-zSDXCHcJBe66dviCl063WQw8V1Fl&sz=w500'},
+      {工號:'fhft606',姓名:'艾爾迪',部門:'製造部',組別:'製一組',職稱:'作業員',班別:'大夜班',啟用:'是',縮圖網址:'https://drive.google.com/thumbnail?id=1R2VU1fDHlVp9La2hg1dIfxIxYnt2Rbed&sz=w500',照片網址:'https://drive.google.com/thumbnail?id=1R2VU1fDHlVp9La2hg1dIfxIxYnt2Rbed&sz=w500'},
+      {工號:'fhft560',姓名:'里查',部門:'製造部',組別:'製一組',職稱:'作業員',班別:'早班',啟用:'是',縮圖網址:'https://drive.google.com/thumbnail?id=1FRPcRXVXZf2McWcXoqFgbIuKu34eN3Sg&sz=w500',照片網址:'https://drive.google.com/thumbnail?id=1FRPcRXVXZf2McWcXoqFgbIuKu34eN3Sg&sz=w500'},
+      {工號:'fhft562',姓名:'艾德華',部門:'製造部',組別:'製一組',職稱:'作業員',班別:'早班',啟用:'是',縮圖網址:'https://drive.google.com/thumbnail?id=1yzBgcJU9eIBFwivtik9KomZwXHkFU5qL&sz=w500',照片網址:'https://drive.google.com/thumbnail?id=1yzBgcJU9eIBFwivtik9KomZwXHkFU5qL&sz=w500'},
+      {工號:'fhfi531',姓名:'駱德祥',部門:'製造部',組別:'製一組',職稱:'作業員',班別:'早班',啟用:'是',縮圖網址:'https://drive.google.com/thumbnail?id=1qcATMZvaVAYdqN1BjVbytcYIHmq3YmBD&sz=w500',照片網址:'https://drive.google.com/thumbnail?id=1qcATMZvaVAYdqN1BjVbytcYIHmq3YmBD&sz=w500'},
+      {工號:'fhfi573',姓名:'黃嘉欣',部門:'製造部',組別:'製一組',職稱:'工程師',班別:'早班',啟用:'是',縮圖網址:'https://drive.google.com/thumbnail?id=1L-ip7mulIe43qICfwbtP1gzJrJTrndYO&sz=w500',照片網址:'https://drive.google.com/thumbnail?id=1L-ip7mulIe43qICfwbtP1gzJrJTrndYO&sz=w500'},
+      {工號:'fhfg272',姓名:'陳瑞彬',部門:'製造部',組別:'製一組',職稱:'工程師',班別:'早班',啟用:'是',縮圖網址:'https://drive.google.com/thumbnail?id=1L-ip7mulIe43qICfwbtP1gzJrJTrndYO&sz=w500',照片網址:'https://drive.google.com/thumbnail?id=1L-ip7mulIe43qICfwbtP1gzJrJTrndYO&sz=w500'},
+      {工號:'fhfi691',姓名:'石郡浩',部門:'製造部',組別:'製一組',職稱:'助理工程師',班別:'早班',啟用:'是',縮圖網址:'https://drive.google.com/thumbnail?id=1B8r4Yr52YSZYonkaMPGbbn6hO6_noU7Y&sz=w500',照片網址:'https://drive.google.com/thumbnail?id=1B8r4Yr52YSZYonkaMPGbbn6hO6_noU7Y&sz=w500'},
+      {工號:'fhft578',姓名:'莫里',部門:'製造部',組別:'製一組',職稱:'作業員',班別:'早班',啟用:'是',縮圖網址:'https://drive.google.com/thumbnail?id=1S91mQs3gX1J3oIvy2AkQhyTo5MZUDnX3&sz=w500',照片網址:'https://drive.google.com/thumbnail?id=1S91mQs3gX1J3oIvy2AkQhyTo5MZUDnX3&sz=w500'},
+      {工號:'fhft582',姓名:'阿本',部門:'製造部',組別:'製一組',職稱:'作業員',班別:'早班',啟用:'是',縮圖網址:'https://drive.google.com/thumbnail?id=1xMhtXQ3Sr_wZtfQJ_hlFsSIHA8fDdhcg&sz=w500',照片網址:'https://drive.google.com/thumbnail?id=1xMhtXQ3Sr_wZtfQJ_hlFsSIHA8fDdhcg&sz=w500'}
+    ];
+    let routes = [];
+    try { if (typeof V4資料對接_建立途程備援_ === 'function') routes = V4資料對接_建立途程備援_(); } catch(e) {}
+    if (!routes || !routes.length) routes = [
+      {產品編號:'A503203008',客戶品號:'ACW1799170',品名:'COVER FOR O/P AGCO 66/74待組',報工工站名稱:'M/C加工',工站名稱:'M/C加工',工序:'OP110',工序範圍:'OP110',主機台:'489',機台清單:[{機台編號:'489',設備名稱:'臥式綜合加工機'}]},
+      {產品編號:'A503203008',客戶品號:'ACW1799170',品名:'COVER FOR O/P AGCO 66/74待組',報工工站名稱:'清洗+目視',工站名稱:'清洗+目視',工序:'OP130',工序範圍:'OP130',主機台:'77',機台清單:[{機台編號:'77',設備名稱:'清洗機'}]},
+      {產品編號:'Z005900000',客戶品號:'119717-21650',品名:'V-PULLEY CRANKSHAFT',報工工站名稱:'自動化',工站名稱:'自動化',工序:'OP110',工序範圍:'OP110',主機台:'1101',機台清單:[{機台編號:'1101',設備名稱:'自動化機台1101'}]}
+    ];
+    const productPhotos = {A503203008:'https://drive.google.com/thumbnail?id=1I6O1zGcDkqxGo4lP65OI0o4GnlXBV9_B&sz=w900',A401800000:'https://drive.google.com/thumbnail?id=12JgM6j8_KipUKdz_nhXIV_rbfYJ21hCC&sz=w900',A402301020:'https://drive.google.com/thumbnail?id=1ZEqwxEZmZuu5ZNv-pCvO_8nf7mM0tMjw&sz=w900',A402300020:'https://drive.google.com/thumbnail?id=1l0BaMP7WyiEi9s1XjyzaZHJTXFd2KVJ5&sz=w900',Z907500010:'https://drive.google.com/thumbnail?id=17rcFPqGjO0WN1m4SrFddMoeXuMqLZiS9&sz=w900',Z005300000:'https://drive.google.com/thumbnail?id=1H1HaUy0gDyW6Cv7oyp4z0xuBgI452Yqq&sz=w900'};
+    const machinePhotos = {77:'https://drive.google.com/thumbnail?id=1Q6V44wBAFkXcUXbfX2Xk-6g5lPmSgf0F&sz=w900',1072:'https://drive.google.com/thumbnail?id=1tswECGJpdkfjHzHfaXy79bBGhMEDrLZB&sz=w900',390:'https://drive.google.com/thumbnail?id=1fbQZs1DCfLNz64ENo_TwOKndpTdg1o9k&sz=w900',204:'https://drive.google.com/thumbnail?id=1DApcuqdreyehEEHsAJaB45Qp8aPrRD69&sz=w900'};
+    routes = routes.map(g => {
+      const pu = productPhotos[g.產品編號] || g.產品照片網址 || g.產品縮圖網址 || '';
+      g.產品照片網址 = pu; g.產品縮圖網址 = pu;
+      g.機台清單 = (g.機台清單 || []).map(m => { const id=String(m.機台編號||'').trim(); const mu=machinePhotos[id]||m.照片網址||m.縮圖網址||''; m.照片網址=mu; m.縮圖網址=mu; return m; });
+      return g;
+    });
+    return {成功:true,success:true,ok:true,fallback:true,訊息:'保底主檔已載入；GAS 第一次讀取失敗原因：'+reason,版本:'v4.3.0_內建保底',作業日:new Date().toISOString().slice(0,10),人員:people,報工工站群組:routes,途程工站群組:routes,班別清單:[{名稱:'早班',值:'早班'},{名稱:'中班',值:'中班'},{名稱:'大夜班',值:'大夜班'}],異常類型:['無異常','支援調度','材質異常','換刀','機台停機','待料','品質確認','其他'],不良原因:{Z:[{代碼:'Z01',名稱:'素材裂縫',英文名稱:'Material Crack'},{代碼:'Z02',名稱:'加工砂孔',英文名稱:'Sand Porosity'},{代碼:'Z03',名稱:'外觀刮傷',英文名稱:'Surface Scratch'}],Y:[{代碼:'Y01',名稱:'內徑超差',英文名稱:'Inner Diameter OOT'},{代碼:'Y02',名稱:'外徑超差',英文名稱:'Outer Diameter OOT'},{代碼:'Y09',名稱:'孔位',英文名稱:'Hole Position'}]},筆數:{人員:people.length,報工工站群組:routes.length,產品:routes.length,照片索引:20,不良代碼:6}};
+  };
+  callBackend('取得報工作業v2初始資料', null, data => {
+    try { if (typeof V4資料對接_標準化初始資料_ === 'function') data = V4資料對接_標準化初始資料_(data || {}); } catch(e) {}
+    onDataLoaded(data);
+  }, err => {
+    const reason = (err && err.message) ? err.message : String(err || 'Load failed');
+    const data = fallbackData(reason);
+    const normalized = (typeof V4資料對接_標準化初始資料_ === 'function') ? V4資料對接_標準化初始資料_(data) : data;
+    onDataLoaded(normalized);
+    showLoading(false);
+    roar('✅', '保底主檔已載入 / Fallback Loaded', 'GAS 第一次讀取失敗，但 V4 不再卡住，可先選人員與工件。', 'success');
+  });
+}`;
+  }
 
   function inject(html){
-    var config='\n<script>window.PWA_CONFIG=Object.assign(window.PWA_CONFIG||{},{GAS_WEB_APP_URL:"https://script.google.com/macros/s/AKfycbwOi-xjKoMD9jVq4HrHBvh7k1DCn70lAPAJiqaWJhvH70PbuRo4ciopCjYcytIalaW4/exec",API_TIMEOUT_MS:12000});<\\/script>\n';
-    var early='\n<script src="./work-report-v4-early-fetch-guard.js?v='+ver+'"><\\/script>\n';
+    var config='\n<script>window.PWA_CONFIG=Object.assign(window.PWA_CONFIG||{},{GAS_WEB_APP_URL:"'+GAS_URL+'",API_TIMEOUT_MS:12000,VERSION:"v4.3.0_內建保底"});<\\/script>\n';
+    var pwa='\n<script src="./pwa-config.js?v='+ver+'"><\\/script>\n';
+    var bridge='\n<script src="./gas-bridge.js?v='+ver+'"><\\/script>\n';
     var ux='\n<script src="./work-report-v4-ux-427.js?v='+ver+'"><\\/script>\n';
-
+    var original="function reloadData() {\n  showLoading(true);\n  callBackend('取得報工作業v2初始資料', null, onDataLoaded, err => {\n    showLoading(false);\n    roar('❌', '讀取失敗 / Load Failed', (err.message || String(err)), 'error');\n  });\n}";
     html = html.replace(/\.\/pwa-config\.js\?v=\d+/g,'./pwa-config.js?v='+ver);
     html = html.replace(/\.\/gas-bridge\.js\?v=\d+/g,'./gas-bridge.js?v='+ver);
-
-    if(html.indexOf('window.PWA_CONFIG=Object.assign')<0){
-      html = html.replace(/<script\s+src=["']\.\/pwa-config\.js[^>]*><\/script>/i, config + '$&');
-    }
-    if(html.indexOf('work-report-v4-early-fetch-guard.js')<0){
-      html = html.replace(/<script\s+src=["']\.\/pwa-config\.js[^>]*><\/script>/i, early + '$&');
-      if(html.indexOf('work-report-v4-early-fetch-guard.js')<0) html = html.replace(/<script/i, early + '<script');
-    }
-    if(html.indexOf('work-report-v4-ux-427.js')<0){
-      html = html.replace(/<\/body>/i, ux + '</body>');
-    }
+    html = html.replace(original, reloadPatch());
+    html = html.replace(/<script>\s*['"]use strict['"];?/i, config+pwa+bridge+'$&');
+    if(html.indexOf('work-report-v4-ux-427.js')<0) html = html.replace(/<\/body>/i, ux+'</body>');
     return html;
   }
 
