@@ -1,5 +1,10 @@
 (function(){
   'use strict';
+  const GAS正式預設URL = 'https://script.google.com/macros/s/AKfycbwOi-xjKoMD9jVq4HrHBvh7k1DCn70lAPAJiqaWJhvH70PbuRo4ciopCjYcytIalaW4/exec';
+  window.PWA_CONFIG = window.PWA_CONFIG || {};
+  if (!window.PWA_CONFIG.GAS_WEB_APP_URL || window.PWA_CONFIG.GAS_WEB_APP_URL === '貼上 GAS Web App URL') {
+    window.PWA_CONFIG.GAS_WEB_APP_URL = GAS正式預設URL;
+  }
   const 設定 = window.PWA_CONFIG || {};
   const 預設逾時 = Number(設定.API_TIMEOUT_MS || 15000);
   const 臨時URL_KEY = '智慧製造_臨時GAS_WEB_APP_URL';
@@ -8,15 +13,15 @@
 
   function 取得GAS網址(){
     const 臨時URL = 清理網址(localStorage.getItem(臨時URL_KEY));
-    const 正式URL = 清理網址(設定.GAS_WEB_APP_URL);
+    const 正式URL = 清理網址(設定.GAS_WEB_APP_URL || GAS正式預設URL);
     if (臨時URL) return 臨時URL;
-    if (!正式URL || 正式URL === '貼上 GAS Web App URL') return '';
+    if (!正式URL || 正式URL === '貼上 GAS Web App URL') return GAS正式預設URL;
     return 正式URL;
   }
 
   function 建立網址(action, payload){
     const base = 取得GAS網址();
-    if (!base) throw new Error('尚未設定 GAS Web App URL，請先到 docs/pwa-config.js 填入正式 Web App URL。');
+    if (!base) throw new Error('尚未設定 GAS Web App URL，已改用正式預設 URL 仍失敗。');
     const url = new URL(base);
     url.searchParams.set('action', action);
     url.searchParams.set('動作', action);
