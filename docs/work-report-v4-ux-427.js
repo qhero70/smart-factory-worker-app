@@ -1,29 +1,24 @@
 /*
- * 製一組報工表單 V4｜UX 穩定補強 v4.2.7
- * 只做前端互動補強，不刪原 HTML / CSS / JS，不改 V3 報工 payload 與扣工單流程。
- * 修正項目：
- * 1. 選產品後工站快選更明顯。
- * 2. 今日共做數不預設 0。
- * 3. 不良數與不良分配不預設 0。
- * 4. 不良原因顯示英文。
- * 5. 不良原因數量分配總和不可超過總不良數。
+ * 製一組報工表單 V4｜UX 穩定補強 v4.3.5
+ * 原則：不替換原 work-report-v4.html，不刪原 HTML / CSS / JS。
+ * 只在既有 V4 上做安全補強：產品兩欄、選產品後工站明顯展開、品質不良原因可選、數量分配防呆、照片補齊。
  */
 (function(){
   'use strict';
-  var VER = 'v4.2.7_工站快選_數量不預設_不良分配強制防呆';
+  var VER = 'v4.3.5_原V4保留_產品兩欄_工站自動展開_不良分配修復';
 
   var 人員照片 = {
-    fhfi546:'https://drive.google.com/thumbnail?id=1jW_-zSDXCHcJBe66dviCl063WQw8V1Fl&sz=w500',
-    fhft606:'https://drive.google.com/thumbnail?id=1R2VU1fDHlVp9La2hg1dIfxIxYnt2Rbed&sz=w500',
-    fhft560:'https://drive.google.com/thumbnail?id=1FRPcRXVXZf2McWcXoqFgbIuKu34eN3Sg&sz=w500',
-    fhft562:'https://drive.google.com/thumbnail?id=1yzBgcJU9eIBFwivtik9KomZwXHkFU5qL&sz=w500',
-    fhfi562:'https://drive.google.com/thumbnail?id=1x1YIk3OSYiHtrfbHzbGFFuhAboXghr-_&sz=w500',
-    fhfi531:'https://drive.google.com/thumbnail?id=1qcATMZvaVAYdqN1BjVbytcYIHmq3YmBD&sz=w500',
-    fhfi573:'https://drive.google.com/thumbnail?id=1L-ip7mulIe43qICfwbtP1gzJrJTrndYO&sz=w500',
-    fhfg272:'https://drive.google.com/thumbnail?id=1L-ip7mulIe43qICfwbtP1gzJrJTrndYO&sz=w500',
-    fhfi691:'https://drive.google.com/thumbnail?id=1B8r4Yr52YSZYonkaMPGbbn6hO6_noU7Y&sz=w500',
-    fhft578:'https://drive.google.com/thumbnail?id=1S91mQs3gX1J3oIvy2AkQhyTo5MZUDnX3&sz=w500',
-    fhft582:'https://drive.google.com/thumbnail?id=1xMhtXQ3Sr_wZtfQJ_hlFsSIHA8fDdhcg&sz=w500'
+    fhfi546:'https://drive.google.com/thumbnail?id=1jW_-zSDXCHcJBe66dviCl063WQw8V1Fl&sz=w600',
+    fhft606:'https://drive.google.com/thumbnail?id=1R2VU1fDHlVp9La2hg1dIfxIxYnt2Rbed&sz=w600',
+    fhft560:'https://drive.google.com/thumbnail?id=1FRPcRXVXZf2McWcXoqFgbIuKu34eN3Sg&sz=w600',
+    fhft562:'https://drive.google.com/thumbnail?id=1yzBgcJU9eIBFwivtik9KomZwXHkFU5qL&sz=w600',
+    fhfi562:'https://drive.google.com/thumbnail?id=1x1YIk3OSYiHtrfbHzbGFFuhAboXghr-_&sz=w600',
+    fhfi531:'https://drive.google.com/thumbnail?id=1qcATMZvaVAYdqN1BjVbytcYIHmq3YmBD&sz=w600',
+    fhfi573:'https://drive.google.com/thumbnail?id=1L-ip7mulIe43qICfwbtP1gzJrJTrndYO&sz=w600',
+    fhfg272:'https://drive.google.com/thumbnail?id=1L-ip7mulIe43qICfwbtP1gzJrJTrndYO&sz=w600',
+    fhfi691:'https://drive.google.com/thumbnail?id=1B8r4Yr52YSZYonkaMPGbbn6hO6_noU7Y&sz=w600',
+    fhft578:'https://drive.google.com/thumbnail?id=1S91mQs3gX1J3oIvy2AkQhyTo5MZUDnX3&sz=w600',
+    fhft582:'https://drive.google.com/thumbnail?id=1xMhtXQ3Sr_wZtfQJ_hlFsSIHA8fDdhcg&sz=w600'
   };
 
   var 產品照片 = {
@@ -58,6 +53,7 @@
     Y04:'Surface Roughness', Y05:'Thread Defect', Y06:'Position Out of Tolerance', Y07:'Burr', Y08:'Chamfer Defect', Y09:'Hole Position'
   };
 
+  var defectId = 1000;
   function $(id){ return document.getElementById(id); }
   function txt(v){ return String(v == null ? '' : v).trim(); }
   function esc(s){ return txt(s).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];}); }
@@ -69,16 +65,17 @@
   function 補照片(data){
     data = data || {};
     (data.人員 || []).forEach(function(p){
-      var id = txt(p.工號).toLowerCase();
-      if(人員照片[id]){ p.照片網址 = p.照片網址 || 人員照片[id]; p.縮圖網址 = p.縮圖網址 || 人員照片[id]; }
+      var id = txt(p.工號 || p.員工編號).toLowerCase();
+      if(人員照片[id]){ p.照片網址 = p.照片網址 || p.縮圖網址 || 人員照片[id]; p.縮圖網址 = p.縮圖網址 || p.照片網址 || 人員照片[id]; }
     });
     var routes = data.報工工站群組 || data.途程工站群組 || [];
     routes.forEach(function(g){
       var pu = 產品照片[txt(g.產品編號)] || g.產品縮圖網址 || g.產品照片網址 || '';
-      if(pu){ g.產品照片網址 = g.產品照片網址 || pu; g.產品縮圖網址 = g.產品縮圖網址 || pu; }
+      if(pu){ g.產品照片網址 = g.產品照片網址 || pu; g.產品縮圖網址 = g.縮圖網址 || g.產品縮圖網址 || pu; }
       (g.機台清單 || []).forEach(function(m){
-        var mu = 機台照片[txt(m.機台編號 || m.主機台)] || m.縮圖網址 || m.照片網址 || '';
-        if(mu){ m.照片網址 = m.照片網址 || mu; m.縮圖網址 = m.縮圖網址 || mu; }
+        var id = txt(m.機台編號 || m.主機台 || g.主機台);
+        var mu = 機台照片[id] || m.縮圖網址 || m.照片網址 || '';
+        if(mu){ m.照片網址 = m.照片網址 || mu; m.縮圖網址 = m.縮圖網址 || m.照片網址 || mu; }
       });
     });
     data.報工工站群組 = routes;
@@ -110,23 +107,34 @@
   }
 
   function 注入樣式(){
-    if(document.getElementById('v4_427_style')) return;
+    if(document.getElementById('v4_435_style')) return;
     var s=document.createElement('style');
-    s.id='v4_427_style';
+    s.id='v4_435_style';
     s.textContent = [
+      '/* V4 435 UX patch：只覆蓋外觀與互動，不替換原結構 */',
       '.person-card{min-height:188px!important;padding:8px!important;justify-content:flex-start!important}',
       '.person-card .avatar-ring{width:100%!important;height:96px!important;border-radius:18px!important;overflow:hidden!important}',
       '.person-card .avatar-ring img{width:100%!important;height:100%!important;border-radius:18px!important;object-fit:cover!important;object-position:center 28%!important}',
-      '.person-card .person-id{font-size:13px!important;font-weight:900!important;color:#174ea6!important;background:rgba(66,133,244,.12)!important;border-radius:999px!important;padding:3px 10px!important;display:inline-block!important;letter-spacing:.3px!important}',
-      '.v4-station-pop{margin:14px 0 10px;padding:14px;border:2px solid rgba(25,103,210,.36);border-radius:22px;background:linear-gradient(135deg,#fff7d6,#e8f0fe);box-shadow:0 10px 28px rgba(25,103,210,.14)}',
-      '.v4-station-title{font-size:16px;font-weight:950;color:#174ea6;margin-bottom:9px;line-height:1.5}',
-      '.v4-station-hint{font-size:12px;font-weight:800;color:#8a5b00;margin-bottom:10px}',
-      '.v4-station-card{width:100%;text-align:left;border:2px solid rgba(66,133,244,.26);border-radius:18px;background:rgba(255,255,255,.94);padding:13px;margin:9px 0;font-weight:950;color:#202124;box-shadow:0 4px 14px rgba(0,0,0,.06)}',
-      '.v4-station-card b{font-size:16px;color:#202124}.v4-station-card small{display:block;margin-top:4px;color:#5f6368;font-weight:800;line-height:1.45}',
-      '.v4-station-card.selected{border-color:#34a853;background:#e6f4ea;box-shadow:0 8px 20px rgba(52,168,83,.18)}',
+      '.person-card .person-id{font-size:14px!important;font-weight:1000!important;color:#174ea6!important;background:rgba(66,133,244,.14)!important;border-radius:999px!important;padding:4px 12px!important;display:inline-block!important;letter-spacing:.4px!important}',
+      '.product-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;max-height:460px!important}',
+      '.product-card{min-height:210px!important;border-width:2px!important}',
+      '.product-thumb{aspect-ratio:1/1!important;min-height:128px!important}',
+      '.product-thumb img{object-fit:cover!important;object-position:center!important}',
+      '.product-name{font-size:14px!important;min-height:44px!important;display:-webkit-box!important;-webkit-line-clamp:2!important;-webkit-box-orient:vertical!important;overflow:hidden!important}',
+      '.product-code{font-size:13px!important;font-weight:1000!important;color:#174ea6!important;background:rgba(66,133,244,.11)!important;border-radius:999px!important;margin:4px 10px 10px!important;padding:3px 6px!important}',
+      '.v4-station-pop{margin:14px 0 12px;padding:14px;border:3px solid rgba(25,103,210,.50);border-radius:24px;background:linear-gradient(135deg,#fff7d6,#e8f0fe);box-shadow:0 14px 34px rgba(25,103,210,.20)}',
+      '.v4-station-title{font-size:18px;font-weight:1000;color:#174ea6;margin-bottom:8px;line-height:1.45}',
+      '.v4-station-hint{font-size:13px;font-weight:900;color:#8a5b00;margin-bottom:10px;line-height:1.55}',
+      '.v4-station-card{width:100%;text-align:left;border:2px solid rgba(66,133,244,.32);border-radius:18px;background:rgba(255,255,255,.96);padding:14px;margin:9px 0;font-weight:1000;color:#202124;box-shadow:0 4px 16px rgba(0,0,0,.08)}',
+      '.v4-station-card b{font-size:17px;color:#202124}.v4-station-card small{display:block;margin-top:4px;color:#5f6368;font-weight:850;line-height:1.45}',
+      '.v4-station-card.selected{border-color:#34a853;background:#e6f4ea;box-shadow:0 8px 22px rgba(52,168,83,.22)}',
       '.v4-qty-empty{color:#80868b!important}',
-      '#totalQty,#ngQty,.qty-input{font-weight:900!important;font-size:18px!important}',
-      '.defect-row select option{font-weight:700}'
+      '#totalQty,#ngQty,.qty-input{font-weight:1000!important;font-size:18px!important}',
+      '.defect-row{display:grid!important;grid-template-columns:1fr 92px 32px!important;align-items:center!important}',
+      '.defect-row select{min-width:0!important;width:100%!important;font-size:14px!important}',
+      '.defect-row .qty-input{width:92px!important;min-width:92px!important;flex:0 0 92px!important}',
+      '.defect-row select option{font-weight:800}',
+      '@media(max-width:420px){.product-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.product-card{min-height:194px!important}.product-thumb{min-height:116px!important}.product-name{font-size:13px!important}.product-code{font-size:12px!important}.machine-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.defect-row{grid-template-columns:1fr 78px 30px!important}.defect-row .qty-input{width:78px!important;min-width:78px!important}}'
     ].join('\n');
     document.head.appendChild(s);
   }
@@ -138,30 +146,37 @@
     ['displayTotal','displayNG','displayGood'].forEach(function(id){ var el=$(id); if(el && el.textContent === '0'){ el.textContent='—'; el.classList.add('v4-qty-empty'); } });
   }
 
-  function 強制分配不超過不良數(優先保留ID){
+  function 強制分配不超過不良數(){
     if(!window.STATE || !Array.isArray(STATE.defectRows)) return;
     var limit = getNG();
-    var rows = STATE.defectRows;
-    if(limit <= 0){
-      rows.forEach(function(r){ r.qty=''; });
-    } else {
-      var used = 0;
-      rows.forEach(function(r){
-        var q = Number(r.qty || 0);
-        if(!isFinite(q) || q < 0) q = 0;
-        var allow = Math.max(0, limit - used);
-        if(q > allow) q = allow;
-        r.qty = q === 0 ? '' : q;
-        used += q;
-      });
-    }
-    rows.forEach(function(r){ var input=document.querySelector('#defectRow_'+r.id+' .qty-input'); if(input) input.value = r.qty || ''; });
+    var used = 0;
+    STATE.defectRows.forEach(function(r){
+      var q = Number(r.qty || 0);
+      if(!isFinite(q) || q < 0) q = 0;
+      var allow = Math.max(0, limit - used);
+      if(q > allow) q = allow;
+      r.qty = q === 0 ? '' : q;
+      used += q;
+    });
+    STATE.defectRows.forEach(function(r){ var input=document.querySelector('#defectRow_'+r.id+' .qty-input'); if(input) input.value = r.qty || ''; });
+  }
+
+  function 補足不良分配到不良數(){
+    if(!window.STATE || !Array.isArray(STATE.defectRows)) return;
+    var limit = getNG();
+    if(limit <= 0) return;
+    if(!STATE.defectRows.length) window.addDefectRow();
+    var used = STATE.defectRows.reduce(function(s,r){ return s + (Number(r.qty)||0); },0);
+    if(used >= limit) return;
+    var row = STATE.defectRows.find(function(r){return r.code;}) || STATE.defectRows[STATE.defectRows.length-1];
+    if(!row.code){ row.code='Z02'; row.category='Z'; row.name='加工砂孔'; row.enName=英文不良.Z02; }
+    row.qty = (Number(row.qty)||0) + (limit - used);
+    重建不良列();
   }
 
   function 重算數量顯示(){
-    var totalRaw = txt(($('totalQty')||{}).value);
+    var total = getTotal();
     var ngRaw = txt(($('ngQty')||{}).value);
-    var total = numOrNull(totalRaw);
     var ng = numOrNull(ngRaw);
     if(total != null && ng != null && ng > total){ ng = total; setVal('ngQty', total); }
     強制分配不超過不良數();
@@ -172,6 +187,7 @@
       if(total == null){ dGood.textContent = '—'; dGood.classList.add('v4-qty-empty'); }
       else { dGood.textContent = Math.max(total - (ng || 0), 0); dGood.classList.remove('v4-qty-empty'); }
     }
+    if((ng || 0) > 0 && window.STATE && (!STATE.defectRows || !STATE.defectRows.length)) window.addDefectRow();
     if(total && total > 0 && typeof markStepDone === 'function') markStepDone();
     if(typeof updateDefectSummaryDisplay === 'function') updateDefectSummaryDisplay();
     if(typeof updateDefectSyncNotice === 'function') updateDefectSyncNotice();
@@ -190,7 +206,7 @@
     box.id='v4StationQuickPicker';
     box.className='v4-station-pop';
     box.innerHTML = '<div class="v4-station-title">👇 請選擇此產品的報工工站 / Tap Workstation</div>' +
-      '<div class="v4-station-hint">選完產品後必須選工站。點下面卡片即可帶入工序與機台。</div>' +
+      '<div class="v4-station-hint">產品已選定，工站已自動拉上來。請點下方工站卡片，不要再找下拉選單。</div>' +
       list.map(function(g,i){
         var m=(g.機台清單||[]).map(function(x){return x.機台編號;}).filter(Boolean).join('、') || g.主機台 || '';
         return '<button type="button" class="v4-station-card ripple" data-station-index="'+i+'"><b>'+esc(g.報工工站名稱||g.工站名稱||'報工工站')+'</b><small>工序：'+esc(g.工序範圍||g.工序||'—')+'｜機台：'+esc(m||'—')+'</small></button>';
@@ -207,7 +223,7 @@
         if(typeof roar === 'function') roar('✅','已選定工站 / Workstation Selected', this.innerText.replace(/\n/g,'｜'), 'success');
       });
     });
-    try { box.scrollIntoView({behavior:'smooth', block:'center'}); } catch(e) {}
+    setTimeout(function(){ try { box.scrollIntoView({behavior:'smooth', block:'start'}); } catch(e) {} }, 120);
   }
 
   function 重建不良列(){
@@ -228,13 +244,13 @@
     }
     container.innerHTML = STATE.defectRows.map(function(row){
       return '<div class="defect-row" id="defectRow_'+row.id+'">'+
-        '<button class="defect-delete-btn ripple" onclick="deleteDefectRow('+row.id+')">✕</button>'+ 
-        '<select style="flex:2;min-width:0;" onchange="onDefectReasonChange('+row.id+',this.value)">'+
+        '<select onchange="onDefectReasonChange('+row.id+',this.value)">'+
           '<option value="">── 選擇不良原因 / Select Defect Reason ──</option>'+ 
           '<optgroup label="Z 素材 / 外觀 Material / Appearance">'+options('Z')+'</optgroup>'+ 
           '<optgroup label="Y 加工 / 尺寸 Machining / Dimension">'+options('Y')+'</optgroup>'+ 
         '</select>'+ 
         '<input class="qty-input" type="number" min="0" value="'+esc(row.qty||'')+'" inputmode="numeric" placeholder="數量" oninput="onDefectQtyChange('+row.id+',this.value)" onchange="onDefectQtyChange('+row.id+',this.value)">'+
+        '<button class="defect-delete-btn ripple" onclick="deleteDefectRow('+row.id+')">✕</button>'+ 
       '</div>';
     }).join('');
     STATE.defectRows.forEach(function(row){
@@ -255,6 +271,9 @@
         oldOnDataLoaded(data);
         補英文不良資料();
         setTimeout(function(){清空數量預設(); 重建不良列();},80);
+        setTimeout(function(){
+          if(window.DB && typeof fillStatusPill === 'function') fillStatusPill();
+        },180);
       };
     }
 
@@ -271,7 +290,7 @@
           if(typeof V4資料對接_標準化初始資料_ === 'function') fb = V4資料對接_標準化初始資料_(fb);
           window.onDataLoaded(補照片(fb));
           if(typeof showLoading === 'function') showLoading(false);
-          if(typeof roar === 'function') roar('✅','保底主檔已載入 / Fallback Loaded','GAS 第一次讀取失敗，但 V4 可先操作人員、產品、工站。','success');
+          if(typeof roar === 'function') roar('✅','保底主檔已載入 / Fallback Loaded','GAS 讀取失敗時仍可操作；若要全部資料，請確認 GAS 取得報工初始資料回傳全量主檔。','success');
         }else{
           if(typeof showLoading === 'function') showLoading(false);
           if(typeof roar === 'function') roar('❌','讀取失敗 / Load Failed', reason, 'error');
@@ -283,17 +302,29 @@
     if(typeof oldSelectProduct === 'function'){
       window.selectProduct = function(key){
         oldSelectProduct(key);
-        setTimeout(建立工站快選,60);
-        setTimeout(建立工站快選,250);
+        setTimeout(建立工站快選,40);
+        setTimeout(建立工站快選,220);
+        setTimeout(function(){ var b=$('v4StationQuickPicker'); if(b) { try{b.scrollIntoView({behavior:'smooth', block:'start'});}catch(e){} } },320);
       };
     }
 
     window.addDefectRow = function(){
       if(!window.STATE) return;
-      window.defectRowIdCounter = (window.defectRowIdCounter || 0) + 1;
-      STATE.defectRows.push({ id: window.defectRowIdCounter, category:'', code:'', name:'', enName:'', qty:'' });
+      defectId += 1;
+      STATE.defectRows = STATE.defectRows || [];
+      STATE.defectRows.push({ id:defectId, category:'', code:'', name:'', enName:'', qty:'' });
       重建不良列();
     };
+
+    var oldDeleteDefectRow = window.deleteDefectRow;
+    window.deleteDefectRow = function(id){
+      if(!window.STATE) return;
+      STATE.defectRows = (STATE.defectRows || []).filter(function(r){return r.id !== id;});
+      重建不良列();
+      if(typeof updatePreview === 'function') updatePreview();
+      if(typeof updateConfirmSummary === 'function') updateConfirmSummary();
+    };
+    if(typeof oldDeleteDefectRow !== 'function') window.deleteDefectRow = window.deleteDefectRow;
 
     window.renderDefectRows = 重建不良列;
 
@@ -307,7 +338,7 @@
       var found = list.find(function(x){return x.代碼 === row.code;});
       row.name = found ? (found.名稱 || '') : '';
       row.enName = found ? (found.英文名稱 || 英文不良[row.code] || '') : (英文不良[row.code] || '');
-      強制分配不超過不良數(id);
+      強制分配不超過不良數();
       if(typeof updateDefectSummaryDisplay === 'function') updateDefectSummaryDisplay();
       if(typeof updatePreview === 'function') updatePreview();
       if(typeof updateConfirmSummary === 'function') updateConfirmSummary();
@@ -343,6 +374,27 @@
     };
 
     window.calcQty = 重算數量顯示;
+
+    var oldValidateReport = window.validateReport;
+    if(typeof oldValidateReport === 'function'){
+      window.validateReport = function(d){
+        強制分配不超過不良數();
+        補足不良分配到不良數();
+        d = (typeof buildReportData === 'function') ? buildReportData() : d;
+        return oldValidateReport(d);
+      };
+    }
+
+    var oldBuildReportData = window.buildReportData;
+    if(typeof oldBuildReportData === 'function'){
+      window.buildReportData = function(){
+        var d = oldBuildReportData();
+        d.不良行清單 = (STATE.defectRows || []).filter(function(r){return r.code && Number(r.qty || 0) > 0;}).map(function(r){return {
+          category:r.category, code:r.code, name:r.name, enName:r.enName || 英文不良[r.code] || '', qty:Number(r.qty || 0)
+        };});
+        return d;
+      };
+    }
 
     var oldReset = window.resetAfterSubmit;
     if(typeof oldReset === 'function'){
