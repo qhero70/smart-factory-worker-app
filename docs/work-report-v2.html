@@ -12,12 +12,12 @@ html,body{margin:0;min-height:100vh;background:#05050a;color:#e5f7ff;font-family
 <body>
 <div class="boot">
   <h1>🏭 製造部・報工作業 V4</h1>
-  <div>正在清除舊 Service Worker / Cache，切換到 <b>V4 LIVE 穩定正式入口</b>...</div>
-  <div class="err">若沒有自動跳轉，請點：<br><a href="./work-report-v4-live.html?v=432&swreset=1">開啟 V4 LIVE 穩定正式入口</a></div>
+  <div>正在清除舊 Service Worker / Cache，切換到 <b>V4 離線穩定正式版</b>...</div>
+  <div class="err">若沒有自動跳轉，請點：<br><a href="./work-report-v4-offline-stable.html?v=433&nosw=1">開啟 V4 離線穩定正式版</a></div>
 </div>
 <script>
 (async function(){
-  var target='./work-report-v4-live.html?v=432&from=v2&swreset=1&ts='+Date.now();
+  var target='./work-report-v4-offline-stable.html?v=433&from=v2&nosw=1&ts='+Date.now();
   try{
     if('serviceWorker' in navigator){
       var regs=await navigator.serviceWorker.getRegistrations();
