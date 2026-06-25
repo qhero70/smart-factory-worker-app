@@ -1,8 +1,9 @@
-window.PWA_CONFIG={
+window.PWA_CONFIG=window.PWA_CONFIG||{};
+Object.assign(window.PWA_CONFIG,{
   GAS_WEB_APP_URL:'https://script.google.com/macros/s/AKfycbwOi-xjKoMD9jVq4HrHBvh7k1DCn70lAPAJiqaWJhvH70PbuRo4ciopCjYcytIalaW4/exec',
   APP_NAME:'NEXUS OS · 工業 5.0 智慧製造矩陣',
   APP_SHORT_NAME:'化新精密',
-  VERSION:'v4.0.0_報工作業V4_沿用V3派班邏輯',
+  VERSION:'v4.2.8_報工作業V4_正式URL保底_UX補強',
   SPREADSHEET_ID:'1JA0-kxVO6x3NbCgjmUurkwd8lffolj0pbInissLl8BQ',
   API_TIMEOUT_MS:12000,
   API_ACTIONS:{
@@ -17,10 +18,10 @@ window.PWA_CONFIG={
     人員註冊38_7_查詢工號:'人員註冊38_7_查詢工號',人員註冊38_7_綁定:'人員註冊38_7_綁定',測試_人員註冊38_7:'測試_人員註冊38_7',
     測試_主線優化38_7:'測試_主線優化38_7',測試_今日派班報工回寫38_7:'測試_今日派班報工回寫38_7',測試_自動排程防重38_7:'測試_自動排程防重38_7',測試_工單扣帳38_7:'測試_工單扣帳38_7',測試_清洗錯誤追蹤38_7:'測試_清洗錯誤追蹤38_7'
   }
-};
+});
 (function(){
   'use strict';
-  var v='271';
+  var v='428';
   var path=(location.pathname||'').toLowerCase();
   var title=(document.title||'').toLowerCase();
   var isV4Report=/work-report-v4\.html$/.test(path) || (/work-report-v2\.html$/.test(path) && /v4/.test(title));
@@ -39,6 +40,10 @@ window.PWA_CONFIG={
     load('./work-report-v2-task-prefill-253.js?v='+v,'今日任務帶入報工253');
     load('./work-report-v2-dispatch-card-261.js?v='+v,'報工派班任務卡261_顯示用');
     load('./work-report-v2-dispatch-submit-262.js?v='+v,'報工派班送出合併262');
+  }
+  if(isV4Report){
+    load('./work-report-v4-early-fetch-guard.js?v='+v,'報工V4初始讀取保底418');
+    load('./work-report-v4-ux-427.js?v='+v,'報工V4正式UX補強427');
   }
   if(isApp){
     load('./nexus-quick-module-258.js?v='+v,'NEXUS主線快速模組258');
