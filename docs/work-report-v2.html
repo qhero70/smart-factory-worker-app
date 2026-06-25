@@ -12,15 +12,74 @@ html,body{margin:0;min-height:100vh;background:#05050a;color:#e5f7ff;font-family
 <script>
 (function(){
   'use strict';
-  var ver='422';
+  var ver='423';
   var target='./work-report-v4.html?v='+ver;
+
+  function patchReloadData(html){
+    var replacement = `function reloadData() {
+  showLoading(true);
+  callBackend('取得報工作業v2初始資料', null, onDataLoaded, err => {
+    const reason = (err && err.message) ? err.message : String(err || 'Load failed');
+    try {
+      let fb = null;
+      if (window.V4_EARLY_FETCH_GUARD && typeof window.V4_EARLY_FETCH_GUARD.保底資料 === 'function') {
+        fb = window.V4_EARLY_FETCH_GUARD.保底資料(reason);
+      }
+      if (!fb && typeof V4資料對接_建立途程備援_ === 'function') {
+        const routes = V4資料對接_建立途程備援_();
+        fb = {
+          成功: true,
+          success: true,
+          ok: true,
+          fallback: true,
+          版本: 'v4.2.3_runtime_reload_patch',
+          訊息: 'iPhone/Safari 讀取 GAS 初始資料失敗，已使用 V4 內建主檔保底。原因：' + reason,
+          作業日: new Date().toISOString().slice(0,10),
+          人員: [
+            {工號:'fhfi546',姓名:'黃俊偉',部門:'製造部',組別:'製一組',職稱:'作業員',班別:'早班',啟用:'是'},
+            {工號:'fhft606',姓名:'艾爾迪',部門:'製造部',組別:'製一組',職稱:'作業員',班別:'大夜班',啟用:'是'},
+            {工號:'fhft560',姓名:'里查',部門:'製造部',組別:'製一組',職稱:'作業員',班別:'早班',啟用:'是'},
+            {工號:'fhfi562',姓名:'艾德華',部門:'製造部',組別:'製一組',職稱:'作業員',班別:'早班',啟用:'是'},
+            {工號:'fhfi531',姓名:'駱德祥',部門:'製造部',組別:'製一組',職稱:'作業員',班別:'早班',啟用:'是'},
+            {工號:'fhfi573',姓名:'黃嘉欣',部門:'製造部',組別:'製一組',職稱:'工程師',班別:'早班',啟用:'是'},
+            {工號:'fhfg272',姓名:'陳瑞彬',部門:'製造部',組別:'製一組',職稱:'工程師',班別:'早班',啟用:'是'},
+            {工號:'fhfi691',姓名:'石郡浩',部門:'製造部',組別:'製一組',職稱:'助理工程師',班別:'早班',啟用:'是'},
+            {工號:'fhft578',姓名:'莫里',部門:'製造部',組別:'製一組',職稱:'作業員',班別:'早班',啟用:'是'},
+            {工號:'fhft582',姓名:'阿本',部門:'製造部',組別:'製一組',職稱:'作業員',班別:'早班',啟用:'是'}
+          ],
+          報工工站群組: routes,
+          途程工站群組: routes,
+          班別清單: [{名稱:'早班',值:'早班'},{名稱:'中班',值:'中班'},{名稱:'大夜班',值:'大夜班'}],
+          異常類型: ['無異常','支援調度','材質異常','換刀','機台停機','待料','品質確認','其他'],
+          不良原因: {Z:[{代碼:'Z01',名稱:'素材裂縫'},{代碼:'Z02',名稱:'加工砂孔'},{代碼:'Z03',名稱:'外觀刮傷'}],Y:[{代碼:'Y01',名稱:'內徑超差'},{代碼:'Y02',名稱:'外徑超差'},{代碼:'Y09',名稱:'孔位'}]},
+          筆數: {人員:10,報工工站群組:routes.length,產品:routes.length,工站機台關聯:routes.length,照片索引:0,不良代碼:6}
+        };
+      }
+      if (fb) {
+        const normalized = (typeof V4資料對接_標準化初始資料_ === 'function') ? V4資料對接_標準化初始資料_(fb) : fb;
+        onDataLoaded(normalized);
+        showLoading(false);
+        roar('✅', '保底主檔已載入 / Fallback Loaded', 'GAS 第一次讀取失敗，但完整 V4 已可選人員與工件。', 'success');
+        return;
+      }
+    } catch (fallbackError) {
+      console.error('V4 fallback failed', fallbackError);
+    }
+    showLoading(false);
+    roar('❌', '讀取失敗 / Load Failed', reason, 'error');
+  });
+}`;
+    var re = /function reloadData\(\) \{[\s\S]*?\n\}\n\nfunction callBackend/;
+    if (re.test(html)) return html.replace(re, replacement + '\n\nfunction callBackend');
+    return html;
+  }
+
   function inject(html){
+    html = patchReloadData(html);
     var beforeOriginalScript='\n<script src="./pwa-config.js?v='+ver+'"><\\/script>\n<script src="./gas-bridge.js?v='+ver+'"><\\/script>\n<script src="./work-report-v4-early-fetch-guard.js?v='+ver+'"><\\/script>\n';
     var afterOriginalScript='\n<script src="./work-report-v4-pwa-bridge.js?v='+ver+'"><\\/script>\n<script src="./work-report-v4-safari-fix.js?v='+ver+'"><\\/script>\n';
-    var forceScript='\n<script src="./work-report-v4-force-small-420.js?v='+ver+'"><\\/script>\n<script>setTimeout(function(){try{if(typeof reloadData===\'function\')reloadData();}catch(e){}try{if(window.V4_FORCE_SMALL)V4_FORCE_SMALL();}catch(e){}},1800);setTimeout(function(){try{if(window.V4_FORCE_SMALL)V4_FORCE_SMALL();}catch(e){}},4200);<\\/script>\n';
     if(html.indexOf('work-report-v4-early-fetch-guard.js')<0) html=html.replace(/<script/i, beforeOriginalScript+'<script');
     if(html.indexOf('work-report-v4-pwa-bridge.js')<0) html=html.replace(/<\/body>/i, afterOriginalScript+'</body>');
-    html=html.replace(/<\/body>/i, forceScript+'</body>');
     return html;
   }
   fetch(target,{cache:'no-store'})
