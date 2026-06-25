@@ -3,7 +3,7 @@ Object.assign(window.PWA_CONFIG,{
   GAS_WEB_APP_URL:'https://script.google.com/macros/s/AKfycbwOi-xjKoMD9jVq4HrHBvh7k1DCn70lAPAJiqaWJhvH70PbuRo4ciopCjYcytIalaW4/exec',
   APP_NAME:'NEXUS OS · 工業 5.0 智慧製造矩陣',
   APP_SHORT_NAME:'化新精密',
-  VERSION:'v4.3.5_報工作業V4_原版保留_UX優化',
+  VERSION:'v4.3.6_報工作業V4_正式主庫直讀資料橋',
   SPREADSHEET_ID:'1JA0-kxVO6x3NbCgjmUurkwd8lffolj0pbInissLl8BQ',
   API_TIMEOUT_MS:12000,
   API_ACTIONS:{
@@ -21,7 +21,7 @@ Object.assign(window.PWA_CONFIG,{
 });
 (function(){
   'use strict';
-  var v='435';
+  var v='436';
   var path=(location.pathname||'').toLowerCase();
   var title=(document.title||'').toLowerCase();
   var isV4Report=/work-report-v4\.html$/.test(path) || (/work-report-v2\.html$/.test(path) && /v4/.test(title));
@@ -42,8 +42,10 @@ Object.assign(window.PWA_CONFIG,{
     load('./work-report-v2-dispatch-submit-262.js?v='+v,'報工派班送出合併262');
   }
   if(isV4Report){
+    // 必須先載入：讓 V4 初始資料優先從正式 Google Sheets 主庫直讀，GAS Load failed 時不再只剩少量保底資料。
+    load('./work-report-v4-sheets-direct-436.js?v='+v,'報工V4正式主庫直讀436');
     load('./work-report-v4-early-fetch-guard.js?v='+v,'報工V4初始讀取保底418');
-    load('./work-report-v4-ux-427.js?v='+v,'報工V4正式UX補強435');
+    load('./work-report-v4-ux-427.js?v='+v,'報工V4正式UX補強436');
   }
   if(isApp){
     load('./nexus-quick-module-258.js?v='+v,'NEXUS主線快速模組258');
