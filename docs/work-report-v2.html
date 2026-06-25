@@ -12,23 +12,27 @@ html,body{margin:0;min-height:100vh;background:#05050a;color:#e5f7ff;font-family
 <script>
 (function(){
   'use strict';
-  var ver='428';
+  var ver='429';
+  var GAS='https://script.google.com/macros/s/AKfycbwOi-xjKoMD9jVq4HrHBvh7k1DCn70lAPAJiqaWJhvH70PbuRo4ciopCjYcytIalaW4/exec';
   var target='./work-report-v4.html?v='+ver;
 
   function inject(html){
-    var config='\n<script>window.PWA_CONFIG=Object.assign(window.PWA_CONFIG||{},{GAS_WEB_APP_URL:"https://script.google.com/macros/s/AKfycbwOi-xjKoMD9jVq4HrHBvh7k1DCn70lAPAJiqaWJhvH70PbuRo4ciopCjYcytIalaW4/exec",API_TIMEOUT_MS:12000});<\\/script>\n';
+    var config='\n<script>window.PWA_CONFIG=Object.assign(window.PWA_CONFIG||{},{GAS_WEB_APP_URL:"'+GAS+'",API_TIMEOUT_MS:12000,VERSION:"v4.2.9_完整V4入口_強制橋接"});<\\/script>\n';
+    var pwa='\n<script src="./pwa-config.js?v='+ver+'"><\\/script>\n';
+    var bridge='\n<script src="./gas-bridge.js?v='+ver+'"><\\/script>\n';
     var early='\n<script src="./work-report-v4-early-fetch-guard.js?v='+ver+'"><\\/script>\n';
     var ux='\n<script src="./work-report-v4-ux-427.js?v='+ver+'"><\\/script>\n';
+    var bundle=config+pwa+bridge+early;
 
     html = html.replace(/\.\/pwa-config\.js\?v=\d+/g,'./pwa-config.js?v='+ver);
     html = html.replace(/\.\/gas-bridge\.js\?v=\d+/g,'./gas-bridge.js?v='+ver);
 
-    if(html.indexOf('window.PWA_CONFIG=Object.assign')<0){
-      html = html.replace(/<script\s+src=["']\.\/pwa-config\.js[^>]*><\/script>/i, config + '$&');
-    }
-    if(html.indexOf('work-report-v4-early-fetch-guard.js')<0){
-      html = html.replace(/<script\s+src=["']\.\/pwa-config\.js[^>]*><\/script>/i, early + '$&');
-      if(html.indexOf('work-report-v4-early-fetch-guard.js')<0) html = html.replace(/<script/i, early + '<script');
+    if(html.indexOf('work-report-v4-bridge-bundle-429')<0){
+      bundle='\n<!-- work-report-v4-bridge-bundle-429 -->\n'+bundle;
+      html = html.replace(/<script>\s*['"]use strict['"];?/i, bundle + '$&');
+      if(html.indexOf('work-report-v4-bridge-bundle-429')<0){
+        html = html.replace(/<\/head>/i, bundle + '</head>');
+      }
     }
     if(html.indexOf('work-report-v4-ux-427.js')<0){
       html = html.replace(/<\/body>/i, ux + '</body>');
