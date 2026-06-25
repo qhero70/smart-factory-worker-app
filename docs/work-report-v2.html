@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>報工作業 V4｜正式入口</title>
+<title>報工作業 V4｜原完整版本入口</title>
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <style>
@@ -12,12 +12,12 @@ html,body{margin:0;min-height:100vh;background:#05050a;color:#e5f7ff;font-family
 <body>
 <div class="boot">
   <h1>🏭 製造部・報工作業 V4</h1>
-  <div>正在清除舊 Service Worker / Cache，切換到 <b>V4 離線穩定正式版</b>...</div>
-  <div class="err">若沒有自動跳轉，請點：<br><a href="./work-report-v4-offline-stable.html?v=433&nosw=1">開啟 V4 離線穩定正式版</a></div>
+  <div>正在回到 <b>原完整 V4 報工版本</b>，不使用離線簡化頁...</div>
+  <div class="err">若沒有自動跳轉，請點：<br><a href="./work-report-v4.html?v=434&restore=original">開啟原完整 V4 報工版本</a></div>
 </div>
 <script>
 (async function(){
-  var target='./work-report-v4-offline-stable.html?v=433&from=v2&nosw=1&ts='+Date.now();
+  var target='./work-report-v4.html?v=434&restore=original&ts='+Date.now();
   try{
     if('serviceWorker' in navigator){
       var regs=await navigator.serviceWorker.getRegistrations();
