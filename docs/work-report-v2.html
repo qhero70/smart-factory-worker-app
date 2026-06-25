@@ -12,7 +12,7 @@ html,body{margin:0;min-height:100vh;background:#05050a;color:#e5f7ff;font-family
 <script>
 (function(){
   'use strict';
-  var ver='423';
+  var ver='424';
   var target='./work-report-v4.html?v='+ver;
 
   function patchReloadData(html){
@@ -22,44 +22,101 @@ html,body{margin:0;min-height:100vh;background:#05050a;color:#e5f7ff;font-family
     const reason = (err && err.message) ? err.message : String(err || 'Load failed');
     try {
       let fb = null;
+      const 人員照片 = {
+        fhfi546:'https://drive.google.com/thumbnail?id=1jW_-zSDXCHcJBe66dviCl063WQw8V1Fl&sz=w500',
+        fhft606:'https://drive.google.com/thumbnail?id=1R2VU1fDHlVp9La2hg1dIfxIxYnt2Rbed&sz=w500',
+        fhft560:'https://drive.google.com/thumbnail?id=1FRPcRXVXZf2McWcXoqFgbIuKu34eN3Sg&sz=w500',
+        fhft562:'https://drive.google.com/thumbnail?id=1yzBgcJU9eIBFwivtik9KomZwXHkFU5qL&sz=w500',
+        fhfi562:'https://drive.google.com/thumbnail?id=1x1YIk3OSYiHtrfbHzbGFFuhAboXghr-_&sz=w500',
+        fhfi531:'https://drive.google.com/thumbnail?id=1qcATMZvaVAYdqN1BjVbytcYIHmq3YmBD&sz=w500',
+        fhfi573:'https://drive.google.com/thumbnail?id=1L-ip7mulIe43qICfwbtP1gzJrJTrndYO&sz=w500',
+        fhfg272:'https://drive.google.com/thumbnail?id=1L-ip7mulIe43qICfwbtP1gzJrJTrndYO&sz=w500',
+        fhfi691:'https://drive.google.com/thumbnail?id=1B8r4Yr52YSZYonkaMPGbbn6hO6_noU7Y&sz=w500',
+        fhft578:'https://drive.google.com/thumbnail?id=1S91mQs3gX1J3oIvy2AkQhyTo5MZUDnX3&sz=w500',
+        fhft582:'https://drive.google.com/thumbnail?id=1xMhtXQ3Sr_wZtfQJ_hlFsSIHA8fDdhcg&sz=w500'
+      };
+      const 產品照片 = {
+        A503203008:'https://drive.google.com/thumbnail?id=1I6O1zGcDkqxGo4lP65OI0o4GnlXBV9_B&sz=w900',
+        A401800000:'https://drive.google.com/thumbnail?id=12JgM6j8_KipUKdz_nhXIV_rbfYJ21hCC&sz=w900',
+        A402301020:'https://drive.google.com/thumbnail?id=1ZEqwxEZmZuu5ZNv-pCvO_8nf7mM0tMjw&sz=w900',
+        A402300020:'https://drive.google.com/thumbnail?id=1l0BaMP7WyiEi9s1XjyzaZHJTXFd2KVJ5&sz=w900',
+        Z907500010:'https://drive.google.com/thumbnail?id=17rcFPqGjO0WN1m4SrFddMoeXuMqLZiS9&sz=w900',
+        Z005300000:'https://drive.google.com/thumbnail?id=1H1HaUy0gDyW6Cv7oyp4z0xuBgI452Yqq&sz=w900',
+        Z004400000:'https://drive.google.com/thumbnail?id=1anfvWzMKyBiBnIYpJEm4XIzYJ3S1IHBm&sz=w900',
+        Z907403008:'https://drive.google.com/thumbnail?id=1je6tB0_pnYDxxoXaawlt_1U-H4_tkJai&sz=w900'
+      };
+      const 機台照片 = {
+        77:'https://drive.google.com/thumbnail?id=1Q6V44wBAFkXcUXbfX2Xk-6g5lPmSgf0F&sz=w900',
+        1072:'https://drive.google.com/thumbnail?id=1tswECGJpdkfjHzHfaXy79bBGhMEDrLZB&sz=w900',
+        390:'https://drive.google.com/thumbnail?id=1fbQZs1DCfLNz64ENo_TwOKndpTdg1o9k&sz=w900',
+        397:'https://drive.google.com/thumbnail?id=1VVjF1PZ6XOIBeTiLLRWa6eJTB1VNagFT&sz=w900',
+        424:'https://drive.google.com/thumbnail?id=1d4onFkHXAKSBGoZlx-dwbREgvl0D4cJF&sz=w900',
+        1061:'https://drive.google.com/thumbnail?id=1fwkelwLkr4ogG0wbbBzutBkIIvMT0Fy6&sz=w900',
+        129:'https://drive.google.com/thumbnail?id=1r7gX_ZBKSAigsnBC1nJ648mzm2eIArZB&sz=w900',
+        447:'https://drive.google.com/thumbnail?id=13Eq4rl5V8jgO1wKCLr1EsDt3qnu49mlN&sz=w900',
+        334:'https://drive.google.com/thumbnail?id=1AVgs69xyXSLuWPM29g9fKSMcQDRomchL&sz=w900',
+        1071:'https://drive.google.com/thumbnail?id=1rknzLeQ69kfKRIjShWMWm-V7VSQ26CQW&sz=w900',
+        387:'https://drive.google.com/thumbnail?id=1YGs9Z3k2LCVJ1sEdNVTr27r2YpXm69NY&sz=w900',
+        204:'https://drive.google.com/thumbnail?id=1DApcuqdreyehEEHsAJaB45Qp8aPrRD69&sz=w900'
+      };
+      const 補人照 = p => Object.assign({}, p, {照片網址:人員照片[p.工號]||p.照片網址||'', 縮圖網址:人員照片[p.工號]||p.縮圖網址||''});
+      const 補途程照 = routes => (routes||[]).map(g => {
+        g = Object.assign({}, g);
+        const pu = 產品照片[g.產品編號] || g.產品縮圖網址 || g.產品照片網址 || '';
+        g.產品照片網址 = pu; g.產品縮圖網址 = pu;
+        g.機台清單 = (g.機台清單||[]).map(m => {
+          m = Object.assign({}, m||{});
+          const id = String(m.機台編號||m.主機台||'').trim();
+          const mu = 機台照片[id] || m.縮圖網址 || m.照片網址 || '';
+          m.照片網址 = mu; m.縮圖網址 = mu;
+          return m;
+        });
+        return g;
+      });
       if (window.V4_EARLY_FETCH_GUARD && typeof window.V4_EARLY_FETCH_GUARD.保底資料 === 'function') {
         fb = window.V4_EARLY_FETCH_GUARD.保底資料(reason);
+        if (fb) {
+          fb.人員 = (fb.人員||[]).map(補人照);
+          fb.報工工站群組 = 補途程照(fb.報工工站群組||fb.途程工站群組||[]);
+          fb.途程工站群組 = fb.報工工站群組;
+        }
       }
       if (!fb && typeof V4資料對接_建立途程備援_ === 'function') {
-        const routes = V4資料對接_建立途程備援_();
+        const routes = 補途程照(V4資料對接_建立途程備援_());
         fb = {
           成功: true,
           success: true,
           ok: true,
           fallback: true,
-          版本: 'v4.2.3_runtime_reload_patch',
+          版本: 'v4.2.4_runtime_reload_patch_photo',
           訊息: 'iPhone/Safari 讀取 GAS 初始資料失敗，已使用 V4 內建主檔保底。原因：' + reason,
           作業日: new Date().toISOString().slice(0,10),
           人員: [
             {工號:'fhfi546',姓名:'黃俊偉',部門:'製造部',組別:'製一組',職稱:'作業員',班別:'早班',啟用:'是'},
             {工號:'fhft606',姓名:'艾爾迪',部門:'製造部',組別:'製一組',職稱:'作業員',班別:'大夜班',啟用:'是'},
             {工號:'fhft560',姓名:'里查',部門:'製造部',組別:'製一組',職稱:'作業員',班別:'早班',啟用:'是'},
-            {工號:'fhfi562',姓名:'艾德華',部門:'製造部',組別:'製一組',職稱:'作業員',班別:'早班',啟用:'是'},
+            {工號:'fhft562',姓名:'艾德華',部門:'製造部',組別:'製一組',職稱:'作業員',班別:'早班',啟用:'是'},
+            {工號:'fhfi562',姓名:'黃秀惠',部門:'製造部',組別:'製一組',職稱:'作業員',班別:'早班',啟用:'是'},
             {工號:'fhfi531',姓名:'駱德祥',部門:'製造部',組別:'製一組',職稱:'作業員',班別:'早班',啟用:'是'},
             {工號:'fhfi573',姓名:'黃嘉欣',部門:'製造部',組別:'製一組',職稱:'工程師',班別:'早班',啟用:'是'},
             {工號:'fhfg272',姓名:'陳瑞彬',部門:'製造部',組別:'製一組',職稱:'工程師',班別:'早班',啟用:'是'},
             {工號:'fhfi691',姓名:'石郡浩',部門:'製造部',組別:'製一組',職稱:'助理工程師',班別:'早班',啟用:'是'},
             {工號:'fhft578',姓名:'莫里',部門:'製造部',組別:'製一組',職稱:'作業員',班別:'早班',啟用:'是'},
             {工號:'fhft582',姓名:'阿本',部門:'製造部',組別:'製一組',職稱:'作業員',班別:'早班',啟用:'是'}
-          ],
+          ].map(補人照),
           報工工站群組: routes,
           途程工站群組: routes,
           班別清單: [{名稱:'早班',值:'早班'},{名稱:'中班',值:'中班'},{名稱:'大夜班',值:'大夜班'}],
           異常類型: ['無異常','支援調度','材質異常','換刀','機台停機','待料','品質確認','其他'],
           不良原因: {Z:[{代碼:'Z01',名稱:'素材裂縫'},{代碼:'Z02',名稱:'加工砂孔'},{代碼:'Z03',名稱:'外觀刮傷'}],Y:[{代碼:'Y01',名稱:'內徑超差'},{代碼:'Y02',名稱:'外徑超差'},{代碼:'Y09',名稱:'孔位'}]},
-          筆數: {人員:10,報工工站群組:routes.length,產品:routes.length,工站機台關聯:routes.length,照片索引:0,不良代碼:6}
+          筆數: {人員:11,報工工站群組:routes.length,產品:routes.length,工站機台關聯:routes.length,照片索引:32,不良代碼:6}
         };
       }
       if (fb) {
         const normalized = (typeof V4資料對接_標準化初始資料_ === 'function') ? V4資料對接_標準化初始資料_(fb) : fb;
         onDataLoaded(normalized);
         showLoading(false);
-        roar('✅', '保底主檔已載入 / Fallback Loaded', 'GAS 第一次讀取失敗，但完整 V4 已可選人員與工件。', 'success');
+        roar('✅', '保底主檔已載入 / Fallback Loaded', 'GAS 第一次讀取失敗；已補入人員、產品與機台照片索引。', 'success');
         return;
       }
     } catch (fallbackError) {
