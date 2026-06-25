@@ -12,13 +12,15 @@ html,body{margin:0;min-height:100vh;background:#05050a;color:#e5f7ff;font-family
 <script>
 (function(){
   'use strict';
-  var ver='421';
+  var ver='422';
   var target='./work-report-v4.html?v='+ver;
   function inject(html){
     var beforeOriginalScript='\n<script src="./pwa-config.js?v='+ver+'"><\\/script>\n<script src="./gas-bridge.js?v='+ver+'"><\\/script>\n<script src="./work-report-v4-early-fetch-guard.js?v='+ver+'"><\\/script>\n';
-    var afterOriginalScript='\n<script src="./work-report-v4-pwa-bridge.js?v='+ver+'"><\\/script>\n<script src="./work-report-v4-safari-fix.js?v='+ver+'"><\\/script>\n<script src="./work-report-v4-force-small-420.js?v='+ver+'"><\\/script>\n<script>setTimeout(function(){try{if(typeof reloadData===\'function\')reloadData();}catch(e){}},1800);<\\/script>\n';
+    var afterOriginalScript='\n<script src="./work-report-v4-pwa-bridge.js?v='+ver+'"><\\/script>\n<script src="./work-report-v4-safari-fix.js?v='+ver+'"><\\/script>\n';
+    var forceScript='\n<script src="./work-report-v4-force-small-420.js?v='+ver+'"><\\/script>\n<script>setTimeout(function(){try{if(typeof reloadData===\'function\')reloadData();}catch(e){}try{if(window.V4_FORCE_SMALL)V4_FORCE_SMALL();}catch(e){}},1800);setTimeout(function(){try{if(window.V4_FORCE_SMALL)V4_FORCE_SMALL();}catch(e){}},4200);<\\/script>\n';
     if(html.indexOf('work-report-v4-early-fetch-guard.js')<0) html=html.replace(/<script/i, beforeOriginalScript+'<script');
     if(html.indexOf('work-report-v4-pwa-bridge.js')<0) html=html.replace(/<\/body>/i, afterOriginalScript+'</body>');
+    html=html.replace(/<\/body>/i, forceScript+'</body>');
     return html;
   }
   fetch(target,{cache:'no-store'})
