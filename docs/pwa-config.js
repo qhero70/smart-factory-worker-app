@@ -3,7 +3,7 @@ Object.assign(window.PWA_CONFIG,{
   GAS_WEB_APP_URL:'https://script.google.com/macros/s/AKfycbwOi-xjKoMD9jVq4HrHBvh7k1DCn70lAPAJiqaWJhvH70PbuRo4ciopCjYcytIalaW4/exec',
   APP_NAME:'NEXUS OS · 工業 5.0 智慧製造矩陣',
   APP_SHORT_NAME:'化新精密',
-  VERSION:'v4.3.7_報工作業V4_正式主庫直讀資料橋_啟動頁修正',
+  VERSION:'v4.3.9_報工作業V4_正式主庫直讀_移除13人保底覆蓋',
   SPREADSHEET_ID:'1JA0-kxVO6x3NbCgjmUurkwd8lffolj0pbInissLl8BQ',
   API_TIMEOUT_MS:12000,
   API_ACTIONS:{
@@ -21,7 +21,7 @@ Object.assign(window.PWA_CONFIG,{
 });
 (function(){
   'use strict';
-  var v='437';
+  var v='439';
   var path=(location.pathname||'').toLowerCase();
   var title=(document.title||'').toLowerCase();
   var isV4Report=/work-report-v4(?:-\d+)?\.html$/.test(path) || (/work-report-v2\.html$/.test(path) && /v4/.test(title));
@@ -42,10 +42,9 @@ Object.assign(window.PWA_CONFIG,{
     load('./work-report-v2-dispatch-submit-262.js?v='+v,'報工派班送出合併262');
   }
   if(isV4Report){
-    // 必須先載入：讓 V4 初始資料優先從正式 Google Sheets 主庫直讀，GAS Load failed 時不再只剩少量保底資料。
-    load('./work-report-v4-sheets-direct-436.js?v='+v,'報工V4正式主庫直讀436');
-    load('./work-report-v4-early-fetch-guard.js?v='+v,'報工V4初始讀取保底418');
-    load('./work-report-v4-ux-427.js?v='+v,'報工V4正式UX補強437');
+    // 正式版只允許正式主庫直讀橋接初始資料；不再載入 13 人 / 16 工站保底覆蓋檔。
+    load('./work-report-v4-sheets-direct-436.js?v='+v,'報工V4正式主庫直讀439');
+    load('./work-report-v4-ux-427.js?v='+v,'報工V4正式UX補強439');
   }
   if(isApp){
     load('./nexus-quick-module-258.js?v='+v,'NEXUS主線快速模組258');
