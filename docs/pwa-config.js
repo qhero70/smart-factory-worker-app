@@ -3,7 +3,7 @@ Object.assign(window.PWA_CONFIG,{
   GAS_WEB_APP_URL:'https://script.google.com/macros/s/AKfycbwOi-xjKoMD9jVq4HrHBvh7k1DCn70lAPAJiqaWJhvH70PbuRo4ciopCjYcytIalaW4/exec',
   APP_NAME:'NEXUS OS · 工業 5.0 智慧製造矩陣',
   APP_SHORT_NAME:'化新精密',
-  VERSION:'v4.5.1_報工作業V4_產品工站最終可用修復',
+  VERSION:'v4.5.3_報工作業V4_後置工站修復',
   SPREADSHEET_ID:'1JA0-kxVO6x3NbCgjmUurkwd8lffolj0pbInissLl8BQ',
   API_TIMEOUT_MS:12000,
   API_ACTIONS:{
@@ -21,7 +21,7 @@ Object.assign(window.PWA_CONFIG,{
 });
 (function(){
   'use strict';
-  var v='451';
+  var v='453';
   var path=(location.pathname||'').toLowerCase();
   var title=(document.title||'').toLowerCase();
   var isV4Report=/work-report-v4(?:-\d+)?\.html$/.test(path) || (/work-report-v2\.html$/.test(path) && /v4/.test(title));
@@ -40,13 +40,8 @@ Object.assign(window.PWA_CONFIG,{
     load('./work-report-v2-dispatch-card-261.js?v='+v,'報工派班任務卡261_顯示用');
     load('./work-report-v2-dispatch-submit-262.js?v='+v,'報工派班送出合併262');
   }
-  if(isV4Report){
-    load('./work-report-v4-sheets-direct-442.js?v='+v,'報工V4正式主庫直讀451');
-    load('./work-report-v4-force-formal-440.js?v='+v,'報工V4強制正式主庫接管451');
-    load('./work-report-v4-ux-427.js?v='+v,'報工V4正式UX補強451');
-    load('./work-report-v4-final-441.js?v='+v,'報工V4正式封口修復451');
-    load('./work-report-v4-product-station-final-451.js?v='+v,'報工V4產品工站最終可用修復451');
-  }
+  // V4 修復必須在原始 work-report-v4.html 內建 JS 後面載入，不能在 pwa-config 前置自動載入，否則會攔截產品卡點擊。
+  if(isV4Report){ return; }
   if(isApp){
     load('./nexus-quick-module-258.js?v='+v,'NEXUS主線快速模組258');
     load('./nexus-mainline-get-shim-259.js?v='+v,'NEXUS主線GET覆寫259');
