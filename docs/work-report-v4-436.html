@@ -3,50 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>製一組 報工表單 V4｜正式主庫直讀啟動</title>
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
-<style>
-html,body{margin:0;min-height:100vh;background:#05050a;color:#e5f7ff;font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC','Microsoft JhengHei',system-ui,sans-serif}.boot{padding:28px;line-height:1.8}.boot h1{margin:0 0 8px;color:#c8f7ff}.bar{height:8px;border-radius:999px;background:linear-gradient(90deg,#22c55e,#06b6d4,#3b82f6);animation:p 1.2s linear infinite;background-size:200% 100%;margin-top:18px}@keyframes p{to{background-position:200% 0}}.err{color:#fecdd3;background:rgba(251,113,133,.12);border:1px solid rgba(251,113,133,.45);border-radius:16px;padding:16px;margin-top:16px;white-space:pre-wrap}.ok{color:#bbf7d0}.small{opacity:.72;font-size:13px}</style>
+<meta http-equiv="refresh" content="0;url=./work-report-v4.html?v=437&sheets=direct&reset=1">
+<title>製一組 報工表單 V4｜轉到正式主庫直讀版</title>
+<style>html,body{margin:0;min-height:100vh;background:#05050a;color:#e5f7ff;font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC','Microsoft JhengHei',system-ui,sans-serif}.boot{padding:28px;line-height:1.8}.boot h1{margin:0 0 8px;color:#c8f7ff}.boot a{color:#22d3ee;font-weight:900}.box{border:1px solid rgba(34,211,238,.35);border-radius:16px;padding:16px;background:rgba(34,211,238,.08)}</style>
 </head>
 <body>
-<div class="boot" id="boot">
+<div class="boot">
   <h1>🏭 製一組 報工表單 V4</h1>
-  <div class="ok">正在啟動正式主庫直讀版，不改原 V4 HTML / CSS / JS。</div>
-  <div class="small">會先讀取原完整 V4，再強制改用 pwa-config v436 與正式 Google Sheets 直讀資料橋。</div>
-  <div class="bar"></div>
+  <div class="box">正在轉到正式主庫直讀版：<br><a href="./work-report-v4.html?v=437&sheets=direct&reset=1">開啟 work-report-v4.html?v=437</a></div>
 </div>
-<script>
-(async function(){
-  const boot=document.getElementById('boot');
-  function fail(msg){boot.innerHTML='<h1>❌ V4 啟動失敗</h1><div class="err">'+String(msg||'未知錯誤')+'</div><div class="small">請重新整理，或改開 work-report-v4.html?v=436。</div>';}
-  try{
-    if('serviceWorker' in navigator){
-      const regs=await navigator.serviceWorker.getRegistrations();
-      await Promise.all(regs.map(r=>r.unregister()));
-    }
-    if(window.caches&&caches.keys){
-      const keys=await caches.keys();
-      await Promise.all(keys.map(k=>caches.delete(k)));
-    }
-  }catch(e){}
-  try{
-    const src='./work-report-v4.html?source=original&ts='+Date.now();
-    let html=await fetch(src,{cache:'no-store'}).then(r=>{
-      if(!r.ok) throw new Error('HTTP '+r.status);
-      return r.text();
-    });
-    html=html.replace(/\.\/pwa-config\.js\?v=\d+/g,'./pwa-config.js?v=436');
-    html=html.replace(/\.\/gas-bridge\.js\?v=\d+/g,'./gas-bridge.js?v=436');
-    html=html.replace('</title>','｜正式主庫直讀</title>');
-    html=html.replace('</body>','<script>window.__V4_BOOT_436__=true;<\/script></body>');
-    document.open();
-    document.write(html);
-    document.close();
-  }catch(e){
-    fail(e&&e.message?e.message:e);
-  }
-})();
-</script>
 </body>
 </html>
