@@ -3,7 +3,7 @@ Object.assign(window.PWA_CONFIG,{
   GAS_WEB_APP_URL:'https://script.google.com/macros/s/AKfycbwOi-xjKoMD9jVq4HrHBvh7k1DCn70lAPAJiqaWJhvH70PbuRo4ciopCjYcytIalaW4/exec',
   APP_NAME:'NEXUS OS · 工業 5.0 智慧製造矩陣',
   APP_SHORT_NAME:'化新精密',
-  VERSION:'v4.4.3_報工作業V4_工站快選與自動捲動',
+  VERSION:'v4.4.4_報工作業V4_工站固定面板',
   SPREADSHEET_ID:'1JA0-kxVO6x3NbCgjmUurkwd8lffolj0pbInissLl8BQ',
   API_TIMEOUT_MS:12000,
   API_ACTIONS:{
@@ -21,7 +21,7 @@ Object.assign(window.PWA_CONFIG,{
 });
 (function(){
   'use strict';
-  var v='443';
+  var v='444';
   var path=(location.pathname||'').toLowerCase();
   var title=(document.title||'').toLowerCase();
   var isV4Report=/work-report-v4(?:-\d+)?\.html$/.test(path) || (/work-report-v2\.html$/.test(path) && /v4/.test(title));
@@ -41,11 +41,12 @@ Object.assign(window.PWA_CONFIG,{
     load('./work-report-v2-dispatch-submit-262.js?v='+v,'報工派班送出合併262');
   }
   if(isV4Report){
-    load('./work-report-v4-sheets-direct-442.js?v='+v,'報工V4正式主庫直讀443');
-    load('./work-report-v4-force-formal-440.js?v='+v,'報工V4強制正式主庫接管443');
-    load('./work-report-v4-ux-427.js?v='+v,'報工V4正式UX補強443');
-    load('./work-report-v4-final-441.js?v='+v,'報工V4正式封口修復443');
-    load('./work-report-v4-station-scroll-443.js?v='+v,'報工V4工站快選捲動修復443');
+    load('./work-report-v4-sheets-direct-442.js?v='+v,'報工V4正式主庫直讀444');
+    load('./work-report-v4-force-formal-440.js?v='+v,'報工V4強制正式主庫接管444');
+    load('./work-report-v4-ux-427.js?v='+v,'報工V4正式UX補強444');
+    load('./work-report-v4-final-441.js?v='+v,'報工V4正式封口修復444');
+    load('./work-report-v4-station-scroll-443.js?v='+v,'報工V4工站快選捲動修復444');
+    load('./work-report-v4-station-dock-444.js?v='+v,'報工V4工站固定面板444');
   }
   if(isApp){
     load('./nexus-quick-module-258.js?v='+v,'NEXUS主線快速模組258');
