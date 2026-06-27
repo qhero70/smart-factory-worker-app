@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>製一組 報工表單 V4｜畫面框架與機台照片修正版 457</title>
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+<meta http-equiv="Pragma" content="no-cache">
+<style>html,body{margin:0;min-height:100vh;background:#05050a;color:#e5f7ff;font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC','Microsoft JhengHei',system-ui,sans-serif}.boot{padding:28px;line-height:1.8}.boot h1{margin:0 0 8px;color:#c8f7ff}.bar{height:8px;border-radius:999px;background:linear-gradient(90deg,#22c55e,#06b6d4,#3b82f6);animation:p 1.2s linear infinite;background-size:200% 100%;margin-top:18px}@keyframes p{to{background-position:200% 0}}.err{color:#fecdd3;background:rgba(251,113,133,.12);border:1px solid rgba(251,113,133,.45);border-radius:16px;padding:16px;margin-top:16px;white-space:pre-wrap}</style>
+</head>
+<body>
+<div class="boot" id="boot"><h1>🏭 製一組 報工表單 V4</h1><div>正在載入原完整 V4；457 修正工站機台補齊、機台照片顯示、提醒語過大與手機框架溢出。</div><div class="bar"></div></div>
+<script>
+(async function(){
+  const boot=document.getElementById('boot');
+  function fail(msg){boot.innerHTML='<h1>❌ V4 啟動失敗</h1><div class="err">'+String(msg||'未知錯誤')+'</div>';}
+  try{
+    let html=await fetch('./work-report-v4.html?raw=1&ts='+Date.now(),{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.text();});
+    const beforeJs='<script src="./pwa-config.js?v=457"><\/script><script src="./gas-bridge.js?v=457"><\/script><script src="./work-report-v4-sheets-direct-442.js?v=457"><\/script><script src="./work-report-v4-machine-list-field-454.js?v=457"><\/script><script src="./work-report-v4-force-formal-440.js?v=457"><\/script><script src="./work-report-v4-ux-427.js?v=457"><\/script><script src="./work-report-v4-final-441.js?v=457"><\/script>';
+    const afterJs='<script src="./work-report-v4-final-after-original-453.js?v=457"><\/script><script src="./work-report-v4-machine-static-map-456.js?v=457"><\/script><script src="./work-report-v4-polish-457.js?v=457"><\/script>';
+    html=html.replace('<!-- ════════════════════════════════════════════════\n  JAVASCRIPT',beforeJs+'\n<!-- ════════════════════════════════════════════════\n  JAVASCRIPT');
+    html=html.replace('</body>',afterJs+'</body>');
+    html=html.replace('</title>','｜畫面框架與機台照片修正版 457</title>');
+    document.open();document.write(html);document.close();
+  }catch(e){fail(e&&e.message?e.message:e);}
+})();
+</script>
+</body>
+</html>
