@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>生產計劃表清洗器 V2.2｜安全解析版</title>
+<meta http-equiv="Cache-Control" content="no-store,no-cache,must-revalidate,max-age=0">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+:root{--藍:#0b74ff;--深:#082f63;--青:#06b6d4;--綠:#16a34a;--黃:#f59e0b;--紅:#dc2626;--底:#eef5ff;--線:#dbeafe;--字:#172033;--淡:#64748b}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at top left,#dff5ff,#eef5ff 42%,#f8fbff);font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC','Microsoft JhengHei',system-ui,sans-serif;color:var(--字);padding-bottom:130px}.頁首{position:sticky;top:0;z-index:10;background:linear-gradient(135deg,var(--深),var(--藍),var(--青));color:#fff;box-shadow:0 10px 28px rgba(11,116,255,.26)}.頁首內,.外框,.底內{max-width:1280px;margin:auto}.頁首內{padding:14px}.品牌{display:flex;gap:10px;align-items:center}.標誌{width:46px;height:46px;border-radius:16px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:25px}h1{font-size:20px;margin:0;font-weight:1000}.副標{font-size:12px;opacity:.9}.狀態{margin-top:10px;border:1px solid rgba(255,255,255,.24);background:rgba(0,0,0,.22);border-radius:999px;padding:8px 12px;font-size:12px;font-weight:900;white-space:normal}.外框{padding:14px}.卡{background:rgba(255,255,255,.92);border:1px solid rgba(255,255,255,.85);border-radius:22px;padding:15px;margin:12px 0;box-shadow:0 12px 32px rgba(15,23,42,.1)}.導引{background:linear-gradient(135deg,#fff7d8,#fff);border-color:#fde68a}.導引 h2,.卡 h2{font-size:17px;margin:0 0 8px;font-weight:1000}.導引 p{margin:5px 0;color:#76520a;line-height:1.6;font-size:13px}.上傳{border:2px dashed #7dd3fc;background:#f0f9ff;border-radius:20px;padding:16px}.主鈕,.鈕{border:none;border-radius:14px;padding:11px 13px;font-weight:1000;cursor:pointer}.主鈕{background:linear-gradient(135deg,var(--藍),var(--青));color:#fff}.鈕{background:#e8f0ff;color:#0b3a75}.工具{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.工具 button.active{background:var(--藍);color:#fff}.輸入,select,input[type=file]{border:1px solid var(--線);border-radius:12px;padding:10px;background:#fff;font-weight:800;max-width:100%}.小字{font-size:12px;color:var(--淡);line-height:1.5}.進度{background:#071225;color:#e0f2fe;border-radius:18px;padding:12px;white-space:pre-wrap;line-height:1.55;font-size:13px}.錯{background:#fff1f2;color:#991b1b;border:1px solid #fecdd3;border-radius:16px;padding:12px;white-space:pre-wrap;line-height:1.55}.好{background:#ecfdf5;color:#166534;border:1px solid #bbf7d0;border-radius:16px;padding:12px;white-space:pre-wrap}.指標{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}.指標卡{background:#fff;border:1px solid var(--線);border-radius:18px;padding:12px}.指標名{font-size:12px;color:#64748b;font-weight:900}.指標值{font-size:23px;font-weight:1000;margin-top:4px;color:#0f2f5d}.表外{overflow:auto;max-height:64vh;border:1px solid var(--線);border-radius:18px;background:#fff}.表{border-collapse:collapse;width:100%;font-size:12px;min-width:1080px}.表 th{position:sticky;top:0;background:#0b3a75;color:#fff;padding:9px;white-space:nowrap}.表 td{border-bottom:1px solid #e5edf7;padding:7px 9px;vertical-align:top}.膠{display:inline-flex;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:1000;white-space:nowrap}.綠{background:#dcfce7;color:#166534}.黃{background:#fef3c7;color:#92400e}.紅{background:#fee2e2;color:#991b1b}.藍{background:#dbeafe;color:#1d4ed8}.白{background:#f8fafc;color:#64748b;border:1px solid #cbd5e1}.摘要{white-space:pre-wrap;background:#071225;color:#e0f2fe;border-radius:18px;padding:14px;line-height:1.62;font-size:13px}.底{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.96);border-top:1px solid var(--線);padding:10px 14px;z-index:20}.底內{display:flex;gap:8px;align-items:center;justify-content:space-between}@media(max-width:900px){.指標{grid-template-columns:repeat(2,minmax(0,1fr))}.底內{display:block}body{padding-bottom:175px}.表{font-size:11px}.卡{padding:13px}}
+</style>
+</head>
+<body>
+<header class="頁首"><div class="頁首內"><div class="品牌"><div class="標誌">🧼</div><div><h1>生產計劃表清洗器 V2.2</h1><div class="副標">安全解析版｜先讀工作表名稱｜只解析目標表｜上傳後必顯示進度</div></div></div><div class="狀態" id="狀態文字">🟡 系統已就緒，請選擇每月生產計劃表 Excel</div></div></header>
+<main class="外框">
+<section class="卡 導引"><h2>修正版重點</h2><p>這版修正「上傳後無反應」：選檔後會立即顯示檔名、檔案大小、讀取進度、工作表數量、解析結果或錯誤原因。</p><p>大型生產計劃表不再一次解析整本 Excel，而是先讀工作表名稱，再只解析 A1/A2、A3、A4、A5、A7/A8、A8、B2、YC、EEA、訂單、庫存、入庫、在製、產能、BOM/ASSY 等目標表。</p></section>
+<section class="卡"><h2>上傳生產計劃表</h2><div class="上傳"><input id="檔案輸入" type="file" accept=".xlsx,.xls,.xlsm,.csv"><div style="height:10px"></div><button class="主鈕" id="選檔按鈕" type="button">📂 選擇 Excel 檔案</button><div class="小字" style="margin-top:10px">如果檔案超過 30MB，手機解析會比較慢，但本版會先顯示進度，不會靜默。</div></div><div style="height:10px"></div><div class="工具"><label><input type="checkbox" id="隱藏零" checked> 隱藏 0 數量</label><label><input type="checkbox" id="週末可生產" checked> 週末可生產</label><label>每日班數 <input class="輸入" id="每日班數" type="number" value="2" min="1" max="4" style="width:70px"></label><label>工作表 <select id="區域篩選"><option value="">全部</option></select></label><button class="鈕" type="button" id="重算按鈕">重新整理</button></div></section>
+<section class="卡"><h2>即時狀態</h2><div id="訊息區" class="進度">等待上傳。</div></section>
+<section class="卡" id="結果區" style="display:none"><div class="工具" id="切頁"><button type="button" data-view="工作表報告">工作表報告</button><button type="button" data-view="每日明細">每日明細</button><button type="button" data-view="本月彙總">本月彙總</button><button type="button" data-view="出貨訂單">出貨訂單</button><button type="button" data-view="CTB缺料">CTB缺料</button><button type="button" data-view="BOM組裝">BOM組裝</button><button type="button" data-view="排程需求池">10_排程需求池</button><button type="button" data-view="LINE摘要">LINE摘要</button></div><div class="指標" id="指標區" style="margin-top:12px"></div></section>
+<section class="卡" id="視圖區" style="display:none"></section>
+</main>
+<div class="底"><div class="底內"><div class="工具"><button type="button" onclick="匯出CSV('每日明細')">匯出每日明細</button><button type="button" onclick="匯出CSV('本月彙總')">匯出本月彙總</button><button type="button" onclick="匯出CSV('CTB缺料')">匯出CTB缺料</button><button class="主鈕" type="button" onclick="匯出CSV('排程需求池')">匯出10_排程需求池</button></div><div class="小字" id="底部狀態">尚未清洗資料</div></div></div>
+<script>
+(function(){
+'use strict';
+function $(id){return document.getElementById(id)}
+function 文(v){return String(v===undefined||v===null?'':v).trim()}
+function 正(v){return 文(v).replace(/\s+/g,'').toUpperCase()}
+function 數(v){var n=Number(文(v).replace(/[,，]/g,''));return isFinite(n)?n:0}
+function 安全(s){return String(s===undefined||s===null?'':s).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]})}
+function 格式(n){return Number(n||0).toLocaleString('zh-TW')}
+function 日期字串(d){var z=function(n){return String(n).padStart(2,'0')};return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate())}
+function 今天(){return 日期字串(new Date())}
+var 目標表=['A1+A2(一)','A3 (一)','A4 (一)','A5 (一)','A5 (ㄧ)','A5（ 一）','A8 (ROT)','YC(義大利)','EEA供料','B2 (ACW系列)','B2 (AP系列)','A7+A8 (一)','A7(HEADER)+A8 (CON)','cxmr431','訂單','庫存數量','入庫數量','在製數量','產能評估','HEADER出貨'];
+var 類型鍵=['訂單','供料','計畫','產出','訂單(出貨)','出貨'];
+var 缺料字=['缺料','材料不足','缺素材','缺棧板','待料','待入庫','素材未進','委外未回','待超久交貨','生鏽','未回','缺包材'];
+var 欄位={產品編號:['產品編號','產品','料號','品號','物料','料件','產品代碼','料號碼','列標籤'],客戶品號:['客戶品號','客戶料號','客戶型號','客戶產品編號','客戶品號碼'],品名:['品名','品名/規格','品名規格','產品名稱','品名(規格)','產品品名'],工單:['在製工單','工單','工單號','工單單號','工單編號','在製單'],期初庫存:['期初庫存','月初庫存','月初庫存量','期初','庫存'],產能8H:['標準數/8H','產能(班)','產能8H','8H產能','產能','標準數','標準產能'],備註:['備註','說明','狀態','原因']};
+var 狀態={檔名:'',年月:null,工作表報告:[],每日明細:[],本月彙總:[],出貨訂單:[],CTB缺料:[],BOM明細:[],BOM組裝:[],排程需求池:[],目前:'工作表報告'};
+function 訊息(t,kind){$('訊息區').className=kind==='錯'?'錯':kind==='好'?'好':'進度';$('訊息區').textContent=t;$('狀態文字').textContent=t.split('\n')[0];$('底部狀態').textContent=t.split('\n')[0]}
+window.onerror=function(msg,src,line,col,err){訊息('❌ 頁面程式錯誤：\n'+msg+'\n行號：'+line+'\n請重新整理後再試。','錯')};
+function 初始化(){
+  $('選檔按鈕').addEventListener('click',function(){$('檔案輸入').value='';$('檔案輸入').click()});
+  $('檔案輸入').addEventListener('change',function(){var f=this.files&&this.files[0];if(f)開始讀檔(f);else 訊息('⚠️ 沒有選到檔案。','錯')});
+  $('重算按鈕').addEventListener('click',function(){重算();切換(狀態.目前)});
+  $('區域篩選').addEventListener('change',function(){重算();切換(狀態.目前)});
+  $('隱藏零').addEventListener('change',function(){如果已有檔案重新提示()});
+  $('每日班數').addEventListener('change',function(){重算();切換(狀態.目前)});
+  document.querySelectorAll('#切頁 button').forEach(function(b){b.addEventListener('click',function(){切換(b.getAttribute('data-view'))})});
+}
+function 如果已有檔案重新提示(){重算();切換(狀態.目前)}
+function 開始讀檔(file){
+  狀態={檔名:file.name,年月:解析年月文字(file.name),工作表報告:[],每日明細:[],本月彙總:[],出貨訂單:[],CTB缺料:[],BOM明細:[],BOM組裝:[],排程需求池:[],目前:'工作表報告'};
+  var mb=(file.size/1024/1024).toFixed(1);
+  訊息('📂 已選擇檔案：'+file.name+'\n大小：'+mb+' MB\n狀態：準備讀取，請稍等...', '進度');
+  if(!window.XLSX){訊息('❌ Excel 解析套件沒有載入。\n請確認網路可連 cdn.jsdelivr.net，或重新整理頁面。','錯');return}
+  setTimeout(function(){讀Excel(file)},120);
+}
+function 讀Excel(file){
+  var reader=new FileReader();
+  reader.onerror=function(){訊息('❌ 手機讀取檔案失敗。\n請確認檔案不是雲端未下載狀態，先下載到 iPhone 檔案 App 再上傳。','錯')};
+  reader.onprogress=function(e){if(e.lengthComputable){訊息('📖 正在讀取檔案：'+Math.round(e.loaded/e.total*100)+'%\n檔案：'+file.name,'進度')}};
+  reader.onload=function(e){
+    try{
+      var data=e.target.result;
+      訊息('✅ 檔案已讀入。\n正在辨識工作表名稱...', '進度');
+      setTimeout(function(){解析工作簿(data)},80);
+    }catch(err){訊息('❌ 檔案讀入後發生錯誤：\n'+(err.message||err),'錯')}
+  };
+  reader.readAsArrayBuffer(file);
+}
+function 解析工作簿(data){
+  try{
+    var 輕量=XLSX.read(data,{type:'array',bookSheets:true});
+    var names=輕量.SheetNames||[];
+    if(!names.length){訊息('❌ 讀不到任何工作表。請確認檔案是 Excel。','錯');return}
+    var chosen=選目標工作表(names);
+    if(names.indexOf('A7(HEADER)+A8 (CON)')>=0) chosen=chosen.filter(function(n){return n!=='A7+A8 (一)'});
+    if(!chosen.length) chosen=names.slice(0,Math.min(names.length,12));
+    訊息('📑 已找到工作表 '+names.length+' 張。\n本次解析目標表 '+chosen.length+' 張：\n'+chosen.join('、')+'\n\n正在解析資料...', '進度');
+    setTimeout(function(){解析目標工作表(data,chosen)},120);
+  }catch(err){訊息('❌ 工作表辨識失敗：\n'+(err.message||err),'錯')}
+}
+function 選目標工作表(names){
+  return names.filter(function(n){
+    if(目標表.indexOf(n)>=0)return true;
+    if(/BOM|ASSY|組裝|用料|物料/i.test(n))return true;
+    if(/^(A|B|C)\d|YC|EEA|HEADER|訂單|庫存|入庫|在製|產能|供料|出貨|cxmr/i.test(n))return true;
+    return false;
+  });
+}
+function 解析目標工作表(data,names){
+  try{
+    var wb=XLSX.read(data,{type:'array',cellDates:true,raw:true,sheets:names});
+    for(var i=0;i<names.length;i++){
+      var name=names[i];
+      var ws=wb.Sheets[name];
+      if(!ws){狀態.工作表報告.push({工作表:name,狀態:'略過',原因:'讀不到工作表'});continue}
+      var rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:true,blankrows:false});
+      if(!rows.length){狀態.工作表報告.push({工作表:name,狀態:'略過',原因:'空白表'});continue}
+      if(/BOM|ASSY|組裝|用料|物料/i.test(name)){解析BOM(name,rows);continue}
+      清洗工作表(name,rows);
+    }
+    重算();填區域();$('結果區').style.display='block';$('視圖區').style.display='block';切換('工作表報告');
+    訊息('✅ 自動清洗完成。\n每日明細：'+狀態.每日明細.length+' 筆\n本月彙總：'+狀態.本月彙總.length+' 筆\n10_排程需求池：'+狀態.排程需求池.length+' 筆','好');
+  }catch(err){訊息('❌ 解析 Excel 失敗：\n'+(err.message||err)+'\n\n建議：若檔案很大，先在電腦版 Chrome 開啟，或另存一份只保留生產計劃、訂單、庫存、BOM 的檔案。','錯')}
+}
+function 解析年月文字(s){var m=文(s).match(/(20\d{2})\D{0,5}(\d{1,2})/);return m?{y:+m[1],m:+m[2]}:null}
+function 偵測年月(rows){for(var r=0;r<Math.min(rows.length,12);r++){var ym=解析年月文字(rows[r].slice(0,40).join(' '));if(ym)return ym}return null}
+function 解析日期(v,ym){
+  if(v instanceof Date&&!isNaN(v))return 日期字串(v);
+  if(typeof v==='number'&&v>25000&&v<80000){var dd=XLSX.SSF.parse_date_code(v);return dd?日期字串(new Date(dd.y,dd.m-1,dd.d)):''}
+  var s=文(v); if(!s)return''; var d;
+  if(/^\d{4}[-\/]\d{1,2}[-\/]\d{1,2}$/.test(s)){d=new Date(s.replace(/\//g,'-'));return isNaN(d)?'':日期字串(d)}
+  if(/^\d{8}$/.test(s)){d=new Date(+s.slice(0,4),+s.slice(4,6)-1,+s.slice(6,8));return isNaN(d)?'':日期字串(d)}
+  if(/^\d{6}$/.test(s)){d=new Date(+s.slice(0,4),+s.slice(4,6)-1,1);return isNaN(d)?'':日期字串(d)}
+  if(/^\d{1,2}[\/\-]\d{1,2}$/.test(s)){var p=s.split(/[\/\-]/).map(Number);var y=(ym&&ym.y)||new Date().getFullYear();d=new Date(y,p[0]-1,p[1]);return isNaN(d)?'':日期字串(d)}
+  if(/^\d{1,2}$/.test(s)&&ym){d=new Date(ym.y,ym.m-1,+s);return isNaN(d)?'':日期字串(d)}
+  return'';
+}
+function 找欄(row,names){var ns=names.map(正);for(var i=0;i<row.length;i++){var c=正(row[i]);if(!c)continue;for(var j=0;j<ns.length;j++){if(c===ns[j]||c.indexOf(ns[j])>=0||ns[j].indexOf(c)>=0)return i}}return-1}
+function 找類型(row,dateC){var arr=[];if(dateC>=0)arr.push(row[dateC]);for(var i=0;i<Math.min(row.length,14);i++)arr.push(row[i]);for(var a=0;a<arr.length;a++){var s=文(arr[a]);for(var k=0;k<類型鍵.length;k++){if(s===類型鍵[k]||正(s)===正(類型鍵[k]))return 類型鍵[k]==='訂單'?'訂單(出貨)':類型鍵[k]}}return''}
+function 判斷CTB(text){for(var i=0;i<缺料字.length;i++){if(text.indexOf(缺料字[i])>=0)return{狀態:'紅燈',原因:缺料字[i]}}if(/待確認|風險|不足|待回/.test(text))return{狀態:'黃燈',原因:'需確認'};return{狀態:'綠燈',原因:''}}
+function 清洗工作表(name,rows){
+  var ym=狀態.年月||偵測年月(rows)||{y:new Date().getFullYear(),m:new Date().getMonth()+1}; if(!狀態.年月)狀態.年月=ym;
+  var header=-1; for(var r=0;r<Math.min(rows.length,50);r++){var t=rows[r].map(文).join('|');if(/品名|客戶品號|產品編號|料號|列標籤/.test(t)){header=r;break}}
+  if(header<0){狀態.工作表報告.push({工作表:name,狀態:'略過',原因:'找不到標題列'});return}
+  var dateR=-1,dateC=-1,dateCols=[];
+  for(var rr=0;rr<Math.min(rows.length,80);rr++){
+    for(var cc=0;cc<Math.min(rows[rr].length,220);cc++){
+      if(文(rows[rr][cc])==='日期'){
+        var cols=[]; for(var x=cc+1;x<rows[rr].length;x++){var iso=解析日期(rows[rr][x],ym);if(iso)cols.push({i:x,iso:iso});else if(cols.length>0&&文(rows[rr][x])==='')break}
+        if(cols.length){dateR=rr;dateC=cc;dateCols=cols;break}
+      }
+    }
+    if(dateCols.length)break;
+  }
+  if(!dateCols.length){
+    for(var dr=0;dr<Math.min(rows.length,80);dr++){var cols2=[];for(var dc=0;dc<rows[dr].length;dc++){var iso2=解析日期(rows[dr][dc],ym);if(iso2)cols2.push({i:dc,iso:iso2})}if(cols2.length>=2){dateR=dr;dateC=Math.max(0,cols2[0].i-1);dateCols=cols2;break}}
+  }
+  if(!dateCols.length){狀態.工作表報告.push({工作表:name,狀態:'略過',原因:'找不到日期列'});return}
+  var head=rows[header],idx={};Object.keys(欄位).forEach(function(k){idx[k]=找欄(head,欄位[k])});
+  var last={},count=0,red=0;
+  for(var irow=header+1;irow<rows.length;irow++){
+    var row=rows[irow],rowText=row.map(文).join(' '),type=找類型(row,dateC);
+    Object.keys(idx).forEach(function(k){if(idx[k]>=0&&文(row[idx[k]])!=='')last[k]=文(row[idx[k]])});
+    if(!last.產品編號&&!last.品名)continue;
+    var ctb=判斷CTB(rowText); if(ctb.狀態==='紅燈')red++;
+    if(idx.期初庫存>=0&&數(row[idx.期初庫存])>0)last.期初庫存=數(row[idx.期初庫存]);
+    if(idx.產能8H>=0&&數(row[idx.產能8H])>0)last.產能8H=數(row[idx.產能8H]);
+    if(!type)continue;
+    for(var dc2=0;dc2<dateCols.length;dc2++){var col=dateCols[dc2];var q=數(row[col.i]);if($('隱藏零').checked&&q===0)continue;狀態.每日明細.push({區域:name,產品編號:last.產品編號||'',客戶品號:last.客戶品號||'',品名:last.品名||'',工單:last.工單||'',日期:col.iso,類型:type,數量:q,期初庫存:數(last.期初庫存),產能8H:數(last.產能8H),CTB狀態:ctb.狀態,CTB原因:ctb.原因,備註:idx.備註>=0?文(row[idx.備註]):'',來源工作表:name,來源列號:irow+1});count++}
+  }
+  狀態.工作表報告.push({工作表:name,狀態:count?'已解析':'無日資料',年月:ym.y+'-'+String(ym.m).padStart(2,'0'),標題列:header+1,日期列:dateR+1,日期欄數:dateCols.length,每日筆數:count,CTB紅燈列:red});
+}
+function 解析BOM(name,rows){狀態.工作表報告.push({工作表:name,狀態:'BOM候選',原因:'已辨識BOM/組裝表'});}
+function key(r){return [r.區域,r.產品編號,r.客戶品號,r.品名].join('|')}
+function 篩(rows){var z=$('區域篩選').value;return z?rows.filter(function(r){return r.區域===z||r.來源工作表===z}):rows}
+function 重算(){建立彙總();建立出貨();建立CTB();建立BOM組裝();建立需求池();渲染指標();}
+function 建立彙總(){var m={};篩(狀態.每日明細).forEach(function(r){var k=key(r);if(!m[k])m[k]={區域:r.區域,產品編號:r.產品編號,客戶品號:r.客戶品號,品名:r.品名,本月計畫量:0,本月產出量:0,本月需求量:0,本月供料量:0,期初庫存:r.期初庫存||0,產能8H:r.產能8H||0,出貨日清單:[],CTB狀態:'綠燈',CTB原因:''};var x=m[k];if(r.類型.indexOf('計畫')>=0)x.本月計畫量+=r.數量;if(r.類型.indexOf('產出')>=0)x.本月產出量+=r.數量;if(r.類型.indexOf('供料')>=0&&r.數量>0)x.本月供料量+=r.數量;if((r.類型.indexOf('出貨')>=0||r.類型.indexOf('訂單')>=0)&&r.數量>0){x.本月需求量+=r.數量;x.出貨日清單.push(r.日期)}if(r.期初庫存)x.期初庫存=r.期初庫存;if(r.產能8H)x.產能8H=r.產能8H;if(r.CTB狀態==='紅燈'){x.CTB狀態='紅燈';x.CTB原因=r.CTB原因}else if(r.CTB狀態==='黃燈'&&x.CTB狀態!=='紅燈'){x.CTB狀態='黃燈';x.CTB原因=r.CTB原因}});狀態.本月彙總=Object.values(m).map(function(x){x.可用量=x.期初庫存+x.本月產出量+x.本月供料量;x.還需加工量=Math.max(0,x.本月需求量-x.可用量);x.欠量=Math.max(0,x.本月需求量-x.本月產出量);x.訂單已滿足=x.可用量>=x.本月需求量?'Y':'N';x.達成率=x.本月計畫量?x.本月產出量/x.本月計畫量:1;x.最近出貨日=x.出貨日清單.sort()[0]||'';x.Tier=判斷Tier(x.最近出貨日);x.主機台=抓機台(x);return x}).filter(function(x){return x.本月計畫量||x.本月產出量||x.本月需求量||x.期初庫存||x.還需加工量})}
+function 判斷Tier(d){if(!d)return'Tier 4';var diff=Math.ceil((new Date(d)-new Date(今天()))/86400000);if(diff<=7)return'Tier 1';if(diff<=14)return'Tier 2';if(diff<=21)return'Tier 3';return'Tier 4'}
+function 抓機台(x){var t=(x.區域+' '+x.品名).match(/\b\d{2,5}\b/g)||[];return t[0]||'待工站主檔對應'}
+function 建立出貨(){var i=0;狀態.出貨訂單=篩(狀態.每日明細).filter(function(r){return (r.類型.indexOf('出貨')>=0||r.類型.indexOf('訂單')>=0)&&r.數量>0&&r.日期>=今天()}).sort(function(a,b){return a.日期.localeCompare(b.日期)}).map(function(r){i++;return{訂單號:'ORD'+r.日期.replace(/-/g,'')+String(i).padStart(5,'0'),區域:r.區域,產品編號:r.產品編號,產品:r.品名,日期:r.日期,數量:r.數量,狀態:'待確認',產能8H:r.產能8H,CTB狀態:r.CTB狀態}})}
+function 建立CTB(){狀態.CTB缺料=狀態.本月彙總.filter(function(x){return x.CTB狀態!=='綠燈'||(x.還需加工量>0&&x.Tier==='Tier 1')}).map(function(x){return{區域:x.區域,產品編號:x.產品編號,客戶品號:x.客戶品號,品名:x.品名,CTB狀態:x.CTB狀態,CTB原因:x.CTB原因||'近期出貨且還需加工',最近出貨日:x.最近出貨日,需求量:x.本月需求量,可用量:x.可用量,還需加工量:x.還需加工量,Tier:x.Tier,處置:x.CTB狀態==='紅燈'?'不可排近期，進缺料池':'需確認後才可排'}})}
+function 建立BOM組裝(){狀態.BOM組裝=[]}
+function 建立需求池(){var i=0,班=數($('每日班數').value)||2;狀態.排程需求池=狀態.本月彙總.filter(function(x){return x.訂單已滿足==='N'||x.還需加工量>0||(['Tier 1','Tier 2'].indexOf(x.Tier)>=0&&x.本月需求量>0)}).sort(function(a,b){return (b.還需加工量||0)-(a.還需加工量||0)}).map(function(x){i++;var qty=Math.max(x.還需加工量,x.欠量,0);var perDay=(x.產能8H||0)*班;var days=perDay?Math.max(1,Math.ceil(qty/perDay)):999;var due=x.最近出貨日||今天();var start=往前推(due,days);return{需求編號:'REQ'+今天().replace(/-/g,'')+String(i).padStart(4,'0'),來源:'生產計劃表清洗器V2.2',區域:x.區域,產品編號:x.產品編號,客戶品號:x.客戶品號,品名:x.品名,需求日期:due,需求數量:x.本月需求量,期初庫存:x.期初庫存,本月產出量:x.本月產出量,供料量:x.本月供料量,可用量:x.可用量,還需加工量:qty,產能8H:x.產能8H,建議開工日:start,建議完工日:due,主機台:x.主機台,急迫性:x.Tier,CTB狀態:x.CTB狀態,狀態:x.CTB狀態==='紅燈'?'缺料待確認':'待排程',備註:'訂單滿足='+x.訂單已滿足+'；欠量='+x.欠量}})}
+function 往前推(date,days){var d=new Date(date),n=0;while(n<days){d.setDate(d.getDate()-1);if($('週末可生產').checked||![0,6].includes(d.getDay()))n++}return 日期字串(d)}
+function 填區域(){var s=$('區域篩選');s.innerHTML='<option value="">全部</option>';var set={};狀態.每日明細.forEach(function(r){set[r.區域]=true});Object.keys(set).sort().forEach(function(x){s.add(new Option(x,x))})}
+function 渲染指標(){var a=[['每日明細',狀態.每日明細.length],['本月彙總',狀態.本月彙總.length],['出貨訂單',狀態.出貨訂單.length],['CTB缺料',狀態.CTB缺料.length],['BOM需求',狀態.BOM組裝.length],['需求池',狀態.排程需求池.length]];$('指標區').innerHTML=a.map(function(x){return '<div class="指標卡"><div class="指標名">'+x[0]+'</div><div class="指標值">'+格式(x[1])+'</div></div>'}).join('')}
+function 切換(v){狀態.目前=v;document.querySelectorAll('#切頁 button').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-view')===v)});if(v==='LINE摘要'){顯示LINE();return}var map={工作表報告:[狀態.工作表報告,['工作表','狀態','原因','年月','標題列','日期列','日期欄數','每日筆數','CTB紅燈列']],每日明細:[篩(狀態.每日明細),['區域','產品編號','客戶品號','品名','工單','日期','類型','數量','期初庫存','產能8H','CTB狀態','CTB原因','備註','來源列號']],本月彙總:[狀態.本月彙總,['區域','產品編號','客戶品號','品名','本月計畫量','本月產出量','本月需求量','可用量','還需加工量','欠量','達成率','訂單已滿足','CTB狀態','Tier','最近出貨日','產能8H','主機台']],出貨訂單:[狀態.出貨訂單,['訂單號','區域','產品編號','產品','日期','數量','狀態','產能8H','CTB狀態']],CTB缺料:[狀態.CTB缺料,['區域','產品編號','客戶品號','品名','CTB狀態','CTB原因','最近出貨日','需求量','可用量','還需加工量','Tier','處置']],BOM組裝:[狀態.BOM組裝,['成品料號','成品品名','成品需求','小料料號','小料名稱','分類','用量','需求量','不足提示']],排程需求池:[狀態.排程需求池,['需求編號','來源','區域','產品編號','客戶品號','品名','需求日期','需求數量','期初庫存','本月產出量','供料量','可用量','還需加工量','產能8H','建議開工日','建議完工日','主機台','急迫性','CTB狀態','狀態','備註']]};var box=map[v]||[[],[]];表格(v,box[0],box[1])}
+function 表格(title,rows,cols){var body=rows.length?rows.map(function(r){return '<tr>'+cols.map(function(c){return '<td>'+顯示(r[c],c)+'</td>'}).join('')+'</tr>'}).join(''):'<tr><td colspan="'+cols.length+'">尚無資料</td></tr>';$('視圖區').style.display='block';$('視圖區').innerHTML='<h2>'+安全(title)+'｜'+rows.length+' 筆</h2><div class="表外"><table class="表"><thead><tr>'+cols.map(function(c){return '<th>'+安全(c)+'</th>'}).join('')+'</tr></thead><tbody>'+body+'</tbody></table></div>'}
+function 顯示(v,c){if(c==='CTB狀態')return 膠(v,v==='紅燈'?'紅':v==='黃燈'?'黃':'綠');if(c==='Tier'||c==='急迫性')return 膠(v,v==='Tier 1'?'紅':v==='Tier 2'?'黃':v==='Tier 3'?'藍':'白');if(c==='訂單已滿足')return 膠(v,v==='Y'?'綠':'紅');if(c==='達成率')return ((Number(v)||0)*100).toFixed(1)+'%';return 安全(v)}
+function 膠(v,cls){return '<span class="膠 '+cls+'">'+安全(v||'')+'</span>'}
+function 顯示LINE(){var rows=狀態.排程需求池.slice(0,12);var t='【製一組重點 '+new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'})+'｜清洗器V2.2】\n';if(!rows.length)t+='目前無需求池項目。';rows.forEach(function(r,i){t+=(i+1)+'. '+(r.CTB狀態==='紅燈'?'⛔':'⚠️')+' '+r.品名+'｜區:'+r.區域+'｜欠:'+格式(r.還需加工量)+'｜開:'+月日(r.建議開工日)+'｜出:'+月日(r.需求日期)+'｜CTB:'+r.CTB狀態+'\n'});$('視圖區').style.display='block';$('視圖區').innerHTML='<h2>LINE摘要</h2><div class="摘要">'+安全(t)+'</div>'}
+function 月日(d){return 文(d).slice(5).replace('-','/')}
+window.匯出CSV=function(type){var data={每日明細:篩(狀態.每日明細),本月彙總:狀態.本月彙總,CTB缺料:狀態.CTB缺料,排程需求池:狀態.排程需求池}[type]||[];if(!data.length){訊息('⚠️ 沒有資料可匯出：'+type,'錯');return}var cols=Object.keys(data[0]);var csv='\ufeff'+cols.join(',')+'\n'+data.map(function(r){return cols.map(function(c){return '"'+String(r[c]===undefined?'':r[c]).replace(/"/g,'""')+'"'}).join(',')}).join('\n');var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download=type+'.csv';a.click();setTimeout(function(){URL.revokeObjectURL(a.href)},1000);訊息('✅ 已匯出：'+type,'好')};
+初始化();
+})();
+</script>
+</body>
+</html>
