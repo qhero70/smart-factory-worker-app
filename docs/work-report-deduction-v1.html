@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>報工扣工單 V1｜中央資料庫測試頁</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#eef5ff;font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC','Microsoft JhengHei',system-ui,sans-serif;color:#0f172a}.head{background:linear-gradient(135deg,#0b3a75,#0b74ff,#06b6d4);color:white;padding:18px}.wrap{max-width:980px;margin:auto;padding:14px}.card{background:white;border:1px solid #dbeafe;border-radius:22px;padding:16px;margin:12px 0;box-shadow:0 10px 26px rgba(15,23,42,.08)}h1{font-size:22px;margin:0}h2{font-size:18px;margin:0 0 10px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.full{grid-column:1/-1}label{font-size:13px;font-weight:900;color:#334155}.inp{width:100%;border:1px solid #cfe0f5;border-radius:13px;padding:11px;font-size:15px;font-weight:800}.btns{display:flex;gap:8px;flex-wrap:wrap}.btn{border:0;border-radius:14px;padding:12px 14px;font-weight:1000}.pri{background:linear-gradient(135deg,#0b74ff,#06b6d4);color:white}.ok{background:#dcfce7;color:#166534}.dark{background:#0f172a;color:white}.msg{white-space:pre-wrap;line-height:1.6;border-radius:18px;padding:14px;background:#071225;color:#e0f2fe}.good{background:#ecfdf5;color:#166534;border:1px solid #bbf7d0}.bad{background:#fff1f2;color:#991b1b;border:1px solid #fecdd3}.note{font-size:13px;color:#64748b;line-height:1.6}@media(max-width:720px){.grid{grid-template-columns:1fr}.btn{flex:1 1 45%}}
+</style>
+</head>
+<body>
+<header class="head"><div class="wrap"><h1>🧾 報工扣工單 V1</h1><div>中央資料庫測試頁｜19_現場報工回寫 → 20_工單進度追蹤</div></div></header>
+<main class="wrap">
+<section class="card"><h2>1. GAS Web App URL</h2><input id="url" class="inp" placeholder="貼上 https://script.google.com/macros/s/.../exec"><div class="btns" style="margin-top:10px"><button class="btn ok" onclick="saveUrl()">儲存URL</button><button class="btn pri" onclick="testGet()">GET測試</button><button class="btn dark" onclick="runDeduct()">執行報工扣工單</button></div><div class="note">網址必須是中央資料庫 API 的 /exec，不是 Apps Script 編輯器網址。</div></section>
+<section class="card"><h2>2. 寫入一筆測試報工</h2><div class="grid"><div><label>工單號</label><input id="工單號" class="inp" placeholder="請填 13_拆工單結果 任一工單號"></div><div><label>工號</label><input id="工號" class="inp" value="TEST001"></div><div><label>姓名</label><input id="姓名" class="inp" value="測試人員"></div><div><label>工站</label><input id="工站" class="inp" value="加工"></div><div><label>機台</label><input id="機台" class="inp" value="測試機台"></div><div><label>良品數</label><input id="良品數" class="inp" type="number" value="10"></div><div><label>不良數</label><input id="不良數" class="inp" type="number" value="1"></div><div><label>工時_分鐘</label><input id="工時" class="inp" type="number" value="60"></div><div class="full"><label>備註</label><input id="備註" class="inp" value="測試報工"></div></div><div class="btns" style="margin-top:12px"><button class="btn pri" onclick="submitReport()">寫入測試報工</button><button class="btn dark" onclick="submitAndDeduct()">寫入後立即扣工單</button></div></section>
+<section class="card"><h2>處理狀態</h2><div id="msg" class="msg">等待操作。</div></section>
+<section class="card"><h2>成功標準</h2><div class="note">Google Sheets 應看到：19_現場報工回寫新增報工，20_工單進度追蹤累計良品/不良，21_完工入庫建議依完工狀態產生，22_報工異常警示出現不良或超量警示。</div></section>
+</main>
+<script>
+const KEY='智慧製造_GAS資料庫_API_URL';
+function $(id){return document.getElementById(id)}
+function val(id){return String($(id).value||'').trim()}
+function show(t,type){const m=$('msg');m.textContent=t;m.className='msg '+(type==='ok'?'good':type==='bad'?'bad':'')}
+function api(){let u=val('url')||localStorage.getItem(KEY)||'';u=u.replace(/\s+/g,'');if(!u)throw new Error('請先貼上 GAS /exec URL');if(!u.endsWith('/exec'))u=u.replace(/\/+$/,'')+'/exec';localStorage.setItem(KEY,u);$('url').value=u;return u}
+function ok(o){return !!(o&&(o.ok===true||o.success===true||o.成功===true))}
+function err(o){return String(o&&(o.錯誤||o.error||o.message||o.訊息||o.raw)||'未知錯誤')}
+async function post(payload){const r=await fetch(api(),{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload),redirect:'follow'});const tx=await r.text();try{return JSON.parse(tx)}catch(e){return{ok:false,error:'回傳不是JSON',raw:tx.slice(0,1000)}}}
+async function get(action){const r=await fetch(api()+'?action='+encodeURIComponent(action)+'&t='+Date.now(),{redirect:'follow'});const tx=await r.text();try{return JSON.parse(tx)}catch(e){return{ok:false,error:'回傳不是JSON',raw:tx.slice(0,1000)}}}
+function saveUrl(){try{show('✅ 已儲存：\n'+api(),'ok')}catch(e){show('❌ '+e.message,'bad')}}
+async function testGet(){try{show('📡 GET測試中...');const a=await get('status');if(!ok(a))throw new Error(err(a));show('✅ GET測試成功：\n'+JSON.stringify(a,null,2),'ok')}catch(e){show('❌ GET測試失敗：\n'+e.message,'bad')}}
+async function submitReport(){try{show('🧾 寫入測試報工中...');const a=await post({action:'寫入現場報工V1',來源:'報工扣工單測試頁',工單號:val('工單號'),工號:val('工號'),姓名:val('姓名'),工站:val('工站'),機台:val('機台'),良品數:Number(val('良品數')||0),不良數:Number(val('不良數')||0),工時_分鐘:Number(val('工時')||0),備註:val('備註')});if(!ok(a))throw new Error(err(a));show('✅ 測試報工已寫入：\n'+JSON.stringify(a,null,2),'ok')}catch(e){show('❌ 寫入測試報工失敗：\n'+e.message,'bad')}}
+async function runDeduct(){try{show('⚙️ 報工扣工單執行中...');const a=await post({action:'執行報工扣工單V1',來源:'報工扣工單測試頁'});if(!ok(a))throw new Error(err(a));show('✅ 報工扣工單完成：\n工單進度筆數：'+(a.工單進度筆數||0)+'\n入庫建議筆數：'+(a.入庫建議筆數||0)+'\n警示筆數：'+(a.警示筆數||0)+'\n報工筆數：'+(a.報工筆數||0)+'\n資料庫：'+(a.資料庫網址||''),'ok')}catch(e){show('❌ 報工扣工單失敗：\n'+e.message,'bad')}}
+async function submitAndDeduct(){await submitReport();await runDeduct()}
+window.addEventListener('DOMContentLoaded',()=>{$('url').value=localStorage.getItem(KEY)||''})
+</script>
+</body>
+</html>
