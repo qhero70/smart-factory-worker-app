@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>生產計劃表清洗器 V3.1｜固定控制列版</title>
+<meta http-equiv="Cache-Control" content="no-store,no-cache,must-revalidate,max-age=0">
+<style>html,body{margin:0;min-height:100vh;background:#06142c;color:#e0f2fe;font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC','Microsoft JhengHei',system-ui,sans-serif}.boot{padding:24px;line-height:1.7}.bar{height:8px;border-radius:999px;background:linear-gradient(90deg,#22c55e,#06b6d4,#3b82f6);background-size:200% 100%;animation:p 1.2s linear infinite}@keyframes p{to{background-position:200% 0}}.err{background:#fff1f2;color:#991b1b;border-radius:16px;padding:14px;white-space:pre-wrap}</style>
+</head>
+<body>
+<div class="boot" id="boot"><h1>🏭 生產計劃表清洗器 V3.1</h1><div>正在載入 V2.4 主體與固定控制列：GET測試、初始化、上傳、APS。</div><div class="bar"></div></div>
+<script>
+(async function(){
+  const boot=document.getElementById('boot');
+  function fail(e){boot.innerHTML='<h1>❌ 啟動失敗</h1><div class="err">'+String(e&&e.message?e.message:e)+'</div>';}
+  try{
+    let html=await fetch('./production-plan-database-v24.html?raw=1&ts='+Date.now(),{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.text();});
+    html=html.replace('</title>','｜固定控制列版 V3.1</title>');
+    html=html.replace('</body>','<script src="./production-plan-control-bridge-v31.js?v=31"><\/script></body>');
+    html=html.replace('生產計劃表清洗器 V2.4','生產計劃表清洗器 V3.1');
+    html=html.replace('清洗 → BOM需求展開 → CTB → 10_排程需求池 → 自動排程 → 匯出中央資料庫','清洗 → BOM需求展開 → CTB → 10_排程需求池 → APS自動排程V1 → Google Sheets中央資料庫');
+    document.open();document.write(html);document.close();
+  }catch(e){fail(e)}
+})();
+</script>
+</body>
+</html>
