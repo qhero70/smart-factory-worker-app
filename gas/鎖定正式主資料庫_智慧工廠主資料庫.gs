@@ -1,11 +1,11 @@
 /**
  * 鎖定正式主資料庫｜智慧工廠主資料庫
  * 目的：停止多資料庫混亂，將中央資料庫 API 的寫入目標鎖定到唯一正式主庫。
- * 正式主庫：智慧工廠主資料庫
+ * 正式主庫：⭐智慧工廠主資料庫
  */
 
-const 正式主資料庫_ID = '10hS6rzV9gStu368gAYkPl8M0sMBgZEa5xHLsKxb0snY';
-const 正式主資料庫_名稱 = '智慧工廠主資料庫';
+const 正式主資料庫_ID = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
+const 正式主資料庫_名稱 = '⭐智慧工廠主資料庫';
 const 正式主資料庫_屬性鍵 = '智慧製造中央作戰資料庫_ID';
 
 function 鎖定正式主資料庫_智慧工廠主資料庫() {
