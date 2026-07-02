@@ -1,5 +1,37 @@
 <!doctype html>
 <html lang="zh-Hant-TW">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>化新精密 報工V4</title><meta http-equiv="refresh" content="0;url=./app.html?v=20260703-final"></head>
-<body style="font-family:Arial,'Microsoft JhengHei',sans-serif;background:#f7f1f4;color:#7b213f;padding:40px"><h1>化新精密 報工V4</h1><p>正在開啟 NEXUS OS 報工管理。</p><p><a href="./app.html?v=20260703-final">進入 NEXUS OS</a></p></body>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#7b213f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<title>化新精密｜報工V4</title>
+<style>
+:root{--wine:#7b213f;--blue:#2f7df6;--cyan:#00b8c9;--bg:#f7f1f4;--card:#ffffff;--text:#1d2733;--sub:#667085;--ok:#1fae6e;--warn:#e0a220}*{box-sizing:border-box}body{margin:0;min-height:100vh;min-height:100dvh;padding:calc(18px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom));font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC','Microsoft JhengHei',Arial,sans-serif;background:radial-gradient(circle at 12% 8%,rgba(123,33,63,.18),transparent 30%),radial-gradient(circle at 88% 14%,rgba(0,184,201,.16),transparent 30%),linear-gradient(180deg,#f8f2f5,#eef3f8);color:var(--text)}.wrap{max-width:720px;margin:auto}.head{display:flex;align-items:center;gap:12px;margin-bottom:18px}.logo{width:56px;height:56px;border-radius:18px;background:linear-gradient(135deg,var(--wine),var(--blue),var(--cyan));color:white;display:flex;align-items:center;justify-content:center;font-weight:1000;font-size:22px;box-shadow:0 14px 28px rgba(123,33,63,.22)}h1{margin:0;color:var(--wine);font-size:30px}.sub{color:var(--sub);font-size:13px;margin-top:3px}.card{background:rgba(255,255,255,.86);border:1px solid rgba(123,33,63,.14);border-radius:28px;padding:18px;box-shadow:14px 14px 34px rgba(118,130,150,.22),-14px -14px 34px rgba(255,255,255,.85);backdrop-filter:blur(18px)}label{display:block;font-size:13px;font-weight:900;color:#344054;margin:12px 0 6px}input,select,textarea{width:100%;border:1px solid rgba(123,33,63,.16);border-radius:16px;padding:13px 14px;background:#fff;color:var(--text);font-size:16px;outline:none}textarea{min-height:88px;resize:vertical}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.btn{border:0;border-radius:16px;padding:14px 18px;font-weight:1000;cursor:pointer;text-decoration:none;text-align:center}.primary{background:linear-gradient(135deg,var(--wine),var(--blue));color:#fff;flex:1}.ghost{background:#fff;color:var(--wine);border:1px solid rgba(123,33,63,.18)}.status{margin-top:14px;padding:12px 14px;border-radius:16px;font-weight:900;background:rgba(224,162,32,.12);color:#805700;border:1px solid rgba(224,162,32,.25)}.ok{background:rgba(31,174,110,.12);color:var(--ok);border-color:rgba(31,174,110,.25)}.note{font-size:12px;color:var(--sub);line-height:1.7;margin-top:12px}@media(max-width:520px){.grid{grid-template-columns:1fr}h1{font-size:26px}.card{padding:16px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head"><div class="logo">化</div><div><h1>報工管理 V4</h1><div class="sub">化新精密｜智慧製造中央作戰總部</div></div></div>
+  <div class="card">
+    <label>工號 / 姓名</label><input id="staff" placeholder="例：fhfb047 洪智祥">
+    <div class="grid"><div><label>工單號</label><input id="wo" placeholder="WO_202606_0001"></div><div><label>產品編號</label><input id="product" placeholder="產品編號"></div></div>
+    <div class="grid"><div><label>工序 / 工站</label><input id="station" placeholder="OP / 工站"></div><div><label>班別</label><select id="shift"><option>早班</option><option>中班</option><option>大夜班</option></select></div></div>
+    <div class="grid"><div><label>良品數</label><input id="good" type="number" inputmode="numeric" value="0"></div><div><label>不良數</label><input id="bad" type="number" inputmode="numeric" value="0"></div></div>
+    <label>備註</label><textarea id="memo" placeholder="異常、補充說明、現場備註"></textarea>
+    <div class="btns"><button class="btn primary" onclick="saveLocal()">暫存報工</button><a class="btn ghost" href="./app.html?v=20260703-final">回 NEXUS OS</a></div>
+    <div id="status" class="status">V4 專用報工畫面已恢復。這頁不會再跳回首頁。</div>
+    <div class="note">正式回寫請由 NEXUS OS 的「報工管理V4」模組對接 19_現場報工回寫；本頁先恢復 V4 入口與現場填寫畫面，避免 404 與自動跳首頁。</div>
+  </div>
+</div>
+<script>
+function g(id){return document.getElementById(id)}
+function saveLocal(){
+  const row={time:new Date().toLocaleString('zh-TW',{hour12:false}),staff:g('staff').value,wo:g('wo').value,product:g('product').value,station:g('station').value,shift:g('shift').value,good:g('good').value,bad:g('bad').value,memo:g('memo').value,source:'V4_LOCAL'};
+  const list=JSON.parse(localStorage.getItem('WORK_REPORT_V4_DRAFTS')||'[]');list.unshift(row);localStorage.setItem('WORK_REPORT_V4_DRAFTS',JSON.stringify(list.slice(0,50)));
+  const s=g('status');s.className='status ok';s.textContent='已暫存本機：'+row.time+'。後續可由主系統回寫正式表。';
+}
+</script>
+</body>
 </html>
