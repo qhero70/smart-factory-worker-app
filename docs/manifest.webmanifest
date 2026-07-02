@@ -1,21 +1,19 @@
 {
-  "name": "NEXUS OS · 製造部智慧製造應用總部",
-  "short_name": "NEXUS OS",
-  "description": "化新精密有限公司製造部製一組智慧製造中央作戰指揮中心 PWA，支援主檔、工站、途程、排程、派班、報工與照片資料維護。",
+  "name": "化新精密 NEXUS OS",
+  "short_name": "化新精密",
+  "description": "化新精密有限公司智慧製造中央作戰指揮中心",
   "start_url": "./app.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#161b26",
-  "theme_color": "#161b26",
+  "background_color": "#f7f1f4",
+  "theme_color": "#7b213f",
   "lang": "zh-Hant-TW",
   "orientation": "portrait-primary",
-  "categories": ["business", "productivity", "utilities"],
   "icons": [
     {
       "src": "./assets/icons/nexus-os.svg",
       "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "type": "image/svg+xml"
     }
   ]
 }
