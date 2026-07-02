@@ -8,9 +8,8 @@
   window.PWA_CONFIG.正式主資料庫ID = 正式主資料庫ID;
   const 設定 = window.PWA_CONFIG || {};
   const 預設逾時 = Number(設定.API_TIMEOUT_MS || 15000);
-  const 臨時URL_KEY = '智慧製造_臨時GAS_WEB_APP_URL';
   function 清理網址(url){ return String(url || '').trim().replace(/\?.*$/,''); }
-  function 取得GAS網址(){ const 臨時URL = 清理網址(localStorage.getItem(臨時URL_KEY)); const 正式URL = 清理網址(設定.GAS_WEB_APP_URL || GAS正式預設URL); if (臨時URL) return 臨時URL; if (!正式URL || 正式URL === '貼上 GAS Web App URL') return GAS正式預設URL; return 正式URL; }
+  function 取得GAS網址(){ const 正式URL = 清理網址(設定.GAS_WEB_APP_URL || GAS正式預設URL); if (!正式URL || 正式URL === '貼上 GAS Web App URL') return GAS正式預設URL; return 正式URL; }
   function 補主資料庫(payload){
     const p = Object.assign({}, payload || {});
     p.spreadsheetId = p.spreadsheetId || p.SPREADSHEET_ID || p.正式主資料庫ID || 正式主資料庫ID;
