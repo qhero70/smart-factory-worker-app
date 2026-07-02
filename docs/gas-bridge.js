@@ -1,58 +1,27 @@
 (function(){
-  'use strict';
-  const GAS正式預設URL = 'https://script.google.com/macros/s/AKfycbwOi-xjKoMD9jVq4HrHBvh7k1DCn70lAPAJiqaWJhvH70PbuRo4ciopCjYcytIalaW4/exec';
-  const 正式主資料庫ID = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
-  window.PWA_CONFIG = window.PWA_CONFIG || {};
-  if (!window.PWA_CONFIG.GAS_WEB_APP_URL || window.PWA_CONFIG.GAS_WEB_APP_URL === '貼上 GAS Web App URL') window.PWA_CONFIG.GAS_WEB_APP_URL = GAS正式預設URL;
-  window.PWA_CONFIG.SPREADSHEET_ID = 正式主資料庫ID;
-  window.PWA_CONFIG.正式主資料庫ID = 正式主資料庫ID;
-  const 設定 = window.PWA_CONFIG || {};
-  const 預設逾時 = Number(設定.API_TIMEOUT_MS || 15000);
-  function 清理網址(url){ return String(url || '').trim().replace(/\?.*$/,''); }
-  function 取得GAS網址(){ const 正式URL = 清理網址(設定.GAS_WEB_APP_URL || GAS正式預設URL); if (!正式URL || 正式URL === '貼上 GAS Web App URL') return GAS正式預設URL; return 正式URL; }
-  function 補主資料庫(payload){
-    const p = Object.assign({}, payload || {});
-    p.spreadsheetId = p.spreadsheetId || p.SPREADSHEET_ID || p.正式主資料庫ID || 正式主資料庫ID;
-    p.SPREADSHEET_ID = p.SPREADSHEET_ID || p.spreadsheetId;
-    p.正式主資料庫ID = p.正式主資料庫ID || p.spreadsheetId;
-    p.主資料庫ID = p.主資料庫ID || p.spreadsheetId;
-    p.databaseId = p.databaseId || p.spreadsheetId;
-    return p;
-  }
-  function 建立網址(action, payload){
-    const base = 取得GAS網址(); if (!base) throw new Error('尚未設定 GAS Web App URL，已改用正式預設 URL 仍失敗。');
-    const url = new URL(base); url.searchParams.set('action', action); url.searchParams.set('動作', action); url.searchParams.set('_ts', String(Date.now()));
-    const p = 補主資料庫(payload);
-    Object.keys(p).forEach(key => { const value = p[key]; if (value === undefined || value === null) return; url.searchParams.set(key, typeof value === 'object' ? JSON.stringify(value) : String(value)); });
-    return url.toString();
-  }
-  function 建立BodyObj(action, payload){ return Object.assign({}, 補主資料庫(payload), { action: action, 動作: action, _ts: String(Date.now()) }); }
-  function 建立表單Body(action, payload){ const bodyObj = 建立BodyObj(action, payload); const sp = new URLSearchParams(); Object.keys(bodyObj).forEach(key => { const value = bodyObj[key]; if (value === undefined || value === null) return; sp.set(key, typeof value === 'object' ? JSON.stringify(value) : String(value)); }); const json = JSON.stringify(bodyObj); if (json.length < 220000) { sp.set('payload', json); sp.set('資料', json); sp.set('json', json); } return sp.toString(); }
-  function 逾時Fetch(url, options, timeoutMs){ const controller = new AbortController(); const timer = setTimeout(() => controller.abort(), timeoutMs); return fetch(url, Object.assign({}, options || {}, { signal: controller.signal })).catch(error => { if (error && error.name === 'AbortError') throw new Error(`API 逾時：${timeoutMs} ms，請檢查 GAS Web App 部署權限、網路或 Webhook/API 是否回應。`); throw error; }).finally(() => clearTimeout(timer)); }
-  async function 解析回應(response){ const text = await response.text(); if (!response.ok) throw new Error(`HTTP ${response.status}：${text.slice(0,220)}`); try { return JSON.parse(text); } catch(e) { return { 成功:false, success:false, 訊息:'GAS 回傳不是 JSON', 原始回應:text.slice(0,800) }; } }
-  function 是失敗回應(res){ if (!res || typeof res !== 'object') return true; if (res.成功 === false || res.success === false || res.ok === false) return true; const msg = String(res.訊息 || res.message || res.error || res.原始回應 || ''); return /UNKNOWN_ACTION|Unknown action|找不到|未接入|沒有.*動作|不支援|未部署/.test(msg); }
-  async function GET(action, payload, options){ const url = 建立網址(action, payload); const timeoutMs = Number(options?.timeoutMs || 預設逾時); return 逾時Fetch(url, { method:'GET', cache:'no-store', mode:'cors', credentials:'omit' }, timeoutMs).then(解析回應); }
-  function 表單送出(action, payload, reason){
-    const base = 取得GAS網址(); if (!base) throw new Error('尚未設定 GAS Web App URL。');
-    const bodyObj = 建立BodyObj(action, payload); const iframeName = 'gas_submit_' + Date.now() + '_' + Math.floor(Math.random()*10000);
-    const iframe = document.createElement('iframe'); iframe.name = iframeName; iframe.style.cssText = 'position:absolute;width:1px;height:1px;left:-9999px;top:-9999px;opacity:0;border:0;';
-    const form = document.createElement('form'); const url = new URL(base); url.searchParams.set('action', action); url.searchParams.set('動作', action); url.searchParams.set('_ts', String(Date.now())); url.searchParams.set('spreadsheetId', 正式主資料庫ID); url.searchParams.set('正式主資料庫ID', 正式主資料庫ID);
-    form.method = 'POST'; form.action = url.toString(); form.target = iframeName; form.acceptCharset = 'UTF-8'; form.style.display = 'none';
-    function add(name, value){ const input = document.createElement('input'); input.type = 'hidden'; input.name = name; input.value = value === undefined || value === null ? '' : (typeof value === 'object' ? JSON.stringify(value) : String(value)); form.appendChild(input); }
-    Object.keys(bodyObj).forEach(k => add(k, bodyObj[k])); const json = JSON.stringify(bodyObj); if (json.length < 220000) { add('payload', json); add('資料', json); add('json', json); }
-    document.body.appendChild(iframe); document.body.appendChild(form); form.submit(); setTimeout(() => { try { form.remove(); iframe.remove(); } catch(e){} }, 15000);
-    return Promise.resolve({ 成功:true, success:true, opaque:true, transport:'hidden_form_post', action:action, 訊息:'已使用表單通道送出至 GAS；此模式避開 iOS/Safari FetchEvent Load failed。請以正式主資料庫寫入結果為準。', 原因:reason || '' });
-  }
-  async function POST_NO_CORS(action, payload, reason){ const base = 取得GAS網址(); if (!base) throw new Error('尚未設定 GAS Web App URL。'); const url = new URL(base); url.searchParams.set('action', action); url.searchParams.set('動作', action); url.searchParams.set('_ts', String(Date.now())); url.searchParams.set('spreadsheetId', 正式主資料庫ID); const body = 建立表單Body(action, payload); try { await fetch(url.toString(), { method:'POST', cache:'no-store', mode:'no-cors', credentials:'omit', headers:{ 'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8' }, body }); return { 成功:true, success:true, opaque:true, transport:'no_cors_post', action:action, 訊息:'已使用 no-cors 通道送出至 GAS；請以正式主資料庫為準。', 原因:reason || '' }; } catch(e) { return 表單送出(action, payload, 'no-cors 也失敗：' + (e.message || String(e))); } }
-  async function POST(action, payload, options){
-    const base = 取得GAS網址(); if (!base) throw new Error('尚未設定 GAS Web App URL。');
-    const url = new URL(base); url.searchParams.set('action', action); url.searchParams.set('動作', action); url.searchParams.set('_ts', String(Date.now())); url.searchParams.set('spreadsheetId', 正式主資料庫ID); url.searchParams.set('正式主資料庫ID', 正式主資料庫ID);
-    const timeoutMs = Number(options?.timeoutMs || 預設逾時); const formBody = 建立表單Body(action, payload);
-    try { const res = await 逾時Fetch(url.toString(), { method:'POST', cache:'no-store', mode:'cors', credentials:'omit', headers:{ 'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8' }, body: formBody }, timeoutMs).then(解析回應); if (!是失敗回應(res)) return res; try { const getRes = await GET(action, payload, { timeoutMs }); if (!是失敗回應(getRes)) return getRes; return POST_NO_CORS(action, payload, 'POST/GET 都有回應但不是成功：' + (getRes.訊息 || getRes.message || '')); } catch(getError) { return POST_NO_CORS(action, payload, 'POST 回應非成功，GET 失敗：' + getError.message); } } catch (postError) { try { const getRes = await GET(action, payload, { timeoutMs }); if (!是失敗回應(getRes)) return getRes; return POST_NO_CORS(action, payload, 'POST 失敗，GET 回應非成功：' + (getRes.訊息 || getRes.message || '')); } catch (getError) { return POST_NO_CORS(action, payload, `POST/GET fetch 均失敗：${postError.message}；${getError.message}`); } }
-  }
-  async function 呼叫(action, payload, options){ const method = String(options?.method || 'GET').toUpperCase(); if (method === 'POST') return POST(action, payload, options); return GET(action, payload, options); }
-  async function 取得報工初始資料(){ return 呼叫(設定.API_ACTIONS?.取得報工作業v2初始資料 || '取得報工作業v2初始資料', { spreadsheetId: 正式主資料庫ID, 正式主資料庫ID: 正式主資料庫ID }, { timeoutMs: Number(設定.API_TIMEOUT_MS || 預設逾時) }); }
-  async function 寫入報工(payload){ return 呼叫(設定.API_ACTIONS?.寫入報工作業v2 || '寫入報工作業v2', payload, { method:'POST', timeoutMs: Number(設定.API_TIMEOUT_MS || 預設逾時) }); }
-  async function 寫入不良紀錄(payload){ return 呼叫(設定.API_ACTIONS?.寫入不良紀錄v2 || '寫入不良紀錄v2', payload, { method:'POST', timeoutMs: Number(設定.API_TIMEOUT_MS || 預設逾時) }); }
-  window.GAS橋接器 = { 取得GAS網址, 建立網址, 呼叫, GET, POST, 取得報工初始資料, 寫入報工, 寫入不良紀錄, 正式主資料庫ID };
+'use strict';
+const GAS_URL='https://script.google.com/macros/s/AKfycbwOi-xjKoMD9jVq4HrHBvh7k1DCn70lAPAJiqaWJhvH70PbuRo4ciopCjYcytIalaW4/exec';
+const SS='19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
+window.PWA_CONFIG=window.PWA_CONFIG||{};
+window.PWA_CONFIG.GAS_WEB_APP_URL=window.PWA_CONFIG.GAS_WEB_APP_URL||GAS_URL;
+window.PWA_CONFIG.SPREADSHEET_ID=SS;window.PWA_CONFIG.正式主資料庫ID=SS;
+const 設定=window.PWA_CONFIG;let CACHE=null;
+function gas(){return String(設定.GAS_WEB_APP_URL||GAS_URL).trim().replace(/\?.*$/,'')||GAS_URL}
+function qp(action,payload){payload=Object.assign({spreadsheetId:SS,正式主資料庫ID:SS,主資料庫ID:SS},payload||{});const u=new URL(gas());u.searchParams.set('action',action);u.searchParams.set('動作',action);u.searchParams.set('_ts',Date.now());Object.keys(payload).forEach(k=>{const v=payload[k];if(v!=null)u.searchParams.set(k,typeof v==='object'?JSON.stringify(v):String(v))});return u.toString()}
+function body(action,payload){payload=Object.assign({spreadsheetId:SS,正式主資料庫ID:SS,主資料庫ID:SS},payload||{}, {action,動作:action,_ts:String(Date.now())});const s=new URLSearchParams();Object.keys(payload).forEach(k=>{const v=payload[k];if(v!=null)s.set(k,typeof v==='object'?JSON.stringify(v):String(v))});const j=JSON.stringify(payload);if(j.length<220000){s.set('payload',j);s.set('資料',j);s.set('json',j)}return s.toString()}
+async function parse(r){const t=await r.text();if(!r.ok)throw new Error('HTTP '+r.status);try{return JSON.parse(t)}catch(e){return{成功:false,success:false,訊息:'GAS回傳不是JSON',原始回應:t.slice(0,300)}}}
+function bad(r){if(!r||typeof r!=='object')return true;if(r.成功===false||r.success===false||r.ok===false)return true;return/UNKNOWN_ACTION|找不到|未接入|不支援|未部署/.test(String(r.訊息||r.message||r.error||r.原始回應||''))}
+async function GET(action,payload,opt){return fetch(qp(action,payload),{method:'GET',cache:'no-store',mode:'cors',credentials:'omit'}).then(parse)}
+async function POST(action,payload,opt){const u=new URL(gas());u.searchParams.set('action',action);u.searchParams.set('動作',action);u.searchParams.set('_ts',Date.now());u.searchParams.set('spreadsheetId',SS);try{const r=await fetch(u.toString(),{method:'POST',cache:'no-store',mode:'cors',credentials:'omit',headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},body:body(action,payload)}).then(parse);if(!bad(r))return r}catch(e){}try{const g=await GET(action,payload,opt);if(!bad(g))return g}catch(e){}try{await fetch(u.toString(),{method:'POST',cache:'no-store',mode:'no-cors',credentials:'omit',headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},body:body(action,payload)});return{成功:true,success:true,opaque:true,transport:'no_cors_post',訊息:'已送出至GAS；請以正式主資料庫寫入結果為準。'}}catch(e){throw e}}
+async function 呼叫(action,payload,opt){return String(opt&&opt.method||'GET').toUpperCase()==='POST'?POST(action,payload,opt):GET(action,payload,opt)}
+function v(o,ks){o=o||{};for(const k of ks){const x=o[k];if(x!=null&&String(x).trim()!=='')return String(x).trim()}return''}
+function mid(s){return String(s||'').split(/[、,，;；/\s]+/).map(x=>x.trim().replace(/\.0$/,'')).filter(Boolean)}
+async function sheet(name){const url='https://docs.google.com/spreadsheets/d/'+SS+'/gviz/tq?tqx=out:json&sheet='+encodeURIComponent(name)+'&_ts='+Date.now();const t=await fetch(url,{cache:'no-store'}).then(r=>r.text());const a=t.indexOf('{'),b=t.lastIndexOf('}');if(a<0||b<a)throw new Error('讀不到分頁 '+name);const d=JSON.parse(t.slice(a,b+1));const h=(d.table.cols||[]).map((c,i)=>String(c.label||c.id||('欄'+(i+1))).trim());return(d.table.rows||[]).map(row=>{const o={};(row.c||[]).forEach((c,i)=>{if(h[i])o[h[i]]=c?(c.f!==undefined?c.f:c.v):''});return o}).filter(o=>Object.values(o).some(x=>String(x||'').trim()!==''))}
+function photos(rows){const m={人員:{},產品:{},機台:{}};(rows||[]).forEach(r=>{const vals=Object.values(r);const type=v(r,['類型','照片主鍵'])||vals[0]||'';const id=v(r,['對應ID','工號','產品編號','機台編號'])||vals[1]||'';const url=v(r,['照片網址','縮圖網址','網址','檔案ID'])||vals.find(x=>String(x||'').startsWith('http'))||'';if(m[type]&&id&&String(url).startsWith('http'))m[type][id]=url});return m}
+async function live(){if(CACHE)return CACHE;const raw={};for(const [k,n] of Object.entries({人員:'01_人員主檔',產品:'02_產品主檔',機台:'03_機台主檔',途程:'08_工站途程機台主檔',不良:'05_不良代碼主檔',照片:'06_照片資料庫'})){try{raw[k]=await sheet(n)}catch(e){raw[k]=[]}}const ph=photos(raw.照片);const people=(raw.人員||[]).map(p=>{const id=v(p,['工號','員工編號']);const u=v(p,['照片網址','縮圖網址'])||ph.人員[id]||'';return Object.assign({},p,{工號:id,姓名:v(p,['姓名','Name']),班別:v(p,['班別'])||'早班',啟用:v(p,['啟用'])||'是',照片網址:u,縮圖網址:u})}).filter(p=>p.工號||p.姓名);const products=(raw.產品||[]).map(p=>{const id=v(p,['產品編號','料號']);const u=v(p,['照片網址','縮圖網址'])||ph.產品[id]||'';return Object.assign({},p,{產品編號:id,客戶品號:v(p,['客戶品號','客戶料號']),品名:v(p,['品名','產品名稱']),照片網址:u,縮圖網址:u})}).filter(p=>p.產品編號);const P={};products.forEach(p=>P[p.產品編號]=p);const machines=(raw.機台||[]).map(m=>{const id=v(m,['機台編號','主機台','設備編號']).replace(/\.0$/,'');const u=v(m,['照片網址','縮圖網址'])||ph.機台[id]||'';return Object.assign({},m,{機台編號:id,主機台:id,機台名稱:v(m,['機台名稱','設備名稱'])||('機台'+id),設備名稱:v(m,['機台名稱','設備名稱'])||('機台'+id),照片網址:u,縮圖網址:u})}).filter(m=>m.機台編號);const M={};machines.forEach(m=>M[m.機台編號]=m);const routes=(raw.途程||[]).map(r=>{const pid=v(r,['產品編號','料號']);const p=P[pid]||{};const ids=mid(v(r,['機台編號','主機台','主機台編號']));const pu=p.照片網址||ph.產品[pid]||'';return Object.assign({},r,{產品編號:pid,客戶品號:v(r,['客戶品號','客戶料號'])||p.客戶品號||'',品名:v(r,['品名','產品名稱'])||p.品名||'',報工工站名稱:v(r,['報工工站名稱','工站名稱','工站','工序名稱']),工站名稱:v(r,['工站名稱','報工工站名稱','工站','工序名稱']),工序範圍:v(r,['工序範圍','工序編號_最終','工序編號','工序']),主機台:ids[0]||'',機台編號:ids.join('、'),機台清單:ids.map(id=>({機台編號:id,主機台:id,設備名稱:(M[id]&&M[id].設備名稱)||('機台'+id),機台名稱:(M[id]&&M[id].機台名稱)||('機台'+id),照片網址:(M[id]&&M[id].照片網址)||'',縮圖網址:(M[id]&&M[id].縮圖網址)||''})),產品照片網址:pu,產品縮圖網址:pu})}).filter(r=>r.產品編號);const ng={Z:[],Y:[]};(raw.不良||[]).forEach(d=>{const code=v(d,['不良代碼','代碼']);const name=v(d,['不良名稱','名稱','不良原因']);const cat=(v(d,['分類'])||code.slice(0,1)||'Z').toUpperCase();if(!ng[cat])ng[cat]=[];if(code||name)ng[cat].push({代碼:code,名稱:name,英文名稱:v(d,['英文名稱'])})});CACHE={成功:true,success:true,人員:people,people,產品:products,products,機台:machines,machines,報工工站群組:routes,routes,不良原因:ng,不良代號:raw.不良||[],defects:raw.不良||[],班別清單:[{名稱:'早班',值:'早班'},{名稱:'中班',值:'中班'},{名稱:'大夜班',值:'大夜班'}],異常類型:['無異常','支援調度','材質異常','換刀','機台停機','待料','品質確認','其他'],筆數:{人員:people.length,產品:products.length,機台:machines.length,工站機台關聯:machines.length,報工工站群組:routes.length,不良原因:(raw.不良||[]).length},訊息:'正式主資料庫即時讀取完成'};return CACHE}
+function merge(r,s){r=Object.assign({},r||{});if(!Array.isArray(r.人員)||!r.人員.length)r.人員=s.人員||[];r.people=r.人員;if(!Array.isArray(r.機台)||!r.機台.length)r.機台=s.機台||[];r.machines=r.機台;if(!Array.isArray(r.產品)||!r.產品.length)r.產品=s.產品||[];r.products=r.產品;const a=Array.isArray(r.報工工站群組)?r.報工工站群組.length:0,b=Array.isArray(s.報工工站群組)?s.報工工站群組.length:0;if(b>a)r.報工工站群組=s.報工工站群組;r.routes=r.報工工站群組;const has=r.不良原因&&((r.不良原因.Z||[]).length||(r.不良原因.Y||[]).length);if(!has)r.不良原因=s.不良原因;if(!Array.isArray(r.不良代號)||!r.不良代號.length)r.不良代號=s.不良代號||[];r.defects=r.不良代號;r.班別清單=r.班別清單||s.班別清單;r.異常類型=r.異常類型||s.異常類型;r.筆數=Object.assign({},r.筆數||{},s.筆數||{});r.成功=true;r.success=true;return r}
+async function 取得報工初始資料(){let r={};try{r=await 呼叫((設定.API_ACTIONS&&設定.API_ACTIONS.取得報工作業v2初始資料)||'取得報工作業v2初始資料',{spreadsheetId:SS,正式主資料庫ID:SS})}catch(e){r={成功:false,success:false,訊息:e.message||String(e)}}try{if(!Array.isArray(r.人員)||!r.人員.length||!r.不良原因||!(r.不良原因.Z||[]).length)r=merge(r,await live())}catch(e){r.訊息=(r.訊息||'')+'；主資料即時讀取失敗：'+(e.message||String(e))}return r}
+async function 寫入報工(p){return 呼叫((設定.API_ACTIONS&&設定.API_ACTIONS.寫入報工作業v2)||'寫入報工作業v2',p,{method:'POST'})}
+async function 寫入不良紀錄(p){return 呼叫((設定.API_ACTIONS&&設定.API_ACTIONS.寫入不良紀錄v2)||'寫入不良紀錄v2',p,{method:'POST'})}
+window.GAS橋接器={取得GAS網址:gas,建立網址:qp,呼叫,GET,POST,取得報工初始資料,寫入報工,寫入不良紀錄,正式主資料庫ID:SS,live};
 })();
