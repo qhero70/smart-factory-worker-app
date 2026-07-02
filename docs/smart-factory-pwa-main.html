@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0b74ff">
+<meta http-equiv="Cache-Control" content="no-store,no-cache,must-revalidate,max-age=0">
+<title>智慧工廠 PWA 總入口｜製造部中央作戰指揮中心</title>
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:linear-gradient(180deg,#06142c,#eaf3ff 36%,#f8fbff);font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC','Microsoft JhengHei',system-ui,sans-serif;color:#0f172a}.hero{color:white;padding:22px 16px 18px;background:linear-gradient(135deg,#0b3a75,#0b74ff,#06b6d4);position:sticky;top:0;z-index:10;box-shadow:0 12px 30px rgba(2,6,23,.25)}.hero h1{margin:0;font-size:24px;font-weight:1000;letter-spacing:.5px}.hero p{margin:6px 0 0;font-weight:800;line-height:1.55}.wrap{max-width:1180px;margin:0 auto;padding:16px}.card{background:white;border:1px solid #dbeafe;border-radius:24px;padding:16px;margin:14px 0;box-shadow:0 16px 40px rgba(15,23,42,.10)}h2{font-size:19px;margin:0 0 12px;font-weight:1000}.status{white-space:pre-wrap;line-height:1.6;border-radius:18px;padding:13px;background:#071225;color:#e0f2fe;font-weight:800}.ok{background:#ecfdf5!important;color:#166534!important;border:1px solid #bbf7d0}.bad{background:#fff1f2!important;color:#991b1b!important;border:1px solid #fecdd3}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.tile{display:block;text-decoration:none;color:#0f172a;background:linear-gradient(180deg,#ffffff,#eef7ff);border:1px solid #dbeafe;border-radius:22px;padding:16px;min-height:120px;box-shadow:0 10px 24px rgba(15,23,42,.08)}.tile b{display:block;font-size:18px;margin-bottom:8px}.tile span{display:block;color:#475569;line-height:1.55;font-weight:700}.tag{display:inline-block;margin-top:12px;background:#dbeafe;color:#0b3a75;border-radius:999px;padding:6px 10px;font-size:12px;font-weight:1000}.danger{background:#fff7ed}.disabled{opacity:.55;filter:grayscale(.2)}input{width:100%;border:1px solid #cfe0f5;border-radius:15px;padding:12px;font-size:14px;font-weight:800}.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.btn{border:0;border-radius:15px;padding:12px 14px;font-weight:1000;cursor:pointer}.primary{background:linear-gradient(135deg,#0b74ff,#06b6d4);color:#fff}.dark{background:#0f172a;color:#fff}.light{background:#e8f0ff;color:#0b3a75}.note{font-size:13px;color:#64748b;line-height:1.65;font-weight:700}.mini{font-size:12px;color:#64748b;line-height:1.6}.lock{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:#f1f5f9;border-radius:12px;padding:10px;overflow:auto}.footer{padding:18px;text-align:center;color:#64748b;font-size:12px}@media(max-width:760px){.hero h1{font-size:21px}.grid{grid-template-columns:1fr}.tile{min-height:auto}.btn{flex:1 1 45%}}
+</style>
+</head>
+<body>
+<header class="hero">
+  <h1>🏭 智慧工廠 PWA 總入口</h1>
+  <p>全部現場操作以 PWA 為主｜GAS 只當 API｜Google Sheets 只當正式資料庫</p>
+</header>
+<main class="wrap">
+  <section class="card">
+    <h2>正式主資料庫鎖定</h2>
+    <div class="lock">正式主資料庫：⭐智慧工廠主資料庫<br>正式主資料庫ID：19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8<br>狀態：後續清洗、APS、派班、報工扣工單全部只認這一份。</div>
+  </section>
+
+  <section class="card">
+    <h2>1. 後端 API 設定</h2>
+    <input id="apiUrl" placeholder="貼上正式 GAS Web App /exec URL">
+    <div class="row">
+      <button class="btn light" onclick="儲存URL()">儲存 URL</button>
+      <button class="btn primary" onclick="測試API()">GET 測試</button>
+      <button class="btn dark" onclick="初始化主庫()">初始化 / 自檢主庫</button>
+    </div>
+    <p class="note">只要在這裡儲存一次，清洗器、APS、派班、報工 V4 都會共用同一個 API URL。</p>
+    <div id="msg" class="status">等待設定正式 API URL。</div>
+  </section>
+
+  <section class="card">
+    <h2>2. PWA 作業入口</h2>
+    <div class="grid">
+      <a class="tile" href="./production-plan-database-v32.html?v=pwa-main">
+        <b>📥 生產計劃清洗 / APS / 派班</b>
+        <span>上傳每月生產計劃表與 BOM，產生 10_排程需求池、11_自動排程、16_自動派班。</span>
+        <em class="tag">計劃 → 排程 → 派班</em>
+      </a>
+      <a class="tile" href="./work-report-v4-460.html?v=461-pwa-main">
+        <b>🧾 正式現場報工 V4</b>
+        <span>現場只用這個報工入口。報工後同步寫入 19_現場報工回寫，再扣工單進度。</span>
+        <em class="tag">正式報工入口</em>
+      </a>
+      <a class="tile" href="./work-report-deduction-v1.html?v=pwa-main-test">
+        <b>🧪 報工扣工單測試</b>
+        <span>只用於測試 19 → 20 → 21 → 22 的後端扣工單流程，不取代正式報工。</span>
+        <em class="tag">測試工具</em>
+      </a>
+      <a class="tile" href="https://docs.google.com/spreadsheets/d/19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8/edit" target="_blank" rel="noopener">
+        <b>📚 正式主資料庫</b>
+        <span>只用於查看與維護主檔，不作為現場操作入口。</span>
+        <em class="tag">資料庫查看</em>
+      </a>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>3. 主線順序</h2>
+    <div class="status ok">① 生產計劃清洗 → ② 10_排程需求池 → ③ APS自動排程 → ④ 自動派班 → ⑤ 報工 V4 → ⑥ 報工扣工單 → ⑦ 入庫建議 / 異常警示</div>
+    <p class="mini">標準：現場人員只開 PWA；管理者必要時才看 Google Sheets；GAS 不當操作畫面，只當 API。</p>
+  </section>
+</main>
+<div class="footer">智慧製造中央作戰指揮中心｜PWA Main</div>
+<script>
+const KEY='智慧製造_GAS資料庫_API_URL';
+const 正式主資料庫ID='19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
+function $(id){return document.getElementById(id)}
+function show(t,type){const m=$('msg');m.textContent=t;m.className='status '+(type==='ok'?'ok':type==='bad'?'bad':'')}
+function api(){let u=String($('apiUrl').value||localStorage.getItem(KEY)||'').trim().replace(/\s+/g,'');if(!u)throw new Error('請貼上正式 GAS Web App /exec URL');if(!u.startsWith('https://script.google.com/macros/s/'))throw new Error('URL 開頭必須是 https://script.google.com/macros/s/');if(!u.endsWith('/exec'))u=u.replace(/\/+$/,'')+'/exec';localStorage.setItem(KEY,u);$('apiUrl').value=u;return u}
+function ok(o){return !!(o&&(o.ok===true||o.success===true||o.成功===true))}
+async function get(action){const r=await fetch(api()+'?action='+encodeURIComponent(action)+'&t='+Date.now(),{redirect:'follow'});const tx=await r.text();try{return JSON.parse(tx)}catch(e){return{ok:false,error:'回傳不是 JSON',raw:tx.slice(0,800)}}}
+function 儲存URL(){try{show('✅ 已儲存正式 API URL：\n'+api(),'ok')}catch(e){show('❌ '+e.message,'bad')}}
+async function 測試API(){try{show('📡 GET 測試中...');const a=await get('status');if(!ok(a))throw new Error(a.錯誤||a.error||a.message||'API 回傳失敗');const id=a.正式主資料庫ID||'';if(id&&id!==正式主資料庫ID)throw new Error('API 有通，但不是正式主資料庫。回傳ID：'+id);show('✅ API 測試成功，已鎖定正式主庫：\n'+JSON.stringify(a,null,2),'ok')}catch(e){show('❌ GET 測試失敗：\n'+e.message,'bad')}}
+async function 初始化主庫(){try{show('⚙️ 初始化 / 自檢正式主庫中...');const a=await get('初始化');if(!ok(a))throw new Error(a.錯誤||a.error||a.message||'初始化失敗');show('✅ 初始化完成：\n'+JSON.stringify(a,null,2).slice(0,1400),'ok')}catch(e){show('❌ 初始化失敗：\n'+e.message,'bad')}}
+window.addEventListener('DOMContentLoaded',()=>{$('apiUrl').value=localStorage.getItem(KEY)||''})
+</script>
+</body>
+</html>
