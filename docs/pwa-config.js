@@ -3,7 +3,7 @@ Object.assign(window.PWA_CONFIG,{
   GAS_WEB_APP_URL:'https://script.google.com/macros/s/AKfycbwOi-xjKoMD9jVq4HrHBvh7k1DCn70lAPAJiqaWJhvH70PbuRo4ciopCjYcytIalaW4/exec',
   APP_NAME:'NEXUS OS · 工業 5.0 智慧製造矩陣',
   APP_SHORT_NAME:'化新精密',
-  VERSION:'v4.5.5_報工作業V4_正式主資料庫對接',
+  VERSION:'v4.7.0_報工作業V4_觸控工站機台規則',
   SPREADSHEET_ID:'19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8',
   正式主資料庫ID:'19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8',
   API_TIMEOUT_MS:12000,
@@ -23,7 +23,7 @@ Object.assign(window.PWA_CONFIG,{
 (function(){
   'use strict';
   var 設定=window.PWA_CONFIG||{};
-  var v='455';
+  var v='470';
   var path=(location.pathname||'').toLowerCase();
   var title=(document.title||'').toLowerCase();
   var isV4Report=/work-report-v4(?:-\d+)?\.html$/.test(path)||(/work-report-v2\.html$/.test(path)&&/v4/.test(title));
@@ -42,7 +42,7 @@ Object.assign(window.PWA_CONFIG,{
   async function POST(action,payload,options){try{return await fetch(buildURL(action,{}),{method:'POST',cache:'no-store',mode:'cors',credentials:'omit',headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},body:body(action,payload)}).then(parse)}catch(e){try{return await GET(action,payload,options)}catch(e2){return formPost(action,payload,e.message+'；'+e2.message)}}}
   async function 呼叫(action,payload,options){return String(options&&options.method||'GET').toUpperCase()==='POST'?POST(action,payload,options):GET(action,payload,options)}
   if(!window.GAS橋接器){window.GAS橋接器={取得GAS網址:baseURL,建立網址:buildURL,呼叫:呼叫,GET:GET,POST:POST,取得報工初始資料:function(){return 呼叫(設定.API_ACTIONS.取得報工作業v2初始資料,{spreadsheetId:主資料庫(),正式主資料庫ID:主資料庫()},{method:'GET'})},寫入報工:function(p){return 呼叫(設定.API_ACTIONS.寫入報工作業v2,p,{method:'POST'})},寫入不良紀錄:function(p){return 呼叫(設定.API_ACTIONS.寫入不良紀錄v2,p,{method:'POST'})}}}
-  if(isV4Report){load('./gas-bridge.js?v='+v,'GAS橋接器V4外部備援');return}
+  if(isV4Report){load('./gas-bridge.js?v='+v,'GAS橋接器V4外部備援');load('./work-report-v4-rules-470.js?v='+v,'報工V4正式規則修復470');return}
   if(isLegacyReport){css();load('./work-report-v2-hotfix-245.js?v='+v,'報工穩定熱修復245');load('./work-report-v2-dispatch-addon-248.js?v='+v,'報工今日派班外掛248');load('./work-report-v2-dispatch-guard-ui-249.js?v='+v,'報工今日派班防呆提示249');load('./work-report-v2-manager-entry-250.js?v='+v,'報工主管戰情入口250');load('./work-report-v2-photo-fix-252.js?v='+v,'報工機台照片修復252');load('./work-report-v2-task-prefill-253.js?v='+v,'今日任務帶入報工253');load('./work-report-v2-dispatch-card-261.js?v='+v,'報工派班任務卡261_顯示用');load('./work-report-v2-dispatch-submit-262.js?v='+v,'報工派班送出合併262')}
-  if(isApp){load('./nexus-quick-module-258.js?v='+v,'NEXUS主線快速模組258');load('./nexus-mainline-get-shim-259.js?v='+v,'NEXUS主線GET覆寫259')}
+  if(isApp){load('./nexus-quick-module-258.js?v='+v,'NEXUS主線快速模組258');load('./nexus-mainline-get-shim-259.js?v='+v,'NEXUS主線GET覆寫259');load('./work-report-v4-home-link-470.js?v='+v,'首頁報工V4模組連結470')}
 })();
