@@ -3,7 +3,7 @@ Object.assign(window.PWA_CONFIG,{
   GAS_WEB_APP_URL:'https://script.google.com/macros/s/AKfycbwOi-xjKoMD9jVq4HrHBvh7k1DCn70lAPAJiqaWJhvH70PbuRo4ciopCjYcytIalaW4/exec',
   APP_NAME:'NEXUS OS · 工業 5.0 智慧製造矩陣',
   APP_SHORT_NAME:'化新精密',
-  VERSION:'v4.7.0_報工作業V4_觸控工站機台規則',
+  VERSION:'v4.7.5_報工作業V4_照片滿版與資料補齊',
   SPREADSHEET_ID:'19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8',
   正式主資料庫ID:'19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8',
   API_TIMEOUT_MS:12000,
@@ -23,7 +23,7 @@ Object.assign(window.PWA_CONFIG,{
 (function(){
   'use strict';
   var 設定=window.PWA_CONFIG||{};
-  var v='470';
+  var v='475';
   var path=(location.pathname||'').toLowerCase();
   var title=(document.title||'').toLowerCase();
   var isV4Report=/work-report-v4(?:-\d+)?\.html$/.test(path)||(/work-report-v2\.html$/.test(path)&&/v4/.test(title));
