@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>製一組 報工表單 V4.7.7</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f0f4ff}#v4frame{width:100%;height:100%;border:0;display:block;background:#f0f4ff}.boot{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:5;background:#f0f4ff;color:#1967d2;font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC','Microsoft JhengHei',sans-serif;font-weight:900}.boot.hide{display:none}
+</style>
+</head>
+<body>
+<div id="boot" class="boot">報工作業 V4.7.7 載入中...</div>
+<iframe id="v4frame" src="./work-report-v4.html?base=477"></iframe>
+<script>
+(function(){
+  var frame=document.getElementById('v4frame');
+  var boot=document.getElementById('boot');
+  function inject(doc,src,id,cb){
+    if(doc.getElementById(id)){cb&&cb();return;}
+    var s=doc.createElement('script');
+    s.id=id;
+    s.src=src;
+    s.async=false;
+    s.onload=function(){cb&&cb();};
+    doc.head.appendChild(s);
+  }
+  frame.addEventListener('load',function(){
+    try{
+      var w=frame.contentWindow;
+      var d=w.document;
+      inject(d,'./gas-bridge.js?v=477','v4Bridge477',function(){
+        inject(d,'./work-report-v4-rules-470.js?v=477','v4Rules477',function(){
+          setTimeout(function(){try{if(typeof w.reloadData==='function')w.reloadData();}catch(e){}},300);
+          setTimeout(function(){boot.classList.add('hide');},600);
+        });
+      });
+    }catch(e){boot.textContent='V4.7.7 載入失敗，請重新整理';}
+  });
+})();
+</script>
+</body>
+</html>
