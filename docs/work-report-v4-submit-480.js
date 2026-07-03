@@ -1,12 +1,46 @@
-/* V4.8.0：修復 GitHub Pages 送出後未落表。只處理送出寫入通道，不改畫面流程。 */
+/* V4.8.1：修復 GitHub Pages 送出後未落表，並在送出前補齊客戶品號 / 工序 / 機台清單 / 主機台。只處理送出寫入通道，不改畫面流程。 */
 (function(){
 'use strict';
 var GAS_URL='https://script.google.com/macros/s/AKfycbwOi-xjKoMD9jVq4HrHBvh7k1DCn70lAPAJiqaWJhvH70PbuRo4ciopCjYcytIalaW4/exec';
 var SS='19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
 function E(id){return document.getElementById(id)}
 function s(v){return String(v==null?'':v)}
+function norm(v){return s(v).replace(/[^A-Za-z0-9]/g,'').toUpperCase()}
 function nowId(){var d=new Date(),z=function(n){return String(n).padStart(2,'0')};return d.getFullYear()+z(d.getMonth()+1)+z(d.getDate())+'-'+z(d.getHours())+z(d.getMinutes())+z(d.getSeconds())}
 function today(){var d=new Date(),z=function(n){return String(n).padStart(2,'0')};return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate())}
+function machineIds(gr){
+  var ids=[];
+  if(gr&&Array.isArray(gr.機台清單))gr.機台清單.forEach(function(m){ids.push(s((m&&typeof m==='object')?(m.機台編號||m.主機台||m.設備編號):m));});
+  if(!ids.length)ids=s((gr&&gr.機台編號清單)||(gr&&gr.機台編號)||(gr&&gr.主機台)||'').split(/[、,，;；\s]+/);
+  var seen={};return ids.map(function(x){return s(x).trim();}).filter(Boolean).filter(function(x){return !seen[x]&&(seen[x]=1);});
+}
+function findRoute(d){
+  var groups=(window.DB&&Array.isArray(DB.workstationGroups))?DB.workstationGroups:[];
+  var pid=norm(d.產品編號), pname=s(d.品名).trim(), station=s(d.報工工站名稱||d.工站名稱).trim();
+  var list=groups.filter(function(g){return (pid&&norm(g.產品編號)===pid)||(!pid&&pname&&s(g.品名).trim()===pname);});
+  if(station){
+    var exact=list.find(function(g){var gs=s(g.報工工站名稱||g.工站名稱).trim();return gs===station;});
+    if(exact)return exact;
+    var fuzzy=list.find(function(g){var gs=s(g.報工工站名稱||g.工站名稱).trim();return gs&&(gs.indexOf(station)>=0||station.indexOf(gs)>=0);});
+    if(fuzzy)return fuzzy;
+  }
+  return list[0]||null;
+}
+function enrichData(d){
+  d=Object.assign({},d||{});
+  var gr=findRoute(d)||{};
+  var ids=machineIds(gr);
+  d.產品編號=d.產品編號||gr.產品編號||'';
+  d.客戶品號=d.客戶品號||gr.客戶品號||'';
+  d.品名=d.品名||gr.品名||'';
+  d.報工工站名稱=d.報工工站名稱||gr.報工工站名稱||gr.工站名稱||'';
+  d.工站名稱=d.工站名稱||d.報工工站名稱;
+  d.工序=d.工序||gr.工序範圍||gr.工序||gr.工序編號_最終||'';
+  d.機台清單=d.機台清單||ids.join('、');
+  d.主機台=d.主機台||E('mainMachineSelect')&&E('mainMachineSelect').value||gr.主機台||ids[0]||'';
+  d.機台編號=d.機台編號||d.主機台;
+  return d;
+}
 function formPost(action,payload){
   payload=Object.assign({spreadsheetId:SS,正式主資料庫ID:SS,主資料庫ID:SS},payload||{});
   payload.action=action;payload.動作=action;payload._ts=String(Date.now());
@@ -27,7 +61,7 @@ function patch(){
  if(window.__v4Submit480)return;window.__v4Submit480=1;
  if(typeof window.submitReport!=='function')return;
  window.submitReport=function(){
-   var d=buildReportData();
+   var d=enrichData(buildReportData());
    var err=validateReport(d);
    if(err){roar('⚠️','驗證失敗 / Validation Failed',err,'error');return;}
    updatePreview();updateConfirmSummary();
@@ -38,13 +72,13 @@ function patch(){
    var reportNo=d.報工編號||('RPT-'+nowId()+'-'+s(d.工號).toUpperCase()+'-'+s(d.產品編號).toUpperCase());
    d.報工編號=reportNo;d.作業日=d.作業日||today();d.寫入時間=new Date().toISOString();
    var payload=(typeof V4資料對接_轉V3報工Payload_==='function')?V4資料對接_轉V3報工Payload_(d,(typeof V4資料對接_讀今日任務_==='function'?V4資料對接_讀今日任務_():{})||{}):d;
-   payload.報工編號=reportNo;payload.作業日=payload.作業日||d.作業日;payload.寫入時間=d.寫入時間;
+   payload=Object.assign({},d,payload,{報工編號:reportNo,作業日:payload.作業日||d.作業日,寫入時間:d.寫入時間});
    postRecord('寫入報工作業v2',payload);
    if(hasDefects){
-     var defectData=buildDefectData(d,reportNo);defectData.報工編號=reportNo;defectData.作業日=d.作業日;
+     var defectData=enrichData(buildDefectData(d,reportNo));defectData.報工編號=reportNo;defectData.作業日=d.作業日;
      postRecord('寫入不良紀錄v2',defectData);
    }
-   try{localStorage.setItem('V4最後送出備份',JSON.stringify({報工:payload,不良:hasDefects?buildDefectData(d,reportNo):null,時間:new Date().toISOString()}));}catch(e){}
+   try{localStorage.setItem('V4最後送出備份',JSON.stringify({報工:payload,不良:hasDefects?enrichData(buildDefectData(d,reportNo)):null,時間:new Date().toISOString()}));}catch(e){}
    setTimeout(function(){
      showSubmitOverlay(false);updateBottomBar();
      roar('✅','報工已送出 / Submitted','報工編號：'+reportNo+'；已送往正式主資料庫 09_報工'+(hasDefects?'、09_不良紀錄':''),'success');
