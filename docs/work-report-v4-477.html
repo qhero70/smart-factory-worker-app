@@ -1,5 +1,19 @@
 <!doctype html>
 <html lang="zh-Hant">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><title>製一組 報工表單 V4.8.0</title><style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f0f4ff}#v4frame{width:100%;height:100%;border:0;display:block;background:#f0f4ff}.boot{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:5;background:#f0f4ff;color:#1967d2;font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC','Microsoft JhengHei',sans-serif;font-weight:900}.boot.hide{display:none}</style></head>
-<body><div id="boot" class="boot">報工作業 V4.8.0 載入中...</div><iframe id="v4frame" src="./work-report-v4.html?base=480"></iframe>
-<script>(function(){var frame=document.getElementById('v4frame'),boot=document.getElementById('boot');function inject(doc,src,id,cb){if(doc.getElementById(id)){cb&&cb();return;}var s=doc.createElement('script');s.id=id;s.src=src;s.async=false;s.onload=function(){cb&&cb();};doc.head.appendChild(s);}function blankQty(){try{var d=frame.contentWindow.document,ids=['totalQty','ngQty'];for(var i=0;i<ids.length;i++){var e=d.getElementById(ids[i]);if(e&&e.value==String(0))e.value=String();if(e&&e.placeholder==String(0))e.placeholder=String();}var q=d.getElementsByClassName('qty-input');for(var j=0;j<q.length;j++){if(q[j].value==String(0))q[j].value=String();}}catch(ex){}}frame.addEventListener('load',function(){try{var w=frame.contentWindow,d=w.document;inject(d,'./gas-bridge.js?v=480','v4Bridge480',function(){inject(d,'./work-report-v4-rules-470.js?v=480','v4Rules480',function(){inject(d,'./work-report-v4-submit-480.js?v=480','v4Submit480',function(){setTimeout(function(){try{if(typeof w.reloadData==='function')w.reloadData();}catch(e){}blankQty();},300);setTimeout(blankQty,500);setTimeout(blankQty,900);setTimeout(function(){boot.classList.add('hide');},700);});});});}catch(e){boot.textContent='請重新整理 V4.8.0';}});})();</script></body></html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#1967d2">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="報工V4">
+<title>製一組 報工表單 V4.8.2</title>
+<link rel="manifest" href="./work-report-v4.webmanifest?v=482">
+<style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f0f4ff}#v4frame{width:100%;height:100%;border:0;display:block;background:#f0f4ff}.boot{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:5;background:#f0f4ff;color:#1967d2;font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC','Microsoft JhengHei',sans-serif;font-weight:900}.boot.hide{display:none}</style>
+</head>
+<body>
+<div id="boot" class="boot">報工作業 V4.8.2 PWA 載入中...</div>
+<iframe id="v4frame" src="./work-report-v4.html?base=482"></iframe>
+<script>(function(){var V='482',frame=document.getElementById('v4frame'),boot=document.getElementById('boot');function inject(doc,src,id,cb){if(doc.getElementById(id)){cb&&cb();return}var s=doc.createElement('script');s.id=id;s.src=src;s.async=false;s.onload=function(){cb&&cb()};doc.head.appendChild(s)}function blankQty(){try{var d=frame.contentWindow.document,ids=['totalQty','ngQty'];for(var i=0;i<ids.length;i++){var e=d.getElementById(ids[i]);if(e&&e.value===String(0))e.value='';if(e&&e.placeholder===String(0))e.placeholder=''}var q=d.getElementsByClassName('qty-input');for(var j=0;j<q.length;j++){if(q[j].value===String(0))q[j].value=''}}catch(ex){}}frame.addEventListener('load',function(){try{var w=frame.contentWindow,d=w.document;inject(d,'./pwa-config.js?v='+V,'v4PwaConfig482',function(){inject(d,'./gas-bridge.js?v='+V,'v4Bridge482',function(){inject(d,'./work-report-v4-rules-470.js?v='+V,'v4Rules482',function(){inject(d,'./work-report-v4-submit-482.js?v='+V,'v4Submit482',function(){setTimeout(function(){try{if(typeof w.reloadData==='function')w.reloadData()}catch(e){}blankQty()},300);setTimeout(blankQty,600);setTimeout(blankQty,1000);setTimeout(function(){boot.classList.add('hide')},700)})})})})}catch(e){boot.textContent='請重新整理 V4.8.2'}});try{if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v='+V).catch(function(){})}catch(e){}})();</script>
+</body>
+</html>
