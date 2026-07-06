@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#080d18">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>報工作業 V4｜黑底正式版</title>
-<link rel="manifest" href="./work-report-v4.webmanifest?v=498">
+<title>報工作業 V4｜響應式正式版</title>
+<link rel="manifest" href="./work-report-v4.webmanifest?v=499">
 <style>
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#080d18;color:#e8ecf2;font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC',sans-serif}
 iframe{width:100%;height:100%;border:0;background:#080d18}.boot{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#080d18;color:#4da3ff;font-weight:900;z-index:9}.boot.hide{display:none}
@@ -15,48 +15,22 @@ iframe{width:100%;height:100%;border:0;background:#080d18}.boot{position:fixed;i
 </head>
 <body>
 <div id="boot" class="boot">報工作業 V4 載入中...</div>
-<iframe id="f" src="./work-report-v4.html?v=498&base=498"></iframe>
+<iframe id="f"></iframe>
 <script>
 (function(){
-var V='498';
-var f=document.getElementById('f');
+var V='499';
 var boot=document.getElementById('boot');
-function addJS(d,src,id,cb){if(d.getElementById(id)){cb&&cb();return}var s=d.createElement('script');s.id=id;s.src=src;s.onload=function(){cb&&cb()};s.onerror=function(){cb&&cb()};d.head.appendChild(s)}
-function injectLayoutFix(w,d){try{var old=d.getElementById('safe498');if(old)old.remove();var s=d.createElement('style');s.id='safe498';s.textContent='html,body{overflow-y:auto!important;overflow-x:hidden!important}.app{width:100%!important;max-width:430px!important;margin-left:auto!important;margin-right:auto!important;padding-bottom:176px!important}.topbar{top:0!important;padding-top:54px!important;z-index:80!important}.title h1{font-size:18px!important;line-height:1.15!important}.title p{font-size:11px!important}.status-pill{width:100%!important;justify-content:center!important;line-height:1.25!important}.stepper{position:sticky!important;top:148px!important;z-index:70!important;margin:12px 14px!important}.step .circle{width:34px!important;height:34px!important}.guide-card{position:relative!important;top:auto!important;z-index:1!important;margin:12px 14px 16px!important}.page{padding-left:14px!important;padding-right:14px!important}.person-grid,.product-grid,.machine-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:14px!important;align-items:start!important}.person-card,.product-card,.machine-card{display:block!important;position:relative!important;overflow:hidden!important;width:100%!important;height:auto!important;min-height:0!important;margin:0!important;padding:0!important}.person-card{aspect-ratio:3/4!important}.product-card,.machine-card{aspect-ratio:4/3!important}.card-photo{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;overflow:hidden!important}.card-photo img{width:100%!important;height:100%!important;object-fit:cover!important;object-position:center 28%!important;display:block!important}.card-overlay{position:absolute!important;left:0!important;right:0!important;bottom:0!important;top:auto!important;z-index:3!important;min-height:54px!important;padding:20px 8px 8px!important}.badge{top:8px!important;right:8px!important;z-index:4!important}.toast-stack{position:fixed!important;left:50%!important;right:auto!important;top:118px!important;transform:translateX(-50%)!important;width:calc(100vw - 32px)!important;max-width:430px!important;z-index:120!important}.toast{background:#fff!important;color:#14243a!important;border:1px solid #d7e2f2!important;border-left:6px solid #22c55e!important;text-align:left!important}.toast small{color:#475569!important}.bottom-bar{left:50%!important;right:auto!important;transform:translateX(-50%)!important;width:100%!important;max-width:430px!important;z-index:90!important}.btn{height:58px!important}@media(max-width:360px){.person-grid,.product-grid,.machine-grid{grid-template-columns:1fr!important}}';d.head.appendChild(s);setTimeout(function(){var t=d.querySelector('.topbar'),p=d.querySelector('.stepper');if(t&&p)p.style.top=Math.ceil(t.getBoundingClientRect().height+8)+'px'},260)}catch(e){}}
-function hideBoot(){setTimeout(function(){boot.classList.add('hide')},900)}
-f.addEventListener('load',function(){
-  try{
-    var w=f.contentWindow,d=w.document;
-    injectLayoutFix(w,d);
-    addJS(d,'./pwa-config.js?v='+V,'cfg498',function(){
-      addJS(d,'./gas-bridge.js?v='+V,'bridge498',function(){
-        addJS(d,'./work-report-v4-dark-488.js?v='+V,'dark498',function(){
-          addJS(d,'./work-report-v4-rules-470.js?v='+V,'rules498',function(){
-            addJS(d,'./work-report-v4-overtime-489.js?v='+V,'overtime498',function(){
-              addJS(d,'./work-report-v4-route-strict-490.js?v='+V,'routeStrict498',function(){
-                addJS(d,'./work-report-v4-submit-482.js?v='+V,'submit498',function(){
-                  addJS(d,'./work-report-v4-hotfix-494.js?v='+V,'hotfix498',function(){
-                    injectLayoutFix(w,d);
-                    try{if(w.V4Dark488&&w.V4Dark488.install)w.V4Dark488.install()}catch(e){}
-                    injectLayoutFix(w,d);
-                    try{if(w.V4Rules&&w.V4Rules.boot)w.V4Rules.boot()}catch(e){}
-                    try{if(w.V4Overtime489&&w.V4Overtime489.boot)w.V4Overtime489.boot()}catch(e){}
-                    try{if(w.V4RouteStrict490&&w.V4RouteStrict490.boot)w.V4RouteStrict490.boot()}catch(e){}
-                    try{if(w.V4Hotfix494&&w.V4Hotfix494.boot)w.V4Hotfix494.boot()}catch(e){}
-                    try{if(typeof w.reloadData==='function')w.reloadData()}catch(e){}
-                    setTimeout(function(){injectLayoutFix(w,d)},700);
-                    setTimeout(function(){injectLayoutFix(w,d)},1500);
-                    hideBoot();
-                  });
-                });
-              });
-            });
-          });
-        });
-      });
-    });
-  }catch(e){boot.textContent='報工作業載入失敗，請重新整理';}
-});
+var frame=document.getElementById('f');
+var scriptStack='<script src="./pwa-config.js?v='+V+'"><\/script><script src="./gas-bridge.js?v='+V+'"><\/script><script src="./work-report-v4-dark-488.js?v='+V+'"><\/script><script src="./work-report-v4-rules-470.js?v='+V+'"><\/script><script src="./work-report-v4-overtime-489.js?v='+V+'"><\/script><script src="./work-report-v4-route-strict-490.js?v='+V+'"><\/script><script src="./work-report-v4-submit-482.js?v='+V+'"><\/script><script src="./work-report-v4-hotfix-494.js?v='+V+'"><\/script>';
+var css='<base href="./"><style id="responsive499">html,body{overflow-y:auto!important;overflow-x:hidden!important}.app{width:100%!important;max-width:430px!important;margin:0 auto!important;padding-bottom:132px!important}.topbar{position:relative!important;top:auto!important;padding-top:42px!important;padding-bottom:12px!important}.title h1{font-size:18px!important;line-height:1.1!important}.title p{font-size:11px!important}.status-pill{margin-top:8px!important;line-height:1.2!important}.stepper{position:relative!important;top:auto!important;margin:10px 14px!important;padding:10px 8px!important}.step .circle{width:32px!important;height:32px!important}.guide-card{position:relative!important;top:auto!important;margin:10px 14px 14px!important;padding:12px 14px!important}.guide-title{font-size:17px!important}.guide-desc{font-size:12px!important;line-height:1.35!important}.page{padding-left:14px!important;padding-right:14px!important}.search{height:46px!important}.scan-mini{width:38px!important;height:38px!important}.person-grid,.product-grid,.machine-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;align-items:start!important}.person-card,.product-card,.machine-card{position:relative!important;overflow:hidden!important;width:100%!important;height:116px!important;min-height:116px!important;margin:0!important;padding:0!important;border-radius:16px!important}.product-card,.machine-card{height:112px!important;min-height:112px!important}.card-photo{position:absolute!important;inset:0!important;width:100%!important;height:100%!important}.card-photo img{width:100%!important;height:100%!important;object-fit:cover!important;object-position:center 30%!important;display:block!important}.card-overlay{position:absolute!important;left:0!important;right:0!important;bottom:0!important;top:auto!important;z-index:3!important;padding:24px 8px 8px!important;background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,.86))!important}.ov-name{font-size:17px!important;line-height:1.16!important;font-weight:1000!important;color:#fff!important;text-shadow:0 2px 5px rgba(0,0,0,.7)!important}.ov-code{font-size:14px!important;line-height:1.12!important;font-weight:1000!important;color:#dbeafe!important;text-shadow:0 2px 5px rgba(0,0,0,.7)!important}.badge{top:7px!important;right:7px!important;z-index:4!important;font-size:11px!important;font-weight:1000!important}.toast-stack{position:fixed!important;left:50%!important;right:auto!important;top:118px!important;transform:translateX(-50%)!important;width:calc(100vw - 32px)!important;max-width:430px!important;z-index:120!important}.toast{background:#fff!important;color:#14243a!important;border:1px solid #d7e2f2!important;border-left:6px solid #22c55e!important;text-align:left!important}.toast small{color:#475569!important}.bottom-bar{position:fixed!important;left:50%!important;right:auto!important;bottom:0!important;transform:translateX(-50%)!important;width:100%!important;max-width:430px!important;z-index:100!important;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px))!important}.btn{height:54px!important;font-size:18px!important}@media(max-width:360px){.person-grid,.product-grid,.machine-grid{grid-template-columns:1fr!important}.person-card,.product-card,.machine-card{height:128px!important}}</style>';
+function showError(e){boot.textContent='載入失敗：'+((e&&e.message)||e||'unknown');boot.classList.remove('hide')}
+function hideBoot(){setTimeout(function(){boot.classList.add('hide')},500)}
+fetch('./work-report-v4.html?v='+V,{cache:'no-store'}).then(function(r){return r.text()}).then(function(html){
+  html=html.replace('</head>',css+'</head>');
+  html=html.replace('<script>',scriptStack+'<script>');
+  frame.srcdoc=html;
+  frame.addEventListener('load',function(){hideBoot();try{var w=frame.contentWindow;setTimeout(function(){if(w.V4Dark488&&w.V4Dark488.install)w.V4Dark488.install();if(w.V4Hotfix494&&w.V4Hotfix494.boot)w.V4Hotfix494.boot();},400)}catch(e){}},{once:true});
+}).catch(showError);
 try{if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js?v='+V).catch(function(){})}catch(e){}
 })();
 </script>
