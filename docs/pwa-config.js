@@ -3,7 +3,7 @@ window.PWA_CONFIG=window.PWA_CONFIG||{};
   c.GAS_WEB_APP_URL=['https://script.google.com','/macros/s/','AKfycbzRvly1OV-C80bMmd2ww4BM1XAH9WTyz62VFDnUxVGiO15kzHahbeHZc2bNTSwdFCqBwQ','/exec'].join('');
   c.APP_NAME='NEXUS OS';
   c.APP_SHORT_NAME='化新精密';
-  c.VERSION='v4.8.3';
+  c.VERSION='v4.9.3';
   c.SPREADSHEET_ID='19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
   c.正式主資料庫ID='19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
   c.API_TIMEOUT_MS=15000;
@@ -13,3 +13,40 @@ window.PWA_CONFIG=window.PWA_CONFIG||{};
     SUBMIT_DEFECT:['submitDefectsV4','寫入不良紀錄v4','寫入不良紀錄v2']
   };
 })(window.PWA_CONFIG);
+(function(){
+  function E(id){return document.getElementById(id)}
+  function centerV4(el){
+    if(!el)return;
+    el.classList.remove('hidden','v4-hide');
+    function run(){
+      try{
+        var rect=el.getBoundingClientRect();
+        var vh=window.innerHeight||document.documentElement.clientHeight||0;
+        var current=window.pageYOffset||document.documentElement.scrollTop||document.body.scrollTop||0;
+        var target=current+rect.top-(vh-rect.height)/2;
+        var max=(document.documentElement.scrollHeight||document.body.scrollHeight||0)-vh;
+        if(max<0)max=0;
+        target=Math.max(0,Math.min(target,max));
+        window.scrollTo({top:target,behavior:'smooth'});
+      }catch(e){try{el.scrollIntoView({behavior:'smooth',block:'center',inline:'nearest'});}catch(_e){}}
+    }
+    requestAnimationFrame(function(){setTimeout(run,60);setTimeout(run,220);});
+  }
+  function patch(){
+    window.center=centerV4;
+    if(window.__V4_CENTER_PATCHED__)return;
+    var old=window.selectPerson;
+    if(typeof old!=='function')return;
+    window.__V4_CENTER_PATCHED__=true;
+    window.selectPerson=function(){
+      window.center=centerV4;
+      var r=old.apply(this,arguments);
+      centerV4(E('selectedPersonArea'));
+      setTimeout(function(){centerV4(E('selectedPersonArea'));},260);
+      return r;
+    };
+  }
+  patch();
+  document.addEventListener('DOMContentLoaded',patch);
+  setTimeout(patch,50);setTimeout(patch,300);setTimeout(patch,900);setInterval(patch,1000);
+})();
