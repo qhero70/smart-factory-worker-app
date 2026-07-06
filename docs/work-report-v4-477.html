@@ -28,11 +28,14 @@ f.addEventListener('load',function(){
     var w=f.contentWindow,d=w.document;
     addJS(d,'./pwa-config.js?v='+V,'cfg488',function(){
       addJS(d,'./gas-bridge.js?v='+V,'bridge488',function(){
-        addJS(d,'./work-report-v4-rules-470.js?v='+V,'rules488',function(){
-          addJS(d,'./work-report-v4-submit-482.js?v='+V,'submit488',function(){
-            try{if(w.V4Rules&&w.V4Rules.boot)w.V4Rules.boot()}catch(e){}
-            try{if(typeof w.reloadData==='function')w.reloadData()}catch(e){}
-            hideBoot();
+        addJS(d,'./work-report-v4-dark-488.js?v='+V,'dark488',function(){
+          addJS(d,'./work-report-v4-rules-470.js?v='+V,'rules488',function(){
+            addJS(d,'./work-report-v4-submit-482.js?v='+V,'submit488',function(){
+              try{if(w.V4Dark488&&w.V4Dark488.install)w.V4Dark488.install()}catch(e){}
+              try{if(w.V4Rules&&w.V4Rules.boot)w.V4Rules.boot()}catch(e){}
+              try{if(typeof w.reloadData==='function')w.reloadData()}catch(e){}
+              hideBoot();
+            });
           });
         });
       });
