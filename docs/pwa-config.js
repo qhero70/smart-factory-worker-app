@@ -1,9 +1,9 @@
 window.PWA_CONFIG=window.PWA_CONFIG||{};
 (function(c){
   c.GAS_WEB_APP_URL=['https://script.google.com','/macros/s/','AKfycbzRvly1OV-C80bMmd2ww4BM1XAH9WTyz62VFDnUxVGiO15kzHahbeHZc2bNTSwdFCqBwQ','/exec'].join('');
-  c.APP_NAME='NEXUS OS';
-  c.APP_SHORT_NAME='化新精密';
-  c.VERSION='v4.9.4';
+  c.APP_NAME='化新報工';
+  c.APP_SHORT_NAME='化新報工';
+  c.VERSION='v4.8.4';
   c.SPREADSHEET_ID='19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
   c.正式主資料庫ID='19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
   c.API_TIMEOUT_MS=20000;
@@ -13,6 +13,20 @@ window.PWA_CONFIG=window.PWA_CONFIG||{};
     SUBMIT_DEFECT:['submitDefectsV4','寫入不良紀錄v4','寫入不良紀錄v2']
   };
 })(window.PWA_CONFIG);
+
+(function(){
+  function 載入一次(src,id){
+    if(document.getElementById(id))return;
+    var s=document.createElement('script');
+    s.id=id;
+    s.defer=true;
+    s.src=src;
+    document.head.appendChild(s);
+  }
+  載入一次('./work-report-v4-opening-particles.js?v=484','化新粒子開場程式');
+  載入一次('./work-report-v4-v484-hotfix.js?v=484','化新報工v484修正程式');
+})();
+
 (function(){
   function E(id){return document.getElementById(id)}
   function centerV4(el){
@@ -41,8 +55,8 @@ window.PWA_CONFIG=window.PWA_CONFIG||{};
     window.selectPerson=function(){
       window.center=centerV4;
       var r=old.apply(this,arguments);
-      centerV4(E('selectedPersonArea'));
-      setTimeout(function(){centerV4(E('selectedPersonArea'));},260);
+      centerV4(E('selectedPersonDisplay'));
+      setTimeout(function(){centerV4(E('selectedPersonDisplay'));},260);
       return r;
     };
   }
