@@ -1,1 +1,27 @@
-{"name":"Report V4 Dark","short_name":"ReportV4","start_url":"./work-report-v4-477.html?v=490","scope":"./","display":"standalone","background_color":"#080d18","theme_color":"#080d18","orientation":"portrait-primary"}
+{
+  "name": "化新報工｜製造部報工作業 V4",
+  "short_name": "化新報工",
+  "description": "化新精密製造部智慧製造報工作業 V4 PWA",
+  "start_url": "./work-report-v4-477.html?v=483&fix=locked-baseline",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#08111f",
+  "theme_color": "#08111f",
+  "icons": [
+    {
+      "src": "./assets/huaxin-report-icon.svg?v=483",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "./assets/huaxin-report-splash.svg?v=483",
+      "sizes": "1290x2796",
+      "type": "image/svg+xml",
+      "form_factor": "narrow"
+    }
+  ]
+}
