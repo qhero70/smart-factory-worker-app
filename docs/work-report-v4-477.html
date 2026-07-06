@@ -2,51 +2,183 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="theme-color" content="#08111f">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#1967D2">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="化新報工">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="化新報工">
 <link rel="manifest" href="./work-report-v4.webmanifest?v=483">
 <link rel="icon" type="image/svg+xml" href="./assets/huaxin-report-icon.svg?v=483">
 <link rel="apple-touch-icon" href="./assets/huaxin-report-icon.svg?v=483">
 <link rel="apple-touch-startup-image" href="./assets/huaxin-report-splash.svg?v=483">
-<title>化新報工｜製一組 報工作業 V4</title>
-<style>
-:root{--底:#08111f;--面:#101a2b;--面2:#162238;--線:rgba(255,255,255,.13);--字:#f2f7ff;--淡:#9eacbf;--藍:#2f8cff;--綠:#22c55e;--紅:#ef4444;--金:#f6c85f;--safeT:env(safe-area-inset-top,0px);--safeB:env(safe-area-inset-bottom,0px)}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100dvh;max-height:100dvh;overflow:hidden;background:var(--底);color:var(--字);font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC','Microsoft JhengHei',Arial,sans-serif}button,input,select,textarea{font:inherit}.應用{width:100%;max-width:430px;height:100dvh;margin:0 auto;display:grid;grid-template-rows:auto 38px 39px 44px minmax(0,1fr) auto;overflow:hidden;background:radial-gradient(circle at 50% -12%,rgba(57,142,255,.18),transparent 36%),linear-gradient(180deg,#08111f,#090d18)}
-.頂列{height:calc(60px + var(--safeT));padding:calc(6px + var(--safeT)) 12px 6px;background:rgba(10,18,33,.96);border-bottom:1px solid var(--線)}.品牌{display:flex;align-items:center;gap:8px;min-width:0}.圖示{width:31px;height:31px;border-radius:11px;background:rgba(255,255,255,.1);display:grid;place-items:center;overflow:hidden;flex:0 0 auto}.圖示 img{width:100%;height:100%;object-fit:cover}.標題{min-width:0}.標題 h1{margin:0;font-size:17px;line-height:1.05;font-weight:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.副標{display:none}.狀態{height:18px;margin-top:5px;padding:0 8px;border-radius:999px;border:1px solid var(--線);background:rgba(255,255,255,.055);display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.燈{width:7px;height:7px;border-radius:50%;background:var(--綠);box-shadow:0 0 10px var(--綠);flex:0 0 auto}
-.步驟列{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:5px 13px;background:rgba(8,17,31,.96)}.步驟{height:28px;border-radius:999px;border:1px solid var(--線);background:rgba(255,255,255,.075);color:#cbd5e1;font-weight:1000;display:grid;place-items:center}.步驟.啟用{background:linear-gradient(135deg,#4da3ff,#1967d2);color:#fff;box-shadow:0 0 0 2px rgba(255,255,255,.16) inset}.步驟.完成{background:rgba(34,197,94,.18);color:#bbf7d0}.提示{margin:0 13px 4px;padding:7px 10px;border-radius:15px;border:1px solid rgba(246,200,95,.42);border-left:6px solid var(--金);background:rgba(246,200,95,.075);color:#ffe4a3;font-size:14px;font-weight:1000;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.搜尋列{padding:0 13px 6px;position:relative}.搜尋列 input{width:100%;height:38px;border:2px solid rgba(255,255,255,.15);border-radius:15px;background:rgba(255,255,255,.065);color:#fff;padding:0 48px 0 14px;font-weight:900;outline:0}.搜尋列 input::placeholder{color:#b7c0cf}.掃碼鈕{position:absolute;right:18px;top:3px;width:32px;height:32px;border-radius:12px;border:1px solid rgba(77,163,255,.45);background:rgba(77,163,255,.18);color:#fff;font-size:16px}.內容{min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;padding:0 13px 8px}.頁{display:none}.頁.啟用{display:block}
-.人員格,.產品格,.機台格{display:grid;gap:8px}.人員格{grid-template-columns:repeat(3,minmax(0,1fr))}.產品格,.機台格{grid-template-columns:repeat(2,minmax(0,1fr))}.卡{position:relative;height:114px;overflow:hidden;border-radius:14px;border:2px solid rgba(40,86,160,.55);background:#111827;box-shadow:0 8px 22px rgba(0,0,0,.22);touch-action:pan-y}.產品格 .卡,.機台格 .卡{height:118px}.卡.選取{border-color:#38a0ff;box-shadow:0 0 0 2px rgba(56,160,255,.30),0 8px 22px rgba(0,0,0,.22)}.卡.選取:before{content:'✓';position:absolute;left:6px;top:6px;z-index:4;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:#38a0ff;color:#fff;font-size:13px;font-weight:1000}.卡 img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 30%;display:block}.佔位{position:absolute;inset:0;display:grid;place-items:center;background:linear-gradient(160deg,#172033,#0f172a);color:#64748b;font-size:22px}.班別{position:absolute;right:5px;top:5px;z-index:3;padding:2px 6px;border-radius:999px;background:rgba(0,0,0,.66);font-size:9px;font-weight:1000}.字罩{position:absolute;left:0;right:0;bottom:0;z-index:2;text-align:center;padding:24px 5px 6px;background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,.9))}.名稱{font-size:15px;font-weight:1000;line-height:1.05;color:#fff;text-shadow:0 2px 5px #000}.名稱.大字{font-size:20px;margin-bottom:4px}.編號{margin-top:3px;font-size:12px;font-weight:1000;line-height:1;color:#dbeafe;text-shadow:0 2px 5px #000}.小佔位{height:44px;border-radius:12px;background:rgba(255,255,255,.06);border:1px dashed rgba(160,190,255,.45);display:grid;place-items:center;font-size:12px;font-weight:1000;color:#93b7ff}
-.面板{background:rgba(255,255,255,.065);border:1px solid var(--線);border-radius:16px;padding:11px;margin-bottom:9px}.面板 h3{margin:0 0 8px;font-size:16px;font-weight:1000}.欄名{font-size:12px;color:#b8c3d4;font-weight:1000;margin:7px 0 4px}.欄位{width:100%;height:40px;border:2px solid rgba(255,255,255,.15);border-radius:14px;background:rgba(255,255,255,.06);color:#fff;padding:0 11px;font-weight:900;outline:0}.唯讀{background:rgba(255,255,255,.04);color:#cbd5e1}.雙欄{display:grid;grid-template-columns:1fr 1fr;gap:8px}.三欄{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}.數字列{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:8px}.數字卡{border-radius:14px;background:rgba(255,255,255,.07);padding:7px 4px;text-align:center;font-size:11px;font-weight:900}.數字卡 b{display:block;font-size:20px;margin-top:2px}.不良列{display:grid;grid-template-columns:1fr 68px 34px;gap:7px;margin-bottom:7px}.工具鈕{border:0;border-radius:14px;background:rgba(255,255,255,.09);color:#fff;font-weight:1000;min-height:40px;padding:0 10px}.照片列{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:8px}.照片列 img{width:100%;height:76px;object-fit:cover;border-radius:12px}.摘要列{display:grid;grid-template-columns:92px 1fr;gap:8px;padding:7px 0;border-bottom:1px dashed rgba(255,255,255,.16);font-weight:900}.摘要列 div:last-child{text-align:right;color:#dbeafe}.底列{height:calc(58px + var(--safeB));padding:6px 10px calc(6px + var(--safeB));background:rgba(8,17,31,.98);border-top:1px solid var(--線)}.下一步{width:100%;height:46px;border:0;border-radius:16px;background:linear-gradient(135deg,#4c95ff,#1967d2);color:#fff;font-size:18px;font-weight:1000;box-shadow:0 10px 26px rgba(49,130,246,.28)}.下一步:disabled{opacity:.7}.返回{display:none}.提示泡泡{position:fixed;left:50%;top:calc(10px + var(--safeT));transform:translateX(-50%);z-index:999;width:calc(100% - 28px);max-width:402px;background:#fff;color:#14243a;border-left:6px solid var(--綠);border-radius:14px;padding:9px 12px;font-weight:1000;box-shadow:0 14px 40px rgba(0,0,0,.25);display:none}.提示泡泡 small{display:block;color:#475569;margin-top:3px}.選定浮層{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) scale(.96);z-index:300;width:calc(100% - 32px);max-width:390px;background:rgba(17,27,44,.96);border:1px solid rgba(255,255,255,.16);border-radius:24px;padding:14px;box-shadow:0 24px 80px rgba(0,0,0,.45);display:none}.選定浮層.顯示{display:block;animation:pop .16s ease-out forwards}.選定列{display:flex;align-items:center;gap:12px}.選定列 img,.選定頭像{width:66px;height:66px;border-radius:18px;object-fit:cover;background:#1f2b42;display:grid;place-items:center;font-weight:1000}@keyframes pop{to{transform:translate(-50%,-50%) scale(1)}}.掃描遮罩{position:fixed;inset:0;z-index:800;background:rgba(5,10,20,.94);display:none;align-items:center;justify-content:center;padding:18px}.掃描盒{width:100%;max-width:410px;background:#101a2b;border-radius:24px;padding:14px}.掃描盒 video{width:100%;max-height:58vh;object-fit:cover;border-radius:18px;background:#000}.掃描提示{text-align:center;color:#dbeafe;font-weight:900;margin:10px 0;font-size:13px}
-.開場畫面{position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;background:#061127;overflow:hidden;transition:opacity .48s ease,visibility .48s ease}.開場畫面.關閉{opacity:0;visibility:hidden}.開場底圖{position:absolute;inset:0;background:url('./assets/huaxin-report-splash.svg?v=483') center/cover no-repeat;transform:scale(1.02);filter:saturate(1.05)}.開場遮罩{position:absolute;inset:0;background:radial-gradient(circle at 50% 35%,rgba(26,127,255,.08),rgba(4,8,20,.18) 45%,rgba(4,8,20,.48) 100%)}.開場內容{position:relative;z-index:2;width:min(84vw,360px);text-align:center;margin-top:-6vh}.開場圖標{width:118px;height:118px;margin:0 auto 18px;border-radius:28px;filter:drop-shadow(0 18px 36px rgba(0,0,0,.45)) drop-shadow(0 0 26px rgba(47,140,255,.55));animation:浮動 2.4s ease-in-out infinite}.開場主標{font-size:42px;line-height:1.05;font-weight:1000;letter-spacing:.04em;background:linear-gradient(135deg,#fff4ba,#f6c85f 38%,#f7faff 68%,#9ecbff);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 10px 28px rgba(0,0,0,.36)}.開場副標{margin-top:12px;font-size:15px;font-weight:800;color:#dbeafe;letter-spacing:.08em}.開場載入{position:fixed;left:0;right:0;bottom:calc(52px + var(--safeB));z-index:2;text-align:center;color:#c6d3e6;font-size:15px;font-weight:900;letter-spacing:.16em}.開場圈{width:34px;height:34px;margin:0 auto 12px;border:4px solid rgba(255,255,255,.18);border-top-color:#f6c85f;border-radius:50%;animation:旋轉 1s linear infinite}.光束{position:absolute;left:50%;top:-8%;width:2px;height:48%;background:linear-gradient(180deg,transparent,#65b8ff,transparent);box-shadow:0 0 32px #2f8cff;animation:光束 2s ease-in-out infinite}@keyframes 旋轉{to{transform:rotate(360deg)}}@keyframes 浮動{50%{transform:translateY(-8px) scale(1.02)}}@keyframes 光束{50%{opacity:.45;transform:scaleY(1.12)}}
-@media(max-width:360px){.人員格{gap:6px}.卡{height:106px}.名稱{font-size:14px}.編號{font-size:11px}.標題 h1{font-size:15px}.提示{font-size:13px}.雙欄,.三欄{grid-template-columns:1fr}.開場主標{font-size:36px}.開場圖標{width:104px;height:104px}}
-</style>
+<link rel="stylesheet" href="./work-report-v4-google-ui.css?v=483">
+<title>製一組 報工表單 V4｜化新 智慧製造</title>
 <script src="./pwa-config.js?v=483"></script>
 <script src="./gas-bridge.js?v=483"></script>
 <script defer src="./work-report-v4-app-483.js?v=483"></script>
 </head>
 <body>
-<div class="開場畫面" id="開場畫面" aria-label="化新報工系統啟動畫面"><div class="開場底圖"></div><div class="開場遮罩"></div><div class="光束"></div><div class="開場內容"><img class="開場圖標" src="./assets/huaxin-report-icon.svg?v=483" alt="化新報工"><div class="開場主標">化新報工</div><div class="開場副標">化新精密｜製造部｜報工作業 V4</div></div><div class="開場載入"><div class="開場圈"></div>系統啟動中...</div></div>
-<div class="應用">
-  <header class="頂列">
-    <div class="品牌"><div class="圖示"><img src="./assets/huaxin-report-icon.svg?v=483" alt="化新報工"></div><div class="標題"><h1>製一組 報工作業 V4</h1><div class="副標">化新精密｜智慧製造指揮中心</div></div></div>
-    <div class="狀態"><span class="燈" id="狀態燈"></span><span id="狀態文字">正在連線主資料庫...</span></div>
-  </header>
-  <nav class="步驟列" id="步驟列"></nav>
-  <div class="提示" id="提示文字">👆 Step 1：選擇作業員 / Select Operator</div>
-  <div class="搜尋列" id="搜尋列"><input id="搜尋框" placeholder="🔍 搜尋人員 / 姓名、工號、班別"><button class="掃碼鈕" id="掃碼鈕" type="button">📷</button></div>
-  <main class="內容" id="內容區">
-    <section class="頁 啟用" id="頁0"><div class="人員格" id="人員清單"></div><div id="selectedPersonArea" class="面板" style="display:none"></div></section>
-    <section class="頁" id="頁1"><div class="產品格" id="產品清單"></div><div id="selectedProductArea" class="面板" style="display:none"><h3>已選產品 / Product</h3><div id="產品摘要"></div><input id="productCode" class="欄位 唯讀" readonly style="margin-top:7px"><input id="productName" class="欄位 唯讀" readonly style="margin-top:7px"><div class="欄名">報工工站 / Workstation</div><select id="workstationSelect" class="欄位"></select><div id="routeFieldsArea" style="display:none"><div class="三欄"><div><div class="欄名">工序</div><input id="processRange" class="欄位 唯讀" readonly></div><div><div class="欄名">產能</div><input id="stdCapacity" class="欄位 唯讀" readonly></div><div><div class="欄名">秒</div><input id="stdTimeSec" class="欄位 唯讀" readonly></div></div><div class="欄名">主機台</div><select id="mainMachineSelect" class="欄位"></select><div class="機台格" id="machineListGrid" style="margin-top:8px"></div></div></div></section>
-    <section class="頁" id="頁2"><div class="面板"><h3>產出數量 / Output</h3><div class="雙欄"><div><div class="欄名">今日共做數 *</div><input id="totalQty" inputmode="numeric" class="欄位" placeholder="請輸入"></div><div><div class="欄名">不良數</div><input id="ngQty" inputmode="numeric" class="欄位" placeholder="可留空"></div></div><div class="數字列"><div class="數字卡">總數<b id="sumTotal">—</b></div><div class="數字卡">不良<b id="sumNg">—</b></div><div class="數字卡">良品<b id="sumGood">—</b></div></div><div class="雙欄"><div><div class="欄名">開始時間</div><input id="startTime" class="欄位"></div><div><div class="欄名">結束時間</div><input id="endTime" class="欄位"></div></div><input id="workingHours" class="欄位 唯讀" value="8 hrs" readonly style="margin-top:8px"></div></section>
-    <section class="頁" id="頁3"><div class="面板"><h3>不良原因 / Defect</h3><div id="defectRows"></div><button class="工具鈕" id="新增不良" type="button">＋ 新增不良</button></div><div class="面板"><h3>現場照片 / Photos</h3><div class="雙欄"><button class="工具鈕" id="拍照鈕" type="button">📸 拍照 / 選圖</button><button class="工具鈕" id="清照片鈕" type="button">清除</button></div><input id="photoInput" type="file" accept="image/*" multiple hidden><div id="photoCount" style="text-align:center;margin-top:7px;font-weight:900;color:#aeb8c7">0 / 12 張照片</div><div class="照片列" id="照片預覽"></div></div><div class="面板"><h3>備註 / Remarks</h3><textarea id="remarks" class="欄位" style="height:74px;padding:10px" placeholder="可留空"></textarea></div></section>
-    <section class="頁" id="頁4"><div class="面板"><h3>確認送出 / Confirm</h3><div id="summaryRows"></div><pre id="fullPreview" style="display:none"></pre></div></section>
-  </main>
-  <footer class="底列"><button class="下一步" id="nextBtn" type="button">下一步 → / Next</button><button class="返回" id="backBtn" type="button">上一步</button></footer>
+
+<div id="loadingScreen" class="loading-screen">
+  <div class="load-bg-orbs"><div class="load-orb"></div><div class="load-orb"></div><div class="load-orb"></div></div>
+  <div class="load-logo-ring">
+    <div class="load-ring"></div><div class="load-ring"></div><div class="load-ring"></div>
+    <img class="load-center-icon" src="./assets/huaxin-report-icon.svg?v=483" alt="化新報工">
+  </div>
+  <div class="load-brand"><div class="load-brand-name">化新精密</div><div class="load-brand-sub">HUA HSIN PRECISION</div></div>
+  <div class="load-title">智慧製造中央作戰指揮中心 · Production Reporting V4</div>
+  <div class="load-google-dots"><div class="load-dot"></div><div class="load-dot"></div><div class="load-dot"></div><div class="load-dot"></div></div>
+  <div class="load-progress-bar"><div class="load-progress-fill"></div></div>
 </div>
-<div class="提示泡泡" id="提示泡泡"></div>
-<div class="選定浮層" id="選定浮層"></div>
-<div class="掃描遮罩" id="掃描遮罩"><div class="掃描盒"><video id="scanVideo" autoplay playsinline muted></video><div class="掃描提示">將條碼 / QR Code 對準鏡頭，自動偵測</div><button class="下一步" id="關閉掃描" type="button">取消</button></div></div>
+
+<div id="submitOverlay" class="submit-overlay hidden">
+  <div class="submit-card"><div class="spinner"></div><p class="submit-title" id="submitTitle">📤 報工送出中...</p><div class="submit-sub" id="submitSub">Writing production record...</div></div>
+</div>
+
+<div id="personScanModal" class="modal-mask hidden">
+  <div class="modal-box">
+    <div class="modal-title">📷 掃描工牌條碼 / Scan Badge QR Code</div>
+    <div class="video-area" id="personVideoArea"><video id="personVideo" autoplay playsinline muted></video><div class="scan-frame"></div><div class="scan-laser"></div></div>
+    <div class="modal-hint">請將條碼對準掃描框 / Align barcode to frame</div>
+    <input type="text" id="personManualInput" class="manual-input hidden" placeholder="手動輸入工號 / Enter Employee ID, press Enter" onkeydown="personManualConfirm(event)">
+    <div class="modal-btns"><button class="btn-close ripple" onclick="closePersonScan()" type="button">✕ 關閉 / Close</button><button class="btn-manual ripple" onclick="togglePersonManual()" type="button">⌨ 手動 / Manual</button></div>
+    <div class="scan-status" id="personScanStatus">📡 啟動相機中... / Starting camera...</div>
+  </div>
+</div>
+
+<div id="productScanModal" class="modal-mask hidden">
+  <div class="modal-box">
+    <div class="modal-title">📷 掃描產品條碼 / Scan Product Barcode</div>
+    <div class="video-area" id="productVideoArea"><video id="productVideo" autoplay playsinline muted></video><div class="scan-frame"></div><div class="scan-laser"></div></div>
+    <div class="modal-hint">請將產品條碼對準框內 / Align product barcode</div>
+    <input type="text" id="productManualInput" class="manual-input hidden" placeholder="輸入產品編號 / Enter Product Code" onkeydown="productManualConfirm(event)">
+    <div class="modal-btns"><button class="btn-close ripple" onclick="closeProductScan()" type="button">✕ 關閉 / Close</button><button class="btn-manual ripple" onclick="toggleProductManual()" type="button">⌨ 手動 / Manual</button></div>
+    <div class="scan-status" id="productScanStatus">📡 啟動相機中... / Starting camera...</div>
+  </div>
+</div>
+
+<div id="photoNoteModal" class="photo-note-modal hidden">
+  <div class="photo-note-box">
+    <div style="font-weight:900;font-size:15px;margin-bottom:10px;">✏️ 編輯照片備註 / Edit Photo Note</div>
+    <img id="photoNotePreview" src="" alt="photo preview">
+    <label class="field-label">備註 / Note</label>
+    <textarea id="photoNoteText" placeholder="輸入此照片的說明備註... / Add note for this photo..."></textarea>
+    <div class="photo-note-btns"><button class="btn-cancel ripple" onclick="closePhotoNote()" type="button">取消 / Cancel</button><button class="btn-confirm ripple" onclick="savePhotoNote()" type="button">✓ 儲存 / Save</button></div>
+  </div>
+</div>
+
+<div id="roarContainer" class="roar-container"></div>
+<div id="toast" class="toast hidden"></div>
+
+<div class="outer-wrap">
+  <header class="site-header">
+    <div class="header-gradient-bar"></div>
+    <div class="header-inner">
+      <div class="header-top-row">
+        <div class="header-brand">
+          <div class="header-icon-wrap"><img src="./assets/huaxin-report-icon.svg?v=483" alt="化新報工"></div>
+          <div class="header-title-group"><div class="header-title">製一組 報工表單 V4</div><div class="header-subtitle">化新精密｜智慧製造指揮中心｜引導式報工 · Smart Production Reporting</div></div>
+        </div>
+        <div class="header-actions"><button class="header-btn ripple" id="fullscreenBtn" onclick="toggleFullscreen()" title="全螢幕 / Fullscreen" type="button">⛶</button><button class="header-btn ripple" onclick="reloadData()" title="重新載入 / Reload" type="button">↻</button></div>
+      </div>
+      <div id="statusPill" class="status-pill"><span class="status-dot" id="statusDot"></span><span id="statusText">🟡 正在連線主資料庫... Connecting to database...</span></div>
+    </div>
+  </header>
+
+  <nav class="stepper-wrap">
+    <div class="stepper" id="stepper">
+      <div class="step-item is-active" data-step="0" onclick="jumpToStep(0)"><div class="step-circle">1</div><div class="step-label">人員<span class="en">Operator</span></div></div>
+      <div class="step-connector" data-line="0"></div>
+      <div class="step-item is-todo" data-step="1" onclick="jumpToStep(1)"><div class="step-circle">2</div><div class="step-label">工件<span class="en">Workpiece</span></div></div>
+      <div class="step-connector" data-line="1"></div>
+      <div class="step-item is-todo" data-step="2" onclick="jumpToStep(2)"><div class="step-circle">3</div><div class="step-label">產出<span class="en">Output</span></div></div>
+      <div class="step-connector" data-line="2"></div>
+      <div class="step-item is-todo" data-step="3" onclick="jumpToStep(3)"><div class="step-circle">4</div><div class="step-label">品質<span class="en">Quality</span></div></div>
+      <div class="step-connector" data-line="3"></div>
+      <div class="step-item is-todo" data-step="4" onclick="jumpToStep(4)"><div class="step-circle">5</div><div class="step-label">確認<span class="en">Confirm</span></div></div>
+    </div>
+  </nav>
+
+  <section id="stepPage0" class="step-section">
+    <div class="guide-card"><div class="guide-icon">👆</div><div class="guide-body"><div class="guide-title">Step 1：選擇作業員 / Select Operator</div><div class="guide-desc">請透過下方任一方式選擇作業員：<b>① 點擊人員卡片</b> ② 掃描工牌條碼 ③ 搜尋姓名或工號。滑動卡片不會誤觸選取。<br>Choose an operator: Click card, scan badge QR, or search by name/ID.</div></div></div>
+    <button class="scan-btn ripple" onclick="openPersonScan()" type="button"><span class="s-icon">📷</span>掃描 / 感應工牌（條碼 / QR Code） · Scan Badge</button>
+    <div style="height:8px;"></div>
+    <div id="recentBar" class="recent-bar hidden"><span class="bar-label">⭐ 最近使用 / Recent:</span><div id="recentPersonContent" style="display:flex;gap:7px;flex-wrap:wrap;"></div></div>
+    <div class="search-row"><input type="text" id="personSearch" class="search-input" placeholder="🔍 搜尋人員 / Search: 姓名、工號、班別..." oninput="filterPersons()"><button class="search-scan-icon ripple" onclick="openPersonScan()" type="button" aria-label="掃描工牌">📷</button></div>
+    <div id="personGrid" class="person-grid"></div>
+    <div id="personGridEmpty" class="caption hidden" style="text-align:center;padding:20px;">沒有符合條件的人員 / No matching operators found</div>
+    <div class="glass-card" style="margin-top:12px;">
+      <div class="section-head">👤 選定人員 <span class="en">Selected Operator</span></div>
+      <div id="selectedPersonDisplay" class="selected-person-display"><div class="person-photo-lg">點擊卡片<br>Click Card</div><div><div class="person-info-name" style="color:var(--text-secondary);">尚未選擇 / Not Selected</div><div class="caption" style="margin-top:4px;">請點擊上方人員卡片、掃碼或搜尋選擇<br>Click a card, scan, or search above</div></div></div>
+      <div id="empIdHighlight" class="employee-id-highlight" style="margin-top:10px;">未輸入 / Not Set</div>
+      <div class="grid-2"><div><label class="field-label">姓名 / Name</label><input id="personName" readonly placeholder="自動帶入 / Auto-filled"></div><div><label class="field-label">工號 / Employee ID</label><input id="personId" readonly placeholder="自動帶入 / Auto-filled"></div></div>
+      <div class="grid-2"><div><label class="field-label">班別 / Shift</label><select id="shiftSelect"></select></div><div><label class="field-label">是否加班 / Overtime</label><select id="overtimeSelect"><option value="否">否 / No</option><option value="是">是 / Yes</option></select></div></div>
+      <div><label class="field-label">加班類型 / Overtime Type</label><select id="overtimeType"><option value="無">無 / None</option><option value="平日加班">平日加班 / Weekday OT</option><option value="休息日加班">休息日加班 / Day-off OT</option><option value="例假日加班">例假日加班 / Holiday OT</option></select></div>
+    </div>
+  </section>
+
+  <section id="stepPage1" class="step-section hidden">
+    <div class="guide-card"><div class="guide-icon">📦</div><div class="guide-body"><div class="guide-title">Step 2：選擇產品與工站 / Select Product &amp; Workstation</div><div class="guide-desc">請選擇要報工的產品，接著選取對應報工工站與主機台。產品未選前不顯示工站；工站未選前不顯示工序與機台。<br>Select product first, then workstation and machine.</div></div></div>
+    <div class="glass-card">
+      <div class="section-head">🔧 工件與工站 <span class="en">Product / Workstation</span></div>
+      <button class="scan-btn ripple" onclick="openProductScan()" style="margin-bottom:10px;" type="button"><span class="s-icon">📷</span> 掃描產品條碼 / Scan Product Barcode</button>
+      <div class="search-row"><input type="text" id="productSearch" class="search-input" placeholder="🔍 搜尋產品 / Search Product: 品名、產品編號..." oninput="filterProducts()"><button class="search-scan-icon ripple" onclick="openProductScan()" type="button" aria-label="掃描產品">📷</button></div>
+      <div id="productGrid" class="product-grid"></div>
+      <div id="productGridEmpty" class="caption hidden" style="text-align:center;padding:16px;">沒有符合條件的產品 / No matching products</div>
+      <div id="selectedProductArea" class="hidden" style="margin-top:10px;">
+        <div id="selectedProductDisplay" class="selected-person-display"><div class="person-photo-lg">產品<br>Product</div><div><div class="person-info-name" style="color:var(--text-secondary);">尚未選產品</div><div class="caption" style="margin-top:3px;">選擇後顯示產品資訊</div></div></div>
+        <div class="grid-2" style="margin-top:10px;"><div><label class="field-label">產品編號 / Product Code</label><input id="productCode" readonly></div><div><label class="field-label">品名 / Product Name</label><input id="productName" readonly></div></div>
+        <label class="field-label required">報工工站 / Workstation</label><select id="workstationSelect" onchange="onWorkstationChange()"></select>
+        <div id="routeDetailsArea" class="hidden">
+          <div class="grid-3" style="margin-top:4px;"><div><label class="field-label">工序範圍 / Process Range</label><input id="processRange" readonly></div><div><label class="field-label">標準產能 / Std. Capacity</label><input id="stdCapacity" readonly></div><div><label class="field-label">標準工時(秒) / Std. Time(s)</label><input id="stdTimeSec" readonly></div></div>
+          <label class="field-label">主機台 / Main Machine</label><select id="mainMachineSelect" onchange="selectMachine(this.value)"></select>
+          <div id="machineListGrid" class="machine-grid"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="stepPage2" class="step-section hidden">
+    <div class="guide-card"><div class="guide-icon">📊</div><div class="guide-body"><div class="guide-title">Step 3：輸入產出數量 / Enter Output Quantity</div><div class="guide-desc">請輸入今日共做數與不良數。系統將自動計算實際良品數與工時。<br>Enter total qty and NG qty. Good qty &amp; working hours are auto-calculated.</div></div></div>
+    <div class="glass-card">
+      <div class="section-head">📊 產出數量 <span class="en">Output Quantity</span></div>
+      <div class="grid-2"><div><label class="field-label required">今日共做數 / Total Qty</label><input id="totalQty" type="number" min="0" inputmode="numeric" placeholder="請輸入" oninput="calcQty()"></div><div><label class="field-label">不良數 / NG Qty</label><input id="ngQty" type="number" min="0" inputmode="numeric" placeholder="可留空" oninput="calcQty()"></div></div>
+      <div class="stats-grid"><div class="stat-card blue"><span class="stat-label">📦 今日共做 / Total</span><span class="stat-value" id="displayTotal">0</span></div><div class="stat-card red"><span class="stat-label">❌ 不良 / NG</span><span class="stat-value" id="displayNG">0</span></div><div class="stat-card green"><span class="stat-label">✅ 實際良品 / Good</span><span class="stat-value" id="displayGood">0</span></div></div>
+      <div class="grid-2" style="margin-top:4px;"><div><label class="field-label">開始時間 / Start Time</label><input id="startTime" type="datetime-local" onchange="calcWorkingHours()"></div><div><label class="field-label">結束時間 / End Time</label><input id="endTime" type="datetime-local" onchange="calcWorkingHours()"></div></div>
+      <label class="field-label">實際工時 / Working Hours</label><input id="workingHours" readonly placeholder="自動計算 / Auto-calculated">
+    </div>
+  </section>
+
+  <section id="stepPage3" class="step-section hidden">
+    <div class="guide-card"><div class="guide-icon">🔍</div><div class="guide-body"><div class="guide-title">Step 4：品質與不良記錄 / Quality &amp; Defect Records</div><div class="guide-desc">若有不良品，請分配不良原因與數量；分配數量不可超過 Step 3 的不良數。可上傳現場照片最多 12 張。<br>Allocate defect reasons and qty. Allocation cannot exceed NG qty.</div></div></div>
+    <div class="glass-card">
+      <div class="section-head">🔍 品質與不良 <span class="en">Quality &amp; Defects</span></div>
+      <label class="field-label" style="margin-top:4px;">📋 不良原因數量分配 / NG Reason Allocation <span class="caption">（不可超過總不良數 / Must not exceed NG qty）</span></label>
+      <div id="defectContainer"></div>
+      <button class="add-defect-btn ripple" onclick="addDefectRow()" type="button">＋ 新增不良分配項目 / Add Allocation Row</button>
+      <div id="defectSummary" class="defect-summary hidden"></div>
+      <label class="field-label" style="margin-top:14px;">異常類型 / Abnormal Type</label><select id="anomalyType" onchange="updatePreview()"><option value="無異常">無異常 / Normal Operation</option><option value="支援調度">支援調度 / Staff Reassignment</option><option value="材質異常">材質異常 / Material Defect</option><option value="換刀">換刀 / Tool Change</option><option value="機台停機">機台停機 / Machine Down</option><option value="待料">待料 / Waiting for Material</option><option value="品質確認">品質確認 / Quality Check</option><option value="其他">其他 / Others</option></select>
+      <div class="anomaly-section"><div class="section-head">⏱ 異常時間 <span class="en">Anomaly Duration</span></div><div class="grid-2"><div><label class="field-label">異常開始 / Start</label><input id="anomalyStart" type="datetime-local" onchange="calcAnomalyTime()"></div><div><label class="field-label">異常結束 / End</label><input id="anomalyEnd" type="datetime-local" onchange="calcAnomalyTime()"></div></div><label class="field-label">異常持續時間 / Duration</label><input id="anomalyDuration" readonly placeholder="自動計算 / Auto-calculated"></div>
+      <label class="field-label" style="margin-top:14px;">現場照片 / Field &amp; Defect Photos <span class="caption">（最多12張 / Max 12）</span></label>
+      <div class="photo-toolbar"><button class="photo-tool-btn ripple" onclick="triggerCamera()" type="button">📸 拍照 / Take Photo</button><button class="photo-tool-btn ripple" onclick="triggerFileSelect()" type="button">🖼 選圖 / Choose File</button><button class="photo-tool-btn danger ripple" onclick="clearAllPhotos()" type="button">🗑 清除 / Clear All</button></div>
+      <input id="cameraInput" type="file" accept="image/*" capture="environment" multiple class="hidden" onchange="onPhotoChange(event,'camera')"><input id="fileInput" type="file" accept="image/*" multiple class="hidden" onchange="onPhotoChange(event,'file')">
+      <div id="photoGrid" class="photo-grid"></div><div class="photo-count" id="photoCount">0 / 12 張照片 / photos</div><div id="defectSyncNotice" style="margin-top:8px;"></div>
+      <label class="field-label" style="margin-top:12px;">備註 / Remarks</label><textarea id="remarks" placeholder="輸入異常描述、備註事項... / Enter anomaly description, remarks..." oninput="updatePreview()"></textarea>
+      <label class="field-label" style="margin-top:14px;">報工預覽 / Report Preview</label><div id="reportPreview" class="preview-block">📋 尚未產生預覽，請依序填寫各步驟資料
+Production report preview will appear here after filling in the steps above...</div>
+    </div>
+  </section>
+
+  <section id="stepPage4" class="step-section hidden">
+    <div class="guide-card"><div class="guide-icon">✅</div><div class="guide-body"><div class="guide-title">Step 5：確認並送出報工 / Confirm &amp; Submit Report</div><div class="guide-desc">請仔細核對以下報工摘要資訊，確認無誤後點擊「送出報工」。送出後寫入 09_報工；有不良時同步寫入 09_不良紀錄。<br>Review carefully before submitting.</div></div></div>
+    <div class="confirm-card" id="confirmCard"><div style="font-weight:900;font-size:15.5px;text-align:center;margin-bottom:12px;color:#1A3A28;">📋 報工摘要確認 / Report Summary Confirmation</div><div id="confirmSummaryContent"><div class="caption" style="text-align:center;padding:14px;">請先完成前面步驟再回來確認 / Please complete previous steps first</div></div></div>
+    <div class="glass-card" style="margin-top:12px;"><div class="section-head">📋 完整預覽 <span class="en">Full Preview</span></div><div id="confirmPreview" class="preview-block">📋 尚未產生預覽...</div></div>
+  </section>
+</div>
+
+<div class="bottom-bar"><button id="btnBack" class="btn-secondary ripple hidden" onclick="goBack()" type="button">← 上一步 / Back</button><button id="btnNext" class="btn-primary ripple" onclick="goNextOrSubmit()" style="grid-column:1 / -1;" type="button">下一步 → / Next</button></div>
+
 </body>
 </html>
