@@ -1,36 +1,38 @@
-/* 報工作業 V4.8.3：PWA 正式送出通道。
- * 重點：送出後回查正式主資料庫 09_報工 / 09_不良紀錄，確認落表才重置。
- */
+/* 報工作業 V4 submit v4.8.3：寫入 09_報工 / 09_不良紀錄 */
 (function(){
 'use strict';
-var GAS_URL='https://script.google.com/macros/s/AKfycbzRvly1OV-C80bMmd2ww4BM1XAH9WTyz62VFDnUxVGiO15kzHahbeHZc2bNTSwdFCqBwQ/exec';
-var SS='19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
-var ACTION_REPORT='submitWorkReportV4';
-var ACTION_DEFECT='submitDefects';
 function E(id){return document.getElementById(id)}
-function s(v){return String(v==null?'':v)}
-function clean(v){return s(v).trim().replace(/\.0$/,'')}
-function norm(v){return s(v).replace(/[^A-Za-z0-9]/g,'').toUpperCase()}
-function pad(n){return String(n).padStart(2,'0')}
-function nowId(){var d=new Date();return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'-'+pad(d.getHours())+pad(d.getMinutes())+pad(d.getSeconds())}
-function today(){var d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
-function apiUrl(){return s((window.PWA_CONFIG&&PWA_CONFIG.GAS_WEB_APP_URL)||localStorage.getItem('智慧製造_臨時GAS_WEB_APP_URL')||GAS_URL).replace(/\?.*$/,'')}
-function machineIds(gr){var ids=[];if(gr&&Array.isArray(gr.機台清單))gr.機台清單.forEach(function(m){ids.push(clean((m&&typeof m==='object')?(m.機台編號||m.主機台||m.設備編號):m));});if(!ids.length)ids=s((gr&&gr.機台編號清單)||(gr&&gr.機台編號)||(gr&&gr.主機台)||'').split(/[、,，;；\s]+/);var seen={};return ids.map(clean).filter(Boolean).filter(function(x){return !seen[x]&&(seen[x]=1);});}
-function findRoute(d){var groups=(window.DB&&Array.isArray(DB.workstationGroups))?DB.workstationGroups:(window.DB&&Array.isArray(DB.routes)?DB.routes:[]);var pid=norm(d.產品編號),pname=s(d.品名).trim(),station=s(d.報工工站名稱||d.工站名稱).trim();var list=groups.filter(function(g){return(pid&&norm(g.產品編號)===pid)||(!pid&&pname&&s(g.品名).trim()===pname);});if(station){var exact=list.find(function(g){var gs=s(g.報工工站名稱||g.工站名稱).trim();return gs===station;});if(exact)return exact;var fuzzy=list.find(function(g){var gs=s(g.報工工站名稱||g.工站名稱).trim();return gs&&(gs.indexOf(station)>=0||station.indexOf(gs)>=0);});if(fuzzy)return fuzzy;}return list[0]||null;}
-function enrich(d){d=Object.assign({},d||{});var gr=findRoute(d)||{};var ids=machineIds(gr);d.產品編號=d.產品編號||gr.產品編號||'';d.客戶品號=d.客戶品號||gr.客戶品號||'';d.品名=d.品名||gr.品名||'';d.報工工站名稱=d.報工工站名稱||gr.報工工站名稱||gr.工站名稱||'';d.工站名稱=d.工站名稱||d.報工工站名稱;d.工序=d.工序||gr.工序範圍||gr.工序||gr.工序編號_最終||'';d.機台清單=d.機台清單||ids.join('、');d.主機台=d.主機台||(E('mainMachineSelect')&&E('mainMachineSelect').value)||gr.主機台||ids[0]||'';d.機台編號=d.機台編號||d.主機台;return d;}
-function buildPayload(d){var p=(typeof V4資料對接_轉V3報工Payload_==='function')?V4資料對接_轉V3報工Payload_(d,(typeof V4資料對接_讀今日任務_==='function'?V4資料對接_讀今日任務_():{})||{}):{};p=Object.assign({},d,p,{報工編號:d.報工編號,作業日:d.作業日,寫入時間:d.寫入時間,spreadsheetId:SS,正式主資料庫ID:SS,主資料庫ID:SS});p.operator={employeeId:d.工號||p.工號||p.employeeId,operatorName:d.姓名||p.姓名||p.operatorName,shift:d.班別||p.班別||p.shift};p.product={productCode:d.產品編號||p.產品編號,customerPartNo:d.客戶品號||p.客戶品號,productName:d.品名||p.品名};p.workstation={workstationName:d.報工工站名稱||d.工站名稱||p.工站名稱,processRange:d.工序||p.工序,machineList:d.機台清單||p.機台清單,mainMachine:d.主機台||p.主機台};p.output={totalQty:Number(d.今日共做數||d.共做||d.totalQty||0),ngQty:Number(d.不良數||d.ngQty||0),goodQty:Number(d.實際良品數||d.goodQty||0),workingHours:d.實際工時||d.工時||p.實際工時||p.工時};p.quality={defects:d.不良行清單||p.不良行清單||[],abnormalType:d.異常類型||p.異常類型};p.reportId=d.報工編號;p.reportNo=d.報工編號;return p;}
-function body(action,payload){payload=Object.assign({},payload||{},{action:action,動作:action,method:action,spreadsheetId:SS,正式主資料庫ID:SS,主資料庫ID:SS,_ts:String(Date.now())});var sp=new URLSearchParams();Object.keys(payload).forEach(function(k){var v=payload[k];if(v!=null)sp.set(k,typeof v==='object'?JSON.stringify(v):s(v));});var json=JSON.stringify(payload);sp.set('payload',json);sp.set('資料',json);sp.set('json',json);return sp.toString();}
-async function parse(r){var t=await r.text();if(!r.ok)throw new Error('HTTP '+r.status);try{return JSON.parse(t)}catch(e){return{ok:false,成功:false,success:false,原始回應:t.slice(0,500)}}}
-function bad(r){if(!r||typeof r!=='object')return true;if(r.ok===false||r.成功===false||r.success===false)return true;return /UNKNOWN_ACTION|找不到|未接入|不支援|失敗|錯誤/.test(s(r.訊息||r.message||r.error||r.原始回應));}
-async function corsPost(action,payload){var u=new URL(apiUrl());u.searchParams.set('action',action);u.searchParams.set('動作',action);u.searchParams.set('_ts',Date.now());u.searchParams.set('spreadsheetId',SS);var r=await fetch(u.toString(),{method:'POST',cache:'no-store',mode:'cors',credentials:'omit',headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},body:body(action,payload)}).then(parse);if(bad(r))throw new Error(r.error||r.message||r.訊息||'後端回傳失敗');return r;}
-function formPost(action,payload){payload=Object.assign({},payload||{});var iframe=E('v4WriteIframe483');if(!iframe){iframe=document.createElement('iframe');iframe.name='v4WriteIframe483';iframe.id='v4WriteIframe483';iframe.style.cssText='display:none;width:0;height:0;border:0';document.body.appendChild(iframe);}var form=document.createElement('form');form.method='POST';form.action=apiUrl();form.target='v4WriteIframe483';form.style.display='none';form.enctype='application/x-www-form-urlencoded';function add(k,v){var input=document.createElement('input');input.type='hidden';input.name=k;input.value=typeof v==='object'?JSON.stringify(v):s(v);form.appendChild(input);}var p=Object.assign({},payload,{action:action,動作:action,method:action,spreadsheetId:SS,正式主資料庫ID:SS,主資料庫ID:SS,_ts:String(Date.now())});Object.keys(p).forEach(function(k){add(k,p[k]);});var json=JSON.stringify(p);add('payload',json);add('資料',json);add('json',json);document.body.appendChild(form);form.submit();setTimeout(function(){try{form.remove()}catch(e){}},2000);}
-async function post(action,payload){try{return await corsPost(action,payload)}catch(e){formPost(action,payload);return{ok:true,success:true,transport:'hidden_form',message:'已用 PWA hidden form 送出，等待試算表回查'}}}
-async function sheetRows(sheet){var url='https://docs.google.com/spreadsheets/d/'+SS+'/gviz/tq?tqx=out:json&sheet='+encodeURIComponent(sheet)+'&_ts='+Date.now();var txt=await fetch(url,{cache:'no-store'}).then(function(r){return r.text()});var a=txt.indexOf('{'),b=txt.lastIndexOf('}');if(a<0||b<a)throw new Error('讀不到 '+sheet);var data=JSON.parse(txt.slice(a,b+1));var headers=(data.table.cols||[]).map(function(c,i){return s(c.label||c.id||('欄'+(i+1))).trim();});return (data.table.rows||[]).map(function(row){var o={};(row.c||[]).forEach(function(c,i){o[headers[i]||('欄'+(i+1))]=c?(c.f!==undefined?c.f:c.v):'';});return o;});}
-async function existsInSheet(sheet,reportNo){var rows=await sheetRows(sheet);return rows.some(function(r){return Object.values(r).some(function(v){return s(v).indexOf(reportNo)>=0;});});}
-async function waitSheet(sheet,reportNo,timeout){var end=Date.now()+(timeout||18000),last='';while(Date.now()<end){try{if(await existsInSheet(sheet,reportNo))return true;}catch(e){last=e.message||s(e);}await new Promise(function(res){setTimeout(res,1300);});}throw new Error(sheet+' 未確認寫入：'+reportNo+(last?'；'+last:''));}
-function patch(){if(window.__v4Submit483)return;window.__v4Submit483=1;if(typeof window.submitReport!=='function'||typeof window.buildReportData!=='function')return;window.submitReport=async function(){var d=enrich(buildReportData());var err=typeof validateReport==='function'?validateReport(d):'';if(err){roar('⚠️','驗證失敗 / Validation Failed',err,'error');return;}if(typeof updatePreview==='function')updatePreview();if(typeof updateConfirmSummary==='function')updateConfirmSummary();var hasDefects=Number(d.不良數||0)>0||((d.不良行清單||[]).length>0);var msg='確認送出報工？/ Confirm submit?\n\n實際良品：'+d.實際良品數+' pcs'+(hasDefects?'\n不良數：'+d.不良數+' pcs（將同步寫入09_不良紀錄）':'');if(!confirm(msg))return;var reportNo=d.報工編號||('RPT-'+nowId()+'-'+s(d.工號).toUpperCase()+'-'+s(d.產品編號).toUpperCase());d.報工編號=reportNo;d.作業日=d.作業日||today();d.寫入時間=new Date().toISOString();var payload=buildPayload(d);var defectData=null;if(hasDefects&&typeof buildDefectData==='function'){defectData=enrich(buildDefectData(d,reportNo));defectData=Object.assign({},defectData,{報工編號:reportNo,reportId:reportNo,作業日:d.作業日,spreadsheetId:SS,正式主資料庫ID:SS,主資料庫ID:SS});}
-try{showSubmitOverlay(true,'📤 報工送出中...','正在寫入並回查 09_報工 / 09_不良紀錄...');await post(ACTION_REPORT,payload);if(defectData)await post(ACTION_DEFECT,defectData);try{localStorage.setItem('V4最後送出備份',JSON.stringify({報工:payload,不良:defectData,時間:new Date().toISOString()}));}catch(e){}await waitSheet('09_報工',reportNo,18000);if(defectData)await waitSheet('09_不良紀錄',reportNo,18000);showSubmitOverlay(false);if(typeof updateBottomBar==='function')updateBottomBar();roar('✅','報工已送出 / Submitted','已確認落表：'+reportNo+' → 09_報工'+(defectData?'、09_不良紀錄':''),'success');if(typeof resetAfterSubmit==='function')resetAfterSubmit();}
-catch(ex){showSubmitOverlay(false);roar('❌','寫入未確認 / Submit not confirmed',s(ex.message||ex)+'。表單未重置，請不要重複送出，先檢查 GAS 部署權限與 Web App URL。','error');}}
+function S(v){return String(v==null?'':v).trim()}
+function n(v){const x=Number(S(v).replace(/,/g,''));return isFinite(x)?x:0}
+function toast(title,msg,type){if(window.v4Toast)window.v4Toast(title,msg,type);else alert(title+'\n'+(msg||''))}
+function getState(){return window.V4_STATE||{}}
+function makeReportId(st){const op=(st.operator&&st.operator.工號)||E('personId')?.value||'NA';const prod=(st.product&&st.product.產品編號)||E('productCode')?.value||'NA';const d=new Date();const ts=[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0'),String(d.getHours()).padStart(2,'0'),String(d.getMinutes()).padStart(2,'0'),String(d.getSeconds()).padStart(2,'0')].join('');return `RPT-${ts}-${op}-${prod}`}
+function readDefects(){const st=getState();const rows=[];document.querySelectorAll('.defect-row').forEach(row=>{const sel=row.querySelector('select');const qty=row.querySelector('.qty-input');const q=n(qty&&qty.value);if(!sel||!sel.value||q<=0)return;const d=(st.defectMap&&st.defectMap[sel.value])||{};rows.push({不良代碼:d.代碼||sel.value,不良名稱:d.名稱||sel.selectedOptions[0]?.textContent||'',英文名稱:d.英文名稱||'',不良數量:q,責任歸屬:d.責任歸屬||'',分類:d.分類||String(d.代碼||sel.value).slice(0,1)})});return rows}
+function validate(){const total=n(E('totalQty')?.value),ng=n(E('ngQty')?.value),good=Math.max(0,total-ng);const defects=readDefects();const sum=defects.reduce((a,b)=>a+n(b.不良數量),0);if(!E('personId')?.value)return '請先選擇作業員';if(!E('productCode')?.value)return '請先選擇產品';if(!E('workstationSelect')?.value)return '請先選擇報工工站';if(total<=0)return '請輸入今日共做數';if(ng>total)return '不良數不可大於共做數';if(sum>ng)return '不良分配數量不可超過 Step 3 的不良數';if(ng>0&&sum!==ng)return '不良分配總數需等於 Step 3 的不良數';return ''}
+function buildPayload(){
+  const st=getState();
+  const total=n(E('totalQty')?.value),ng=n(E('ngQty')?.value),good=Math.max(0,total-ng);const defects=readDefects();
+  const reportId=makeReportId(st);
+  const op=st.operator||{},prod=st.product||{},route=st.route||{},machine=st.machine||{};
+  return {reportId,報工編號:reportId,workDate:window.V4Bridge?.today?.()||'',作業日:window.V4Bridge?.today?.()||'',operator:{employeeId:S(op.工號||E('personId')?.value),operatorName:S(op.姓名||E('personName')?.value),shift:S(op.班別||E('shift')?.value||'早班')},product:{productCode:S(prod.產品編號||E('productCode')?.value),customerPartNo:S(prod.客戶品號||E('customerPartNo')?.value),productName:S(prod.品名||E('productName')?.value)},workstation:{workstationName:S(route.工站名稱||route.報工工站名稱||E('workstationSelect')?.value),processRange:S(route.工序範圍||route.工序||E('processRange')?.value),machineList:S(route.機台編號||''),mainMachine:S(machine.機台編號||machine.主機台||E('mainMachineSelect')?.value)},output:{totalQty:total,ngQty:ng,goodQty:good,startTime:S(E('startTime')?.value),endTime:S(E('endTime')?.value),workingHours:S(E('workingHours')?.value||'8 hrs')},quality:{defects,defectSummary:defects.map(d=>`${d.分類||''}類 ${d.不良代碼} ${d.不良名稱} × ${d.不良數量} pcs`).join('；')},photos:window.V4_PHOTOS||[],remarks:S(E('remarks')?.value),source:'PWA_V4.8.3'};
 }
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',patch);else patch();setTimeout(patch,500);setTimeout(patch,1500);setTimeout(patch,3000);
+async function submit(){
+  const err=validate();if(err){toast('寫入未確認 / Submit not confirmed',err,'error');return}
+  const p=buildPayload();
+  const ok=confirm(`確認送出報工？ / Confirm submit?\n\n實際良品：${p.output.goodQty} pcs\n不良數：${p.output.ngQty} pcs`);
+  if(!ok)return;
+  document.body.classList.add('submitting');
+  try{
+    const res=await window.V4Bridge.submitReport(p);
+    if(res&&(res.成功||res.success||res.ok)){
+      toast('報工已送出 / Submitted',`報工編號：${res.reportId||res.報工編號||p.reportId}\n已送往正式主資料庫 09_報工、09_不良紀錄`,'success');
+      if(typeof window.resetFlow==='function')window.resetFlow();
+    }else{
+      toast('寫入未確認 / Submit not confirmed',S(res&&res.訊息||res&&res.message||'GAS 未確認寫入，請檢查 Web App URL 與部署權限。'),'error');
+    }
+  }catch(e){toast('寫入失敗 / Submit failed',S(e.message||e),'error')}
+  finally{document.body.classList.remove('submitting')}
+}
+window.submitWorkReportV4=submit;
+document.addEventListener('click',function(e){const btn=e.target.closest('[data-submit-v4],#submitReportBtn');if(btn){e.preventDefault();submit()}});
 })();
