@@ -3,7 +3,7 @@ Object.assign(window.PWA_CONFIG,{
   GAS_WEB_APP_URL:'https://script.google.com/macros/s/AKfycbzRvly1OV-C80bMmd2ww4BM1XAH9WTyz62VFDnUxVGiO15kzHahbeHZc2bNTSwdFCqBwQ/exec',
   APP_NAME:'NEXUS OS · 工業 5.0 智慧製造矩陣',
   APP_SHORT_NAME:'化新精密',
-  VERSION:'v4.8.3_報工作業V4_正式主檔連線',
+  VERSION:'v4.9.1_報工作業V4_正式主檔連線',
   SPREADSHEET_ID:'19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8',
   正式主資料庫ID:'19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8',
   API_TIMEOUT_MS:15000,
