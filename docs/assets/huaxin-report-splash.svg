@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1290" height="2796" viewBox="0 0 1290 2796" role="img" aria-label="化新報工開場畫面">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#061127"/><stop offset="0.48" stop-color="#082758"/><stop offset="1" stop-color="#040914"/></linearGradient>
+    <radialGradient id="halo" cx="50%" cy="30%" r="55%"><stop offset="0" stop-color="#2f91ff" stop-opacity=".55"/><stop offset=".46" stop-color="#0d3f8d" stop-opacity=".22"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff2b5"/><stop offset=".44" stop-color="#f6c85f"/><stop offset="1" stop-color="#b67613"/></linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="18" result="b"/><feColorMatrix in="b" type="matrix" values="0 0 0 0 .12 0 0 0 0 .48 0 0 0 0 1 0 0 0 .65 0"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="1290" height="2796" fill="url(#bg)"/>
+  <rect width="1290" height="2796" fill="url(#halo)"/>
+  <g opacity=".38" stroke="#208dff" stroke-width="2">
+    <path d="M-80 2100C260 1880 720 1850 1370 2020"/><path d="M-80 2180C330 1980 780 1950 1370 2130"/><path d="M-80 2260C380 2100 770 2080 1370 2250"/>
+  </g>
+  <g opacity=".72" filter="url(#glow)">
+    <circle cx="645" cy="700" r="330" fill="none" stroke="#1d85ff" stroke-width="8"/>
+    <circle cx="645" cy="700" r="260" fill="none" stroke="#7fc5ff" stroke-width="2" opacity=".42"/>
+  </g>
+  <g transform="translate(245 365) scale(.78)">
+    <rect x="32" y="32" width="724" height="724" rx="165" fill="#071126" stroke="#55a4ff" stroke-width="8" opacity=".9"/>
+    <path d="M145 485V276h82v209z" fill="#10284e" stroke="url(#gold)" stroke-width="14"/>
+    <path d="M160 248h52v34h-52z" fill="url(#gold)"/>
+    <path d="M280 490V325l185-90v255z" fill="url(#gold)" stroke="#ffe8a0" stroke-width="8"/>
+    <path d="M465 352l156 67v71H465z" fill="#0d254e" stroke="url(#gold)" stroke-width="8"/>
+    <path d="M615 292c0-34 52-34 52 0v190h-52z" fill="url(#gold)"/>
+    <path d="M662 292h42v190" fill="none" stroke="url(#gold)" stroke-width="17" stroke-linecap="round"/>
+    <rect x="318" y="370" width="38" height="38" rx="5" fill="#08111f"/><rect x="386" y="370" width="38" height="38" rx="5" fill="#08111f"/>
+    <path d="M120 504H684" stroke="#278cff" stroke-width="8" filter="url(#glow)"/>
+    <text x="394" y="642" text-anchor="middle" font-family="Noto Sans TC, Microsoft JhengHei, Arial, sans-serif" font-size="116" font-weight="1000" fill="#f7faff" stroke="#071126" stroke-width="8" paint-order="stroke">化新報工</text>
+  </g>
+  <text x="645" y="1275" text-anchor="middle" font-family="Noto Sans TC, Microsoft JhengHei, Arial, sans-serif" font-size="122" font-weight="1000" fill="url(#gold)">化新報工</text>
+  <text x="645" y="1365" text-anchor="middle" font-family="Noto Sans TC, Microsoft JhengHei, Arial, sans-serif" font-size="42" font-weight="700" fill="#dbeafe">化新精密｜製造部｜報工作業 V4</text>
+  <g opacity=".58">
+    <rect x="0" y="2180" width="1290" height="616" fill="#041025"/>
+    <path d="M70 2450h1150M100 2520h1090M140 2590h1030" stroke="#116bd1" stroke-width="4" opacity=".7"/>
+    <rect x="180" y="2325" width="190" height="145" rx="22" fill="#0b2349" stroke="#1b7dff"/><rect x="460" y="2290" width="210" height="180" rx="24" fill="#0b2349" stroke="#1b7dff"/><rect x="760" y="2315" width="280" height="155" rx="24" fill="#0b2349" stroke="#1b7dff"/>
+  </g>
+  <circle cx="645" cy="2470" r="34" fill="none" stroke="#f6c85f" stroke-width="10" stroke-linecap="round" stroke-dasharray="150 70"/>
+  <text x="645" y="2575" text-anchor="middle" font-family="Noto Sans TC, Microsoft JhengHei, Arial, sans-serif" font-size="38" font-weight="700" fill="#b7c7da">系統啟動中...</text>
+</svg>
