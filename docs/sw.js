@@ -1,14 +1,16 @@
-const 快取名稱='huaxin-work-report-v4-cache-483-google-glass';
+const 快取名稱='huaxin-work-report-v4-cache-484-particles-hotfix';
 const 預快取清單=[
   './',
-  './work-report-v4-477.html?v=483&fix=locked-baseline',
-  './work-report-v4.webmanifest?v=483',
-  './pwa-config.js?v=483',
-  './gas-bridge.js?v=483',
-  './work-report-v4-app-483.js?v=483',
-  './work-report-v4-google-ui.css?v=483',
-  './assets/huaxin-report-icon.svg?v=483',
-  './assets/huaxin-report-splash.svg?v=483'
+  './work-report-v4-477.html?v=484&fix=locked-baseline',
+  './work-report-v4.webmanifest?v=484',
+  './pwa-config.js?v=484',
+  './gas-bridge.js?v=484',
+  './work-report-v4-app-483.js?v=484',
+  './work-report-v4-v484-hotfix.js?v=484',
+  './work-report-v4-opening-particles.js?v=484',
+  './work-report-v4-google-ui.css?v=484',
+  './assets/huaxin-report-icon.svg?v=484',
+  './assets/huaxin-report-splash.svg?v=484'
 ];
 
 self.addEventListener('install',event=>{
