@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>報工作業 V4｜黑底正式版</title>
-<link rel="manifest" href="./work-report-v4.webmanifest?v=494">
+<link rel="manifest" href="./work-report-v4.webmanifest?v=496">
 <style>
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#080d18;color:#e8ecf2;font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC',sans-serif}
 iframe{width:100%;height:100%;border:0;background:#080d18}.boot{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#080d18;color:#4da3ff;font-weight:900;z-index:9}.boot.hide{display:none}
@@ -15,31 +15,36 @@ iframe{width:100%;height:100%;border:0;background:#080d18}.boot{position:fixed;i
 </head>
 <body>
 <div id="boot" class="boot">報工作業 V4 載入中...</div>
-<iframe id="f" src="./work-report-v4.html?v=494&base=494"></iframe>
+<iframe id="f" src="./work-report-v4.html?v=496&base=496"></iframe>
 <script>
 (function(){
-var V='494';
+var V='496';
 var f=document.getElementById('f');
 var boot=document.getElementById('boot');
 function addJS(d,src,id,cb){if(d.getElementById(id)){cb&&cb();return}var s=d.createElement('script');s.id=id;s.src=src;s.onload=function(){cb&&cb()};s.onerror=function(){cb&&cb()};d.head.appendChild(s)}
+function injectSafeCss(w,d){try{if(d.getElementById('safe496'))return;var s=d.createElement('style');s.id='safe496';s.textContent='html,body{overflow-y:auto!important}.app{padding-bottom:170px!important}.topbar{top:0!important;padding-top:56px!important;z-index:80!important}.stepper{position:sticky!important;top:150px!important;z-index:70!important;margin-top:12px!important}.guide-card{position:relative!important;top:auto!important;z-index:1!important}.toast-stack{top:178px!important}.bottom-bar{z-index:90!important}.title h1{font-size:18px!important;line-height:1.15!important}.title p{font-size:11px!important}.step .circle{width:34px!important;height:34px!important}.btn{height:58px!important}';d.head.appendChild(s);setTimeout(function(){var t=d.querySelector('.topbar'),p=d.querySelector('.stepper');if(t&&p)p.style.top=Math.ceil(t.getBoundingClientRect().height+8)+'px'},300)}catch(e){}}
 function hideBoot(){setTimeout(function(){boot.classList.add('hide')},900)}
 f.addEventListener('load',function(){
   try{
     var w=f.contentWindow,d=w.document;
-    addJS(d,'./pwa-config.js?v='+V,'cfg494',function(){
-      addJS(d,'./gas-bridge.js?v='+V,'bridge494',function(){
-        addJS(d,'./work-report-v4-dark-488.js?v='+V,'dark494',function(){
-          addJS(d,'./work-report-v4-rules-470.js?v='+V,'rules494',function(){
-            addJS(d,'./work-report-v4-overtime-489.js?v='+V,'overtime494',function(){
-              addJS(d,'./work-report-v4-route-strict-490.js?v='+V,'routeStrict494',function(){
-                addJS(d,'./work-report-v4-submit-482.js?v='+V,'submit494',function(){
-                  addJS(d,'./work-report-v4-hotfix-494.js?v='+V,'hotfix494',function(){
+    injectSafeCss(w,d);
+    addJS(d,'./pwa-config.js?v='+V,'cfg496',function(){
+      addJS(d,'./gas-bridge.js?v='+V,'bridge496',function(){
+        addJS(d,'./work-report-v4-dark-488.js?v='+V,'dark496',function(){
+          addJS(d,'./work-report-v4-rules-470.js?v='+V,'rules496',function(){
+            addJS(d,'./work-report-v4-overtime-489.js?v='+V,'overtime496',function(){
+              addJS(d,'./work-report-v4-route-strict-490.js?v='+V,'routeStrict496',function(){
+                addJS(d,'./work-report-v4-submit-482.js?v='+V,'submit496',function(){
+                  addJS(d,'./work-report-v4-hotfix-494.js?v='+V,'hotfix496',function(){
+                    injectSafeCss(w,d);
                     try{if(w.V4Dark488&&w.V4Dark488.install)w.V4Dark488.install()}catch(e){}
+                    injectSafeCss(w,d);
                     try{if(w.V4Rules&&w.V4Rules.boot)w.V4Rules.boot()}catch(e){}
                     try{if(w.V4Overtime489&&w.V4Overtime489.boot)w.V4Overtime489.boot()}catch(e){}
                     try{if(w.V4RouteStrict490&&w.V4RouteStrict490.boot)w.V4RouteStrict490.boot()}catch(e){}
                     try{if(w.V4Hotfix494&&w.V4Hotfix494.boot)w.V4Hotfix494.boot()}catch(e){}
                     try{if(typeof w.reloadData==='function')w.reloadData()}catch(e){}
+                    setTimeout(function(){injectSafeCss(w,d)},600);
                     hideBoot();
                   });
                 });
