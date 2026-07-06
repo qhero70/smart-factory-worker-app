@@ -1,513 +1,1157 @@
-(() => {
-  'use strict';
+'use strict';
 
-  const 狀態 = {
-    步驟: 0,
-    資料: null,
-    人員: null,
-    產品: null,
-    工站: null,
-    機台: null,
-    照片: [],
-    不良索引: {},
-    掃描串流: null,
-    掃描計時器: null
-  };
+/* 化新報工 V4｜Google Glass PWA 正式邏輯
+ * 對接：docs/pwa-config.js + docs/gas-bridge.js
+ * 寫入：正式 GAS Web App → 09_報工；有不良時由後端同步 09_不良紀錄
+ */
 
-  const 步驟清單 = [
-    '👆 Step 1：選擇作業員 / Select Operator',
-    '📦 Step 2：選擇產品與工站 / Product & Route',
-    '📊 Step 3：輸入產出數量 / Output',
-    '🧪 Step 4：品質與照片 / Quality',
-    '✅ Step 5：確認並送出 / Confirm'
-  ];
+let DB = {
+  persons: [],
+  workstationGroups: [],
+  productList: [],
+  shiftList: [],
+  ngReasons: { Z: [], Y: [] },
+  anomalyTypes: [],
+  counts: {}
+};
 
-  const $ = (id) => document.getElementById(id);
-  const 文字 = (v) => String(v == null ? '' : v).trim();
-  const 數字 = (v) => {
-    const n = Number(文字(v).replace(/,/g, ''));
-    return Number.isFinite(n) ? n : 0;
-  };
-  const 轉義 = (s) => 文字(s).replace(/[&<>"']/g, (c) => ({
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;'
-  }[c]));
+let STATE = {
+  currentStep: 0,
+  operator: null,
+  productGroupList: [],
+  currentProductKey: '',
+  currentProductGroup: null,
+  currentWorkstation: null,
+  currentMachineId: '',
+  photos: [],
+  personStream: null,
+  personDetector: null,
+  personTimer: null,
+  productStream: null,
+  productDetector: null,
+  productTimer: null,
+  defectRows: [],
+  editPhotoIndex: -1,
+  stepDone: [false, false, false, false, false],
+  touchStart: { x: 0, y: 0, t: 0 },
+  touchMoved: false
+};
 
-  function 顯示提示(標題, 說明 = '', 類型 = 'ok') {
-    const el = $('提示泡泡');
-    if (!el) return;
-    el.style.borderLeftColor = 類型 === 'error' ? '#ef4444' : 類型 === 'warn' ? '#f59e0b' : '#22c55e';
-    el.innerHTML = 轉義(標題) + (說明 ? `<small>${轉義(說明)}</small>` : '');
-    el.style.display = 'block';
-    clearTimeout(el._timer);
-    el._timer = setTimeout(() => { el.style.display = 'none'; }, 2200);
+const TOTAL_STEPS = 5;
+const STEP_NAMES = ['人員', '工件', '產出', '品質', '確認'];
+const STEP_EN = ['Operator', 'Workpiece', 'Output', 'Quality', 'Confirm'];
+const LS_KEY = 'huaxin_rg_v4_recent_persons';
+const MAX_RECENT = 6;
+const MAX_PHOTOS = 12;
+let defectRowIdCounter = 0;
+let scanBuffer = '';
+let scanTimer = null;
+const SCAN_GAP_MS = 80;
+
+window.addEventListener('load', () => {
+  setDefaultTimes();
+  initAnomalyTypeSelect();
+  reloadData();
+  listenScannerGun();
+  listenFullscreenChange();
+  addDefectRow();
+  updateStepperUI();
+  updateBottomBar();
+  registerPWAServiceWorker();
+});
+
+document.addEventListener('click', e => {
+  const el = e.target.closest('.ripple');
+  if (!el) return;
+  const wave = document.createElement('span');
+  wave.className = 'ripple-wave';
+  const r = el.getBoundingClientRect();
+  const sz = Math.max(r.width, r.height);
+  wave.style.cssText = `width:${sz}px;height:${sz}px;left:${e.clientX-r.left-sz/2}px;top:${e.clientY-r.top-sz/2}px`;
+  el.appendChild(wave);
+  wave.addEventListener('animationend', () => wave.remove());
+});
+
+function registerPWAServiceWorker() {
+  if (!('serviceWorker' in navigator)) return;
+  navigator.serviceWorker.register('./sw.js?v=483').catch(() => {});
+}
+
+function reloadData() {
+  showLoading(true);
+  const bridge = window.V4Bridge;
+  if (!bridge || typeof bridge.loadInit !== 'function') {
+    showLoading(false);
+    setStatus('🔴 找不到 PWA Bridge，請確認 gas-bridge.js 已載入', 'error');
+    roar('❌', 'PWA Bridge 未載入', '請確認 docs/gas-bridge.js 存在並重新整理', 'error');
+    return;
   }
+  bridge.loadInit().then(onDataLoaded).catch(err => {
+    showLoading(false);
+    setStatus('🔴 讀取失敗 / Load failed', 'error');
+    roar('❌', '讀取失敗 / Load Failed', err.message || String(err), 'error');
+  });
+}
 
-  window.v4Toast = 顯示提示;
-
-  function 圖片HTML(url, icon = '👤') {
-    url = 文字(url);
-    if (url.startsWith('http')) {
-      return `<img src="${轉義(url)}" loading="lazy" alt="" onerror="this.outerHTML='<div class=&quot;佔位&quot;>${icon}</div>'">`;
-    }
-    return `<div class="佔位">${轉義(icon)}</div>`;
+function onDataLoaded(data) {
+  showLoading(false);
+  if (!data || !(data.成功 || data.success || data.ok)) {
+    setStatus('🔴 資料讀取失敗 / Load failed', 'error');
+    roar('❌', '資料讀取失敗 / Load Failed', (data && (data.訊息 || data.message)) || '請檢查後端連線', 'error');
+    return;
   }
+  DB.persons = (data.人員 || data.people || []).filter(r => String(r.啟用 || '是') !== '否');
+  DB.workstationGroups = (data.報工工站群組 || data.routes || data.途程工站群組 || []).map(normalizeGroup).filter(g => g.產品編號 && g.報工工站名稱);
+  DB.ngReasons = data.不良原因 || data.defectReasons || { Z: [], Y: [] };
+  DB.anomalyTypes = data.異常類型 || [];
+  DB.shiftList = data.班別清單 || [];
+  DB.counts = data.筆數 || {};
+  DB.productList = buildProductList();
+  fillStatusPill();
+  buildShiftSelect();
+  buildPersonGrid();
+  buildProductGrid();
+  initAnomalyTypeSelect();
+  loadRecentPersons();
+  const dot = g('statusDot');
+  if (dot) dot.className = 'status-dot connected';
+  roar('✅', '資料已載入 / Data Loaded', `人員 ${DB.persons.length} 筆｜產品 ${DB.productList.length} 筆｜工站群組 ${DB.workstationGroups.length} 筆`, 'success');
+}
 
-  function 設定狀態(text, ok = true) {
-    $('狀態文字').textContent = text;
-    $('狀態燈').style.background = ok ? '#22c55e' : '#f59e0b';
-    $('狀態燈').style.boxShadow = `0 0 10px ${ok ? '#22c55e' : '#f59e0b'}`;
+function normalizeGroup(src) {
+  const g0 = src || {};
+  const g1 = Object.assign({}, g0);
+  if (typeof g1.機台清單 === 'string') {
+    try { g1.機台清單 = JSON.parse(g1.機台清單); }
+    catch(e) { g1.機台清單 = splitMachineText(g1.機台清單).map(id => ({ 機台編號: id, 設備名稱: '機台' + id })); }
   }
-
-  function 畫步驟() {
-    $('步驟列').innerHTML = [1, 2, 3, 4, 5].map((n, i) => {
-      const cls = i === 狀態.步驟 ? '步驟 啟用' : i < 狀態.步驟 ? '步驟 完成' : '步驟';
-      return `<div class="${cls}">${i < 狀態.步驟 ? '✓' : n}</div>`;
-    }).join('');
-  }
-
-  function 到步驟(index) {
-    狀態.步驟 = Math.max(0, Math.min(4, index));
-    document.querySelectorAll('.頁').forEach((page, i) => page.classList.toggle('啟用', i === 狀態.步驟));
-    畫步驟();
-    $('提示文字').textContent = 步驟清單[狀態.步驟];
-    $('搜尋列').style.display = 狀態.步驟 <= 1 ? 'block' : 'none';
-    $('搜尋框').value = '';
-    $('搜尋框').placeholder = 狀態.步驟 === 0
-      ? '🔍 搜尋人員 / 姓名、工號、班別'
-      : '🔍 搜尋產品 / 品名、產品編號、客戶品號';
-    $('nextBtn').textContent = 狀態.步驟 === 4 ? '📥 送出報工 / Submit' : '下一步 → / Next';
-    $('內容區').scrollTop = 0;
-    if (狀態.步驟 === 1) 畫產品();
-    if (狀態.步驟 === 3) 初始化不良列();
-    if (狀態.步驟 === 4) 畫摘要();
-  }
-
-  function 防滑動誤觸(container, callback) {
-    let sx = 0;
-    let sy = 0;
-    let moved = false;
-    container.addEventListener('pointerdown', (e) => {
-      sx = e.clientX;
-      sy = e.clientY;
-      moved = false;
-    }, { passive: true });
-    container.addEventListener('pointermove', (e) => {
-      if (Math.abs(e.clientX - sx) > 10 || Math.abs(e.clientY - sy) > 10) moved = true;
-    }, { passive: true });
-    container.addEventListener('pointerup', (e) => {
-      if (moved) return;
-      const card = e.target.closest('.卡');
-      if (card) callback(card);
-    }, true);
-  }
-
-  function 取人員() { return (狀態.資料 && 狀態.資料.人員) || []; }
-  function 取產品() { return (狀態.資料 && 狀態.資料.產品) || []; }
-  function 取工站群組() { return (狀態.資料 && (狀態.資料.routes || 狀態.資料.報工工站群組)) || []; }
-
-  function 畫人員() {
-    const q = 文字($('搜尋框').value).toLowerCase();
-    const rows = 取人員()
-      .filter((p) => !q || [p.姓名, p.工號, p.班別].join(' ').toLowerCase().includes(q))
-      .slice(0, 120);
-    $('人員清單').innerHTML = rows.map((p) => `
-      <div class="卡 ${狀態.人員 && 狀態.人員.工號 === p.工號 ? '選取' : ''}" data-id="${轉義(p.工號)}">
-        <span class="班別">${轉義(p.班別 || '早班')}</span>
-        ${圖片HTML(p.照片網址 || p.縮圖網址, '👤')}
-        <div class="字罩"><div class="名稱">${轉義(p.姓名)}</div><div class="編號">${轉義(p.工號)}</div></div>
-      </div>
-    `).join('') || '<div class="面板">尚無人員資料</div>';
-  }
-
-  function 選人員(id) {
-    const p = 取人員().find((x) => x.工號 === id);
-    if (!p) return;
-    狀態.人員 = p;
-    $('selectedPersonArea').style.display = 'none';
-    $('selectedPersonArea').innerHTML = `
-      <input id="personId" value="${轉義(p.工號)}">
-      <input id="personName" value="${轉義(p.姓名)}">
-      <input id="shift" value="${轉義(p.班別 || '早班')}">
-    `;
-    畫人員();
-    彈出選定('👤 已選定人員', p.姓名, p.工號, p.照片網址 || p.縮圖網址);
-  }
-
-  function 彈出選定(title, name, code, photo) {
-    const box = $('選定浮層');
-    const head = 文字(photo).startsWith('http')
-      ? `<img src="${轉義(photo)}" alt="">`
-      : `<div class="選定頭像">${轉義(文字(name).slice(0, 1) || '✓')}</div>`;
-    box.innerHTML = `<div class="選定列">${head}<div><div class="名稱 大字">${轉義(title)}</div><div class="名稱">${轉義(name)}</div><div class="編號">${轉義(code)}</div></div></div>`;
-    box.classList.add('顯示');
-    clearTimeout(box._timer);
-    box._timer = setTimeout(() => box.classList.remove('顯示'), 1200);
-  }
-
-  function 畫產品() {
-    const q = 文字($('搜尋框').value).toLowerCase();
-    const routePids = {};
-    取工站群組().forEach((r) => { if (r.產品編號) routePids[r.產品編號] = true; });
-    let rows = 取產品().filter((p) => routePids[p.產品編號]);
-    if (!rows.length) rows = 取產品();
-    rows = rows
-      .filter((p) => !q || [p.品名, p.產品編號, p.客戶品號].join(' ').toLowerCase().includes(q))
-      .slice(0, 120);
-    $('產品清單').innerHTML = rows.map((p) => `
-      <div class="卡 ${狀態.產品 && 狀態.產品.產品編號 === p.產品編號 ? '選取' : ''}" data-id="${轉義(p.產品編號)}">
-        ${圖片HTML(p.照片網址 || p.縮圖網址, '📦')}
-        <div class="字罩"><div class="名稱">${轉義(p.品名 || p.產品編號)}</div><div class="編號">${轉義(p.產品編號)}</div></div>
-      </div>
-    `).join('') || '<div class="面板">尚無產品資料</div>';
-  }
-
-  function 選產品(pid) {
-    const p = 取產品().find((x) => x.產品編號 === pid);
-    if (!p) return;
-    狀態.產品 = p;
-    狀態.工站 = null;
-    狀態.機台 = null;
-    $('selectedProductArea').style.display = 'block';
-    $('產品摘要').innerHTML = `<b>${轉義(p.品名 || '')}</b><br><span class="編號">${轉義(p.產品編號)}</span>`;
-    $('productCode').value = p.產品編號 || '';
-    $('productName').value = p.品名 || '';
-    畫產品();
-    畫工站選單();
-    彈出選定('📦 已選定產品', p.品名 || p.產品編號, p.產品編號, p.照片網址 || p.縮圖網址);
-  }
-
-  function 畫工站選單() {
-    const routes = 取工站群組().filter((r) => r.產品編號 === 狀態.產品.產品編號);
-    window.__V4_ROUTES_VIEW__ = routes;
-    $('workstationSelect').innerHTML = '<option value="">請選擇工站</option>' + routes.map((r, i) => {
-      const name = r.工站名稱 || r.報工工站名稱 || '';
-      const op = r.工序範圍 || r.工序 || '';
-      const machines = Array.isArray(r.機台清單) ? r.機台清單.map((m) => m.機台編號).join('、') : '';
-      return `<option value="${i}">${轉義(name)}｜${轉義(op)}｜${轉義(machines)}</option>`;
-    }).join('');
-    清工站欄位();
-  }
-
-  function 清工站欄位() {
-    $('routeFieldsArea').style.display = 'none';
-    $('processRange').value = '';
-    $('stdCapacity').value = '';
-    $('stdTimeSec').value = '';
-    $('mainMachineSelect').innerHTML = '';
-    $('machineListGrid').innerHTML = '';
-  }
-
-  function 選工站(index) {
-    const route = (window.__V4_ROUTES_VIEW__ || [])[Number(index)];
-    if (!route) {
-      狀態.工站 = null;
-      清工站欄位();
-      return;
-    }
-    狀態.工站 = route;
-    $('routeFieldsArea').style.display = 'block';
-    $('processRange').value = route.工序範圍 || route.工序 || '';
-    $('stdCapacity').value = route['標準產能'] || route['8H產能'] || route['工站8H產能_件'] || '';
-    $('stdTimeSec').value = route['標準工時_秒'] || route['標準工時(秒)'] || '';
-    const machines = Array.isArray(route.機台清單) ? route.機台清單 : [];
-    $('mainMachineSelect').innerHTML = machines.map((m) => `<option value="${轉義(m.機台編號)}">${轉義(m.機台編號)}｜${轉義(m.機台名稱 || m.設備名稱 || '')}</option>`).join('');
-    if (machines[0]) 選機台(machines[0].機台編號);
-    else 畫機台([]);
-  }
-
-  function 畫機台(machines) {
-    $('machineListGrid').innerHTML = (machines || []).map((m) => `
-      <div class="卡 ${狀態.機台 && 狀態.機台.機台編號 === m.機台編號 ? '選取' : ''}" data-id="${轉義(m.機台編號)}">
-        ${圖片HTML(m.照片網址 || m.縮圖網址, '⚙️')}
-        <div class="字罩"><div class="名稱">${轉義(m.機台編號)}</div><div class="編號">${轉義(m.機台名稱 || m.設備名稱 || '機台')}</div></div>
-      </div>
-    `).join('') || '<div class="小佔位">此工站未設定機台清單</div>';
-  }
-
-  function 選機台(id) {
-    const machines = (狀態.工站 && 狀態.工站.機台清單) || [];
-    狀態.機台 = machines.find((m) => m.機台編號 === id) || machines[0] || null;
-    if (狀態.機台) $('mainMachineSelect').value = 狀態.機台.機台編號;
-    畫機台(machines);
-  }
-
-  function 計算數量() {
-    const total = 數字($('totalQty').value);
-    const ng = 數字($('ngQty').value);
-    $('sumTotal').textContent = total || '—';
-    $('sumNg').textContent = ng || '—';
-    $('sumGood').textContent = (total || ng) ? Math.max(0, total - ng) : '—';
-    檢查不良分配(true);
-  }
-
-  function 全不良原因() {
-    const d = (狀態.資料 && 狀態.資料.不良原因) || { Z: [], Y: [] };
-    return [...(d.Z || []), ...(d.Y || [])];
-  }
-
-  function 初始化不良列() {
-    狀態.不良索引 = {};
-    全不良原因().forEach((d) => { 狀態.不良索引[d.代碼] = d; });
-    if (!$('defectRows').children.length) 新增不良列();
-  }
-
-  function 新增不良列() {
-    const row = document.createElement('div');
-    row.className = '不良列';
-    const opts = 全不良原因().map((d) => {
-      const cat = d.分類 || String(d.代碼 || '').slice(0, 1);
-      return `<option value="${轉義(d.代碼)}">${轉義(`${cat}類 ${d.代碼} ${d.英文名稱 || ''} / ${d.名稱 || ''}`)}</option>`;
-    }).join('');
-    row.innerHTML = `<select class="欄位"><option value="">不良原因</option>${opts}</select><input class="欄位 不良數量" inputmode="numeric" placeholder="數量"><button class="工具鈕" type="button">刪</button>`;
-    row.querySelector('button').onclick = () => { row.remove(); 檢查不良分配(true); };
-    row.querySelector('input').oninput = () => 檢查不良分配(true);
-    row.querySelector('select').onchange = () => 檢查不良分配(true);
-    $('defectRows').appendChild(row);
-  }
-
-  function 檢查不良分配(silent = false) {
-    const ng = 數字($('ngQty').value);
-    let sum = 0;
-    document.querySelectorAll('.不良數量').forEach((input) => { sum += 數字(input.value); });
-    if (sum > ng) {
-      if (!silent) 顯示提示('不良分配超過上限', '分配數量不可超過 Step 3 的不良數', 'warn');
-      return false;
-    }
-    return true;
-  }
-
-  function 讀不良() {
-    const arr = [];
-    document.querySelectorAll('.不良列').forEach((row) => {
-      const code = row.querySelector('select').value;
-      const qty = 數字(row.querySelector('input').value);
-      const d = 狀態.不良索引[code] || {};
-      if (code && qty > 0) {
-        arr.push({
-          不良代碼: code,
-          不良名稱: d.名稱 || '',
-          英文名稱: d.英文名稱 || '',
-          不良數量: qty,
-          分類: d.分類 || String(code).slice(0, 1),
-          責任歸屬: d.責任歸屬 || ''
-        });
-      }
+  if (!Array.isArray(g1.機台清單)) g1.機台清單 = [];
+  g1.機台清單 = g1.機台清單.map(m => {
+    const id = clean(String(m.機台編號 || m.主機台 || m.設備編號 || m.id || ''));
+    const url = clean(m.縮圖網址 || m.照片網址 || m.圖片網址 || m.URL || '');
+    return Object.assign({}, m, {
+      機台編號: id,
+      主機台: id,
+      設備名稱: clean(m.設備名稱 || m.機台名稱 || m.名稱 || ('機台' + id)),
+      機台名稱: clean(m.機台名稱 || m.設備名稱 || m.名稱 || ('機台' + id)),
+      縮圖網址: url,
+      照片網址: url
     });
-    return arr;
+  }).filter(m => m.機台編號);
+  if (!g1.機台清單.length) {
+    splitMachineText([g1.機台編號清單, g1.機台清單, g1.可用機台, g1.主機台, g1.機台編號].filter(Boolean).join('、'))
+      .forEach(id => g1.機台清單.push({ 機台編號: id, 主機台: id, 設備名稱: '機台' + id, 機台名稱: '機台' + id }));
   }
+  if (!Array.isArray(g1.工序清單)) g1.工序清單 = clean(g1.工序清單 || g1.工序 || g1.工序範圍 || '').split(/[、,，;；\s]+/).filter(Boolean);
+  g1.產品編號 = clean(g1.產品編號 || g1.料號 || g1.productCode || '');
+  g1.品名 = cleanProductName(g1.品名 || g1.產品名稱 || g1.productName || '');
+  g1.客戶品號 = clean(g1.客戶品號 || g1.客戶料號 || '');
+  g1.報工工站名稱 = clean(g1.報工工站名稱 || g1.工站名稱 || g1.工站 || '');
+  g1.工站名稱 = g1.報工工站名稱;
+  g1.工序範圍 = clean(g1.工序範圍 || g1.工序 || g1.OP || g1.工序編號_最終 || g1.工序編號 || '');
+  g1.工序 = g1.工序範圍;
+  g1.主機台 = clean(g1.主機台 || (g1.機台清單[0] && g1.機台清單[0].機台編號) || '');
+  g1.機台編號清單 = g1.機台清單.map(m => m.機台編號);
+  g1.機台編號 = g1.機台編號清單.join('、');
+  const purl = clean(g1.產品縮圖網址 || g1.產品照片網址 || g1.照片網址 || g1.縮圖網址 || '');
+  g1.產品縮圖網址 = purl;
+  g1.產品照片網址 = purl;
+  g1.顯示名稱 = clean(g1.顯示名稱) || [g1.報工工站名稱, g1.工序範圍, g1.機台編號].filter(Boolean).join('｜');
+  return g1;
+}
 
-  function 選照片(files) {
-    const list = Array.from(files || []).slice(0, 12 - 狀態.照片.length);
-    list.forEach((file) => 狀態.照片.push({ name: file.name, size: file.size, type: file.type, preview: URL.createObjectURL(file) }));
-    $('photoCount').textContent = `${狀態.照片.length} / 12 張照片`;
-    $('照片預覽').innerHTML = 狀態.照片.map((p) => `<img src="${p.preview}" alt="">`).join('');
+function splitMachineText(v) {
+  return clean(v).split(/[、,，;；\/\s]+/).map(x => x.replace(/\.0$/, '')).filter(x => /^\d{1,5}$/.test(x));
+}
+
+function buildProductList() {
+  const map = new Map();
+  DB.workstationGroups.forEach(gr => {
+    const key = gr.產品編號 + '|' + gr.品名;
+    if (!map.has(key)) map.set(key, gr);
+  });
+  return Array.from(map.values()).sort((a, b) => clean(a.品名).localeCompare(clean(b.品名), 'zh-Hant'));
+}
+
+function setStatus(text, type) {
+  const textEl = g('statusText');
+  const dot = g('statusDot');
+  if (textEl) textEl.textContent = text;
+  if (dot) dot.className = type === 'error' ? 'status-dot error' : type === 'ok' ? 'status-dot connected' : 'status-dot';
+}
+
+function fillStatusPill() {
+  const p = DB.counts || {};
+  setStatus('🟢 資料已載入 / Loaded｜人員：' + (p.人員 || DB.persons.length) + '｜產品：' + (p.產品 || DB.productList.length) + '｜工站群組：' + (p.報工工站群組 || DB.workstationGroups.length), 'ok');
+}
+
+function updateStepperUI() {
+  const items = document.querySelectorAll('.step-item');
+  const connectors = document.querySelectorAll('.step-connector');
+  items.forEach((item, i) => {
+    item.classList.remove('is-active', 'is-done', 'is-todo');
+    const circle = item.querySelector('.step-circle');
+    if (i < STATE.currentStep) { item.classList.add('is-done'); circle.textContent = '✓'; }
+    else if (i === STATE.currentStep) { item.classList.add('is-active'); circle.textContent = i + 1; }
+    else { item.classList.add('is-todo'); circle.textContent = i + 1; }
+  });
+  connectors.forEach((c, i) => {
+    c.classList.remove('done', 'active');
+    if (i < STATE.currentStep) c.classList.add('done');
+    else if (i === STATE.currentStep) c.classList.add('active');
+  });
+}
+
+function jumpToStep(idx) {
+  if (idx === STATE.currentStep) return;
+  if (idx > STATE.currentStep && !STATE.stepDone[STATE.currentStep]) {
+    roar('⚠️', '請先完成目前步驟 / Complete Current Step First', '請依引導完成步驟 ' + (STATE.currentStep + 1) + ' 再繼續', 'warning');
+    return;
   }
+  switchStep(idx);
+}
 
-  function 清照片() {
-    狀態.照片.forEach((p) => { try { URL.revokeObjectURL(p.preview); } catch (e) {} });
-    狀態.照片 = [];
-    $('photoCount').textContent = '0 / 12 張照片';
-    $('照片預覽').innerHTML = '';
+function switchStep(idx) {
+  if (idx < 0 || idx >= TOTAL_STEPS) return;
+  STATE.currentStep = idx;
+  for (let i = 0; i < TOTAL_STEPS; i++) {
+    const el = g('stepPage' + i);
+    if (el) el.classList.toggle('hidden', i !== idx);
   }
+  updateStepperUI();
+  updateBottomBar();
+  if (idx === 2) setDefaultTimes(false);
+  if (idx === 3) updateDefectSyncNotice();
+  if (idx === 4) updateConfirmSummary();
+  updatePreview();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
-  function 畫摘要() {
-    const total = 數字($('totalQty').value);
-    const ng = 數字($('ngQty').value);
-    const good = Math.max(0, total - ng);
-    const defect = 讀不良();
-    const rows = [
-      ['人員', `${狀態.人員?.姓名 || ''}｜${狀態.人員?.工號 || ''}`],
-      ['產品', `${狀態.產品?.產品編號 || ''}｜${狀態.產品?.品名 || ''}`],
-      ['工站', 狀態.工站?.工站名稱 || 狀態.工站?.報工工站名稱 || ''],
-      ['工序', 狀態.工站?.工序範圍 || 狀態.工站?.工序 || ''],
-      ['機台', 狀態.機台?.機台編號 || ''],
-      ['共做', `${total} pcs`],
-      ['良品', `${good} pcs`],
-      ['不良', `${ng} pcs`],
-      ['不良原因', defect.map((d) => `${d.不良代碼} ${d.不良名稱} × ${d.不良數量}`).join('；') || '無'],
-      ['照片', `${狀態.照片.length} 張`]
-    ];
-    $('summaryRows').innerHTML = rows.map((r) => `<div class="摘要列"><div>${轉義(r[0])}</div><div>${轉義(r[1])}</div></div>`).join('');
+function updateBottomBar() {
+  const btnBack = g('btnBack');
+  const btnNext = g('btnNext');
+  if (STATE.currentStep === 0) { btnBack.classList.add('hidden'); btnNext.style.gridColumn = '1 / -1'; }
+  else { btnBack.classList.remove('hidden'); btnNext.style.gridColumn = ''; }
+  if (STATE.currentStep === TOTAL_STEPS - 1) {
+    btnNext.textContent = '📤 送出報工 / Submit Report';
+    btnNext.classList.add('green-submit');
+  } else {
+    btnNext.textContent = '下一步 → / Next';
+    btnNext.classList.remove('green-submit');
   }
+  btnNext.disabled = false;
+  btnNext.classList.remove('submitting');
+}
 
-  function 檢查步驟() {
-    if (狀態.步驟 === 0 && !狀態.人員) { 顯示提示('尚未選擇人員', '請先選擇作業員', 'warn'); return false; }
-    if (狀態.步驟 === 1 && !狀態.產品) { 顯示提示('尚未選擇產品', '請先選擇產品', 'warn'); return false; }
-    if (狀態.步驟 === 1 && !狀態.工站) { 顯示提示('尚未選擇工站', '請先選擇報工工站', 'warn'); return false; }
-    if (狀態.步驟 === 2 && 數字($('totalQty').value) <= 0) { 顯示提示('尚未輸入產出', '請輸入今日共做數', 'warn'); return false; }
-    if (狀態.步驟 === 3 && !檢查不良分配(false)) return false;
-    return true;
+function markStepDone() {
+  STATE.stepDone[STATE.currentStep] = true;
+  updateStepperUI();
+}
+
+function goBack() { if (STATE.currentStep > 0) switchStep(STATE.currentStep - 1); }
+
+function goNextOrSubmit() {
+  const err = validateCurrentStep();
+  if (err) { roar('⚠️', '請完成必填項目 / Required Field Missing', err, 'warning'); return; }
+  markStepDone();
+  if (STATE.currentStep < TOTAL_STEPS - 1) switchStep(STATE.currentStep + 1);
+  else submitReport();
+}
+
+function validateCurrentStep() {
+  switch (STATE.currentStep) {
+    case 0:
+      if (!STATE.operator && !val('personId')) return '請選擇作業員 / Please select an operator';
+      break;
+    case 1:
+      if (!STATE.currentProductGroup) return '請選擇產品 / Please select product';
+      if (!STATE.currentWorkstation && !val('workstationSelect')) return '請選擇報工工站 / Please select workstation';
+      break;
+    case 2:
+      if (num('totalQty') <= 0) return '今日共做數必須大於 0 / Total qty must be > 0';
+      if (num('ngQty') > num('totalQty')) return '不良數不可大於共做數 / NG qty must not exceed total qty';
+      break;
+    case 3:
+      return validateDefectAllocation();
+    case 4:
+      return validateReport(buildReportData());
   }
+  return '';
+}
 
-  function 建立Payload() {
-    const total = 數字($('totalQty').value);
-    const ng = 數字($('ngQty').value);
-    const good = Math.max(0, total - ng);
-    const defects = 讀不良();
-    const id = `RPT-${new Date().toISOString().replace(/[-:.TZ]/g, '')}-${狀態.人員?.工號 || 'NA'}-${狀態.產品?.產品編號 || 'NA'}`;
-    const today = window.V4Bridge?.today?.() || '';
-    return {
-      reportId: id,
-      報工編號: id,
-      workDate: today,
-      作業日: today,
-      operator: {
-        employeeId: 狀態.人員?.工號,
-        operatorName: 狀態.人員?.姓名,
-        shift: 狀態.人員?.班別 || '早班'
-      },
-      product: {
-        productCode: 狀態.產品?.產品編號,
-        customerPartNo: 狀態.產品?.客戶品號,
-        productName: 狀態.產品?.品名
-      },
-      workstation: {
-        workstationName: 狀態.工站?.工站名稱 || 狀態.工站?.報工工站名稱,
-        processRange: 狀態.工站?.工序範圍 || 狀態.工站?.工序,
-        machineList: ((狀態.工站?.機台清單) || []).map((m) => m.機台編號).join(','),
-        mainMachine: 狀態.機台?.機台編號
-      },
-      output: {
-        totalQty: total,
-        ngQty: ng,
-        goodQty: good,
-        startTime: $('startTime').value,
-        endTime: $('endTime').value,
-        workingHours: $('workingHours').value || '8 hrs'
-      },
-      quality: {
-        defects,
-        defectSummary: defects.map((d) => `${d.分類 || ''}類 ${d.不良代碼} ${d.不良名稱} × ${d.不良數量} pcs`).join('；')
-      },
-      photos: 狀態.照片.map((p) => ({ name: p.name, size: p.size, type: p.type })),
-      remarks: $('remarks').value,
-      source: 'PWA_V4_正式基準_483_HUAXIN_SPLASH'
+function getShiftType(shift) {
+  const t = String(shift || '');
+  if (t.includes('大夜') || t.includes('夜') || t === 'NIGHT') return 'night';
+  if (t.includes('中') || t === 'SWING') return 'swing';
+  return 'day';
+}
+function getShiftIcon(shift) { const k = getShiftType(shift); return k === 'night' ? '🌙' : k === 'swing' ? '🌇' : '☀️'; }
+
+function bindSafeTap(container, selector, callback) {
+  if (!container) return;
+  container.onpointerdown = e => {
+    STATE.touchStart = { x: e.clientX, y: e.clientY, t: Date.now() };
+    STATE.touchMoved = false;
+  };
+  container.onpointermove = e => {
+    if (Math.abs(e.clientX - STATE.touchStart.x) > 10 || Math.abs(e.clientY - STATE.touchStart.y) > 10) STATE.touchMoved = true;
+  };
+  container.onpointerup = e => {
+    if (STATE.touchMoved) return;
+    const card = e.target.closest(selector);
+    if (card) callback(card);
+  };
+}
+
+function buildPersonGrid() {
+  const container = g('personGrid');
+  const active = DB.persons.filter(r => String(r.啟用 || '是') !== '否');
+  if (!active.length) {
+    container.innerHTML = '<div class="caption" style="text-align:center;padding:24px;grid-column:1/-1;">尚無啟用的人員資料 / No active operators</div>';
+    return;
+  }
+  container.innerHTML = active.map(r => {
+    const i = DB.persons.indexOf(r);
+    const st = getShiftType(r.班別 || r.班別名稱);
+    const icon = getShiftIcon(r.班別 || r.班別名稱);
+    const url = clean(r.縮圖網址 || r.照片網址 || r.圖片網址 || '');
+    const avatarContent = url ? `<img src="${safeAttr(url)}" onerror="this.parentElement.innerHTML='${safeAttr(nameInitial(r.姓名))}'">` : nameInitial(r.姓名);
+    return `<div class="person-card shift-${st} ripple" data-index="${i}" id="personCard_${i}">
+      <span class="shift-badge ${st}">${icon} ${safeTxt(String(r.班別 || r.班別名稱 || '').slice(0, 2))}</span>
+      <span class="selected-badge">✓ 已選取</span>
+      <div class="avatar-ring">${avatarContent}</div>
+      <div class="person-name">${safeTxt(r.姓名 || '未知')}</div>
+      <div class="person-id">${safeTxt(r.工號 || '')}</div>
+    </div>`;
+  }).join('');
+  bindSafeTap(container, '.person-card', card => selectPerson(Number(card.dataset.index)));
+}
+
+function nameInitial(name) { const n = String(name || '?').trim(); return n ? n.charAt(0).toUpperCase() : '?'; }
+
+function filterPersons() {
+  const kw = (val('personSearch') || '').toUpperCase().trim();
+  const cards = document.querySelectorAll('.person-card');
+  let any = false;
+  cards.forEach(card => {
+    const idx = Number(card.dataset.index);
+    const r = DB.persons[idx];
+    if (!r) { card.classList.add('hidden'); return; }
+    const txt = [r.姓名, r.工號, r.班別, r.班別名稱, r.部門, r.職稱].join(' ').toUpperCase();
+    if (!kw || txt.includes(kw)) { card.classList.remove('hidden'); any = true; }
+    else card.classList.add('hidden');
+  });
+  g('personGridEmpty').classList.toggle('hidden', any);
+}
+
+function selectPerson(i) {
+  const r = DB.persons[i];
+  if (!r) return;
+  STATE.operator = r;
+  document.querySelectorAll('.person-card').forEach(c => c.classList.remove('selected'));
+  const card = g('personCard_' + i);
+  if (card) { card.classList.add('selected'); card.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+  setVal('personId', r.工號 || '');
+  setVal('personName', r.姓名 || '');
+  if (r.班別 || r.班別名稱) setVal('shiftSelect', r.班別名稱 || inferShift(r.班別));
+  g('empIdHighlight').textContent = r.工號 || '未輸入';
+  const disp = g('selectedPersonDisplay');
+  disp.className = 'selected-person-display populated';
+  disp.innerHTML = imgHTML(r.縮圖網址 || r.照片網址, '無頭像', true) +
+    `<div><div class="person-info-name">${safeTxt(r.姓名 || '')} <span style="font-size:12px;color:var(--text-secondary);">${safeTxt(r.工號 || '')}</span></div>
+    <div class="caption" style="margin-top:4px;">${safeTxt([r.部門, r.班別名稱 || r.班別, r.職稱 || ''].filter(Boolean).join('｜'))}</div></div>`;
+  saveRecentPerson(i);
+  setDefaultTimes(false);
+  markStepDone();
+  updatePreview();
+  updateConfirmSummary();
+  roar('👤', '已選定作業員 / Operator Selected', (r.姓名 || '') + '（' + (r.工號 || '') + '）', 'success');
+}
+
+function buildShiftSelect() {
+  const s = g('shiftSelect');
+  s.innerHTML = '';
+  if (DB.shiftList && DB.shiftList.length) DB.shiftList.forEach(x => s.add(new Option(x.名稱 || x.值 || x, x.值 || x.名稱 || x)));
+  else ['早班', '中班', '大夜班', '加班'].forEach(x => s.add(new Option(x, x)));
+}
+
+function inferShift(v) {
+  const t = String(v || '').trim();
+  if (t === 'DAY') return '早班';
+  if (t === 'SWING') return '中班';
+  if (t === 'NIGHT') return '大夜班';
+  if (t.includes('大夜') || t.includes('夜')) return '大夜班';
+  if (t.includes('中班') || t.includes('中')) return '中班';
+  return '早班';
+}
+
+function loadRecentPersons() {
+  try { renderRecentPersons(JSON.parse(localStorage.getItem(LS_KEY) || '[]').slice(0, MAX_RECENT)); }
+  catch(e) { renderRecentPersons([]); }
+}
+function saveRecentPerson(i) {
+  try {
+    let list = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+    list = list.filter(x => x.idx !== i);
+    list.unshift({ idx: i, ts: Date.now() });
+    if (list.length > MAX_RECENT * 3) list = list.slice(0, MAX_RECENT * 3);
+    localStorage.setItem(LS_KEY, JSON.stringify(list));
+    renderRecentPersons(list.slice(0, MAX_RECENT));
+  } catch(e) {}
+}
+function renderRecentPersons(list) {
+  const bar = g('recentBar');
+  const content = g('recentPersonContent');
+  if (!list || !list.length) { bar.classList.add('hidden'); content.innerHTML = ''; return; }
+  const html = list.map(item => {
+    const r = DB.persons[item.idx];
+    if (!r || r.啟用 === '否') return '';
+    const url = clean(r.縮圖網址 || r.照片網址 || '');
+    const head = url ? `<img src="${safeAttr(url)}" onerror="this.parentElement.innerHTML='${safeAttr(nameInitial(r.姓名))}'">` : nameInitial(r.姓名);
+    return `<div class="recent-chip ripple" onclick="selectPerson(${item.idx})" title="${safeTxt(r.姓名 || '')}｜${safeTxt(r.工號 || '')}"><div class="mini-avatar">${head}</div>${safeTxt(r.姓名 || '')}</div>`;
+  }).filter(Boolean).join('');
+  content.innerHTML = html;
+  bar.classList.toggle('hidden', !html.trim());
+}
+
+function buildProductGrid() {
+  const container = g('productGrid');
+  if (!DB.productList.length) {
+    container.innerHTML = '<div class="caption" style="text-align:center;padding:20px;grid-column:1/-1;">尚無產品資料 / No products</div>';
+    return;
+  }
+  container.innerHTML = DB.productList.map((gr, index) => {
+    const dname = cleanProductName(gr.品名 || '');
+    const url = clean(gr.產品縮圖網址 || gr.產品照片網址 || gr.縮圖網址 || gr.照片網址 || '');
+    const thumb = url ? `<img src="${safeAttr(url)}" onerror="this.parentElement.innerHTML='<span>📦</span>'">` : '<span>📦</span>';
+    return `<div class="product-card ripple" data-index="${index}" data-pid="${safeAttr(gr.產品編號 || '')}">
+      <div class="product-thumb">${thumb}</div>
+      <div class="product-name">${safeTxt(dname)}</div>
+      <div class="product-code">${safeTxt(gr.產品編號 || '')}</div>
+    </div>`;
+  }).join('');
+  bindSafeTap(container, '.product-card', card => selectProduct(Number(card.dataset.index)));
+}
+
+function filterProducts() {
+  const kw = (val('productSearch') || '').toUpperCase().trim();
+  const cards = document.querySelectorAll('.product-card');
+  let any = false;
+  cards.forEach(card => {
+    const gr = DB.productList[Number(card.dataset.index)];
+    const txt = [gr?.產品編號, gr?.品名, gr?.客戶品號].join(' ').toUpperCase();
+    if (!kw || txt.includes(kw)) { card.classList.remove('hidden'); any = true; }
+    else card.classList.add('hidden');
+  });
+  g('productGridEmpty').classList.toggle('hidden', any);
+}
+
+function selectProduct(indexOrKey) {
+  let gr;
+  if (typeof indexOrKey === 'number') gr = DB.productList[indexOrKey];
+  else {
+    const key = String(indexOrKey || '');
+    gr = DB.productList.find(x => (x.產品編號 + '|' + x.品名) === key || x.產品編號 === key || x.客戶品號 === key);
+  }
+  if (!gr) return;
+  STATE.currentProductKey = gr.產品編號 + '|' + gr.品名;
+  document.querySelectorAll('.product-card').forEach(c => c.classList.remove('selected'));
+  const idx = DB.productList.indexOf(gr);
+  const t = document.querySelector(`.product-card[data-index="${idx}"]`);
+  if (t) { t.classList.add('selected'); t.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+  STATE.productGroupList = DB.workstationGroups.filter(x => x.產品編號 === gr.產品編號 && x.品名 === gr.品名);
+  STATE.currentProductGroup = STATE.productGroupList[0] || gr;
+  STATE.currentWorkstation = null;
+  STATE.currentMachineId = '';
+  setVal('productCode', gr.產品編號 || '');
+  setVal('productName', cleanProductName(gr.品名 || ''));
+  showProductPhoto(gr);
+  buildWorkstationSelect();
+  g('selectedProductArea').classList.remove('hidden');
+  g('routeDetailsArea').classList.add('hidden');
+  updatePreview();
+  updateConfirmSummary();
+  roar('📦', '已選定產品 / Product Selected', (gr.品名 || '') + '（' + (gr.產品編號 || '') + '）', 'success');
+}
+
+function showProductPhoto(gr) {
+  const disp = g('selectedProductDisplay');
+  disp.className = 'selected-person-display populated';
+  disp.innerHTML = imgHTML(gr?.產品縮圖網址 || gr?.產品照片網址 || gr?.縮圖網址 || gr?.照片網址, '無產品照', false) +
+    `<div><div class="person-info-name">${safeTxt(gr?.品名 ? cleanProductName(gr.品名) : '尚未選產品')}</div><div class="caption" style="margin-top:3px;">${safeTxt(gr?.產品編號 || '')}</div></div>`;
+}
+
+function buildWorkstationSelect() {
+  const s = g('workstationSelect');
+  s.innerHTML = '<option value="">── 請選擇報工工站 / Select Workstation ──</option>';
+  STATE.productGroupList.forEach((gr, i) => s.add(new Option(gr.顯示名稱 || [gr.報工工站名稱, gr.工序範圍, gr.主機台].filter(Boolean).join('｜'), String(i))));
+  clearWorkstationFields();
+}
+
+function onWorkstationChange() {
+  const i = val('workstationSelect');
+  STATE.currentWorkstation = i === '' ? null : STATE.productGroupList[Number(i)];
+  const gr = STATE.currentWorkstation || {};
+  if (!STATE.currentWorkstation) { clearWorkstationFields(); return; }
+  g('routeDetailsArea').classList.remove('hidden');
+  setVal('processRange', gr.工序範圍 || gr.工序 || '');
+  setVal('stdCapacity', gr.標準產能 || gr['8H產能'] || gr['8小時標準產能'] || gr['工站8H產能_件'] || '');
+  setVal('stdTimeSec', gr.標準工時_秒 || gr['標準工時(秒)'] || '');
+  buildMachineSelect(gr.機台清單 || []);
+  renderMachineGrid(gr.機台清單 || []);
+  markStepDone();
+  updatePreview();
+  updateConfirmSummary();
+}
+
+function clearWorkstationFields() {
+  STATE.currentWorkstation = null;
+  STATE.currentMachineId = '';
+  setVal('processRange', '');
+  setVal('stdCapacity', '');
+  setVal('stdTimeSec', '');
+  g('mainMachineSelect').innerHTML = '';
+  g('machineListGrid').innerHTML = '';
+}
+
+function buildMachineSelect(list) {
+  const s = g('mainMachineSelect');
+  s.innerHTML = '';
+  if (!list.length) { s.add(new Option('無固定機台 / No Fixed Machine', '')); return; }
+  list.forEach(m => s.add(new Option([m.機台編號, m.區域, m.機台型號 || m.設備名稱].filter(Boolean).join('｜'), m.機台編號 || '')));
+  STATE.currentMachineId = list[0].機台編號 || '';
+  s.value = STATE.currentMachineId;
+}
+
+function renderMachineGrid(list) {
+  const box = g('machineListGrid');
+  if (!list.length) { box.innerHTML = '<div class="caption" style="padding:8px;">此工站無固定機台 / No dedicated machines</div>'; return; }
+  box.innerHTML = list.map((m, i) => {
+    const url = clean(m.縮圖網址 || m.照片網址 || '');
+    return `<div class="machine-card ripple ${i === 0 ? 'selected' : ''}" data-id="${safeAttr(m.機台編號 || '')}">
+      ${url ? `<img src="${safeAttr(url)}" onerror="this.outerHTML='<div class=machine-no-img>⚙</div>'">` : '<div class="machine-no-img">⚙</div>'}
+      <div class="machine-number">${safeTxt(m.機台編號 || '')}</div>
+      <div class="machine-info">${safeTxt([m.區域, m.機台型號, m.設備名稱].filter(Boolean).join('｜'))}</div>
+    </div>`;
+  }).join('');
+  bindSafeTap(box, '.machine-card', card => selectMachine(card.dataset.id));
+}
+
+function selectMachine(id) {
+  STATE.currentMachineId = clean(id);
+  setVal('mainMachineSelect', STATE.currentMachineId);
+  document.querySelectorAll('.machine-card').forEach(c => c.classList.toggle('selected', c.dataset.id === STATE.currentMachineId));
+  updatePreview();
+  updateConfirmSummary();
+}
+
+function initAnomalyTypeSelect() {
+  const s = g('anomalyType');
+  if (!s) return;
+  const existing = Array.from(s.options).map(o => o.value);
+  (DB.anomalyTypes || []).forEach(x => { if (!existing.includes(x)) s.add(new Option(x, x)); });
+}
+
+function addDefectRow() {
+  const id = ++defectRowIdCounter;
+  STATE.defectRows.push({ id, category: '', code: '', name: '', enName: '', qty: 0 });
+  renderDefectRows();
+}
+
+function deleteDefectRow(id) {
+  STATE.defectRows = STATE.defectRows.filter(r => r.id !== id);
+  renderDefectRows();
+  updatePreview();
+  updateConfirmSummary();
+}
+
+function renderDefectRows() {
+  const container = g('defectContainer');
+  if (!STATE.defectRows.length) {
+    container.innerHTML = '<div class="caption" style="padding:6px;">尚無分配項目 / No allocation items yet</div>';
+    updateDefectSummaryDisplay();
+    return;
+  }
+  let zOpts = (DB.ngReasons.Z || []).map(x => `<option value="${safeAttr((x.代碼 || '') + '|Z')}">${safeTxt((x.代碼 || '') + '｜' + (x.名稱 || '') + '｜' + (x.英文名稱 || ''))}</option>`).join('');
+  let yOpts = (DB.ngReasons.Y || []).map(x => `<option value="${safeAttr((x.代碼 || '') + '|Y')}">${safeTxt((x.代碼 || '') + '｜' + (x.名稱 || '') + '｜' + (x.英文名稱 || ''))}</option>`).join('');
+  if (!zOpts && !yOpts) {
+    zOpts = ['Z01|素材裂縫|Surface Crack','Z02|加工砂孔|Sand Porosity','Z03|外觀刮傷|Surface Scratch'].map(s => { const [c,n,e] = s.split('|'); return `<option value="${c}|Z">${c}｜${n}｜${e}</option>`; }).join('');
+    yOpts = ['Y01|內徑超差|Inner Diameter OOT','Y02|外徑超差|Outer Diameter OOT','Y03|長度超差|Length OOT','Y04|表面粗糙度|Surface Roughness'].map(s => { const [c,n,e] = s.split('|'); return `<option value="${c}|Y">${c}｜${n}｜${e}</option>`; }).join('');
+  }
+  container.innerHTML = STATE.defectRows.map(row => `<div class="defect-row" id="defectRow_${row.id}">
+      <button class="defect-delete-btn ripple" onclick="deleteDefectRow(${row.id})" type="button">✕</button>
+      <select style="flex:2;min-width:0;" onchange="onDefectReasonChange(${row.id},this.value)">
+        <option value="">── 選擇不良原因 / Select Defect Reason ──</option>
+        <optgroup label="Z 素材 / 外觀類">${zOpts}</optgroup>
+        <optgroup label="Y 加工 / 尺寸類">${yOpts}</optgroup>
+      </select>
+      <input class="qty-input" type="number" min="0" value="${row.qty || ''}" inputmode="numeric" placeholder="pcs" onchange="onDefectQtyChange(${row.id},this.value)" oninput="onDefectQtyChange(${row.id},this.value)">
+    </div>`).join('');
+  STATE.defectRows.forEach(row => {
+    if (!row.code) return;
+    const sel = document.querySelector(`#defectRow_${row.id} select`);
+    if (sel) sel.value = row.code + '|' + row.category;
+  });
+  updateDefectSummaryDisplay();
+}
+
+function onDefectReasonChange(id, val_) {
+  const row = STATE.defectRows.find(r => r.id === id);
+  if (!row) return;
+  const parts = String(val_ || '').split('|');
+  row.code = parts[0] || '';
+  row.category = parts[1] || '';
+  const list = row.category === 'Z' ? (DB.ngReasons.Z || []) : (DB.ngReasons.Y || []);
+  const found = list.find(x => x.代碼 === row.code);
+  row.name = found ? (found.名稱 || '') : '';
+  row.enName = found ? (found.英文名稱 || '') : '';
+  updateDefectSummaryDisplay();
+  updatePreview();
+  updateConfirmSummary();
+}
+
+function onDefectQtyChange(id, v) {
+  const row = STATE.defectRows.find(r => r.id === id);
+  if (!row) return;
+  row.qty = Math.max(0, Number(v) || 0);
+  updateDefectSummaryDisplay();
+  updatePreview();
+  updateConfirmSummary();
+}
+
+function validateDefectAllocation() {
+  const totalNG = num('ngQty');
+  const allocated = STATE.defectRows.reduce((s, r) => s + (Number(r.qty) || 0), 0);
+  if (allocated > totalNG) return '不良分配數量不可超過 Step 3 的不良數 / Allocation cannot exceed NG qty';
+  const rowMissingReason = STATE.defectRows.some(r => Number(r.qty) > 0 && !r.code);
+  if (rowMissingReason) return '有填不良數量時，必須選擇不良原因 / Defect qty requires a reason';
+  return '';
+}
+
+function updateDefectSummaryDisplay() {
+  const box = g('defectSummary');
+  const totalNG = num('ngQty');
+  const allocated = STATE.defectRows.reduce((s, r) => s + (Number(r.qty) || 0), 0);
+  if (totalNG > 0 || allocated > 0) {
+    const diff = totalNG - allocated;
+    const color = diff >= 0 ? 'var(--g-green)' : 'var(--g-red)';
+    box.innerHTML = `📊 分配總和：<b>${allocated}</b> / 總不良：<b>${totalNG}</b>（<span style="color:${color}">${diff >= 0 ? '剩餘可分配 / Remaining ' + diff + ' pcs' : '⚠ 超過 ' + Math.abs(diff) + ' pcs'}</span>）`;
+    box.classList.remove('hidden');
+  } else box.classList.add('hidden');
+}
+
+function calcAnomalyTime() {
+  const s = g('anomalyStart').value;
+  const e = g('anomalyEnd').value;
+  if (s && e) {
+    let diff = (new Date(e) - new Date(s)) / 3600000;
+    if (diff < 0) diff += 24;
+    setVal('anomalyDuration', diff >= 0 ? diff.toFixed(2) + ' hrs' : '');
+  } else setVal('anomalyDuration', '');
+  updatePreview();
+  updateConfirmSummary();
+}
+
+function triggerCamera() { g('cameraInput').click(); }
+function triggerFileSelect() { g('fileInput').click(); }
+function onPhotoChange(e, source) {
+  const files = Array.from(e.target.files || []);
+  const remaining = MAX_PHOTOS - STATE.photos.length;
+  if (remaining <= 0) { roar('⚠️', '已達上限 / Max Reached', '最多 ' + MAX_PHOTOS + ' 張照片', 'warning'); e.target.value = ''; return; }
+  files.slice(0, remaining).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      STATE.photos.push({ base64: String(ev.target.result), mime: file.type, filename: file.name, note: '', source });
+      renderPhotoGrid();
+      updatePreview();
+      updateConfirmSummary();
     };
+    reader.readAsDataURL(file);
+  });
+  e.target.value = '';
+}
+function renderPhotoGrid() {
+  const grid = g('photoGrid');
+  grid.innerHTML = STATE.photos.map((p, i) => `<div class="photo-item ripple" onclick="openPhotoNote(${i})"><img src="${p.base64}" alt="photo${i + 1}">${p.note ? `<div class="photo-note-overlay">${safeTxt(p.note)}</div>` : ''}<button class="photo-delete-btn ripple" onclick="event.stopPropagation();deletePhoto(${i})" type="button">✕</button></div>`).join('');
+  g('photoCount').textContent = STATE.photos.length + ' / ' + MAX_PHOTOS + ' 張照片 / photos';
+}
+function deletePhoto(i) { STATE.photos.splice(i, 1); renderPhotoGrid(); updatePreview(); updateConfirmSummary(); }
+function clearAllPhotos() {
+  if (!STATE.photos.length) return;
+  if (!confirm('確認清除所有照片？/ Clear all photos?')) return;
+  STATE.photos = [];
+  renderPhotoGrid();
+  updatePreview();
+  updateConfirmSummary();
+}
+function openPhotoNote(i) {
+  STATE.editPhotoIndex = i;
+  const p = STATE.photos[i];
+  if (!p) return;
+  g('photoNotePreview').src = p.base64;
+  g('photoNoteText').value = p.note || '';
+  g('photoNoteModal').classList.remove('hidden');
+  setTimeout(() => g('photoNoteText').focus(), 200);
+}
+function closePhotoNote() { g('photoNoteModal').classList.add('hidden'); STATE.editPhotoIndex = -1; }
+function savePhotoNote() {
+  const i = STATE.editPhotoIndex;
+  if (i >= 0 && STATE.photos[i]) {
+    STATE.photos[i].note = g('photoNoteText').value;
+    renderPhotoGrid();
+    updatePreview();
+    updateConfirmSummary();
   }
+  closePhotoNote();
+}
 
-  async function 送出報工() {
-    const payload = 建立Payload();
-    $('nextBtn').disabled = true;
-    $('nextBtn').textContent = '送出中...';
-    try {
-      const res = await window.V4Bridge.submitReport(payload);
-      顯示提示('報工已送出', res?.報工編號 || res?.reportId || payload.reportId);
-      到步驟(0);
-    } catch (e) {
-      顯示提示('寫入失敗', e.message || e, 'error');
-    } finally {
-      $('nextBtn').disabled = false;
-      $('nextBtn').textContent = 狀態.步驟 === 4 ? '📥 送出報工 / Submit' : '下一步 → / Next';
+function calcQty() {
+  let total = num('totalQty');
+  let ng = num('ngQty');
+  if (ng > total && total > 0) { setVal('ngQty', total); ng = total; }
+  const good = Math.max(total - ng, 0);
+  g('displayTotal').textContent = total;
+  g('displayNG').textContent = ng;
+  g('displayGood').textContent = good;
+  if (total > 0) markStepDone();
+  updateDefectSummaryDisplay();
+  updateDefectSyncNotice();
+  updatePreview();
+  updateConfirmSummary();
+}
+
+function calcWorkingHours() {
+  const s = val('startTime');
+  const e = val('endTime');
+  if (s && e) {
+    let diff = (new Date(e) - new Date(s)) / 3600000;
+    if (diff < 0) diff += 24;
+    setVal('workingHours', diff >= 0 ? diff.toFixed(2) + ' hrs' : '');
+  }
+  updatePreview();
+  updateConfirmSummary();
+}
+
+function getShiftRule() {
+  const op = STATE.operator || {};
+  const shift = op.班別名稱 || op.班別 || val('shiftSelect') || '早班';
+  if (shift.includes('大夜') || shift.includes('夜') || shift === 'NIGHT') return { name: '大夜班', start: op.班別開始時間 || '23:00', end: op.班別結束時間 || '07:50', overnight: true, hrs: Number(op.班別實際工時 || 8) };
+  if (shift.includes('中') || shift === 'SWING') return { name: '中班', start: op.班別開始時間 || '16:50', end: op.班別結束時間 || '01:40', overnight: true, hrs: Number(op.班別實際工時 || 8) };
+  return { name: '早班', start: op.班別開始時間 || '08:00', end: op.班別結束時間 || '16:50', overnight: false, hrs: Number(op.班別實際工時 || 8) };
+}
+function toDateTimeVal(time, nextDay) {
+  const now = new Date();
+  const [hh, mm] = String(time || '00:00').split(':').map(Number);
+  const d = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hh || 0, mm || 0, 0, 0);
+  if (nextDay) d.setDate(d.getDate() + 1);
+  return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+}
+function setDefaultTimes(update = true) {
+  const rule = getShiftRule();
+  setVal('shiftSelect', rule.name);
+  if (!val('startTime')) setVal('startTime', toDateTimeVal(rule.start, false));
+  if (!val('endTime')) setVal('endTime', toDateTimeVal(rule.end, rule.overnight));
+  if (!val('workingHours')) setVal('workingHours', rule.hrs + ' hrs');
+  if (update) { updatePreview(); updateConfirmSummary(); }
+}
+
+function buildReportData() {
+  const op = STATE.operator || {};
+  const gr = STATE.currentWorkstation || STATE.currentProductGroup || {};
+  const total = num('totalQty');
+  const ng = num('ngQty');
+  const machines = gr.機台清單 || [];
+  const defectLines = STATE.defectRows.filter(r => r.code && Number(r.qty) > 0).map(r => ({
+    category: r.category,
+    code: r.code,
+    name: r.name,
+    enName: r.enName,
+    qty: Number(r.qty) || 0,
+    分類: r.category,
+    不良代碼: r.code,
+    不良名稱: r.name,
+    英文名稱: r.enName,
+    不良數量: Number(r.qty) || 0
+  }));
+  const reportNo = `RPT-${nowCompact()}-${clean(op.工號 || val('personId') || 'NA')}-${clean(gr.產品編號 || val('productCode') || 'NA')}`;
+  const machineList = machines.map(m => m.機台編號).filter(Boolean).join(',');
+  return {
+    reportId: reportNo,
+    報工編號: reportNo,
+    作業日: todayLocal(),
+    workDate: todayLocal(),
+    工號: op.工號 || val('personId'),
+    姓名: op.姓名 || val('personName'),
+    班別: val('shiftSelect'),
+    是否加班: val('overtimeSelect'),
+    加班類型: val('overtimeType'),
+    作業員照片網址: op.照片網址 || '',
+    作業員縮圖網址: op.縮圖網址 || '',
+    產品編號: gr.產品編號 || val('productCode'),
+    客戶品號: gr.客戶品號 || '',
+    品名: gr.品名 || val('productName'),
+    產品照片網址: gr.產品照片網址 || '',
+    產品縮圖網址: gr.產品縮圖網址 || '',
+    報工工站名稱: gr.報工工站名稱 || gr.工站名稱 || '',
+    工站名稱: gr.報工工站名稱 || gr.工站名稱 || '',
+    工序: Array.isArray(gr.工序清單) && gr.工序清單.length ? gr.工序清單.join(',') : (gr.工序 || gr.工序範圍 || ''),
+    工序範圍: gr.工序範圍 || gr.工序 || '',
+    機台清單: machineList,
+    主機台: val('mainMachineSelect') || STATE.currentMachineId || gr.主機台 || '',
+    今日共做數: total,
+    不良數: ng,
+    實際良品數: Math.max(total - ng, 0),
+    不良率: total > 0 ? ng / total : 0,
+    開始時間: val('startTime'),
+    結束時間: val('endTime'),
+    實際工時: val('workingHours'),
+    不良行清單: defectLines,
+    異常類型: val('anomalyType'),
+    異常開始時間: g('anomalyStart')?.value || '',
+    異常結束時間: g('anomalyEnd')?.value || '',
+    異常工時: val('anomalyDuration'),
+    備註: val('remarks'),
+    現場照片清單: STATE.photos.map(p => ({
+      照片類型: '現場照片',
+      檔案名稱: p.filename,
+      MIME類型: p.mime,
+      Base64: (p.base64 || '').split(',')[1] || '',
+      備註: p.note,
+      來源: p.source
+    })),
+    operator: { employeeId: op.工號 || val('personId'), operatorName: op.姓名 || val('personName'), shift: val('shiftSelect') },
+    product: { productCode: gr.產品編號 || val('productCode'), customerPartNo: gr.客戶品號 || '', productName: gr.品名 || val('productName') },
+    workstation: { workstationName: gr.報工工站名稱 || gr.工站名稱 || '', processRange: gr.工序範圍 || gr.工序 || '', machineList, mainMachine: val('mainMachineSelect') || STATE.currentMachineId || gr.主機台 || '' },
+    output: { totalQty: total, ngQty: ng, goodQty: Math.max(total - ng, 0), startTime: val('startTime'), endTime: val('endTime'), workingHours: val('workingHours') },
+    quality: { defects: defectLines, defectSummary: defectLines.map(r => `${r.category}類 ${r.code} ${r.name} × ${r.qty} pcs`).join('；') },
+    photos: STATE.photos.map(p => ({ name: p.filename, size: 0, type: p.mime, note: p.note })),
+    remarks: val('remarks'),
+    source: 'PWA_V4_正式基準_483_GOOGLE_GLASS_UI'
+  };
+}
+
+function updateDefectSyncNotice() {
+  const box = g('defectSyncNotice');
+  const hasDefect = STATE.defectRows.some(r => r.code && Number(r.qty) > 0) || num('ngQty') > 0;
+  box.innerHTML = hasDefect ? '<div class="sync-badge">⚠ 此報工將同步寫入 09_不良紀錄 / Will sync to defect record</div>' : '';
+}
+
+function updatePreview() {
+  const d = buildReportData();
+  const defectDetails = d.不良行清單.map(r => `   › ${r.category}類 ${r.code} ${r.name}${r.enName ? ' / ' + r.enName : ''} × ${r.qty} pcs`).join('\n') || '   無不良記錄 / No defects';
+  const text = `📋 報工預覽 / Production Report Preview
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+👤 作業員 / Operator：${d.姓名 || '—'} / ${d.工號 || '—'} ｜ ${d.班別 || '—'}
+   加班 / OT：${d.是否加班 || '否'} ｜ ${d.加班類型 || '無'}
+📦 產品 / Product：${d.產品編號 || '—'} ｜ ${d.品名 || '—'}
+🔧 工站 / Workstation：${d.報工工站名稱 || '—'} ｜ 工序：${d.工序 || '—'}
+🖥 機台 / Machine：${d.機台清單 || '無'} ｜ 主機台：${d.主機台 || '無'}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 今日共做 / Total Qty：${d.今日共做數} pcs
+❌ 不良數 / NG Qty：${d.不良數} pcs
+✅ 實際良品 / Good Qty：${d.實際良品數} pcs
+📉 不良率 / NG Rate：${d.不良率 > 0 ? (d.不良率 * 100).toFixed(1) + '%' : '0%'}
+🕐 工時 / Working Hrs：${d.實際工時 || '未計算 / N/A'}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔍 不良明細 / Defect Details：
+${defectDetails}
+🚨 異常類型 / Abnormal Type：${d.異常類型 || '無異常'}
+⏱ 異常時間 / Anomaly Duration：${d.異常工時 || 'N/A'}
+📸 照片 / Photos：${d.現場照片清單.length} 張
+📝 備註 / Remarks：${d.備註 || '無'}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${(d.不良數 > 0 || d.不良行清單.length > 0) ? '⚠ 含不良記錄，將同步寫入 09_不良紀錄 / Contains defects, will sync' : '✅ 無不良記錄 / No defect records'}`;
+  if (g('reportPreview')) g('reportPreview').textContent = text;
+  if (g('confirmPreview')) g('confirmPreview').textContent = text;
+}
+
+function updateConfirmSummary() {
+  const d = buildReportData();
+  const container = g('confirmSummaryContent');
+  if (!container) return;
+  if (!d.工號 && !d.產品編號) {
+    container.innerHTML = '<div class="caption" style="text-align:center;padding:12px;">請先完成前面步驟再回來確認 / Please complete previous steps first</div>';
+    return;
+  }
+  const defectHTML = d.不良行清單.length ? d.不良行清單.map(r => `<div class="confirm-row"><span class="confirm-label">不良原因 / Defect</span><span class="confirm-value">${r.category}類 ${r.code} ${r.name} × ${r.qty} pcs</span></div>`).join('') : '<div class="confirm-row"><span class="confirm-label">不良記錄 / Defects</span><span class="confirm-value">無 / None</span></div>';
+  container.innerHTML = `<div class="confirm-row"><span class="confirm-label">👤 作業員 / Operator</span><span class="confirm-value">${safeTxt(d.姓名 || '—')} / ${safeTxt(d.工號 || '—')}｜${safeTxt(d.班別 || '—')}</span></div>
+    <div class="confirm-row"><span class="confirm-label">📦 產品 / Product</span><span class="confirm-value">${safeTxt(d.產品編號 || '—')}｜${safeTxt(d.品名 || '—')}</span></div>
+    <div class="confirm-row"><span class="confirm-label">🔧 工站 / Workstation</span><span class="confirm-value">${safeTxt(d.報工工站名稱 || '—')}</span></div>
+    <div class="confirm-row"><span class="confirm-label">📊 共做 / Total</span><span class="confirm-value">${d.今日共做數} pcs</span></div>
+    <div class="confirm-row"><span class="confirm-label">✅ 良品 / Good</span><span class="confirm-value" style="color:var(--g-green);font-size:16px;font-weight:900;">${d.實際良品數} pcs</span></div>
+    <div class="confirm-row"><span class="confirm-label">❌ 不良 / NG</span><span class="confirm-value" style="color:${d.不良數 > 0 ? 'var(--g-red)' : 'var(--text-tertiary)'};">${d.不良數} pcs</span></div>
+    ${defectHTML}
+    <div class="confirm-row"><span class="confirm-label">🕐 工時 / Hours</span><span class="confirm-value">${safeTxt(d.實際工時 || 'N/A')}</span></div>
+    <div class="confirm-row"><span class="confirm-label">📸 照片 / Photos</span><span class="confirm-value">${d.現場照片清單.length} 張</span></div>
+    <div class="confirm-row"><span class="confirm-label">📝 備註 / Remarks</span><span class="confirm-value">${safeTxt(d.備註 || '無')}</span></div>
+    ${d.不良數 > 0 ? '<div style="text-align:center;margin-top:8px;padding:7px;background:rgba(254,243,199,.90);border-radius:10px;font-weight:700;font-size:11px;color:#854D0E;">⚠ 此報工將同步寫入 09_不良紀錄 / Will sync to defect records</div>' : ''}`;
+}
+
+function validateReport(d) {
+  if (!d.工號) return '請選擇作業員 / Please select operator';
+  if (!d.產品編號 && !d.品名) return '請選擇產品 / Please select product';
+  if (!d.報工工站名稱) return '請選擇報工工站 / Please select workstation';
+  if (d.今日共做數 <= 0) return '今日共做數必須大於 0 / Total qty must be > 0';
+  if (d.不良數 < 0) return '不良數不可小於 0 / NG qty must be >= 0';
+  if (d.不良數 > d.今日共做數) return '不良數不可大於共做數 / NG qty must not exceed total qty';
+  return validateDefectAllocation();
+}
+
+function submitReport() {
+  const d = buildReportData();
+  const err = validateReport(d);
+  if (err) { roar('⚠️', '驗證失敗 / Validation Failed', err, 'error'); return; }
+  updatePreview();
+  updateConfirmSummary();
+  const hasDefects = d.不良數 > 0 || d.不良行清單.length > 0;
+  const msg = `確認送出報工？/ Confirm submit?\n\n實際良品：${d.實際良品數} pcs${hasDefects ? '\n不良數：' + d.不良數 + ' pcs（將同步寫入 09_不良紀錄）' : ''}`;
+  if (!confirm(msg)) return;
+  showSubmitOverlay(true, '📤 報工送出中...', 'Submitting production record...');
+  g('btnNext').disabled = true;
+  g('btnNext').classList.add('submitting');
+  window.V4Bridge.submitReport(d).then(res => {
+    showSubmitOverlay(false);
+    updateBottomBar();
+    if (res && (res.成功 || res.success || res.ok || res.reportId || res.報工編號)) {
+      const reportNo = res.報工編號 || res.reportId || d.報工編號;
+      roar('✅', '報工完成 / Complete', '報工編號：' + reportNo + (hasDefects ? '｜不良紀錄已同步' : ''), 'success');
+      resetAfterSubmit();
+    } else {
+      roar('❌', '寫入失敗 / Submit Failed', (res && (res.訊息 || res.message)) || '未知錯誤', 'error');
     }
-  }
+  }).catch(err => {
+    showSubmitOverlay(false);
+    updateBottomBar();
+    roar('❌', '寫入失敗 / Submit Failed', err.message || String(err), 'error');
+  });
+}
 
-  async function 讀取資料() {
-    設定狀態('正在連線主資料庫...', false);
-    try {
-      const db = await window.V4Bridge.loadInit();
-      狀態.資料 = db;
-      設定狀態(`資料已載入｜人員：${db.筆數?.人員 || db.人員?.length || 0}｜工站：${db.筆數?.報工工站群組 || db.routes?.length || 0}`);
-      畫人員();
-      畫產品();
-      隱藏開場();
-      顯示提示('資料已載入', '化新報工 V4 已就緒');
-    } catch (e) {
-      設定狀態('讀取失敗', false);
-      隱藏開場();
-      顯示提示('讀取失敗', e.message || e, 'error');
+function resetAfterSubmit() {
+  setVal('totalQty', '');
+  setVal('ngQty', '');
+  STATE.defectRows = [];
+  renderDefectRows();
+  addDefectRow();
+  STATE.photos = [];
+  renderPhotoGrid();
+  g('defectSyncNotice').innerHTML = '';
+  g('remarks').value = '';
+  STATE.stepDone = [false, false, false, false, false];
+  STATE.operator = null;
+  STATE.currentWorkstation = null;
+  STATE.currentProductGroup = null;
+  STATE.currentMachineId = '';
+  document.querySelectorAll('.person-card').forEach(c => c.classList.remove('selected'));
+  document.querySelectorAll('.product-card').forEach(c => c.classList.remove('selected'));
+  g('selectedProductArea').classList.add('hidden');
+  g('routeDetailsArea').classList.add('hidden');
+  const disp = g('selectedPersonDisplay');
+  disp.className = 'selected-person-display';
+  disp.innerHTML = '<div class="person-photo-lg">點擊卡片<br>Click Card</div><div><div class="person-info-name" style="color:var(--text-secondary);">尚未選擇 / Not Selected</div><div class="caption" style="margin-top:4px;">請點擊上方人員卡片、掃碼或搜尋選擇</div></div>';
+  g('empIdHighlight').textContent = '未輸入 / Not Set';
+  setVal('personId', '');
+  setVal('personName', '');
+  setVal('productCode', '');
+  setVal('productName', '');
+  calcQty();
+  switchStep(0);
+  roar('🔄', '已重置 / Reset Complete', '可以重新開始報工流程', 'success');
+}
+
+function openPersonScan() {
+  g('personScanModal').classList.remove('hidden');
+  g('personScanStatus').textContent = '📡 啟動相機中... / Starting camera...';
+  g('personManualInput').classList.add('hidden');
+  g('personManualInput').value = '';
+  startCamera('person');
+}
+function closePersonScan() { g('personScanModal').classList.add('hidden'); stopCamera('person'); }
+function openProductScan() {
+  g('productScanModal').classList.remove('hidden');
+  g('productScanStatus').textContent = '📡 啟動相機中... / Starting camera...';
+  g('productManualInput').classList.add('hidden');
+  g('productManualInput').value = '';
+  startCamera('product');
+}
+function closeProductScan() { g('productScanModal').classList.add('hidden'); stopCamera('product'); }
+
+async function startCamera(mode) {
+  stopCamera(mode);
+  const vidId = mode === 'product' ? 'productVideo' : 'personVideo';
+  const statusId = mode === 'product' ? 'productScanStatus' : 'personScanStatus';
+  const vid = g(vidId);
+  const statusEl = g(statusId);
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } } });
+    if (mode === 'product') STATE.productStream = stream;
+    else STATE.personStream = stream;
+    vid.srcObject = stream;
+    vid.style.display = 'block';
+    statusEl.textContent = '🔍 掃描中，請將條碼對準框內 / Scanning — align barcode to frame';
+    let detector = null;
+    if ('BarcodeDetector' in window) {
+      try {
+        const fmts = await window.BarcodeDetector.getSupportedFormats();
+        if (fmts.length) detector = new window.BarcodeDetector({ formats: fmts });
+      } catch(e) {}
     }
+    if (mode === 'product') STATE.productDetector = detector;
+    else STATE.personDetector = detector;
+    startScanLoop(mode);
+    if (!detector) {
+      statusEl.textContent = '⚠️ 瀏覽器不支援自動偵測，請使用手動輸入 / Use manual input';
+      const mid = mode === 'product' ? 'productManualInput' : 'personManualInput';
+      g(mid).classList.remove('hidden');
+      g(mid).focus();
+    }
+  } catch(e) {
+    statusEl.textContent = '❌ 無法存取相機：' + (e.message || '請確認相機權限');
+    vid.style.display = 'none';
+    const mid = mode === 'product' ? 'productManualInput' : 'personManualInput';
+    g(mid).classList.remove('hidden');
+    g(mid).focus();
   }
+}
 
-  function 隱藏開場() {
-    const el = $('開場畫面');
-    if (!el) return;
-    const minMs = 1200;
-    const start = Number(el.dataset.start || Date.now());
-    const wait = Math.max(0, minMs - (Date.now() - start));
-    setTimeout(() => {
-      el.classList.add('關閉');
-      setTimeout(() => el.remove(), 520);
-    }, wait);
-  }
+function startScanLoop(mode) {
+  const timerKey = mode === 'product' ? 'productTimer' : 'personTimer';
+  const detKey = mode === 'product' ? 'productDetector' : 'personDetector';
+  const vidId = mode === 'product' ? 'productVideo' : 'personVideo';
+  if (STATE[timerKey]) clearInterval(STATE[timerKey]);
+  if (!STATE[detKey]) return;
+  STATE[timerKey] = setInterval(async () => {
+    const v = g(vidId);
+    if (!v || !v.srcObject || v.readyState < 2) return;
+    try {
+      const dets = await STATE[detKey].detect(v);
+      if (dets && dets.length) {
+        const val_ = dets[0].rawValue || dets[0].data || '';
+        if (val_) mode === 'product' ? onProductScanned(val_) : onPersonScanned(val_);
+      }
+    } catch(e) {}
+  }, 350);
+}
 
-  async function 開啟掃描() {
-    if (!('BarcodeDetector' in window)) {
-      顯示提示('掃描器不支援', '請改用手動輸入或實體掃碼器', 'warn');
-      $('搜尋框').focus();
+function stopCamera(mode) {
+  const timerKey = mode === 'product' ? 'productTimer' : 'personTimer';
+  const streamKey = mode === 'product' ? 'productStream' : 'personStream';
+  const detKey = mode === 'product' ? 'productDetector' : 'personDetector';
+  const vidId = mode === 'product' ? 'productVideo' : 'personVideo';
+  if (STATE[timerKey]) { clearInterval(STATE[timerKey]); STATE[timerKey] = null; }
+  if (STATE[streamKey]) { STATE[streamKey].getTracks().forEach(t => t.stop()); STATE[streamKey] = null; }
+  STATE[detKey] = null;
+  const v = g(vidId);
+  if (v) { v.srcObject = null; v.style.display = 'none'; }
+}
+
+function onPersonScanned(val_) {
+  stopCamera('person');
+  closePersonScan();
+  const cleanVal = clean(val_);
+  const found = DB.persons.find(r => clean(r.工號) === cleanVal && r.啟用 !== '否') || DB.persons.find(r => clean(r.工號).includes(cleanVal) && r.啟用 !== '否') || DB.persons.find(r => clean(r.姓名) === cleanVal && r.啟用 !== '否') || DB.persons.find(r => clean(r.條碼 || r.工牌號 || r.卡號) === cleanVal && r.啟用 !== '否');
+  if (found) { selectPerson(DB.persons.indexOf(found)); roar('✅', '掃碼成功 / Scan Success', '已自動選定作業員，可前往下一步', 'success'); }
+  else roar('⚠️', '找不到此工號 / Employee Not Found', '條碼：' + cleanVal + '，請手動選擇', 'warning');
+}
+function onProductScanned(val_) {
+  stopCamera('product');
+  closeProductScan();
+  const cleanVal = clean(val_);
+  const foundIndex = DB.productList.findIndex(g_ => clean(g_.產品編號) === cleanVal || clean(g_.客戶品號) === cleanVal || clean(g_.品名) === cleanVal);
+  if (foundIndex >= 0) { selectProduct(foundIndex); roar('✅', '產品掃碼成功 / Product Scanned', DB.productList[foundIndex].品名 + '（' + DB.productList[foundIndex].產品編號 + '）', 'success'); }
+  else roar('⚠️', '找不到此產品 / Product Not Found', '條碼：' + cleanVal, 'warning');
+}
+function togglePersonManual() { const f = g('personManualInput'); f.classList.toggle('hidden'); if (!f.classList.contains('hidden')) { f.focus(); g('personScanStatus').textContent = '⌨ 請輸入工號後按 Enter'; } }
+function toggleProductManual() { const f = g('productManualInput'); f.classList.toggle('hidden'); if (!f.classList.contains('hidden')) { f.focus(); g('productScanStatus').textContent = '⌨ 請輸入產品編號後按 Enter'; } }
+function personManualConfirm(e) { if (e.key === 'Enter') { e.preventDefault(); const v = g('personManualInput').value.trim(); if (v) onPersonScanned(v); } }
+function productManualConfirm(e) { if (e.key === 'Enter') { e.preventDefault(); const v = g('productManualInput').value.trim(); if (v) onProductScanned(v); } }
+
+function listenScannerGun() {
+  document.addEventListener('keydown', e => {
+    const tag = document.activeElement?.tagName?.toLowerCase();
+    if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+    if (e.key.length > 1 && e.key !== 'Enter') return;
+    if (e.key === 'Enter') {
+      if (scanBuffer.length >= 3) {
+        e.preventDefault();
+        const v = scanBuffer.trim();
+        scanBuffer = '';
+        STATE.currentStep === 1 ? onProductScanned(v) : onPersonScanned(v);
+      } else scanBuffer = '';
       return;
     }
-    try {
-      狀態.掃描串流 = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-      $('scanVideo').srcObject = 狀態.掃描串流;
-      $('掃描遮罩').style.display = 'flex';
-      const detector = new BarcodeDetector({ formats: ['qr_code', 'code_128', 'code_39', 'ean_13', 'ean_8'] });
-      狀態.掃描計時器 = setInterval(async () => {
-        try {
-          const codes = await detector.detect($('scanVideo'));
-          if (codes && codes[0]) {
-            $('搜尋框').value = codes[0].rawValue;
-            $('搜尋框').dispatchEvent(new Event('input'));
-            關閉掃描();
-            顯示提示('掃描成功', codes[0].rawValue);
-          }
-        } catch (e) {}
-      }, 350);
-    } catch (e) {
-      顯示提示('無法啟用相機', '請確認權限', 'error');
-    }
-  }
+    scanBuffer += e.key;
+    if (scanTimer) clearTimeout(scanTimer);
+    scanTimer = setTimeout(() => { if (scanBuffer.length < 6) scanBuffer = ''; }, SCAN_GAP_MS * 2);
+  });
+}
 
-  function 關閉掃描() {
-    if (狀態.掃描計時器) clearInterval(狀態.掃描計時器);
-    狀態.掃描計時器 = null;
-    if (狀態.掃描串流) 狀態.掃描串流.getTracks().forEach((t) => t.stop());
-    狀態.掃描串流 = null;
-    $('掃描遮罩').style.display = 'none';
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    const fn = document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen || document.documentElement.mozRequestFullScreen || document.documentElement.msRequestFullscreen;
+    if (fn) fn.call(document.documentElement).catch(e => roar('⚠️', '無法全螢幕', e.message || '', 'warning'));
+  } else {
+    const fn = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+    if (fn) fn.call(document);
   }
+}
+function listenFullscreenChange() {
+  ['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange'].forEach(evt => document.addEventListener(evt, () => {
+    const btn = g('fullscreenBtn');
+    if (btn) btn.title = document.fullscreenElement ? '退出全螢幕 / Exit Fullscreen' : '全螢幕 / Fullscreen';
+  }));
+}
 
-  function 綁定事件() {
-    $('搜尋框').addEventListener('input', () => {
-      if (狀態.步驟 === 0) 畫人員();
-      if (狀態.步驟 === 1) 畫產品();
-    });
-    防滑動誤觸($('人員清單'), (card) => 選人員(card.dataset.id));
-    防滑動誤觸($('產品清單'), (card) => 選產品(card.dataset.id));
-    防滑動誤觸($('machineListGrid'), (card) => 選機台(card.dataset.id));
-    $('workstationSelect').addEventListener('change', (e) => 選工站(e.target.value));
-    $('mainMachineSelect').addEventListener('change', (e) => 選機台(e.target.value));
-    $('totalQty').addEventListener('input', 計算數量);
-    $('ngQty').addEventListener('input', 計算數量);
-    $('新增不良').addEventListener('click', 新增不良列);
-    $('拍照鈕').addEventListener('click', () => $('photoInput').click());
-    $('清照片鈕').addEventListener('click', 清照片);
-    $('photoInput').addEventListener('change', (e) => { 選照片(e.target.files); e.target.value = ''; });
-    $('掃碼鈕').addEventListener('click', 開啟掃描);
-    $('關閉掃描').addEventListener('click', 關閉掃描);
-    $('nextBtn').addEventListener('click', () => {
-      if (狀態.步驟 === 4) return 送出報工();
-      if (!檢查步驟()) return;
-      到步驟(狀態.步驟 + 1);
-    });
-  }
+function roar(icon, title, sub, type) {
+  const container = g('roarContainer');
+  if (!container) return;
+  const id = 'roar_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+  const cssClass = type === 'success' ? 'success' : type === 'error' ? 'error' : type === 'warning' ? 'warning' : '';
+  const el = document.createElement('div');
+  el.className = 'roar-notif ' + cssClass;
+  el.id = id;
+  el.innerHTML = `<div class="roar-icon">${icon}</div><div class="roar-text"><div class="roar-title">${safeTxt(title)}</div><div class="roar-sub">${safeTxt(String(sub || ''))}</div></div><button class="roar-close" onclick="closeRoar('${id}')" type="button">✕</button>`;
+  container.appendChild(el);
+  setTimeout(() => closeRoar(id), 5200);
+}
+function closeRoar(id) {
+  const el = g(id);
+  if (!el) return;
+  el.style.animation = 'roarOut .3s ease forwards';
+  setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 320);
+}
+function showSubmitOverlay(show, title, sub) {
+  const el = g('submitOverlay');
+  if (!el) return;
+  if (show) { if (title) g('submitTitle').textContent = title; if (sub) g('submitSub').textContent = sub; el.classList.remove('hidden'); }
+  else el.classList.add('hidden');
+}
+function showLoading(show) {
+  const el = g('loadingScreen');
+  if (!el) return;
+  if (!show) { el.classList.add('hide'); setTimeout(() => { el.style.display = 'none'; }, 650); }
+  else { el.style.display = 'flex'; el.classList.remove('hide'); }
+}
 
-  function 啟動() {
-    const splash = $('開場畫面');
-    if (splash) splash.dataset.start = String(Date.now());
-    畫步驟();
-    綁定事件();
-    const now = new Date();
-    $('startTime').value = now.toLocaleString('zh-TW', { hour12: false });
-    讀取資料();
-    setTimeout(隱藏開場, 3800);
-    try {
-      if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js?v=483').catch(() => {});
-    } catch (e) {}
-  }
+function g(id) { return document.getElementById(id); }
+function val(id) { const el = g(id); return el ? el.value : ''; }
+function setVal(id, v) { const el = g(id); if (el) el.value = v == null ? '' : v; }
+function num(id) { const n = Number(val(id)); return Number.isFinite(n) ? n : 0; }
+function clean(v) { return String(v == null ? '' : v).trim().replace(/\.0$/, ''); }
+function cleanProductName(name) { return clean(name).replace(/^[-/：；（）$@「」。，、？！._—|～《》¥\[\]{}#%^*+=·\s]+/g, '').replace(/[-/：；（）$@「」。，、？！._—|～《》¥\[\]{}#%^*+=·\s]+$/g, '').trim() || clean(name); }
+function safeTxt(s) { return String(s || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])); }
+function safeAttr(s) { return safeTxt(s).replace(/\n/g, ''); }
+function imgHTML(url, fallbackText, isRound) {
+  const fallback = `<div class="person-photo-lg">${safeTxt(fallbackText)}</div>`;
+  const cls = isRound ? 'style="width:80px;height:80px;border-radius:50%;object-fit:cover;"' : 'style="width:80px;height:80px;border-radius:var(--r-md);object-fit:cover;"';
+  return clean(url).startsWith('http') ? `<img src="${safeAttr(url)}" ${cls} onerror="this.outerHTML='${safeAttr(fallback)}'">` : fallback;
+}
+function todayLocal() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
+function nowCompact() { const d = new Date(); return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}${String(d.getHours()).padStart(2, '0')}${String(d.getMinutes()).padStart(2, '0')}${String(d.getSeconds()).padStart(2, '0')}`; }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', 啟動);
-  else 啟動();
-})();
+Object.assign(window, {
+  reloadData, jumpToStep, goBack, goNextOrSubmit, openPersonScan, closePersonScan, togglePersonManual, personManualConfirm,
+  openProductScan, closeProductScan, toggleProductManual, productManualConfirm, filterPersons, filterProducts, onWorkstationChange,
+  selectMachine, calcQty, calcWorkingHours, calcAnomalyTime, addDefectRow, deleteDefectRow, onDefectReasonChange, onDefectQtyChange,
+  triggerCamera, triggerFileSelect, onPhotoChange, clearAllPhotos, openPhotoNote, closePhotoNote, savePhotoNote, toggleFullscreen, closeRoar,
+  updatePreview, updateConfirmSummary
+});
