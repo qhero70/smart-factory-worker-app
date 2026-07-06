@@ -4,15 +4,43 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#080d18">
-<title>Report V4 Dark</title>
-<link rel="manifest" href="./work-report-v4.webmanifest?v=486">
-<style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#080d18}iframe{width:100%;height:100%;border:0;background:#080d18}.boot{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#080d18;color:#4da3ff;font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-weight:900;z-index:9}.boot.hide{display:none}</style>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>報工作業 V4｜黑底正式版</title>
+<link rel="manifest" href="./work-report-v4.webmanifest?v=488">
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#080d18;color:#e8ecf2;font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC',sans-serif}
+iframe{width:100%;height:100%;border:0;background:#080d18}.boot{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#080d18;color:#4da3ff;font-weight:900;z-index:9}.boot.hide{display:none}
+</style>
 </head>
 <body>
-<div id="boot" class="boot">Report V4 Dark Loading...</div>
-<iframe id="f" src="./work-report-v4.html?v=486&base=486"></iframe>
+<div id="boot" class="boot">報工作業 V4 載入中...</div>
+<iframe id="f" src="./work-report-v4.html?v=488&base=488"></iframe>
 <script>
-(function(){var V='486',f=document.getElementById('f'),boot=document.getElementById('boot');function addJS(d,src,id,cb){if(d.getElementById(id)){cb&&cb();return}var s=d.createElement('script');s.id=id;s.src=src;s.onload=function(){cb&&cb()};s.onerror=function(){cb&&cb()};d.head.appendChild(s)}function css(d){if(d.getElementById('dark486'))return;var s=d.createElement('style');s.id='dark486';s.textContent=':root{--blue:#4da3ff!important;--bg:#080d18!important;--card:rgba(255,255,255,.06)!important;--text:#e8ecf2!important;--muted:#8a95a8!important;--line:rgba(255,255,255,.12)!important;--shadow:0 4px 24px rgba(0,0,0,.32)!important}html,body{background:#080d18!important;color:#e8ecf2!important;overflow-x:hidden!important}.topbar{background:rgba(10,17,30,.88)!important;border-bottom:1px solid rgba(255,255,255,.1)!important}.stepper,.glass-card,.selected-box,.selected-product,.summary,.machine-card,.stat-card,.recent-chip,.toast{background:rgba(255,255,255,.06)!important;border:1px solid rgba(255,255,255,.12)!important;color:#e8ecf2!important;box-shadow:0 4px 24px rgba(0,0,0,.28)!important}.guide-card{background:rgba(255,255,255,.06)!important;border-color:rgba(245,184,66,.25)!important;color:#e8ecf2!important}.guide-title,.card-title,.person-name,.product-name,.selected-text,.machine-no,.summary h2{color:#fff!important}.guide-desc,.title p,.en{color:#bcc5d2!important}.field,.search,input,select,textarea,.defect-row select,.defect-row input{background:rgba(255,255,255,.05)!important;color:#fff!important;border-color:rgba(255,255,255,.16)!important}.person-grid,.product-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.person-card,.product-card{position:relative!important;overflow:hidden!important;padding:0!important;background:rgba(255,255,255,.05)!important;border:2px solid transparent!important;border-radius:18px!important;touch-action:pan-y!important;min-height:160px!important}.person-card.selected,.product-card.selected,.machine-card.selected{border-color:#4da3ff!important;box-shadow:0 0 22px rgba(77,163,255,.35)!important}.avatar,.product-thumb{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;margin:0!important;border-radius:0!important;border:0!important;background:rgba(255,255,255,.04)!important}.avatar img,.product-thumb img{width:100%!important;height:100%!important;object-fit:cover!important}.person-card:after,.product-card:after{content:"";position:absolute;left:0;right:0;bottom:0;height:58%;background:linear-gradient(transparent,rgba(0,0,0,.84));z-index:1;pointer-events:none}.person-name,.person-id,.product-name,.product-code{position:relative!important;z-index:2!important;text-shadow:0 1px 3px rgba(0,0,0,.75)!important}.person-name,.product-name{display:block!important;margin-top:92px!important;padding:0 8px!important;font-weight:1000!important}.person-id,.product-code{background:rgba(0,0,0,.45)!important;color:#cfe2ff!important}.machine-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.machine-card{overflow:hidden!important;padding:0!important}.bottom-bar{background:rgba(10,17,30,.88)!important;border-top:1px solid rgba(255,255,255,.12)!important}.btn-secondary{background:rgba(255,255,255,.06)!important;color:#d0d8e8!important;border:1px solid rgba(255,255,255,.14)!important}@media(max-width:430px){.person-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}.product-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.grid-2,.grid-3,.defect-row{grid-template-columns:1fr!important}}';d.head.appendChild(s)}function blank(){try{var d=f.contentWindow.document,ids=['totalQty','ngQty','今日共做數','不良數'];ids.forEach(function(id){var e=d.getElementById(id);if(e&&e.value==='0')e.value='';if(e&&e.placeholder==='0')e.placeholder=''})}catch(e){}}f.addEventListener('load',function(){try{var w=f.contentWindow,d=w.document;css(d);addJS(d,'./pwa-config.js?v='+V,'cfg486',function(){addJS(d,'./gas-bridge.js?v='+V,'bridge486',function(){addJS(d,'./work-report-v4-rules-470.js?v='+V,'rules486',function(){addJS(d,'./work-report-v4-submit-482.js?v='+V,'submit486',function(){css(d);setTimeout(function(){try{if(typeof w.reloadData==='function')w.reloadData()}catch(e){}blank();css(d);boot.classList.add('hide')},700)})})})})}catch(e){boot.textContent='Reload Report V4'}});try{if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js?v='+V).catch(function(){})}catch(e){}})();
+(function(){
+var V='488';
+var f=document.getElementById('f');
+var boot=document.getElementById('boot');
+function addJS(d,src,id,cb){if(d.getElementById(id)){cb&&cb();return}var s=d.createElement('script');s.id=id;s.src=src;s.onload=function(){cb&&cb()};s.onerror=function(){cb&&cb()};d.head.appendChild(s)}
+function hideBoot(){setTimeout(function(){boot.classList.add('hide')},900)}
+f.addEventListener('load',function(){
+  try{
+    var w=f.contentWindow,d=w.document;
+    addJS(d,'./pwa-config.js?v='+V,'cfg488',function(){
+      addJS(d,'./gas-bridge.js?v='+V,'bridge488',function(){
+        addJS(d,'./work-report-v4-rules-470.js?v='+V,'rules488',function(){
+          addJS(d,'./work-report-v4-submit-482.js?v='+V,'submit488',function(){
+            try{if(w.V4Rules&&w.V4Rules.boot)w.V4Rules.boot()}catch(e){}
+            try{if(typeof w.reloadData==='function')w.reloadData()}catch(e){}
+            hideBoot();
+          });
+        });
+      });
+    });
+  }catch(e){boot.textContent='報工作業載入失敗，請重新整理';}
+});
+try{if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js?v='+V).catch(function(){})}catch(e){}
+})();
 </script>
 </body>
 </html>
