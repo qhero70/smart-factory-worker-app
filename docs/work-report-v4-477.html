@@ -9,29 +9,23 @@
 <meta name="apple-mobile-web-app-title" content="化新報工">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="application-name" content="化新報工">
-<link rel="manifest" href="./work-report-v4.webmanifest?v=483">
-<link rel="icon" type="image/svg+xml" href="./assets/huaxin-report-icon.svg?v=483">
-<link rel="apple-touch-icon" href="./assets/huaxin-report-icon.svg?v=483">
-<link rel="apple-touch-startup-image" href="./assets/huaxin-report-splash.svg?v=483">
-<link rel="stylesheet" href="./work-report-v4-google-ui.css?v=483">
+<link rel="manifest" href="./work-report-v4.webmanifest?v=489">
+<link rel="icon" type="image/svg+xml" href="./assets/huaxin-report-icon.svg?v=489">
+<link rel="apple-touch-icon" href="./assets/huaxin-report-icon.svg?v=489">
+<link rel="apple-touch-startup-image" href="./assets/huaxin-report-splash.svg?v=489">
+<link rel="stylesheet" href="./work-report-v4-google-ui.css?v=489">
 <title>製一組 報工表單 V4｜化新 智慧製造</title>
-<script src="./pwa-config.js?v=483"></script>
-<script src="./gas-bridge.js?v=483"></script>
-<script defer src="./work-report-v4-app-483.js?v=483"></script>
+<script src="./pwa-config.js?v=489"></script>
+<script src="./gas-bridge.js?v=489"></script>
+<script defer src="./work-report-v4-opening-particles.js?v=489"></script>
+<script defer src="./work-report-v4-app-483.js?v=489"></script>
+<script defer src="./work-report-v4-v484-hotfix.js?v=489"></script>
+<script defer src="./work-report-v4-v489-data-repair.js?v=489"></script>
+<style>#loadingScreen{display:none!important}</style>
 </head>
 <body>
 
-<div id="loadingScreen" class="loading-screen">
-  <div class="load-bg-orbs"><div class="load-orb"></div><div class="load-orb"></div><div class="load-orb"></div></div>
-  <div class="load-logo-ring">
-    <div class="load-ring"></div><div class="load-ring"></div><div class="load-ring"></div>
-    <img class="load-center-icon" src="./assets/huaxin-report-icon.svg?v=483" alt="化新報工">
-  </div>
-  <div class="load-brand"><div class="load-brand-name">化新精密</div><div class="load-brand-sub">HUA HSIN PRECISION</div></div>
-  <div class="load-title">智慧製造中央作戰指揮中心 · Production Reporting V4</div>
-  <div class="load-google-dots"><div class="load-dot"></div><div class="load-dot"></div><div class="load-dot"></div><div class="load-dot"></div></div>
-  <div class="load-progress-bar"><div class="load-progress-fill"></div></div>
-</div>
+<div id="loadingScreen" class="loading-screen hidden" style="display:none!important"></div>
 
 <div id="submitOverlay" class="submit-overlay hidden">
   <div class="submit-card"><div class="spinner"></div><p class="submit-title" id="submitTitle">📤 報工送出中...</p><div class="submit-sub" id="submitSub">Writing production record...</div></div>
@@ -78,7 +72,7 @@
     <div class="header-inner">
       <div class="header-top-row">
         <div class="header-brand">
-          <div class="header-icon-wrap"><img src="./assets/huaxin-report-icon.svg?v=483" alt="化新報工"></div>
+          <div class="header-icon-wrap"><img src="./assets/huaxin-report-icon.svg?v=489" alt="化新報工"></div>
           <div class="header-title-group"><div class="header-title">製一組 報工表單 V4</div><div class="header-subtitle">化新精密｜智慧製造指揮中心｜引導式報工 · Smart Production Reporting</div></div>
         </div>
         <div class="header-actions"><button class="header-btn ripple" id="fullscreenBtn" onclick="toggleFullscreen()" title="全螢幕 / Fullscreen" type="button">⛶</button><button class="header-btn ripple" onclick="reloadData()" title="重新載入 / Reload" type="button">↻</button></div>
