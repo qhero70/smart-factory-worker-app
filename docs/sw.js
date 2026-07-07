@@ -1,16 +1,17 @@
-const 快取名稱='huaxin-work-report-v4-cache-488-defect-photo-bridge';
+const 快取名稱='huaxin-work-report-v4-cache-489-data-repair-particle-only';
 const 預快取清單=[
   './',
-  './work-report-v4-477.html?v=488&fix=defect-photo-bridge',
-  './work-report-v4.webmanifest?v=488',
-  './pwa-config.js?v=488',
-  './gas-bridge.js?v=488',
-  './work-report-v4-app-483.js?v=488',
-  './work-report-v4-v484-hotfix.js?v=488',
-  './work-report-v4-opening-particles.js?v=488',
-  './work-report-v4-google-ui.css?v=488',
-  './assets/huaxin-report-icon.svg?v=488',
-  './assets/huaxin-report-splash.svg?v=488'
+  './work-report-v4-477.html?v=489&fix=data-repair-particle-only',
+  './work-report-v4.webmanifest?v=489',
+  './pwa-config.js?v=489',
+  './gas-bridge.js?v=489',
+  './work-report-v4-app-483.js?v=489',
+  './work-report-v4-v484-hotfix.js?v=489',
+  './work-report-v4-v489-data-repair.js?v=489',
+  './work-report-v4-opening-particles.js?v=489',
+  './work-report-v4-google-ui.css?v=489',
+  './assets/huaxin-report-icon.svg?v=489',
+  './assets/huaxin-report-splash.svg?v=489'
 ];
 
 self.addEventListener('install',event=>{
