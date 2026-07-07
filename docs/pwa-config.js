@@ -3,7 +3,7 @@ window.PWA_CONFIG=window.PWA_CONFIG||{};
   c.GAS_WEB_APP_URL=['https://script.google.com','/macros/s/','AKfycbzRvly1OV-C80bMmd2ww4BM1XAH9WTyz62VFDnUxVGiO15kzHahbeHZc2bNTSwdFCqBwQ','/exec'].join('');
   c.APP_NAME='化新報工';
   c.APP_SHORT_NAME='化新報工';
-  c.VERSION='v4.8.5';
+  c.VERSION='v4.8.6';
   c.SPREADSHEET_ID='19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
   c.正式主資料庫ID='19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
   c.API_TIMEOUT_MS=20000;
@@ -23,8 +23,8 @@ window.PWA_CONFIG=window.PWA_CONFIG||{};
     s.src=src;
     document.head.appendChild(s);
   }
-  載入一次('./work-report-v4-opening-particles.js?v=485','化新粒子開場程式');
-  載入一次('./work-report-v4-v484-hotfix.js?v=485','化新報工v484修正程式');
+  載入一次('./work-report-v4-opening-particles.js?v=486','化新原始開場程式');
+  載入一次('./work-report-v4-v484-hotfix.js?v=486','化新報工v484修正程式');
 })();
 
 (function(){
