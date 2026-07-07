@@ -15,20 +15,6 @@ window.PWA_CONFIG=window.PWA_CONFIG||{};
 })(window.PWA_CONFIG);
 
 (function(){
-  function 載入一次(src,id){
-    if(document.getElementById(id))return;
-    var s=document.createElement('script');
-    s.id=id;
-    s.defer=true;
-    s.src=src;
-    document.head.appendChild(s);
-  }
-  載入一次('./work-report-v4-opening-particles.js?v=489','化新純粒子開場程式');
-  載入一次('./work-report-v4-v484-hotfix.js?v=489','化新報工v484修正程式');
-  載入一次('./work-report-v4-v489-data-repair.js?v=489','化新報工v489資料修復程式');
-})();
-
-(function(){
   function E(id){return document.getElementById(id)}
   function centerV4(el){
     if(!el)return;
