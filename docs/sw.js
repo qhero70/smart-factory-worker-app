@@ -1,16 +1,16 @@
-const 快取名稱='huaxin-work-report-v4-cache-486-exact-uploaded-opening';
+const 快取名稱='huaxin-work-report-v4-cache-488-defect-photo-bridge';
 const 預快取清單=[
   './',
-  './work-report-v4-477.html?v=486&fix=exact-uploaded-opening',
-  './work-report-v4.webmanifest?v=486',
-  './pwa-config.js?v=486',
-  './gas-bridge.js?v=486',
-  './work-report-v4-app-483.js?v=486',
-  './work-report-v4-v484-hotfix.js?v=486',
-  './work-report-v4-opening-particles.js?v=486',
-  './work-report-v4-google-ui.css?v=486',
-  './assets/huaxin-report-icon.svg?v=486',
-  './assets/huaxin-report-splash.svg?v=486'
+  './work-report-v4-477.html?v=488&fix=defect-photo-bridge',
+  './work-report-v4.webmanifest?v=488',
+  './pwa-config.js?v=488',
+  './gas-bridge.js?v=488',
+  './work-report-v4-app-483.js?v=488',
+  './work-report-v4-v484-hotfix.js?v=488',
+  './work-report-v4-opening-particles.js?v=488',
+  './work-report-v4-google-ui.css?v=488',
+  './assets/huaxin-report-icon.svg?v=488',
+  './assets/huaxin-report-splash.svg?v=488'
 ];
 
 self.addEventListener('install',event=>{
