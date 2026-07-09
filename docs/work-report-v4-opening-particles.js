@@ -1,13 +1,26 @@
-/* 化新報工 V4｜v4.9.0 開場還原鎖定
- * 使用 GitHub 歷史正式版：原封不動載入使用者上傳的 開場.txt。
- * 不改粒子數、不改 RAW_LOGO_DATA、不改 CONFIG、不改動畫節奏。
+/* 化新報工 V4｜v5.1.4 開場鎖定 + 不良主檔載入橋接
+ * 開場動畫仍使用 GitHub 歷史正式版。
+ * 額外載入 05_不良代碼主檔正式對接修復檔。
  */
 (function(){
   'use strict';
   const 原封不動開場JS='https://cdn.jsdelivr.net/gh/qhero70/smart-factory-worker-app@ab308c06d91b31780ee9409666dbd071e1f101ba/docs/work-report-v4-opening-particles.js';
-  if(window.__HUAXIN_EXACT_OPENING_LOCKED__) return;
-  window.__HUAXIN_EXACT_OPENING_LOCKED__=true;
+  function 載入JS(src,id){
+    if(id&&document.getElementById(id))return;
+    const s=document.createElement('script');
+    s.src=src;
+    if(id)s.id=id;
+    s.defer=true;
+    s.onerror=function(){console.error('[化新報工] JS 載入失敗',src);};
+    document.head.appendChild(s);
+  }
+  function 載入不良主檔修復(){
+    載入JS('./work-report-v4-defect-master-fix-514.js?v=514','hx-defect-master-fix-514');
+  }
   function 載入正式開場(){
+    載入不良主檔修復();
+    if(window.__HUAXIN_EXACT_OPENING_LOCKED__) return;
+    window.__HUAXIN_EXACT_OPENING_LOCKED__=true;
     fetch(原封不動開場JS,{cache:'no-store'})
       .then(r=>{if(!r.ok)throw new Error('開場檔讀取失敗 '+r.status);return r.text();})
       .then(code=>{
