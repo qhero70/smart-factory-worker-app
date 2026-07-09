@@ -1,7 +1,7 @@
-const 快取名稱 = 'huaxin-work-report-v4-cache-512-workstation-match-fix';
+const 快取名稱 = 'huaxin-work-report-v4-cache-513-step2-layout-fix';
 const 預快取清單 = [
   './',
-  './work-report-v4-477.html?v=512&fix=workstation-match-fix',
+  './work-report-v4-477.html?v=513&fix=step2-layout-fix',
   './work-report-v4.webmanifest?v=489',
   './pwa-config.js?v=511',
   './gas-bridge.js?v=511',
