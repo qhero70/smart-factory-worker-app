@@ -1,19 +1,20 @@
-/* 報工作業 V4｜不良原因兩欄格子選擇器 v5.1.9 穩定鎖定版
- * 目的：修復 iPhone 上還沒選定不良原因就跳回原位。
- * 規則：打開後不允許背景重繪、不允許背景點擊關閉、不允許觸控穿透；只有按 X 或點卡片才關閉。
+/* 報工作業 V4｜不良原因兩欄格子選擇器 v5.2.1 數量輸入穩定版
+ * 修復：數量 input 正在輸入時，不允許 defectContainer 自動重繪，避免游標/鍵盤被踢掉。
  * 資料來源只允許：05_不良代碼主檔。
  */
 (function () {
   'use strict';
 
-  const 版本 = '519';
-  const 標記 = '__報工V4_不良原因格子選擇器519__';
+  const 版本 = '521';
+  const 標記 = '__報工V4_不良原因格子選擇器521__';
   if (window[標記]) return;
   window[標記] = true;
 
   let 主檔快取 = null;
   let 讀取中 = false;
   let 選擇中 = false;
+  let 數量輸入中 = false;
+  let 最後輸入時間 = 0;
   let 目前列ID = null;
 
   function clean(v) { return String(v == null ? '' : v).trim(); }
@@ -49,44 +50,42 @@
     讀取中 = false;
     return 主檔快取;
   }
+
   function 資料() { const d = (window.DB && window.DB.ngReasons && window.DB.ngReasons.__修復版 === 版本) ? window.DB.ngReasons : 主檔快取; return d || { Z: [], Y: [], __來源: '05_不良代碼主檔', __修復版: 版本 }; }
   function 找(code, cat) { const d = 資料(); return ((d[cat] || []).find(x => x.代碼 === code)) || ((d.Z || []).concat(d.Y || []).find(x => x.代碼 === code)) || null; }
   function label(row) { if (!row || !validCode(row.code)) return '<span class="hx-defect-placeholder">點擊選擇不良原因</span>'; const item = 找(row.code, row.category) || row; return `<b>${esc(row.code)}</b><span>${esc(item.名稱 || row.name || '')}</span><small>${esc(item.英文名稱 || row.enName || '')}</small>`; }
   function notice() { const n = document.getElementById('defectSyncNotice'); if (!n) return; const c = count(資料()); n.innerHTML = c ? `<div class="caption">✅ 已同步 05_不良代碼主檔：${c} 筆｜格子選擇器 v${版本}</div>` : '<div class="caption" style="color:#b00020;font-weight:900;">⚠️ 未同步 05_不良代碼主檔；此版禁止前端假資料。</div>'; }
+  function 正在輸入數量() { const a = document.activeElement; return !!(a && a.closest && a.closest('#defectContainer') && a.classList && a.classList.contains('qty-input')); }
+  function 禁止重繪() { return 選擇中 || 數量輸入中 || 正在輸入數量() || (Date.now() - 最後輸入時間 < 1800); }
+  function 更新列數量(rowId, value) { if (!window.STATE || !Array.isArray(window.STATE.defectRows)) return; const row = window.STATE.defectRows.find(x => Number(x.id) === Number(rowId)); if (row) row.qty = clean(value); if (typeof window.updateDefectSummaryDisplay === 'function') window.updateDefectSummaryDisplay(); if (typeof window.updatePreview === 'function') window.updatePreview(); }
 
   function style() {
-    if (document.getElementById('hx-defect-grid-style-519')) return;
+    if (document.getElementById('hx-defect-grid-style-521')) return;
     const st = document.createElement('style');
-    st.id = 'hx-defect-grid-style-519';
-    st.textContent = `
-      body.hx-defect-picker-open{overflow:hidden!important;touch-action:none!important}.defect-row{display:grid!important;grid-template-columns:34px minmax(0,1fr) 82px!important;gap:7px!important;align-items:center!important;width:100%!important;box-sizing:border-box!important;overflow:hidden!important;margin:8px 0!important}.hx-defect-select-btn{width:100%!important;min-width:0!important;border:1px solid #c9d7f5!important;background:#fff!important;border-radius:16px!important;padding:10px 12px!important;text-align:left!important;color:#17233c!important;font-weight:900!important;min-height:54px!important;box-sizing:border-box!important;line-height:1.25!important;display:grid!important;gap:2px!important}.hx-defect-select-btn b{font-size:17px!important;color:#0b57d0!important}.hx-defect-select-btn span{font-size:14px!important;color:#18243a!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}.hx-defect-select-btn small{font-size:11px!important;color:#64748b!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}.hx-defect-placeholder{font-size:14px!important;color:#94a3b8!important;font-weight:800!important}.hx-defect-mask{position:fixed!important;inset:0!important;z-index:2147483000!important;background:rgba(15,23,42,.52)!important;backdrop-filter:blur(10px)!important;-webkit-backdrop-filter:blur(10px)!important;display:flex!important;align-items:flex-end!important;justify-content:center!important;padding:12px!important;box-sizing:border-box!important;touch-action:none!important}.hx-defect-panel{width:100%!important;max-width:560px!important;max-height:84vh!important;background:rgba(255,255,255,.98)!important;border-radius:28px 28px 22px 22px!important;box-shadow:0 28px 70px rgba(15,23,42,.38)!important;overflow:hidden!important;border:1px solid rgba(255,255,255,.72)!important;display:flex!important;flex-direction:column!important;touch-action:auto!important}.hx-defect-head{flex:0 0 auto!important;background:rgba(255,255,255,.96)!important;padding:14px 14px 10px!important;border-bottom:1px solid #e5edf8!important;display:flex!important;gap:10px!important;align-items:center!important;justify-content:space-between!important}.hx-defect-title{font-size:18px!important;font-weight:950!important;color:#12213a!important;line-height:1.2!important}.hx-defect-close{border:0!important;background:#eef3fb!important;color:#334155!important;width:42px!important;height:42px!important;border-radius:14px!important;font-size:24px!important;font-weight:900!important}.hx-defect-body{overflow:auto!important;-webkit-overflow-scrolling:touch!important;padding:12px!important;touch-action:pan-y!important}.hx-defect-section{margin-bottom:14px!important}.hx-defect-section-title{font-size:14px!important;font-weight:950!important;color:#64748b!important;padding:4px 2px 8px!important}.hx-defect-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}.hx-defect-card{border:1px solid #d7e3f8!important;background:linear-gradient(180deg,#fff,#f7fbff)!important;border-radius:18px!important;padding:11px 10px!important;min-height:96px!important;text-align:left!important;box-shadow:0 6px 16px rgba(30,64,175,.08)!important;display:flex!important;flex-direction:column!important;gap:5px!important;justify-content:flex-start!important}.hx-defect-code{font-size:18px!important;font-weight:950!important;color:#0b57d0!important}.hx-defect-name{font-size:15px!important;font-weight:900!important;color:#111827!important;line-height:1.18!important}.hx-defect-en{font-size:12px!important;font-weight:700!important;color:#64748b!important;line-height:1.16!important}.hx-defect-empty{padding:18px!important;border:1px dashed #f2b8b5!important;background:#fff7f7!important;border-radius:18px!important;color:#b00020!important;font-weight:900!important;text-align:center!important}.hx-defect-picked{outline:3px solid rgba(52,168,83,.35)!important;border-color:#34a853!important;background:#f0fff6!important}@media(max-width:390px){.hx-defect-grid{gap:8px!important}.hx-defect-card{min-height:90px!important;padding:10px 8px!important}.defect-row{grid-template-columns:32px minmax(0,1fr) 72px!important;gap:6px!important}.hx-defect-panel{max-height:86vh!important}}`;
+    st.id = 'hx-defect-grid-style-521';
+    st.textContent = `body.hx-defect-picker-open{overflow:hidden!important;touch-action:none!important}.defect-row{display:grid!important;grid-template-columns:34px minmax(0,1fr) 92px!important;gap:7px!important;align-items:center!important;width:100%!important;box-sizing:border-box!important;overflow:hidden!important;margin:8px 0!important}.hx-defect-select-btn{width:100%!important;min-width:0!important;border:1px solid #c9d7f5!important;background:#fff!important;border-radius:16px!important;padding:10px 12px!important;text-align:left!important;color:#17233c!important;font-weight:900!important;min-height:54px!important;box-sizing:border-box!important;line-height:1.25!important;display:grid!important;gap:2px!important}.hx-defect-select-btn b{font-size:17px!important;color:#0b57d0!important}.hx-defect-select-btn span{font-size:14px!important;color:#18243a!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}.hx-defect-select-btn small{font-size:11px!important;color:#64748b!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}.hx-defect-placeholder{font-size:14px!important;color:#94a3b8!important;font-weight:800!important}.defect-row .qty-input{width:100%!important;min-width:0!important;box-sizing:border-box!important;text-align:center!important;font-size:18px!important;font-weight:900!important;padding:10px 6px!important;border-radius:14px!important}.hx-defect-mask{position:fixed!important;inset:0!important;z-index:2147483000!important;background:rgba(15,23,42,.52)!important;backdrop-filter:blur(10px)!important;-webkit-backdrop-filter:blur(10px)!important;display:flex!important;align-items:flex-end!important;justify-content:center!important;padding:12px!important;box-sizing:border-box!important;touch-action:none!important}.hx-defect-panel{width:100%!important;max-width:560px!important;max-height:84vh!important;background:rgba(255,255,255,.98)!important;border-radius:28px 28px 22px 22px!important;box-shadow:0 28px 70px rgba(15,23,42,.38)!important;overflow:hidden!important;border:1px solid rgba(255,255,255,.72)!important;display:flex!important;flex-direction:column!important;touch-action:auto!important}.hx-defect-head{flex:0 0 auto!important;background:rgba(255,255,255,.96)!important;padding:14px 14px 10px!important;border-bottom:1px solid #e5edf8!important;display:flex!important;gap:10px!important;align-items:center!important;justify-content:space-between!important}.hx-defect-title{font-size:18px!important;font-weight:950!important;color:#12213a!important;line-height:1.2!important}.hx-defect-close{border:0!important;background:#eef3fb!important;color:#334155!important;width:42px!important;height:42px!important;border-radius:14px!important;font-size:24px!important;font-weight:900!important}.hx-defect-body{overflow:auto!important;-webkit-overflow-scrolling:touch!important;padding:12px!important;touch-action:pan-y!important}.hx-defect-section{margin-bottom:14px!important}.hx-defect-section-title{font-size:14px!important;font-weight:950!important;color:#64748b!important;padding:4px 2px 8px!important}.hx-defect-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}.hx-defect-card{border:1px solid #d7e3f8!important;background:linear-gradient(180deg,#fff,#f7fbff)!important;border-radius:18px!important;padding:11px 10px!important;min-height:96px!important;text-align:left!important;box-shadow:0 6px 16px rgba(30,64,175,.08)!important;display:flex!important;flex-direction:column!important;gap:5px!important;justify-content:flex-start!important}.hx-defect-code{font-size:18px!important;font-weight:950!important;color:#0b57d0!important}.hx-defect-name{font-size:15px!important;font-weight:900!important;color:#111827!important;line-height:1.18!important}.hx-defect-en{font-size:12px!important;font-weight:700!important;color:#64748b!important;line-height:1.16!important}.hx-defect-empty{padding:18px!important;border:1px dashed #f2b8b5!important;background:#fff7f7!important;border-radius:18px!important;color:#b00020!important;font-weight:900!important;text-align:center!important}.hx-defect-picked{outline:3px solid rgba(52,168,83,.35)!important;border-color:#34a853!important;background:#f0fff6!important}@media(max-width:390px){.hx-defect-grid{gap:8px!important}.hx-defect-card{min-height:90px!important;padding:10px 8px!important}.defect-row{grid-template-columns:32px minmax(0,1fr) 82px!important;gap:6px!important}.hx-defect-panel{max-height:86vh!important}}`;
     document.head.appendChild(st);
   }
 
   function renderRows(force) {
-    if (選擇中 && !force) return;
+    if (!force && 禁止重繪()) return;
     style();
     const c = document.getElementById('defectContainer');
     if (!c || !window.STATE) return;
     if (!window.STATE.defectRows || !window.STATE.defectRows.length) window.STATE.defectRows = [{ id: Date.now(), category: '', code: '', name: '', enName: '', qty: '' }];
     const d = 資料();
     if (!count(d)) { c.innerHTML = '<div class="defect-summary error" style="display:block;">⚠️ 未同步 05_不良代碼主檔。此版禁止前端假資料，請確認 GAS 有回傳 05_不良代碼主檔。</div>'; notice(); return; }
-    c.innerHTML = window.STATE.defectRows.map(row => `<div class="defect-row" id="defectRow_${row.id}"><button class="defect-delete-btn ripple" onclick="deleteDefectRow(${row.id})" type="button">✕</button><button class="hx-defect-select-btn ripple" type="button" onclick="開啟不良原因格子(${row.id})">${label(row)}</button><input class="qty-input" type="number" min="0" value="${Number(row.qty) || ''}" inputmode="numeric" placeholder="pcs" onchange="onDefectQtyChange(${row.id},this.value)" oninput="onDefectQtyChange(${row.id},this.value)"></div>`).join('');
+    c.innerHTML = window.STATE.defectRows.map(row => `<div class="defect-row" id="defectRow_${row.id}"><button class="defect-delete-btn ripple" onclick="deleteDefectRow(${row.id})" type="button">✕</button><button class="hx-defect-select-btn ripple" type="button" onclick="開啟不良原因格子(${row.id})">${label(row)}</button><input class="qty-input" data-row-id="${row.id}" type="number" min="0" value="${esc(row.qty || '')}" inputmode="numeric" placeholder="pcs" onchange="onDefectQtyChange(${row.id},this.value)" oninput="onDefectQtyChange(${row.id},this.value)"></div>`).join('');
     notice();
     if (typeof window.updateDefectSummaryDisplay === 'function') window.updateDefectSummaryDisplay();
   }
   function card(item, cat, current) { const picked = current === item.代碼 ? ' hx-defect-picked' : ''; return `<button type="button" class="hx-defect-card${picked}" data-code="${esc(item.代碼)}" data-cat="${cat}"><div class="hx-defect-code">${esc(item.代碼)}</div><div class="hx-defect-name">${esc(item.名稱 || '未命名')}</div><div class="hx-defect-en">${esc(item.英文名稱 || '')}</div></button>`; }
   function open(rowId) {
-    style();
-    選擇中 = true;
-    目前列ID = rowId;
-    document.body.classList.add('hx-defect-picker-open');
-    const d = 資料();
-    const row = (window.STATE && window.STATE.defectRows || []).find(x => Number(x.id) === Number(rowId)) || {};
+    if (正在輸入數量()) document.activeElement.blur();
+    style(); 選擇中 = true; 目前列ID = rowId; document.body.classList.add('hx-defect-picker-open');
+    const d = 資料(); const row = (window.STATE && window.STATE.defectRows || []).find(x => Number(x.id) === Number(rowId)) || {};
     const old = document.getElementById('hxDefectPickerMask'); if (old) old.remove();
-    const mask = document.createElement('div');
-    mask.id = 'hxDefectPickerMask';
-    mask.className = 'hx-defect-mask';
+    const mask = document.createElement('div'); mask.id = 'hxDefectPickerMask'; mask.className = 'hx-defect-mask';
     mask.innerHTML = `<div class="hx-defect-panel" role="dialog" aria-modal="true"><div class="hx-defect-head"><div class="hx-defect-title">選擇不良原因<br><span style="font-size:13px;color:#64748b;font-weight:800">05_不良代碼主檔｜兩欄格子｜選完才關閉</span></div><button class="hx-defect-close" type="button" data-close="1">×</button></div><div class="hx-defect-body">${count(d) ? '' : '<div class="hx-defect-empty">未同步 05_不良代碼主檔，無法選擇。</div>'}<div class="hx-defect-section"><div class="hx-defect-section-title">Z 素材 / 外觀類</div><div class="hx-defect-grid">${(d.Z || []).map(x => card(x, 'Z', row.code)).join('') || '<div class="hx-defect-empty">無 Z 類主檔</div>'}</div></div><div class="hx-defect-section"><div class="hx-defect-section-title">Y 加工 / 尺寸類</div><div class="hx-defect-grid">${(d.Y || []).map(x => card(x, 'Y', row.code)).join('') || '<div class="hx-defect-empty">無 Y 類主檔</div>'}</div></div></div></div>`;
     mask.addEventListener('click', e => { e.stopPropagation(); const closeBtn = e.target.closest('[data-close="1"]'); if (closeBtn) { close(); return; } const btn = e.target.closest('.hx-defect-card'); if (btn) select(btn.dataset.code, btn.dataset.cat); }, true);
     mask.addEventListener('touchstart', e => e.stopPropagation(), { passive: true, capture: true });
@@ -103,9 +102,15 @@
   window.關閉不良原因格子 = close;
   window.選定不良原因 = select;
   window.onDefectReasonChange = function (rowId, value) { const p = clean(value).split('|'); if (p[0] && p[1]) { 目前列ID = rowId; select(p[0], p[1]); } };
+  window.onDefectQtyChange = function (rowId, value) { 數量輸入中 = true; 最後輸入時間 = Date.now(); 更新列數量(rowId, value); setTimeout(() => { if (!正在輸入數量() && Date.now() - 最後輸入時間 > 1200) 數量輸入中 = false; }, 1500); };
   window.同步不良原因主檔 = async function () { await 讀主檔(); renderRows(true); };
-  async function boot() { window.renderDefectRows = renderRows; window.updateDefectSyncNotice = notice; if (window.DB && window.V4Bridge && !選擇中) await 讀主檔(); renderRows(); }
+
+  document.addEventListener('focusin', function (e) { if (e.target && e.target.closest && e.target.closest('#defectContainer') && e.target.classList.contains('qty-input')) { 數量輸入中 = true; 最後輸入時間 = Date.now(); } }, true);
+  document.addEventListener('input', function (e) { if (e.target && e.target.closest && e.target.closest('#defectContainer') && e.target.classList.contains('qty-input')) { 數量輸入中 = true; 最後輸入時間 = Date.now(); 更新列數量(e.target.dataset.rowId || 0, e.target.value); } }, true);
+  document.addEventListener('focusout', function (e) { if (e.target && e.target.closest && e.target.closest('#defectContainer') && e.target.classList.contains('qty-input')) { 最後輸入時間 = Date.now(); setTimeout(() => { if (!正在輸入數量() && Date.now() - 最後輸入時間 > 900) { 數量輸入中 = false; renderRows(true); } }, 1000); } }, true);
+
+  async function boot() { window.renderDefectRows = renderRows; window.updateDefectSyncNotice = notice; if (window.DB && window.V4Bridge && !禁止重繪()) await 讀主檔(); renderRows(); }
   window.addEventListener('load', function () { setTimeout(boot, 400); setTimeout(boot, 1400); setTimeout(boot, 3000); });
   document.addEventListener('click', function (e) { if (e.target && e.target.closest && e.target.closest('.step-item')) setTimeout(boot, 250); }, true);
-  setInterval(function () { window.renderDefectRows = renderRows; window.updateDefectSyncNotice = notice; if (window.STATE && window.STATE.currentStep === 3 && !選擇中) renderRows(); }, 1200);
+  setInterval(function () { window.renderDefectRows = renderRows; window.updateDefectSyncNotice = notice; if (window.STATE && window.STATE.currentStep === 3 && !禁止重繪()) renderRows(); }, 1200);
 })();
