@@ -23,40 +23,51 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}body{padding-top:0!importa
 <script>
 (function(){
   function clean(v){return String(v==null?'':v).trim();}
-  function 主檔班別(人員){
+  function 報工班別(人員){
     var raw=clean(人員&&((人員['班別'])||(人員['班別名稱'])||(人員['shift'])||(人員['Shift'])));
-    if(!raw)return '早班';
-    if(raw.indexOf('大夜')>=0)return '大夜班';
-    if(raw.indexOf('中')>=0)return '中班';
-    if(raw.indexOf('早')>=0)return '早班';
-    return raw;
+    if(raw.indexOf('大夜')>=0||raw.indexOf('夜')>=0)return '大夜班';
+    return '早班';
   }
   function 套用班別(班別){
     var s=document.getElementById('shiftSelect');
     if(!s)return;
-    var v=主檔班別({'班別':班別});
+    var v=報工班別({'班別':班別});
     s.innerHTML='';
     s.add(new Option(v,v));
     s.value=v;
     if(window.STATE&&window.STATE.operator)window.STATE.operator['班別']=v;
   }
-  function 綁定人員主檔班別(){
-    if(typeof window.selectPerson==='function'&&!window.selectPerson.__人員主檔班別){
+  function 移除中班顯示(){
+    document.querySelectorAll('.shift-badge').forEach(function(b){
+      if((b.textContent||'').indexOf('中')>=0){
+        b.textContent='☀️ 早班';
+        b.classList.remove('swing');
+        b.classList.add('day');
+        var c=b.closest('.person-card');
+        if(c){c.classList.remove('shift-swing');c.classList.add('shift-day');}
+      }
+    });
+    var d=document.getElementById('selectedPersonDisplay');
+    if(d&&d.innerHTML.indexOf('中班')>=0)d.innerHTML=d.innerHTML.replace(/中班/g,'早班');
+  }
+  function 綁定報工班別(){
+    if(typeof window.selectPerson==='function'&&!window.selectPerson.__報工班別無中班){
       var 原選人=window.selectPerson;
       window.selectPerson=function(i){
         var 人員=window.DB&&window.DB.persons?window.DB.persons[i]:null;
         var ret=原選人.apply(this,arguments);
-        setTimeout(function(){套用班別(主檔班別(人員));},0);
-        setTimeout(function(){套用班別(主檔班別(人員));},120);
+        setTimeout(function(){套用班別(報工班別(人員));移除中班顯示();},0);
+        setTimeout(function(){套用班別(報工班別(人員));移除中班顯示();},150);
         return ret;
       };
-      window.selectPerson.__人員主檔班別=true;
+      window.selectPerson.__報工班別無中班=true;
     }
-    if(window.STATE&&window.STATE.operator)套用班別(主檔班別(window.STATE.operator));
+    if(window.STATE&&window.STATE.operator)套用班別(報工班別(window.STATE.operator));
+    移除中班顯示();
   }
-  window.addEventListener('load',function(){setTimeout(綁定人員主檔班別,0);setTimeout(綁定人員主檔班別,600);});
-  document.addEventListener('pointerup',function(e){if(e.target.closest&&e.target.closest('.person-card'))setTimeout(綁定人員主檔班別,180);},true);
-  setInterval(綁定人員主檔班別,1000);
+  window.addEventListener('load',function(){setTimeout(綁定報工班別,0);setTimeout(綁定報工班別,600);setTimeout(移除中班顯示,1200);});
+  document.addEventListener('pointerup',function(e){if(e.target.closest&&e.target.closest('.person-card'))setTimeout(綁定報工班別,180);},true);
+  setInterval(綁定報工班別,1000);
 })();
 </script>
 </head>
