@@ -1,15 +1,16 @@
-const 快取名稱 = 'huaxin-work-report-v4-cache-535-op-select-label';
+const 快取名稱 = 'huaxin-work-report-v4-cache-536-complete-route-list';
 const 預快取清單 = [
   './',
-  './work-report-v4-477.html?v=535&fix=op-select-label',
+  './work-report-v4-477.html?v=536&fix=complete-route-list',
   './work-report-v4-530.html',
   './work-report-v4.webmanifest?v=489',
   './pwa-config.js?v=535',
   './gas-bridge.js?v=511',
   './work-report-v4-app-483.js?v=511',
-  './work-report-v4-opening-particles.js?v=534',
+  './work-report-v4-opening-particles.js?v=536',
   './work-report-v4-data-v529-adapter.js?v=533',
   './work-report-v4-official-lock-533.js?v=533',
+  './work-report-v4-route-complete-536.js?v=536',
   './work-report-v4-opfix-534.js?v=534',
   './work-report-v4-opselect-535.js?v=535',
   './work-report-v4-ui-lock-531.js?v=531',
@@ -56,6 +57,7 @@ self.addEventListener('fetch', event => {
     url.pathname.endsWith('/work-report-v4-opening-particles.js') ||
     url.pathname.endsWith('/work-report-v4-data-v529-adapter.js') ||
     url.pathname.endsWith('/work-report-v4-official-lock-533.js') ||
+    url.pathname.endsWith('/work-report-v4-route-complete-536.js') ||
     url.pathname.endsWith('/work-report-v4-opfix-534.js') ||
     url.pathname.endsWith('/work-report-v4-opselect-535.js') ||
     url.pathname.endsWith('/work-report-v4-ui-lock-531.js')
