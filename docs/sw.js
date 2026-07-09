@@ -1,6 +1,7 @@
-const 快取名稱='huaxin-work-report-v4-cache-493-photo-timing-selected-hide';
+const 快取名稱='huaxin-work-report-v4-cache-494-selected-person-center';
 const 預快取清單=[
   './',
+  './work-report-v4-477.html?v=494&fix=selected-person-center',
   './work-report-v4-477.html?v=493&fix=photo-timing-selected-hide',
   './work-report-v4.webmanifest?v=489',
   './pwa-config.js?v=493',
@@ -10,6 +11,7 @@ const 預快取清單=[
   './work-report-v4-v489-data-repair.js?v=489',
   './work-report-v4-shift-rules-491.js?v=491',
   './work-report-v4-photo-restore-493.js?v=493',
+  './work-report-v4-selected-center-494.js?v=494',
   './work-report-v4-opening-particles.js?v=490',
   './work-report-v4-google-ui.css?v=489',
   './assets/huaxin-report-icon.svg?v=489',
