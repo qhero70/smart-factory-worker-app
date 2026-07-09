@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#1967D2">
+<title>化新報工 V4｜v530 正式資料庫對接啟動</title>
+<style>
+  html,body{height:100%;margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:linear-gradient(135deg,#0f172a,#1d4ed8);color:#fff;display:grid;place-items:center}
+  .card{width:min(92vw,420px);border-radius:28px;background:rgba(255,255,255,.12);box-shadow:0 24px 80px rgba(0,0,0,.35);padding:28px 24px;text-align:center;backdrop-filter:blur(18px)}
+  .logo{font-size:54px;margin-bottom:10px}.title{font-weight:950;font-size:22px;letter-spacing:.04em}.sub{margin-top:10px;opacity:.88;line-height:1.55;font-size:14px}.bar{height:8px;border-radius:99px;background:rgba(255,255,255,.22);overflow:hidden;margin-top:22px}.bar i{display:block;height:100%;width:40%;border-radius:inherit;background:#93c5fd;animation:run 1s ease-in-out infinite alternate}@keyframes run{from{transform:translateX(-20%)}to{transform:translateX(180%)}}
+  .small{font-size:12px;opacity:.72;margin-top:14px;word-break:break-all}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">🏭</div>
+  <div class="title">報工 V4 正式資料庫對接中</div>
+  <div class="sub">正在清除舊版 PWA 快取，載入 v530 正式主資料庫版本。</div>
+  <div class="bar"><i></i></div>
+  <div class="small" id="status">初始化中...</div>
+</div>
+<script>
+(function(){
+  'use strict';
+  var target='./work-report-v4-477.html?v=530&fix=database-v529-official&_ts='+Date.now();
+  var status=document.getElementById('status');
+  function set(t){ if(status) status.textContent=t; }
+  async function clearCaches(){
+    if(!('caches' in window)) return;
+    var keys=await caches.keys();
+    await Promise.all(keys.map(function(k){return caches.delete(k);}));
+  }
+  async function unregisterSW(){
+    if(!('serviceWorker' in navigator)) return;
+    var regs=await navigator.serviceWorker.getRegistrations();
+    await Promise.all(regs.map(function(r){return r.unregister();}));
+  }
+  async function boot(){
+    try{ set('清除舊快取...'); await clearCaches(); }catch(e){}
+    try{ set('重置 Service Worker...'); await unregisterSW(); }catch(e){}
+    set('載入正式報工 v530...');
+    location.replace(target);
+  }
+  boot();
+})();
+</script>
+</body>
+</html>
