@@ -1,7 +1,8 @@
-const 快取名稱='huaxin-work-report-v4-cache-489-data-repair-particle-only';
+const 快取名稱='huaxin-work-report-v4-cache-490-opening-exact-restored';
 const 預快取清單=[
   './',
   './work-report-v4-477.html?v=489&fix=data-repair-particle-only',
+  './work-report-v4-477.html?v=490&fix=opening-exact-restored',
   './work-report-v4.webmanifest?v=489',
   './pwa-config.js?v=489',
   './gas-bridge.js?v=489',
@@ -9,6 +10,7 @@ const 預快取清單=[
   './work-report-v4-v484-hotfix.js?v=489',
   './work-report-v4-v489-data-repair.js?v=489',
   './work-report-v4-opening-particles.js?v=489',
+  './work-report-v4-opening-particles.js?v=490',
   './work-report-v4-google-ui.css?v=489',
   './assets/huaxin-report-icon.svg?v=489',
   './assets/huaxin-report-splash.svg?v=489'
