@@ -15,166 +15,46 @@
 <link rel="apple-touch-startup-image" href="./assets/huaxin-report-splash.svg?v=489">
 <link rel="stylesheet" href="./work-report-v4-google-ui.css?v=489">
 <title>製一組 報工表單 V4｜化新 智慧製造</title>
-<script src="./pwa-config.js?v=493"></script>
+<script src="./pwa-config.js?v=500"></script>
 <script src="./gas-bridge.js?v=489"></script>
 <script defer src="./work-report-v4-opening-particles.js?v=490"></script>
-<script defer src="./work-report-v4-app-483.js?v=489"></script>
-<script defer src="./work-report-v4-v484-hotfix.js?v=489"></script>
-<script defer src="./work-report-v4-v489-data-repair.js?v=489"></script>
-<script defer src="./work-report-v4-shift-rules-491.js?v=491"></script>
-<script defer src="./work-report-v4-photo-restore-493.js?v=493"></script>
-<style>#loadingScreen{display:none!important}</style>
+<script id="hx-work-report-official-500" defer src="./work-report-v4-official-500.js?v=501"></script>
+<style>
+  html,body{width:100%;max-width:100%;overflow-x:hidden;}
+  body{padding-top:0!important;}
+  @media (display-mode: standalone){
+    .site-header .header-inner{padding-top:calc(10px + env(safe-area-inset-top, 44px))!important;}
+  }
+  .site-header{left:0;right:0;}
+  .header-title{font-size:clamp(17px,5vw,22px)!important;line-height:1.15!important;}
+  .header-subtitle{max-width:72vw;}
+  .product-info b,.person-info b,.machine-info-panel b{color:#fff!important;text-shadow:0 2px 5px rgba(0,0,0,.75)!important;}
+  .product-info span,.person-info span,.machine-info-panel span{color:rgba(255,255,255,.92)!important;}
+</style>
 </head>
 <body>
+<div id="loadingScreen" class="loading-screen"></div>
+<div id="submitOverlay" class="submit-overlay hidden"><div class="submit-card"><div class="spinner"></div><p class="submit-title" id="submitTitle">📤 報工送出中...</p><div class="submit-sub" id="submitSub">Writing production record...</div></div></div>
 
-<div id="loadingScreen" class="loading-screen hidden" style="display:none!important"></div>
-
-<div id="submitOverlay" class="submit-overlay hidden">
-  <div class="submit-card"><div class="spinner"></div><p class="submit-title" id="submitTitle">📤 報工送出中...</p><div class="submit-sub" id="submitSub">Writing production record...</div></div>
-</div>
-
-<div id="personScanModal" class="modal-mask hidden">
-  <div class="modal-box">
-    <div class="modal-title">📷 掃描工牌條碼 / Scan Badge QR Code</div>
-    <div class="video-area" id="personVideoArea"><video id="personVideo" autoplay playsinline muted></video><div class="scan-frame"></div><div class="scan-laser"></div></div>
-    <div class="modal-hint">請將條碼對準掃描框 / Align barcode to frame</div>
-    <input type="text" id="personManualInput" class="manual-input hidden" placeholder="手動輸入工號 / Enter Employee ID, press Enter" onkeydown="personManualConfirm(event)">
-    <div class="modal-btns"><button class="btn-close ripple" onclick="closePersonScan()" type="button">✕ 關閉 / Close</button><button class="btn-manual ripple" onclick="togglePersonManual()" type="button">⌨ 手動 / Manual</button></div>
-    <div class="scan-status" id="personScanStatus">📡 啟動相機中... / Starting camera...</div>
-  </div>
-</div>
-
-<div id="productScanModal" class="modal-mask hidden">
-  <div class="modal-box">
-    <div class="modal-title">📷 掃描產品條碼 / Scan Product Barcode</div>
-    <div class="video-area" id="productVideoArea"><video id="productVideo" autoplay playsinline muted></video><div class="scan-frame"></div><div class="scan-laser"></div></div>
-    <div class="modal-hint">請將產品條碼對準框內 / Align product barcode</div>
-    <input type="text" id="productManualInput" class="manual-input hidden" placeholder="輸入產品編號 / Enter Product Code" onkeydown="productManualConfirm(event)">
-    <div class="modal-btns"><button class="btn-close ripple" onclick="closeProductScan()" type="button">✕ 關閉 / Close</button><button class="btn-manual ripple" onclick="toggleProductManual()" type="button">⌨ 手動 / Manual</button></div>
-    <div class="scan-status" id="productScanStatus">📡 啟動相機中... / Starting camera...</div>
-  </div>
-</div>
-
-<div id="photoNoteModal" class="photo-note-modal hidden">
-  <div class="photo-note-box">
-    <div style="font-weight:900;font-size:15px;margin-bottom:10px;">✏️ 編輯照片備註 / Edit Photo Note</div>
-    <img id="photoNotePreview" src="" alt="photo preview">
-    <label class="field-label">備註 / Note</label>
-    <textarea id="photoNoteText" placeholder="輸入此照片的說明備註... / Add note for this photo..."></textarea>
-    <div class="photo-note-btns"><button class="btn-cancel ripple" onclick="closePhotoNote()" type="button">取消 / Cancel</button><button class="btn-confirm ripple" onclick="savePhotoNote()" type="button">✓ 儲存 / Save</button></div>
-  </div>
-</div>
-
-<div id="roarContainer" class="roar-container"></div>
-<div id="toast" class="toast hidden"></div>
+<div id="personScanModal" class="modal-mask hidden"><div class="modal-box"><div class="modal-title">📷 掃描工牌條碼 / Scan Badge QR Code</div><div class="video-area" id="personVideoArea"><video id="personVideo" autoplay playsinline muted></video><div class="scan-frame"></div><div class="scan-laser"></div></div><div class="modal-hint">請將條碼對準掃描框 / Align barcode to frame</div><input type="text" id="personManualInput" class="manual-input hidden" placeholder="手動輸入工號 / Enter Employee ID, press Enter" onkeydown="personManualConfirm(event)"><div class="modal-btns"><button class="btn-close ripple" onclick="closePersonScan()" type="button">✕ 關閉 / Close</button><button class="btn-manual ripple" onclick="togglePersonManual()" type="button">⌨ 手動 / Manual</button></div><div class="scan-status" id="personScanStatus">📡 啟動相機中... / Starting camera...</div></div></div>
+<div id="productScanModal" class="modal-mask hidden"><div class="modal-box"><div class="modal-title">📷 掃描產品條碼 / Scan Product Barcode</div><div class="video-area" id="productVideoArea"><video id="productVideo" autoplay playsinline muted></video><div class="scan-frame"></div><div class="scan-laser"></div></div><div class="modal-hint">請將產品條碼對準框內 / Align product barcode</div><input type="text" id="productManualInput" class="manual-input hidden" placeholder="輸入產品編號 / Enter Product Code" onkeydown="productManualConfirm(event)"><div class="modal-btns"><button class="btn-close ripple" onclick="closeProductScan()" type="button">✕ 關閉 / Close</button><button class="btn-manual ripple" onclick="toggleProductManual()" type="button">⌨ 手動 / Manual</button></div><div class="scan-status" id="productScanStatus">📡 啟動相機中... / Starting camera...</div></div></div>
+<div id="photoNoteModal" class="photo-note-modal hidden"><div class="photo-note-box"><div style="font-weight:900;font-size:15px;margin-bottom:10px;">✏️ 編輯照片備註 / Edit Photo Note</div><img id="photoNotePreview" src="" alt="photo preview"><label class="field-label">備註 / Note</label><textarea id="photoNoteText" placeholder="輸入此照片的說明備註... / Add note for this photo..."></textarea><div class="photo-note-btns"><button class="btn-cancel ripple" onclick="closePhotoNote()" type="button">取消 / Cancel</button><button class="btn-confirm ripple" onclick="savePhotoNote()" type="button">✓ 儲存 / Save</button></div></div></div>
+<div id="roarContainer" class="roar-container"></div><div id="toast" class="toast hidden"></div>
 
 <div class="outer-wrap">
-  <header class="site-header">
-    <div class="header-gradient-bar"></div>
-    <div class="header-inner">
-      <div class="header-top-row">
-        <div class="header-brand">
-          <div class="header-icon-wrap"><img src="./assets/huaxin-report-icon.svg?v=489" alt="化新報工"></div>
-          <div class="header-title-group"><div class="header-title">製一組 報工表單 V4</div><div class="header-subtitle">化新精密｜智慧製造指揮中心｜引導式報工 · Smart Production Reporting</div></div>
-        </div>
-        <div class="header-actions"><button class="header-btn ripple" id="fullscreenBtn" onclick="toggleFullscreen()" title="全螢幕 / Fullscreen" type="button">⛶</button><button class="header-btn ripple" onclick="reloadData()" title="重新載入 / Reload" type="button">↻</button></div>
-      </div>
-      <div id="statusPill" class="status-pill"><span class="status-dot" id="statusDot"></span><span id="statusText">🟡 正在連線主資料庫... Connecting to database...</span></div>
-    </div>
-  </header>
+  <header class="site-header"><div class="header-gradient-bar"></div><div class="header-inner"><div class="header-top-row"><div class="header-brand"><div class="header-icon-wrap"><img src="./assets/huaxin-report-icon.svg?v=489" alt="化新報工"></div><div class="header-title-group"><div class="header-title">製一組 報工表單 V4</div><div class="header-subtitle">化新精密｜智慧製造指揮中心｜Smart Production Reporting</div></div></div><div class="header-actions"><button class="header-btn ripple" id="fullscreenBtn" onclick="toggleFullscreen()" title="全螢幕 / Fullscreen" type="button">⛶</button><button class="header-btn ripple" onclick="reloadData()" title="重新載入 / Reload" type="button">↻</button></div></div><div id="statusPill" class="status-pill"><span class="status-dot" id="statusDot"></span><span id="statusText">🟡 正在連線主資料庫... Connecting to database...</span></div></div></header>
+  <nav class="stepper-wrap"><div class="stepper" id="stepper"><div class="step-item is-active" data-step="0" onclick="jumpToStep(0)"><div class="step-circle">1</div><div class="step-label">人員<span class="en">Operator</span></div></div><div class="step-connector" data-line="0"></div><div class="step-item is-todo" data-step="1" onclick="jumpToStep(1)"><div class="step-circle">2</div><div class="step-label">工件<span class="en">Workpiece</span></div></div><div class="step-connector" data-line="1"></div><div class="step-item is-todo" data-step="2" onclick="jumpToStep(2)"><div class="step-circle">3</div><div class="step-label">產出<span class="en">Output</span></div></div><div class="step-connector" data-line="2"></div><div class="step-item is-todo" data-step="3" onclick="jumpToStep(3)"><div class="step-circle">4</div><div class="step-label">品質<span class="en">Quality</span></div></div><div class="step-connector" data-line="3"></div><div class="step-item is-todo" data-step="4" onclick="jumpToStep(4)"><div class="step-circle">5</div><div class="step-label">確認<span class="en">Confirm</span></div></div></div></nav>
 
-  <nav class="stepper-wrap">
-    <div class="stepper" id="stepper">
-      <div class="step-item is-active" data-step="0" onclick="jumpToStep(0)"><div class="step-circle">1</div><div class="step-label">人員<span class="en">Operator</span></div></div>
-      <div class="step-connector" data-line="0"></div>
-      <div class="step-item is-todo" data-step="1" onclick="jumpToStep(1)"><div class="step-circle">2</div><div class="step-label">工件<span class="en">Workpiece</span></div></div>
-      <div class="step-connector" data-line="1"></div>
-      <div class="step-item is-todo" data-step="2" onclick="jumpToStep(2)"><div class="step-circle">3</div><div class="step-label">產出<span class="en">Output</span></div></div>
-      <div class="step-connector" data-line="2"></div>
-      <div class="step-item is-todo" data-step="3" onclick="jumpToStep(3)"><div class="step-circle">4</div><div class="step-label">品質<span class="en">Quality</span></div></div>
-      <div class="step-connector" data-line="3"></div>
-      <div class="step-item is-todo" data-step="4" onclick="jumpToStep(4)"><div class="step-circle">5</div><div class="step-label">確認<span class="en">Confirm</span></div></div>
-    </div>
-  </nav>
+  <section id="stepPage0" class="step-section"><div class="guide-card"><div class="guide-icon">👆</div><div class="guide-body"><div class="guide-title">Step 1：選擇作業員 / Select Operator</div><div class="guide-desc">請透過下方任一方式選擇作業員：① 點擊人員卡片 ② 掃描工牌條碼 ③ 搜尋姓名或工號。滑動卡片不會誤觸選取。<br>Choose an operator: Click card, scan badge QR, or search by name/ID.</div></div></div><button class="scan-btn ripple" onclick="openPersonScan()" type="button"><span class="s-icon">📷</span>掃描 / 感應工牌（條碼 / QR Code） · Scan Badge</button><div style="height:8px"></div><div class="search-row"><input type="text" id="personSearch" class="search-input" placeholder="🔍 搜尋人員 / Search: 姓名、工號、班別..." oninput="filterPersons()"><button class="search-scan-icon ripple" onclick="openPersonScan()" type="button" aria-label="掃描工牌">📷</button></div><div id="personGrid" class="person-grid"></div><div id="personGridEmpty" class="caption hidden" style="text-align:center;padding:20px;">沒有符合條件的人員 / No matching operators found</div><div id="selectedPersonCard" class="glass-card" style="margin-top:12px;display:none"><div class="section-head">👤 選定人員 <span class="en">Selected Operator</span></div><div id="selectedPersonDisplay" class="selected-person-display"><div class="person-photo-lg">點擊卡片<br>Click Card</div><div><div class="person-info-name" style="color:var(--text-secondary);">尚未選擇 / Not Selected</div></div></div><div id="empIdHighlight" class="employee-id-highlight" style="margin-top:10px;">未輸入 / Not Set</div><div class="grid-2"><div><label class="field-label">姓名 / Name</label><input id="personName" readonly></div><div><label class="field-label">工號 / Employee ID</label><input id="personId" readonly></div></div><div class="grid-2"><div><label class="field-label">班別 / Shift</label><select id="shiftSelect" onchange="setDefaultTimes&&setDefaultTimes()"></select></div><div><label class="field-label">是否加班 / Overtime</label><select id="overtimeSelect"><option value="否">否 / No</option><option value="是">是 / Yes</option></select></div></div><div><label class="field-label">加班類型 / Overtime Type</label><select id="overtimeType"><option value="無">無 / None</option><option value="平日加班">平日加班 / Weekday OT</option><option value="休息日加班">休息日加班 / Day-off OT</option><option value="例假日加班">例假日加班 / Holiday OT</option></select></div></div></section>
 
-  <section id="stepPage0" class="step-section">
-    <div class="guide-card"><div class="guide-icon">👆</div><div class="guide-body"><div class="guide-title">Step 1：選擇作業員 / Select Operator</div><div class="guide-desc">請透過下方任一方式選擇作業員：<b>① 點擊人員卡片</b> ② 掃描工牌條碼 ③ 搜尋姓名或工號。滑動卡片不會誤觸選取。<br>Choose an operator: Click card, scan badge QR, or search by name/ID.</div></div></div>
-    <button class="scan-btn ripple" onclick="openPersonScan()" type="button"><span class="s-icon">📷</span>掃描 / 感應工牌（條碼 / QR Code） · Scan Badge</button>
-    <div style="height:8px;"></div>
-    <div id="recentBar" class="recent-bar hidden"><span class="bar-label">⭐ 最近使用 / Recent:</span><div id="recentPersonContent" style="display:flex;gap:7px;flex-wrap:wrap;"></div></div>
-    <div class="search-row"><input type="text" id="personSearch" class="search-input" placeholder="🔍 搜尋人員 / Search: 姓名、工號、班別..." oninput="filterPersons()"><button class="search-scan-icon ripple" onclick="openPersonScan()" type="button" aria-label="掃描工牌">📷</button></div>
-    <div id="personGrid" class="person-grid"></div>
-    <div id="personGridEmpty" class="caption hidden" style="text-align:center;padding:20px;">沒有符合條件的人員 / No matching operators found</div>
-    <div class="glass-card" style="margin-top:12px;">
-      <div class="section-head">👤 選定人員 <span class="en">Selected Operator</span></div>
-      <div id="selectedPersonDisplay" class="selected-person-display"><div class="person-photo-lg">點擊卡片<br>Click Card</div><div><div class="person-info-name" style="color:var(--text-secondary);">尚未選擇 / Not Selected</div><div class="caption" style="margin-top:4px;">請點擊上方人員卡片、掃碼或搜尋選擇<br>Click a card, scan, or search above</div></div></div>
-      <div id="empIdHighlight" class="employee-id-highlight" style="margin-top:10px;">未輸入 / Not Set</div>
-      <div class="grid-2"><div><label class="field-label">姓名 / Name</label><input id="personName" readonly placeholder="自動帶入 / Auto-filled"></div><div><label class="field-label">工號 / Employee ID</label><input id="personId" readonly placeholder="自動帶入 / Auto-filled"></div></div>
-      <div class="grid-2"><div><label class="field-label">班別 / Shift</label><select id="shiftSelect"></select></div><div><label class="field-label">是否加班 / Overtime</label><select id="overtimeSelect"><option value="否">否 / No</option><option value="是">是 / Yes</option></select></div></div>
-      <div><label class="field-label">加班類型 / Overtime Type</label><select id="overtimeType"><option value="無">無 / None</option><option value="平日加班">平日加班 / Weekday OT</option><option value="休息日加班">休息日加班 / Day-off OT</option><option value="例假日加班">例假日加班 / Holiday OT</option></select></div>
-    </div>
-  </section>
+  <section id="stepPage1" class="step-section hidden"><div class="guide-card"><div class="guide-icon">📦</div><div class="guide-body"><div class="guide-title">Step 2：選擇產品與工站 / Select Product &amp; Workstation</div><div class="guide-desc">請選擇要報工的產品，接著選取對應報工工站與主機台。產品未選前不顯示工站；工站未選前不顯示工序與機台。<br>Select product first, then workstation and machine.</div></div></div><div class="glass-card"><div class="section-head">🔧 工件與工站 <span class="en">Product / Workstation</span></div><button class="scan-btn ripple" onclick="openProductScan()" style="margin-bottom:10px" type="button"><span class="s-icon">📷</span> 掃描產品條碼 / Scan Product Barcode</button><div class="search-row"><input type="text" id="productSearch" class="search-input" placeholder="🔍 搜尋產品 / Search Product: 品名、產品編號..." oninput="filterProducts()"><button class="search-scan-icon ripple" onclick="openProductScan()" type="button" aria-label="掃描產品">📷</button></div><div id="productGrid" class="product-grid"></div><div id="productGridEmpty" class="caption hidden" style="text-align:center;padding:16px;">沒有符合條件的產品 / No matching products</div><div id="selectedProductArea" class="hidden" style="margin-top:10px"><div id="selectedProductDisplay" class="selected-person-display"><div class="person-photo-lg">產品<br>Product</div><div><div class="person-info-name" style="color:var(--text-secondary);">尚未選產品</div></div></div><div class="grid-2" style="margin-top:10px"><div><label class="field-label">產品編號 / Product Code</label><input id="productCode" readonly></div><div><label class="field-label">品名 / Product Name</label><input id="productName" readonly></div></div><label class="field-label required">報工工站 / Workstation</label><select id="workstationSelect" onchange="onWorkstationChange()"></select><div id="routeDetailsArea" class="hidden"><div class="grid-3" style="margin-top:4px"><div><label class="field-label">工序範圍 / Process Range</label><input id="processRange" readonly></div><div><label class="field-label">標準產能 / Std. Capacity</label><input id="stdCapacity" readonly></div><div><label class="field-label">標準工時(秒) / Std. Time(s)</label><input id="stdTimeSec" readonly></div></div><label class="field-label">主機台 / Main Machine</label><select id="mainMachineSelect" onchange="selectMachine(this.value)"></select><div id="machineListGrid" class="machine-grid"></div></div></div></div></section>
 
-  <section id="stepPage1" class="step-section hidden">
-    <div class="guide-card"><div class="guide-icon">📦</div><div class="guide-body"><div class="guide-title">Step 2：選擇產品與工站 / Select Product &amp; Workstation</div><div class="guide-desc">請選擇要報工的產品，接著選取對應報工工站與主機台。產品未選前不顯示工站；工站未選前不顯示工序與機台。<br>Select product first, then workstation and machine.</div></div></div>
-    <div class="glass-card">
-      <div class="section-head">🔧 工件與工站 <span class="en">Product / Workstation</span></div>
-      <button class="scan-btn ripple" onclick="openProductScan()" style="margin-bottom:10px;" type="button"><span class="s-icon">📷</span> 掃描產品條碼 / Scan Product Barcode</button>
-      <div class="search-row"><input type="text" id="productSearch" class="search-input" placeholder="🔍 搜尋產品 / Search Product: 品名、產品編號..." oninput="filterProducts()"><button class="search-scan-icon ripple" onclick="openProductScan()" type="button" aria-label="掃描產品">📷</button></div>
-      <div id="productGrid" class="product-grid"></div>
-      <div id="productGridEmpty" class="caption hidden" style="text-align:center;padding:16px;">沒有符合條件的產品 / No matching products</div>
-      <div id="selectedProductArea" class="hidden" style="margin-top:10px;">
-        <div id="selectedProductDisplay" class="selected-person-display"><div class="person-photo-lg">產品<br>Product</div><div><div class="person-info-name" style="color:var(--text-secondary);">尚未選產品</div><div class="caption" style="margin-top:3px;">選擇後顯示產品資訊</div></div></div>
-        <div class="grid-2" style="margin-top:10px;"><div><label class="field-label">產品編號 / Product Code</label><input id="productCode" readonly></div><div><label class="field-label">品名 / Product Name</label><input id="productName" readonly></div></div>
-        <label class="field-label required">報工工站 / Workstation</label><select id="workstationSelect" onchange="onWorkstationChange()"></select>
-        <div id="routeDetailsArea" class="hidden">
-          <div class="grid-3" style="margin-top:4px;"><div><label class="field-label">工序範圍 / Process Range</label><input id="processRange" readonly></div><div><label class="field-label">標準產能 / Std. Capacity</label><input id="stdCapacity" readonly></div><div><label class="field-label">標準工時(秒) / Std. Time(s)</label><input id="stdTimeSec" readonly></div></div>
-          <label class="field-label">主機台 / Main Machine</label><select id="mainMachineSelect" onchange="selectMachine(this.value)"></select>
-          <div id="machineListGrid" class="machine-grid"></div>
-        </div>
-      </div>
-    </div>
-  </section>
+  <section id="stepPage2" class="step-section hidden"><div class="guide-card"><div class="guide-icon">📊</div><div class="guide-body"><div class="guide-title">Step 3：輸入產出數量 / Enter Output Quantity</div><div class="guide-desc">請輸入今日共做數與不良數。系統會扣除休息時間並計算正常工時與加班工時。</div></div></div><div class="glass-card"><div class="section-head">📊 產出數量 <span class="en">Output Quantity</span></div><div class="grid-2"><div><label class="field-label required">今日共做數 / Total Qty</label><input id="totalQty" type="number" min="0" inputmode="numeric" placeholder="請輸入" oninput="calcQty()"></div><div><label class="field-label">不良數 / NG Qty</label><input id="ngQty" type="number" min="0" inputmode="numeric" placeholder="可留空" oninput="calcQty()"></div></div><div class="stats-grid"><div class="stat-card blue"><span class="stat-label">📦 今日共做 / Total</span><span class="stat-value" id="displayTotal">0</span></div><div class="stat-card red"><span class="stat-label">❌ 不良 / NG</span><span class="stat-value" id="displayNG">0</span></div><div class="stat-card green"><span class="stat-label">✅ 實際良品 / Good</span><span class="stat-value" id="displayGood">0</span></div></div><div class="grid-2" style="margin-top:4px"><div><label class="field-label">開始時間 / Start Time</label><input id="startTime" type="datetime-local" onchange="calcWorkingHours()"></div><div><label class="field-label">結束時間 / End Time</label><input id="endTime" type="datetime-local" onchange="calcWorkingHours()"></div></div><label class="field-label">實際工時 / Working Hours</label><input id="workingHours" readonly placeholder="自動計算 / Auto-calculated"></div></section>
 
-  <section id="stepPage2" class="step-section hidden">
-    <div class="guide-card"><div class="guide-icon">📊</div><div class="guide-body"><div class="guide-title">Step 3：輸入產出數量 / Enter Output Quantity</div><div class="guide-desc">請輸入今日共做數與不良數。系統將自動計算實際良品數與工時。<br>Enter total qty and NG qty. Good qty &amp; working hours are auto-calculated.</div></div></div>
-    <div class="glass-card">
-      <div class="section-head">📊 產出數量 <span class="en">Output Quantity</span></div>
-      <div class="grid-2"><div><label class="field-label required">今日共做數 / Total Qty</label><input id="totalQty" type="number" min="0" inputmode="numeric" placeholder="請輸入" oninput="calcQty()"></div><div><label class="field-label">不良數 / NG Qty</label><input id="ngQty" type="number" min="0" inputmode="numeric" placeholder="可留空" oninput="calcQty()"></div></div>
-      <div class="stats-grid"><div class="stat-card blue"><span class="stat-label">📦 今日共做 / Total</span><span class="stat-value" id="displayTotal">0</span></div><div class="stat-card red"><span class="stat-label">❌ 不良 / NG</span><span class="stat-value" id="displayNG">0</span></div><div class="stat-card green"><span class="stat-label">✅ 實際良品 / Good</span><span class="stat-value" id="displayGood">0</span></div></div>
-      <div class="grid-2" style="margin-top:4px;"><div><label class="field-label">開始時間 / Start Time</label><input id="startTime" type="datetime-local" onchange="calcWorkingHours()"></div><div><label class="field-label">結束時間 / End Time</label><input id="endTime" type="datetime-local" onchange="calcWorkingHours()"></div></div>
-      <label class="field-label">實際工時 / Working Hours</label><input id="workingHours" readonly placeholder="自動計算 / Auto-calculated">
-    </div>
-  </section>
+  <section id="stepPage3" class="step-section hidden"><div class="guide-card"><div class="guide-icon">🔍</div><div class="guide-body"><div class="guide-title">Step 4：品質與不良記錄 / Quality &amp; Defect Records</div><div class="guide-desc">若有不良品，請分配不良原因與數量；分配數量不可超過 Step 3 的不良數。可上傳現場照片最多 12 張。</div></div></div><div class="glass-card"><div class="section-head">🔍 品質與不良 <span class="en">Quality &amp; Defects</span></div><label class="field-label">📋 不良原因數量分配 / NG Reason Allocation</label><div id="defectContainer"></div><button class="add-defect-btn ripple" onclick="addDefectRow()" type="button">＋ 新增不良分配項目 / Add Allocation Row</button><div id="defectSummary" class="defect-summary hidden"></div><label class="field-label" style="margin-top:14px">異常類型 / Abnormal Type</label><select id="anomalyType" onchange="updatePreview&&updatePreview()"><option value="無異常">無異常 / Normal Operation</option></select><div class="anomaly-section"><div class="section-head">⏱ 異常時間 <span class="en">Anomaly Duration</span></div><div class="grid-2"><div><label class="field-label">異常開始 / Start</label><input id="anomalyStart" type="datetime-local" onchange="calcAnomalyTime()"></div><div><label class="field-label">異常結束 / End</label><input id="anomalyEnd" type="datetime-local" onchange="calcAnomalyTime()"></div></div><label class="field-label">異常持續時間 / Duration</label><input id="anomalyDuration" readonly></div><label class="field-label" style="margin-top:14px">現場照片 / Field &amp; Defect Photos</label><div class="photo-toolbar"><button class="photo-tool-btn ripple" onclick="triggerCamera()" type="button">📸 拍照 / Take Photo</button><button class="photo-tool-btn ripple" onclick="triggerFileSelect()" type="button">🖼 選圖 / Choose File</button><button class="photo-tool-btn danger ripple" onclick="clearAllPhotos()" type="button">🗑 清除 / Clear All</button></div><input id="cameraInput" type="file" accept="image/*" capture="environment" multiple class="hidden" onchange="onPhotoChange(event,'camera')"><input id="fileInput" type="file" accept="image/*" multiple class="hidden" onchange="onPhotoChange(event,'file')"><div id="photoGrid" class="photo-grid"></div><div class="photo-count" id="photoCount">0 / 12 張照片 / photos</div><div id="defectSyncNotice" style="margin-top:8px"></div><label class="field-label" style="margin-top:12px">備註 / Remarks</label><textarea id="remarks" placeholder="輸入異常描述、備註事項..." oninput="updatePreview&&updatePreview()"></textarea><label class="field-label" style="margin-top:14px">報工預覽 / Report Preview</label><div id="reportPreview" class="preview-block">📋 尚未產生預覽，請依序填寫各步驟資料</div></div></section>
 
-  <section id="stepPage3" class="step-section hidden">
-    <div class="guide-card"><div class="guide-icon">🔍</div><div class="guide-body"><div class="guide-title">Step 4：品質與不良記錄 / Quality &amp; Defect Records</div><div class="guide-desc">若有不良品，請分配不良原因與數量；分配數量不可超過 Step 3 的不良數。可上傳現場照片最多 12 張。<br>Allocate defect reasons and qty. Allocation cannot exceed NG qty.</div></div></div>
-    <div class="glass-card">
-      <div class="section-head">🔍 品質與不良 <span class="en">Quality &amp; Defects</span></div>
-      <label class="field-label" style="margin-top:4px;">📋 不良原因數量分配 / NG Reason Allocation <span class="caption">（不可超過總不良數 / Must not exceed NG qty）</span></label>
-      <div id="defectContainer"></div>
-      <button class="add-defect-btn ripple" onclick="addDefectRow()" type="button">＋ 新增不良分配項目 / Add Allocation Row</button>
-      <div id="defectSummary" class="defect-summary hidden"></div>
-      <label class="field-label" style="margin-top:14px;">異常類型 / Abnormal Type</label><select id="anomalyType" onchange="updatePreview()"><option value="無異常">無異常 / Normal Operation</option><option value="支援調度">支援調度 / Staff Reassignment</option><option value="材質異常">材質異常 / Material Defect</option><option value="換刀">換刀 / Tool Change</option><option value="機台停機">機台停機 / Machine Down</option><option value="待料">待料 / Waiting for Material</option><option value="品質確認">品質確認 / Quality Check</option><option value="其他">其他 / Others</option></select>
-      <div class="anomaly-section"><div class="section-head">⏱ 異常時間 <span class="en">Anomaly Duration</span></div><div class="grid-2"><div><label class="field-label">異常開始 / Start</label><input id="anomalyStart" type="datetime-local" onchange="calcAnomalyTime()"></div><div><label class="field-label">異常結束 / End</label><input id="anomalyEnd" type="datetime-local" onchange="calcAnomalyTime()"></div></div><label class="field-label">異常持續時間 / Duration</label><input id="anomalyDuration" readonly placeholder="自動計算 / Auto-calculated"></div>
-      <label class="field-label" style="margin-top:14px;">現場照片 / Field &amp; Defect Photos <span class="caption">（最多12張 / Max 12）</span></label>
-      <div class="photo-toolbar"><button class="photo-tool-btn ripple" onclick="triggerCamera()" type="button">📸 拍照 / Take Photo</button><button class="photo-tool-btn ripple" onclick="triggerFileSelect()" type="button">🖼 選圖 / Choose File</button><button class="photo-tool-btn danger ripple" onclick="clearAllPhotos()" type="button">🗑 清除 / Clear All</button></div>
-      <input id="cameraInput" type="file" accept="image/*" capture="environment" multiple class="hidden" onchange="onPhotoChange(event,'camera')"><input id="fileInput" type="file" accept="image/*" multiple class="hidden" onchange="onPhotoChange(event,'file')">
-      <div id="photoGrid" class="photo-grid"></div><div class="photo-count" id="photoCount">0 / 12 張照片 / photos</div><div id="defectSyncNotice" style="margin-top:8px;"></div>
-      <label class="field-label" style="margin-top:12px;">備註 / Remarks</label><textarea id="remarks" placeholder="輸入異常描述、備註事項... / Enter anomaly description, remarks..." oninput="updatePreview()"></textarea>
-      <label class="field-label" style="margin-top:14px;">報工預覽 / Report Preview</label><div id="reportPreview" class="preview-block">📋 尚未產生預覽，請依序填寫各步驟資料
-Production report preview will appear here after filling in the steps above...</div>
-    </div>
-  </section>
-
-  <section id="stepPage4" class="step-section hidden">
-    <div class="guide-card"><div class="guide-icon">✅</div><div class="guide-body"><div class="guide-title">Step 5：確認並送出報工 / Confirm &amp; Submit Report</div><div class="guide-desc">請仔細核對以下報工摘要資訊，確認無誤後點擊「送出報工」。送出後寫入 09_報工；有不良時同步寫入 09_不良紀錄。<br>Review carefully before submitting.</div></div></div>
-    <div class="confirm-card" id="confirmCard"><div style="font-weight:900;font-size:15.5px;text-align:center;margin-bottom:12px;color:#1A3A28;">📋 報工摘要確認 / Report Summary Confirmation</div><div id="confirmSummaryContent"><div class="caption" style="text-align:center;padding:14px;">請先完成前面步驟再回來確認 / Please complete previous steps first</div></div></div>
-    <div class="glass-card" style="margin-top:12px;"><div class="section-head">📋 完整預覽 <span class="en">Full Preview</span></div><div id="confirmPreview" class="preview-block">📋 尚未產生預覽...</div></div>
-  </section>
+  <section id="stepPage4" class="step-section hidden"><div class="guide-card"><div class="guide-icon">✅</div><div class="guide-body"><div class="guide-title">Step 5：確認並送出報工 / Confirm &amp; Submit Report</div><div class="guide-desc">請核對報工摘要，確認無誤後送出。送出後寫入 09_報工；有不良時同步寫入 09_不良紀錄。</div></div></div><div class="confirm-card" id="confirmCard"><div style="font-weight:900;font-size:15.5px;text-align:center;margin-bottom:12px;color:#1A3A28">📋 報工摘要確認 / Report Summary Confirmation</div><div id="confirmSummaryContent"><div class="caption" style="text-align:center;padding:14px">請先完成前面步驟再回來確認</div></div></div><div class="glass-card" style="margin-top:12px"><div class="section-head">📋 完整預覽 <span class="en">Full Preview</span></div><div id="confirmPreview" class="preview-block">📋 尚未產生預覽...</div></div></section>
 </div>
-
-<div class="bottom-bar"><button id="btnBack" class="btn-secondary ripple hidden" onclick="goBack()" type="button">← 上一步 / Back</button><button id="btnNext" class="btn-primary ripple" onclick="goNextOrSubmit()" style="grid-column:1 / -1;" type="button">下一步 → / Next</button></div>
-
+<div class="bottom-bar"><button id="btnBack" class="btn-secondary ripple hidden" onclick="goBack()" type="button">← 上一步 / Back</button><button id="btnNext" class="btn-primary ripple" onclick="goNextOrSubmit()" style="grid-column:1 / -1" type="button">下一步 → / Next</button></div>
 </body>
 </html>
