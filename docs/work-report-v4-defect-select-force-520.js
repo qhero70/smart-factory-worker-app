@@ -1,12 +1,10 @@
-/* 報工作業 V4｜不良原因原生下拉強制攔截 v5.2.0
- * 目的：徹底阻止 iPhone Safari 開啟原生 select 滾輪。
- * 行為：把 defectContainer 內舊的 select 直接替換成格子選擇按鈕；所有 select 的 touch/click/focus 都阻止預設行為。
+/* 報工作業 V4｜不良原因原生下拉強制攔截 v5.2.1
+ * 目的：阻止 iPhone Safari 原生 select，並使用 v521 數量輸入穩定版格子選擇器。
  */
 (function () {
   'use strict';
 
-  const 版本 = '520';
-  const 標記 = '__報工V4_不良原生下拉強制攔截520__';
+  const 標記 = '__報工V4_不良原生下拉強制攔截521__';
   if (window[標記]) return;
   window[標記] = true;
 
@@ -14,12 +12,12 @@
   function esc(v) { return clean(v).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])); }
   function validCode(v) { return /^(Z|Y)\d{2,}$/i.test(clean(v)); }
 
-  function 載入519() {
+  function 載入521() {
     if (window.開啟不良原因格子) return;
     if (document.getElementById('hx-defect-grid-picker-519')) return;
     const s = document.createElement('script');
     s.id = 'hx-defect-grid-picker-519';
-    s.src = './work-report-v4-defect-grid-picker-519.js?v=520';
+    s.src = './work-report-v4-defect-grid-picker-519.js?v=521';
     s.defer = true;
     document.head.appendChild(s);
   }
@@ -38,32 +36,10 @@
     return window.STATE && window.STATE.defectRows && window.STATE.defectRows[0] ? window.STATE.defectRows[0].id : Date.now();
   }
 
-  function 找列(rowId) {
-    return (window.STATE && Array.isArray(window.STATE.defectRows) ? window.STATE.defectRows : []).find(x => Number(x.id) === Number(rowId));
-  }
-
-  function 主檔項目(code, cat) {
-    const d = window.DB && window.DB.ngReasons ? window.DB.ngReasons : null;
-    if (!d) return null;
-    return ((d[cat] || []).find(x => x.代碼 === code)) || ((d.Z || []).concat(d.Y || []).find(x => x.代碼 === code)) || null;
-  }
-
-  function 顯示文字(rowId) {
-    const row = 找列(rowId) || {};
-    if (!row || !validCode(row.code)) return '<span class="hx-defect-placeholder">點擊選擇不良原因</span>';
-    const item = 主檔項目(row.code, row.category) || row;
-    return `<b>${esc(row.code)}</b><span>${esc(item.名稱 || row.name || '')}</span><small>${esc(item.英文名稱 || row.enName || '')}</small>`;
-  }
-
-  function 打開(rowId) {
-    載入519();
-    const doOpen = function () {
-      if (window.開啟不良原因格子) window.開啟不良原因格子(rowId);
-    };
-    doOpen();
-    setTimeout(doOpen, 80);
-    setTimeout(doOpen, 220);
-  }
+  function 找列(rowId) { return (window.STATE && Array.isArray(window.STATE.defectRows) ? window.STATE.defectRows : []).find(x => Number(x.id) === Number(rowId)); }
+  function 主檔項目(code, cat) { const d = window.DB && window.DB.ngReasons ? window.DB.ngReasons : null; if (!d) return null; return ((d[cat] || []).find(x => x.代碼 === code)) || ((d.Z || []).concat(d.Y || []).find(x => x.代碼 === code)) || null; }
+  function 顯示文字(rowId) { const row = 找列(rowId) || {}; if (!row || !validCode(row.code)) return '<span class="hx-defect-placeholder">點擊選擇不良原因</span>'; const item = 主檔項目(row.code, row.category) || row; return `<b>${esc(row.code)}</b><span>${esc(item.名稱 || row.name || '')}</span><small>${esc(item.英文名稱 || row.enName || '')}</small>`; }
+  function 打開(rowId) { 載入521(); const doOpen = function () { if (window.開啟不良原因格子) window.開啟不良原因格子(rowId); }; doOpen(); setTimeout(doOpen, 80); setTimeout(doOpen, 220); }
 
   function 建按鈕(rowId) {
     const btn = document.createElement('button');
@@ -72,11 +48,7 @@
     btn.setAttribute('data-hx-row-id', String(rowId));
     btn.innerHTML = 顯示文字(rowId);
     const handler = function (e) {
-      if (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
-      }
+      if (e) { e.preventDefault(); e.stopPropagation(); if (e.stopImmediatePropagation) e.stopImmediatePropagation(); }
       打開(rowId);
       return false;
     };
@@ -89,7 +61,7 @@
   function 強制替換Select() {
     const c = document.getElementById('defectContainer');
     if (!c) return;
-    載入519();
+    載入521();
     c.querySelectorAll('select').forEach(sel => {
       const rowId = 取得列ID(sel);
       const btn = 建按鈕(rowId);
@@ -122,23 +94,8 @@
     document.addEventListener(type, 攔截原生Select事件, { capture: true, passive: false });
   });
 
-  function boot() {
-    載入519();
-    強制替換Select();
-  }
-
-  window.addEventListener('load', function () {
-    setTimeout(boot, 200);
-    setTimeout(boot, 900);
-    setTimeout(boot, 1800);
-    setTimeout(boot, 3200);
-  });
-
-  document.addEventListener('click', function (e) {
-    if (e.target && e.target.closest && e.target.closest('.step-item')) setTimeout(boot, 180);
-  }, true);
-
-  setInterval(function () {
-    if (window.STATE && window.STATE.currentStep === 3 && !document.getElementById('hxDefectPickerMask')) boot();
-  }, 700);
+  function boot() { 載入521(); if (!(document.activeElement && document.activeElement.classList && document.activeElement.classList.contains('qty-input'))) 強制替換Select(); }
+  window.addEventListener('load', function () { setTimeout(boot, 200); setTimeout(boot, 900); setTimeout(boot, 1800); setTimeout(boot, 3200); });
+  document.addEventListener('click', function (e) { if (e.target && e.target.closest && e.target.closest('.step-item')) setTimeout(boot, 180); }, true);
+  setInterval(function () { if (window.STATE && window.STATE.currentStep === 3 && !document.getElementById('hxDefectPickerMask')) boot(); }, 900);
 })();
