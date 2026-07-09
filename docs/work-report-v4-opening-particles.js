@@ -1,6 +1,6 @@
-/* 化新報工 V4｜v5.1.4 開場鎖定 + 不良主檔載入橋接
+/* 化新報工 V4｜v5.1.5 開場鎖定 + 不良主檔載入橋接
  * 開場動畫仍使用 GitHub 歷史正式版。
- * 額外載入 05_不良代碼主檔正式對接修復檔。
+ * 額外載入 05_不良代碼主檔正式對接修復檔，支援 c/n/en 欄位格式。
  */
 (function(){
   'use strict';
@@ -15,7 +15,7 @@
     document.head.appendChild(s);
   }
   function 載入不良主檔修復(){
-    載入JS('./work-report-v4-defect-master-fix-514.js?v=514','hx-defect-master-fix-514');
+    載入JS('./work-report-v4-defect-master-fix-514.js?v=515','hx-defect-master-fix-515');
   }
   function 載入正式開場(){
     載入不良主檔修復();
