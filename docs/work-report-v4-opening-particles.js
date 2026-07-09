@@ -1,6 +1,6 @@
-/* 化新報工 V4｜v5.2.0 開場鎖定 + 不良原因原生下拉攔截
+/* 化新報工 V4｜v5.3.0 開場鎖定 + 正式資料庫 v529 對接
  * 開場動畫仍使用 GitHub 歷史正式版。
- * 額外載入 519 格子選擇器與 520 原生 select 強制攔截器。
+ * 額外載入：v529 資料庫對接器、519 格子選擇器、520 原生 select 強制攔截器。
  */
 (function(){
   'use strict';
@@ -13,12 +13,13 @@
     s.defer=true;
     document.head.appendChild(s);
   }
-  function 載入不良原因修復器(){
-    載入JS('./work-report-v4-defect-grid-picker-519.js?v=520','hx-defect-grid-picker-519');
-    載入JS('./work-report-v4-defect-select-force-520.js?v=520','hx-defect-select-force-520');
+  function 載入正式資料與修復器(){
+    載入JS('./work-report-v4-data-v529-adapter.js?v=530','hx-data-v529-adapter-530');
+    載入JS('./work-report-v4-defect-grid-picker-519.js?v=521','hx-defect-grid-picker-519');
+    載入JS('./work-report-v4-defect-select-force-520.js?v=521','hx-defect-select-force-520');
   }
   function 載入正式開場(){
-    載入不良原因修復器();
+    載入正式資料與修復器();
     if(window.__HUAXIN_EXACT_OPENING_LOCKED__) return;
     window.__HUAXIN_EXACT_OPENING_LOCKED__=true;
     fetch(原封不動開場JS,{cache:'no-store'})
