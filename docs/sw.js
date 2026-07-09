@@ -1,11 +1,11 @@
-const 快取名稱='huaxin-work-report-v4-cache-504-no-patches';
+const 快取名稱='huaxin-work-report-v4-cache-505-official-app';
 const 預快取清單=[
   './',
-  './work-report-v4-477.html?v=504&fix=no-patches',
+  './work-report-v4-477.html?v=505&fix=official-app',
   './work-report-v4.webmanifest?v=489',
   './pwa-config.js?v=504',
   './gas-bridge.js?v=489',
-  './work-report-v4-app-483.js?v=489',
+  './work-report-v4-app-483.js?v=505',
   './work-report-v4-opening-particles.js?v=490',
   './work-report-v4-google-ui.css?v=489',
   './assets/huaxin-report-icon.svg?v=489',
