@@ -1,6 +1,6 @@
-/* 化新報工 V4｜v5.1.8 開場鎖定 + 不良原因格子選擇器橋接
+/* 化新報工 V4｜v5.1.9 開場鎖定 + 不良原因格子選擇器橋接
  * 開場動畫仍使用 GitHub 歷史正式版。
- * 額外載入 05_不良代碼主檔兩欄格子選擇器。
+ * 額外載入 05_不良代碼主檔兩欄格子選擇器穩定鎖定版。
  */
 (function(){
   'use strict';
@@ -15,7 +15,7 @@
     document.head.appendChild(s);
   }
   function 載入不良原因格子選擇器(){
-    載入JS('./work-report-v4-defect-grid-picker-518.js?v=518','hx-defect-grid-picker-518');
+    載入JS('./work-report-v4-defect-grid-picker-519.js?v=519','hx-defect-grid-picker-519');
   }
   function 載入正式開場(){
     載入不良原因格子選擇器();
