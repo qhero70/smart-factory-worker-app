@@ -1,15 +1,17 @@
-const 快取名稱 = 'huaxin-work-report-v4-cache-530-database-v529-official';
+const 快取名稱 = 'huaxin-work-report-v4-cache-531-ui-logic-lock';
 const 預快取清單 = [
   './',
-  './work-report-v4-477.html?v=530&fix=database-v529-official',
-  './work-report-v4-477.html?v=527&fix=product-master-photo-lock',
+  './work-report-v4-477.html?v=531&fix=ui-logic-lock',
+  './work-report-v4-530.html',
   './work-report-v4.webmanifest?v=489',
   './pwa-config.js?v=511',
   './pwa-config.js?v=530',
+  './pwa-config.js?v=531',
   './gas-bridge.js?v=511',
   './work-report-v4-app-483.js?v=511',
   './work-report-v4-opening-particles.js?v=530',
   './work-report-v4-data-v529-adapter.js?v=530',
+  './work-report-v4-ui-lock-531.js?v=531',
   './work-report-v4-defect-grid-picker-519.js?v=521',
   './work-report-v4-defect-select-force-520.js?v=521',
   './work-report-v4-photo-display-522.js?v=527',
@@ -48,7 +50,11 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  if (url.pathname.endsWith('/pwa-config.js') || url.pathname.endsWith('/work-report-v4-data-v529-adapter.js')) {
+  if (
+    url.pathname.endsWith('/pwa-config.js') ||
+    url.pathname.endsWith('/work-report-v4-data-v529-adapter.js') ||
+    url.pathname.endsWith('/work-report-v4-ui-lock-531.js')
+  ) {
     event.respondWith(fetch(req, { cache: 'no-store' }).catch(() => caches.match(req)));
     return;
   }
