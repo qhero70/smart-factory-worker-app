@@ -3,7 +3,7 @@ window.PWA_CONFIG=window.PWA_CONFIG||{};
   c.GAS_WEB_APP_URL=window.PWA_CONFIG.GAS_WEB_APP_URL||'';
   c.APP_NAME='化新報工';
   c.APP_SHORT_NAME='化新報工';
-  c.VERSION='v4.8.3-baseline';
+  c.VERSION='v5.0.5-official-main-file';
   c.SPREADSHEET_ID='19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
   c.API_TIMEOUT_MS=20000;
 })(window.PWA_CONFIG);
