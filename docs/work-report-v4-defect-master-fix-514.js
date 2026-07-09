@@ -1,22 +1,32 @@
-/* 報工作業 V4｜05_不良代碼主檔正式對接修復 v5.1.4 */
+/* 報工作業 V4｜05_不良代碼主檔正式對接修復 v5.1.5
+ * 支援正式欄位與舊主檔簡寫欄位：不良代碼/代碼/code/defectCode/c、名稱/name/n、英文/nameEn/en。
+ */
 (function () {
   'use strict';
 
-  const 修復標記 = '__報工V4_不良主檔修復514__';
+  const 修復標記 = '__報工V4_不良主檔修復515__';
   if (window[修復標記]) return;
   window[修復標記] = true;
 
   function clean(v) { return String(v == null ? '' : v).trim(); }
   function esc(v) { return clean(v).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])); }
-  function codeOf(r) { return clean(r.不良代碼 || r.代碼 || r.Code || r.code || r.不良原因代碼 || r.原因代碼); }
-  function nameOf(r) { return clean(r.不良名稱 || r.名稱 || r.不良原因 || r.Reason || r.reason || r.中文名稱 || r.中文 || r.說明); }
-  function enOf(r) { return clean(r.英文名稱 || r.英文 || r.English || r.english || r.英文說明 || r.英文原因 || r.EN || r.enName); }
+  function first(obj, keys) {
+    obj = obj || {};
+    for (const k of keys) {
+      if (obj[k] != null && clean(obj[k]) !== '') return clean(obj[k]);
+    }
+    return '';
+  }
+  function codeOf(r) { return first(r, ['不良代碼', '不良代號', '代碼', 'Code', 'code', 'defectCode', 'DefectCode', '不良原因代碼', '原因代碼', 'c', 'C']); }
+  function nameOf(r) { return first(r, ['不良名稱', '名稱', '不良原因', 'Reason', 'reason', '中文名稱', '中文', '說明', 'defectName', 'name', 'Name', 'n', 'N']); }
+  function enOf(r) { return first(r, ['英文名稱', '英文', 'English', 'english', '英文說明', '英文原因', '不良英文', 'defectNameEn', 'nameEn', 'enName', 'EN', 'en', 'En']); }
   function enabled(r) {
-    const v = clean(r.啟用 || r.是否啟用 || r.使用狀態 || '是');
+    const v = first(r, ['啟用', '是否啟用', '使用狀態', 'active', 'Active']) || '是';
     return v !== '否' && v.toLowerCase() !== 'false' && v !== '停用';
   }
   function categoryOf(r, code) {
-    let c = clean(r.分類 || r.類別 || r.不良分類 || r.責任類型 || r.責任歸屬 || code.charAt(0)).toUpperCase();
+    let c = first(r, ['分類', '類別', '不良分類', '責任類型', '責任歸屬', 'category', 'group']) || code.charAt(0);
+    c = clean(c).toUpperCase();
     if (c.indexOf('加工') >= 0 || c.indexOf('尺寸') >= 0) return 'Y';
     if (c.indexOf('素材') >= 0 || c.indexOf('外觀') >= 0) return 'Z';
     if (c !== 'Z' && c !== 'Y') c = clean(code).toUpperCase().startsWith('Z') ? 'Z' : 'Y';
@@ -50,6 +60,16 @@
     return (d.Z || []).length + (d.Y || []).length;
   }
 
+  function extractRows(res) {
+    if (Array.isArray(res)) return res;
+    if (!res || typeof res !== 'object') return [];
+    let rows = res.資料 || res.data || res.rows || res.records || res.items || res.清單 || res.結果 || [];
+    if (rows && rows.rows) rows = rows.rows;
+    if (rows && rows.data) rows = rows.data;
+    if (rows && rows.資料) rows = rows.資料;
+    return Array.isArray(rows) ? rows : [];
+  }
+
   async function forceLoadDefectMaster() {
     if (!window.DB) return { Z: [], Y: [] };
     if (countDefects(window.DB.ngReasons) > 0 && window.DB.ngReasons.__來源 === '05_不良代碼主檔') return window.DB.ngReasons;
@@ -59,19 +79,19 @@
       try { rows = await window.V4Bridge.readSheet('05_不良代碼主檔'); } catch (e) { console.warn('[V4] 讀取 05_不良代碼主檔失敗', e); }
     }
     if ((!rows || !rows.length) && window.V4Bridge && typeof window.V4Bridge.apiPost === 'function') {
-      const actions = ['讀取主資料庫分頁', '讀取工作表資料', '讀取分頁資料', '取得工作表資料', '取得分頁資料', 'getSheetRows', 'readSheet', 'sheetRows'];
+      const actions = ['讀取主資料庫分頁', '讀取工作表資料', '讀取分頁資料', '取得工作表資料', '取得分頁資料', 'getSheetRows', 'readSheet', 'sheetRows', '讀取分頁'];
       for (const action of actions) {
         try {
           const res = await window.V4Bridge.apiPost(action, { sheet: '05_不良代碼主檔', sheetName: '05_不良代碼主檔', 工作表名稱: '05_不良代碼主檔', 分頁名稱: '05_不良代碼主檔' });
-          rows = Array.isArray(res) ? res : (res && (res.資料 || res.data || res.rows || res.records || res.items || res.清單 || res.結果)) || [];
-          if (rows && rows.rows) rows = rows.rows;
-          if (Array.isArray(rows) && rows.length) break;
+          rows = extractRows(res);
+          if (rows.length) break;
         } catch (e) {}
       }
     }
 
     const normalized = normalizeDefects(rows);
     normalized.__來源 = '05_不良代碼主檔';
+    normalized.__原始筆數 = rows.length;
     window.DB.ngReasons = normalized;
     return normalized;
   }
@@ -144,13 +164,13 @@
   window.同步不良原因主檔 = syncAndRender;
 
   window.addEventListener('load', function () {
-    setTimeout(syncAndRender, 600);
-    setTimeout(syncAndRender, 1600);
-    setTimeout(syncAndRender, 3200);
+    setTimeout(syncAndRender, 500);
+    setTimeout(syncAndRender, 1400);
+    setTimeout(syncAndRender, 3000);
   });
 
   document.addEventListener('click', function (e) {
-    if (e.target && e.target.closest && e.target.closest('.step-item')) setTimeout(syncAndRender, 300);
+    if (e.target && e.target.closest && e.target.closest('.step-item')) setTimeout(syncAndRender, 250);
   }, true);
 
   setInterval(function () {
