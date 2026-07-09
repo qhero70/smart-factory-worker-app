@@ -4,7 +4,7 @@ window.PWA_CONFIG = window.PWA_CONFIG || {};
   設定.GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzRvly1OV-C80bMmd2ww4BM1XAH9WTyz62VFDnUxVGiO15kzHahbeHZc2bNTSwdFCqBwQ/exec';
   設定.APP_NAME = '化新精密｜製一組報工作業V4';
   設定.APP_SHORT_NAME = '化新報工';
-  設定.VERSION = 'v5.2.7-product-master-photo-lock';
+  設定.VERSION = 'v5.3.0-database-v529-official';
   設定.SPREADSHEET_ID = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
   設定.API_TIMEOUT_MS = 20000;
   設定.API_ACTIONS = {
@@ -12,28 +12,20 @@ window.PWA_CONFIG = window.PWA_CONFIG || {};
     SUBMIT: ['submitWorkReportV4', '寫入報工作業V4']
   };
 
+  function 載入JS(id, src) {
+    if (document.getElementById(id)) return;
+    var s = document.createElement('script');
+    s.id = id;
+    s.src = src;
+    s.defer = true;
+    document.head.appendChild(s);
+  }
+
   function 啟用報工修復器() {
-    if (!document.getElementById('hx-defect-grid-picker-519')) {
-      var a = document.createElement('script');
-      a.id = 'hx-defect-grid-picker-519';
-      a.src = './work-report-v4-defect-grid-picker-519.js?v=521';
-      a.defer = true;
-      document.head.appendChild(a);
-    }
-    if (!document.getElementById('hx-defect-select-force-520')) {
-      var b = document.createElement('script');
-      b.id = 'hx-defect-select-force-520';
-      b.src = './work-report-v4-defect-select-force-520.js?v=521';
-      b.defer = true;
-      document.head.appendChild(b);
-    }
-    if (!document.getElementById('hx-photo-display-527')) {
-      var c = document.createElement('script');
-      c.id = 'hx-photo-display-527';
-      c.src = './work-report-v4-photo-display-522.js?v=527';
-      c.defer = true;
-      document.head.appendChild(c);
-    }
+    載入JS('hx-data-v529-adapter-530', './work-report-v4-data-v529-adapter.js?v=530');
+    載入JS('hx-defect-grid-picker-519', './work-report-v4-defect-grid-picker-519.js?v=521');
+    載入JS('hx-defect-select-force-520', './work-report-v4-defect-select-force-520.js?v=521');
+    載入JS('hx-photo-display-527', './work-report-v4-photo-display-522.js?v=527');
   }
 
   啟用報工修復器();
