@@ -4,7 +4,7 @@ window.PWA_CONFIG = window.PWA_CONFIG || {};
   設定.GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzRvly1OV-C80bMmd2ww4BM1XAH9WTyz62VFDnUxVGiO15kzHahbeHZc2bNTSwdFCqBwQ/exec';
   設定.APP_NAME = '化新精密｜製一組報工作業V4';
   設定.APP_SHORT_NAME = '化新報工';
-  設定.VERSION = 'v5.2.1-defect-qty-input-fix';
+  設定.VERSION = 'v5.2.2-photo-display-fix';
   設定.SPREADSHEET_ID = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
   設定.API_TIMEOUT_MS = 20000;
   設定.API_ACTIONS = {
@@ -12,7 +12,7 @@ window.PWA_CONFIG = window.PWA_CONFIG || {};
     SUBMIT: ['submitWorkReportV4', '寫入報工作業V4']
   };
 
-  function 啟用不良原因修復器() {
+  function 啟用報工修復器() {
     if (!document.getElementById('hx-defect-grid-picker-519')) {
       var a = document.createElement('script');
       a.id = 'hx-defect-grid-picker-519';
@@ -27,9 +27,16 @@ window.PWA_CONFIG = window.PWA_CONFIG || {};
       b.defer = true;
       document.head.appendChild(b);
     }
+    if (!document.getElementById('hx-photo-display-522')) {
+      var c = document.createElement('script');
+      c.id = 'hx-photo-display-522';
+      c.src = './work-report-v4-photo-display-522.js?v=522';
+      c.defer = true;
+      document.head.appendChild(c);
+    }
   }
 
-  啟用不良原因修復器();
-  window.addEventListener('DOMContentLoaded', 啟用不良原因修復器, { once: true });
-  window.addEventListener('load', 啟用不良原因修復器, { once: true });
+  啟用報工修復器();
+  window.addEventListener('DOMContentLoaded', 啟用報工修復器, { once: true });
+  window.addEventListener('load', 啟用報工修復器, { once: true });
 })(window.PWA_CONFIG);
