@@ -1,14 +1,14 @@
-const 快取名稱 = 'huaxin-work-report-v4-cache-514-defect-master-fix';
+const 快取名稱 = 'huaxin-work-report-v4-cache-515-defect-cn-en-fix';
 const 預快取清單 = [
   './',
+  './work-report-v4-477.html?v=515&fix=defect-cn-en-fix',
   './work-report-v4-477.html?v=514&fix=defect-master-fix',
-  './work-report-v4-477.html?v=513&fix=step2-layout-fix',
   './work-report-v4.webmanifest?v=489',
   './pwa-config.js?v=511',
   './gas-bridge.js?v=511',
   './work-report-v4-app-483.js?v=511',
   './work-report-v4-opening-particles.js?v=490',
-  './work-report-v4-defect-master-fix-514.js?v=514',
+  './work-report-v4-defect-master-fix-514.js?v=515',
   './work-report-v4-google-ui.css?v=489',
   './assets/huaxin-report-icon.svg?v=489',
   './assets/huaxin-report-splash.svg?v=489'
