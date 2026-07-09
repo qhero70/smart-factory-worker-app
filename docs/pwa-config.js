@@ -3,7 +3,7 @@ window.PWA_CONFIG=window.PWA_CONFIG||{};
   c.GAS_WEB_APP_URL=['https://script.google.com','/macros/s/','AKfycbzRvly1OV-C80bMmd2ww4BM1XAH9WTyz62VFDnUxVGiO15kzHahbeHZc2bNTSwdFCqBwQ','/exec'].join('');
   c.APP_NAME='化新報工';
   c.APP_SHORT_NAME='化新報工';
-  c.VERSION='v4.8.9';
+  c.VERSION='v4.9.1';
   c.SPREADSHEET_ID='19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
   c.正式主資料庫ID='19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
   c.API_TIMEOUT_MS=20000;
@@ -13,6 +13,19 @@ window.PWA_CONFIG=window.PWA_CONFIG||{};
     SUBMIT_DEFECT:['submitDefectsV4','寫入不良紀錄v4','寫入不良紀錄v2']
   };
 })(window.PWA_CONFIG);
+
+(function(){
+  function 載入一次(src,id){
+    if(document.getElementById(id))return;
+    var s=document.createElement('script');
+    s.id=id;
+    s.defer=true;
+    s.async=false;
+    s.src=src;
+    document.head.appendChild(s);
+  }
+  載入一次('./work-report-v4-shift-rules-491.js?v=491','化新報工v491班別工時計算規則');
+})();
 
 (function(){
   function E(id){return document.getElementById(id)}
