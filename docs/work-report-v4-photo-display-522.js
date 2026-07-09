@@ -1,14 +1,15 @@
-/* 報工作業 V4｜人員/產品/機台照片顯示修復器 v5.2.6
- * 正式來源優先序：
- * 1) GAS API：取得照片索引V4 / getPhotoIndexV4 / photoIndexV4
- * 2) 備援：06_照片資料庫 分頁
- * 目標：人員卡、產品卡、已選產品卡、機台卡顯示 Google Drive 照片；沒有照片才顯示小型佔位。
+/* 報工作業 V4｜人員/產品/機台照片顯示修復器 v5.2.7
+ * 正式規則：
+ * 1) 產品清單、產品編號、客戶品號、品名，一律以 02_產品主檔 / DB.productList 為準。
+ * 2) 取得照片索引V4 只准補照片網址，不准新增產品、不准改產品名稱、不准取代產品主檔。
+ * 3) 產品照片只用 產品編號 / 客戶品號 / 客戶料號 / 料號 精準對應；不使用泛用檔名亂配產品。
+ * 4) 人員、機台照片仍依工號與機台編號對應。
  */
 (function () {
   'use strict';
 
-  const 版本 = '526';
-  const 標記 = '__報工V4_照片顯示修復526__';
+  const 版本 = '527';
+  const 標記 = '__報工V4_照片顯示修復527__';
   if (window[標記]) return;
   window[標記] = true;
 
@@ -20,6 +21,7 @@
   function norm(v) { return clean(v).replace(/\.0$/, '').replace(/\s+/g, '').toUpperCase(); }
   function esc(v) { return clean(v).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])); }
   function byId(id) { return document.getElementById(id); }
+  function uniq(arr) { return Array.from(new Set((arr || []).map(norm).filter(Boolean))); }
 
   function driveThumb(v) {
     let s = clean(v);
@@ -69,7 +71,7 @@
     if (/產品_|品號|料號|產品|product|part/i.test(text)) return '產品';
     if (row.工號 || row.員工編號 || row.人員編號) return '人員';
     if (row.機台編號 || row.設備編號 || row.主機台) return '機台';
-    if (row.產品編號 || row.料號 || row.品號 || row.客戶品號 || row.品名) return '產品';
+    if (row.產品編號 || row.料號 || row.品號 || row.客戶品號 || row.客戶料號) return '產品';
     return '產品';
   }
 
@@ -77,37 +79,56 @@
     v = clean(v);
     if (!v) return;
     keys.push(v);
-    const n = norm(v);
-    if (n) keys.push(n);
     const base = fileBase(v);
     if (base) {
       keys.push(base);
-      keys.push(norm(base));
       keys.push(base.replace(/^人員[_-]/, ''));
       keys.push(base.replace(/^產品[_-]/, ''));
       keys.push(base.replace(/^機台[_-]/, ''));
     }
   }
 
-  function keysOf(row, type) {
+  function personPhotoKeys(row) {
     row = row || {};
     const keys = [];
-    if (type === '人員') {
-      ['照片主鍵','對應ID','主鍵值','工號','員工編號','人員編號','姓名','名稱','編號','主鍵','檔名','檔案名稱','文件名稱','圖片名稱','照片名稱','name','Name','title','Title'].forEach(k => addKey(keys, row[k]));
-    } else if (type === '機台') {
-      ['照片主鍵','對應ID','主鍵值','機台編號','設備編號','主機台','機台名稱','設備名稱','名稱','編號','主鍵','檔名','檔案名稱','文件名稱','圖片名稱','照片名稱','name','Name','title','Title'].forEach(k => addKey(keys, row[k]));
-    } else {
-      ['照片主鍵','對應ID','主鍵值','產品編號','料號','品號','客戶品號','客戶料號','品名','產品名稱','名稱','編號','主鍵','檔名','檔案名稱','文件名稱','圖片名稱','照片名稱','name','Name','title','Title'].forEach(k => addKey(keys, row[k]));
-    }
+    ['照片主鍵','對應ID','主鍵值','工號','員工編號','人員編號','姓名','名稱','編號','主鍵','檔名','檔案名稱','文件名稱','圖片名稱','照片名稱','name','Name','title','Title'].forEach(k => addKey(keys, row[k]));
+    Object.values(row).forEach(v => {
+      const s = clean(v);
+      const b = fileBase(s);
+      if (b) addKey(keys, b);
+      if (/^(fhf|hfs|emp|op|p)[-_]?[A-Za-z0-9]+$/i.test(s)) addKey(keys, s);
+    });
+    return uniq(keys);
+  }
+
+  function machinePhotoKeys(row) {
+    row = row || {};
+    const keys = [];
+    ['照片主鍵','對應ID','主鍵值','機台編號','設備編號','主機台','機台名稱','設備名稱','名稱','編號','主鍵','檔名','檔案名稱','文件名稱','圖片名稱','照片名稱','name','Name','title','Title'].forEach(k => addKey(keys, row[k]));
     Object.values(row).forEach(v => {
       const s = clean(v);
       const b = fileBase(s);
       if (b) addKey(keys, b);
       if (/^\d{1,5}(?:\.0)?$/.test(s)) addKey(keys, s);
-      if (/^[A-Z]\d{6,}$/i.test(s)) addKey(keys, s);
-      if (/^(fhf|hfs|emp|op|p|m)[-_]?[A-Za-z0-9]+$/i.test(s)) addKey(keys, s);
     });
-    return Array.from(new Set(keys.map(norm).filter(Boolean)));
+    return uniq(keys);
+  }
+
+  function productPhotoKeys(row) {
+    row = row || {};
+    const keys = [];
+    // 產品照片索引只能使用主檔可精準對應欄位，不用「品名」或 IMG 檔名亂配。
+    ['照片主鍵','對應ID','主鍵值','產品編號','料號','品號','客戶品號','客戶料號','產品料號','PartNo','partNo','ProductNo','productNo'].forEach(k => addKey(keys, row[k]));
+    Object.values(row).forEach(v => {
+      const s = clean(v);
+      const b = fileBase(s);
+      if (/^[A-Z][A-Z0-9-]{5,}$/i.test(s)) addKey(keys, s);
+      if (/^[A-Z][A-Z0-9-]{5,}$/i.test(b)) addKey(keys, b);
+      if (/^\d{5,}[-\d()]*$/.test(s)) addKey(keys, s);
+      if (/^\d{5,}[-\d()]*$/.test(b)) addKey(keys, b);
+      if (/^產品[_-][A-Z0-9-]{5,}$/i.test(b)) addKey(keys, b.replace(/^產品[_-]/i, ''));
+    });
+    return uniq(keys);
   }
 
   function addPhoto(type, key, url) {
@@ -125,9 +146,9 @@
       arr.forEach(x => rows.push(Object.assign({}, x || {}, { 類型: type, 資料類型: type })));
     };
     if (res.照片索引) {
-      pushRows(res.照片索引.人員 || res.照片索引['人員'] || res.照片索引.people, '人員');
-      pushRows(res.照片索引.產品 || res.照片索引['產品'] || res.照片索引.products, '產品');
-      pushRows(res.照片索引.機台 || res.照片索引['機台'] || res.照片索引.machines, '機台');
+      pushRows(res.照片索引.人員 || res.照片索引.people, '人員');
+      pushRows(res.照片索引.產品 || res.照片索引.products, '產品');
+      pushRows(res.照片索引.機台 || res.照片索引.machines, '機台');
     }
     pushRows(res.人員照片 || res.peoplePhotos || res.personPhotos, '人員');
     pushRows(res.產品照片 || res.productPhotos, '產品');
@@ -146,31 +167,33 @@
       const url = firstUrl(row);
       if (!url) return;
       const type = typeOf(row);
-      keysOf(row, type).forEach(k => addPhoto(type, k, url));
+      const keys = type === '人員' ? personPhotoKeys(row) : (type === '機台' ? machinePhotoKeys(row) : productPhotoKeys(row));
+      keys.forEach(k => addPhoto(type, k, url));
     });
     ['人員','產品','機台'].forEach(type => Object.assign(照片索引[type], old[type] || {}));
   }
 
-  function personKeys(p) {
+  function personKeysFromMaster(p) {
     p = p || {};
-    return [p.照片主鍵, p.對應ID, p.主鍵值, p.工號, p.員工編號, p.人員編號, p.姓名, p.名稱].map(norm).filter(Boolean);
+    return uniq([p.工號, p.員工編號, p.人員編號, p.姓名, p.名稱]);
   }
-  function productKeys(p) {
+  function productKeysFromMaster(p) {
     p = p || {};
-    return [p.照片主鍵, p.對應ID, p.主鍵值, p.產品編號, p.料號, p.品號, p.客戶品號, p.客戶料號, p.品名, p.產品名稱, p.名稱].map(norm).filter(Boolean);
+    // 產品照片只依 02_產品主檔 的精準欄位對應，品名只用於顯示，不用於照片匹配。
+    return uniq([p.產品編號, p.客戶品號, p.客戶料號, p.料號, p.品號]);
   }
-  function machineKeys(m) {
+  function machineKeysFromMaster(m) {
     m = m || {};
-    return [m.照片主鍵, m.對應ID, m.主鍵值, m.機台編號, m.設備編號, m.主機台, m.機台名稱, m.設備名稱, m.名稱].map(norm).filter(Boolean);
+    return uniq([m.機台編號, m.設備編號, m.主機台]);
   }
   function lookup(type, keys) {
     const bucket = 照片索引[type] || {};
     for (const k of keys || []) if (k && bucket[norm(k)]) return bucket[norm(k)];
     return '';
   }
-  function personUrl(p) { return firstUrl(p) || lookup('人員', personKeys(p)); }
-  function productUrl(p) { return firstUrl(p) || lookup('產品', productKeys(p)); }
-  function machineUrl(m) { return firstUrl(m) || lookup('機台', machineKeys(m)); }
+  function personUrl(p) { return firstUrl(p) || lookup('人員', personKeysFromMaster(p)); }
+  function productUrl(p) { return firstUrl(p) || lookup('產品', productKeysFromMaster(p)); }
+  function machineUrl(m) { return firstUrl(m) || lookup('機台', machineKeysFromMaster(m)); }
 
   async function apiPostPhotoIndex() {
     if (!window.V4Bridge || typeof window.V4Bridge.apiPost !== 'function') return null;
@@ -210,7 +233,8 @@
       console.info('[報工V4] 照片索引已建立 v' + 版本, {
         人員: Object.keys(照片索引.人員).length,
         產品: Object.keys(照片索引.產品).length,
-        機台: Object.keys(照片索引.機台).length
+        機台: Object.keys(照片索引.機台).length,
+        產品主檔來源: '02_產品主檔 / DB.productList'
       });
     }
     讀取中 = false;
@@ -222,6 +246,7 @@
       const u = personUrl(p);
       if (u) p.人員照片網址 = p.照片網址 = p.縮圖網址 = p.頭像網址 = u;
     });
+    // 只補照片欄位，不改產品主檔欄位。
     (DB.products || []).forEach(p => {
       const u = productUrl(p);
       if (u) p.產品照片網址 = p.產品縮圖網址 = p.照片網址 = p.縮圖網址 = u;
@@ -262,34 +287,31 @@
       const idx = Number(card.dataset.index);
       const p = DB.persons[idx];
       if (!p) return;
-      const u = personUrl(p);
       const box = card.querySelector('.person-photo, .person-avatar, .person-img, .person-photo-lg');
-      if (box) setImgBox(box, u, '👤', p.姓名 || p.工號);
+      if (box) setImgBox(box, personUrl(p), '👤', p.姓名 || p.工號);
     });
     const op = window.STATE && STATE.operator;
     const disp = byId('selectedPersonDisplay');
     if (op && disp) {
-      const u = personUrl(op);
       const box = disp.querySelector('.person-photo-lg');
-      if (box) setImgBox(box, u, '👤', op.姓名 || op.工號);
+      if (box) setImgBox(box, personUrl(op), '👤', op.姓名 || op.工號);
     }
   }
 
   function renderProducts() {
     if (!window.DB || !DB.productList) return;
+    // 產品卡只讀 DB.productList，也就是 02_產品主檔。照片索引只補 product-thumb。
     document.querySelectorAll('.product-card').forEach(card => {
       const p = DB.productList[Number(card.dataset.index)];
       if (!p) return;
-      const u = productUrl(p);
       const box = card.querySelector('.product-thumb');
-      setImgBox(box, u, '📦', p.品名 || p.產品編號);
+      setImgBox(box, productUrl(p), '📦', p.品名 || p.產品編號);
     });
     const selected = window.STATE && STATE.currentProductGroup;
     const disp = byId('selectedProductDisplay');
     if (selected && disp) {
-      const u = productUrl(selected);
       const box = disp.querySelector('.person-photo-lg');
-      if (box) setImgBox(box, u, '📦', selected.品名 || selected.產品編號);
+      if (box) setImgBox(box, productUrl(selected), '📦', selected.品名 || selected.產品編號);
     }
   }
 
@@ -322,9 +344,9 @@
   }
 
   function injectStyle() {
-    if (document.getElementById('hx-photo-display-526-style')) return;
+    if (document.getElementById('hx-photo-display-527-style')) return;
     const st = document.createElement('style');
-    st.id = 'hx-photo-display-526-style';
+    st.id = 'hx-photo-display-527-style';
     st.textContent = `
       .product-card,.machine-card,.person-card{position:relative!important;overflow:hidden!important;background:#0f172a!important}
       .product-thumb img,.machine-card>img,.person-photo img,.person-avatar img,.person-img img,.person-photo-lg img{width:100%!important;height:100%!important;object-fit:cover!important;display:block!important}
@@ -344,14 +366,14 @@
 
   function patch(name, afterDelay) {
     const fn = window[name];
-    if (typeof fn !== 'function' || fn.__photo526) return;
+    if (typeof fn !== 'function' || fn.__photo527) return;
     window[name] = function () {
       const ret = fn.apply(this, arguments);
       setTimeout(() => refresh(false), 0);
       setTimeout(() => refresh(false), afterDelay || 300);
       return ret;
     };
-    window[name].__photo526 = true;
+    window[name].__photo527 = true;
   }
 
   function patchAll() {
