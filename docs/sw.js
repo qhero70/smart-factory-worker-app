@@ -1,16 +1,15 @@
-const 快取名稱 = 'huaxin-work-report-v4-cache-531-ui-logic-lock';
+const 快取名稱 = 'huaxin-work-report-v4-cache-533-official-master-lock';
 const 預快取清單 = [
   './',
-  './work-report-v4-477.html?v=531&fix=ui-logic-lock',
+  './work-report-v4-477.html?v=533&fix=official-master-lock',
   './work-report-v4-530.html',
   './work-report-v4.webmanifest?v=489',
-  './pwa-config.js?v=511',
-  './pwa-config.js?v=530',
-  './pwa-config.js?v=531',
+  './pwa-config.js?v=533',
   './gas-bridge.js?v=511',
   './work-report-v4-app-483.js?v=511',
-  './work-report-v4-opening-particles.js?v=530',
-  './work-report-v4-data-v529-adapter.js?v=530',
+  './work-report-v4-opening-particles.js?v=533',
+  './work-report-v4-data-v529-adapter.js?v=533',
+  './work-report-v4-official-lock-533.js?v=533',
   './work-report-v4-ui-lock-531.js?v=531',
   './work-report-v4-defect-grid-picker-519.js?v=521',
   './work-report-v4-defect-select-force-520.js?v=521',
@@ -53,6 +52,7 @@ self.addEventListener('fetch', event => {
   if (
     url.pathname.endsWith('/pwa-config.js') ||
     url.pathname.endsWith('/work-report-v4-data-v529-adapter.js') ||
+    url.pathname.endsWith('/work-report-v4-official-lock-533.js') ||
     url.pathname.endsWith('/work-report-v4-ui-lock-531.js')
   ) {
     event.respondWith(fetch(req, { cache: 'no-store' }).catch(() => caches.match(req)));
