@@ -12,10 +12,10 @@
 <link rel="apple-touch-icon" href="./assets/huaxin-report-icon.svg?v=489">
 <link rel="stylesheet" href="./work-report-v4-google-ui.css?v=489">
 <title>製一組 報工表單 V4｜化新 智慧製造</title>
-<script src="./pwa-config.js?v=510"></script>
-<script src="./gas-bridge.js?v=510"></script>
+<script src="./pwa-config.js?v=511"></script>
+<script src="./gas-bridge.js?v=511"></script>
 <script defer src="./work-report-v4-opening-particles.js?v=490"></script>
-<script defer src="./work-report-v4-app-483.js?v=510"></script>
+<script defer src="./work-report-v4-app-483.js?v=511"></script>
 <style>
 html,body{width:100%;max-width:100%;height:auto;min-height:100%;overflow-x:hidden!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;touch-action:pan-y!important}body{padding-top:0!important;overscroll-behavior-y:auto!important}.outer-wrap,.step-section,.glass-card,.product-grid,.person-grid,.machine-grid{max-width:100%!important;overflow-x:hidden!important;overflow-y:visible!important;-webkit-overflow-scrolling:touch!important;touch-action:pan-y!important}.product-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;max-width:100%!important;overflow:visible!important;padding-bottom:16px!important}.product-card{position:relative!important;min-height:156px!important;border-radius:18px!important;overflow:hidden!important;padding:0!important;background:#111827!important;border:1px solid rgba(66,133,244,.28)!important;box-shadow:0 8px 22px rgba(15,23,42,.14)!important;touch-action:pan-y!important;-webkit-user-select:none!important;user-select:none!important}.product-thumb{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;border-radius:0!important;background:linear-gradient(135deg,#1e3a8a,#0f172a)!important;display:grid!important;place-items:center!important;overflow:hidden!important}.product-thumb img{width:100%!important;height:100%!important;object-fit:cover!important;display:block!important}.product-thumb span{font-size:30px!important;color:#fff!important;font-weight:900!important}.product-card:after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05) 0%,rgba(0,0,0,.12) 42%,rgba(0,0,0,.80) 100%);pointer-events:none}.product-name,.product-code{position:absolute!important;left:8px!important;right:8px!important;z-index:2!important;color:#fff!important;text-align:center!important;text-shadow:0 2px 6px rgba(0,0,0,.9)!important}.product-name{bottom:28px!important;font-size:12px!important;font-weight:950!important;line-height:1.18!important;display:-webkit-box!important;-webkit-line-clamp:2!important;-webkit-box-orient:vertical!important;overflow:hidden!important}.product-code{bottom:9px!important;font-size:10.5px!important;font-weight:900!important;opacity:.96!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}.product-card.selected{outline:3px solid rgba(66,133,244,.75)!important;box-shadow:0 0 0 4px rgba(66,133,244,.18),0 14px 32px rgba(25,103,210,.28)!important}.selected-person-display,.bottom-bar{touch-action:pan-y!important}.roar-container{pointer-events:none!important}.roar-notif{pointer-events:auto!important}@media(max-width:420px){.product-grid{gap:9px!important}.product-card{min-height:146px!important}.product-name{font-size:11.5px!important}.product-code{font-size:10px!important}}
 @media(display-mode:standalone){.site-header .header-inner{padding-top:calc(10px + env(safe-area-inset-top,44px))!important}}
@@ -23,97 +23,19 @@ html,body{width:100%;max-width:100%;height:auto;min-height:100%;overflow-x:hidde
 <script>
 (function(){
   function clean(v){return String(v==null?'':v).trim();}
-  function 報工班別(人員){
-    var raw=clean(人員&&((人員['班別'])||(人員['班別名稱'])||(人員['shift'])||(人員['Shift'])));
-    if(raw.indexOf('大夜')>=0||raw.indexOf('夜')>=0)return '大夜班';
-    return '早班';
-  }
-  function 套用班別(班別){
-    var s=document.getElementById('shiftSelect');
-    if(!s)return;
-    var v=報工班別({'班別':班別});
-    s.innerHTML='';
-    s.add(new Option(v,v));
-    s.value=v;
-    if(window.STATE&&window.STATE.operator)window.STATE.operator['班別']=v;
-  }
-  function 移除中班顯示(){
-    document.querySelectorAll('.shift-badge').forEach(function(b){
-      if((b.textContent||'').indexOf('中')>=0){
-        b.textContent='☀️ 早班';
-        b.classList.remove('swing');
-        b.classList.add('day');
-        var c=b.closest('.person-card');
-        if(c){c.classList.remove('shift-swing');c.classList.add('shift-day');}
-      }
-    });
-    var d=document.getElementById('selectedPersonDisplay');
-    if(d&&d.innerHTML.indexOf('中班')>=0)d.innerHTML=d.innerHTML.replace(/中班/g,'早班');
-  }
-  function 綁定報工班別(){
-    if(typeof window.selectPerson==='function'&&!window.selectPerson.__報工班別無中班){
-      var 原選人=window.selectPerson;
-      window.selectPerson=function(i){
-        var 人員=window.DB&&window.DB.persons?window.DB.persons[i]:null;
-        var ret=原選人.apply(this,arguments);
-        setTimeout(function(){套用班別(報工班別(人員));移除中班顯示();},0);
-        setTimeout(function(){套用班別(報工班別(人員));移除中班顯示();},150);
-        return ret;
-      };
-      window.selectPerson.__報工班別無中班=true;
-    }
-    if(window.STATE&&window.STATE.operator)套用班別(報工班別(window.STATE.operator));
-    移除中班顯示();
-  }
-  function 照片網址(v){
-    var s=clean(v);if(!s)return'';
-    var m=s.match(/\/file\/d\/([A-Za-z0-9_-]+)/)||s.match(/[?&]id=([A-Za-z0-9_-]+)/)||(!/^https?:/i.test(s)&&s.match(/[-_A-Za-z0-9]{20,}/));
-    if(m&&m[1])return 'https://drive.google.com/thumbnail?id='+m[1]+'&sz=w1200';
-    if(m&&m[0]&&!/^https?:/i.test(s))return 'https://drive.google.com/thumbnail?id='+m[0]+'&sz=w1200';
-    return /^https?:\/\//i.test(s)?s:'';
-  }
-  function 第一照片(o){
-    o=o||{};var ks=['產品縮圖網址','產品照片網址','縮圖網址','照片網址','圖片網址','網址','URL','url','GoogleDrive連結','Drive連結','產品圖片','產品照片','圖片','照片','檔案ID'];
-    for(var i=0;i<ks.length;i++){var u=照片網址(o[ks[i]]);if(u)return u;}
-    return '';
-  }
+  function 報工班別(人員){var raw=clean(人員&&((人員['班別'])||(人員['班別名稱'])||(人員['shift'])||(人員['Shift'])));if(raw.indexOf('大夜')>=0||raw.indexOf('夜')>=0)return '大夜班';return '早班';}
+  function 套用班別(班別){var s=document.getElementById('shiftSelect');if(!s)return;var v=報工班別({'班別':班別});s.innerHTML='';s.add(new Option(v,v));s.value=v;if(window.STATE&&window.STATE.operator)window.STATE.operator['班別']=v;}
+  function 移除中班顯示(){document.querySelectorAll('.shift-badge').forEach(function(b){if((b.textContent||'').indexOf('中')>=0){b.textContent='☀️ 早班';b.classList.remove('swing');b.classList.add('day');var c=b.closest('.person-card');if(c){c.classList.remove('shift-swing');c.classList.add('shift-day');}}});var d=document.getElementById('selectedPersonDisplay');if(d&&d.innerHTML.indexOf('中班')>=0)d.innerHTML=d.innerHTML.replace(/中班/g,'早班');}
+  function 綁定報工班別(){if(typeof window.selectPerson==='function'&&!window.selectPerson.__報工班別無中班){var 原選人=window.selectPerson;window.selectPerson=function(i){var 人員=window.DB&&window.DB.persons?window.DB.persons[i]:null;var ret=原選人.apply(this,arguments);setTimeout(function(){套用班別(報工班別(人員));移除中班顯示();},0);setTimeout(function(){套用班別(報工班別(人員));移除中班顯示();},150);return ret;};window.selectPerson.__報工班別無中班=true;}if(window.STATE&&window.STATE.operator)套用班別(報工班別(window.STATE.operator));移除中班顯示();}
+  function 照片網址(v){var s=clean(v);if(!s)return'';var m=s.match(/\/file\/d\/([A-Za-z0-9_-]+)/)||s.match(/[?&]id=([A-Za-z0-9_-]+)/)||(!/^https?:/i.test(s)&&s.match(/[-_A-Za-z0-9]{20,}/));if(m&&m[1])return 'https://drive.google.com/thumbnail?id='+m[1]+'&sz=w1200';if(m&&m[0]&&!/^https?:/i.test(s))return 'https://drive.google.com/thumbnail?id='+m[0]+'&sz=w1200';return /^https?:\/\//i.test(s)?s:'';}
+  function 第一照片(o){o=o||{};var ks=['產品縮圖網址','產品照片網址','縮圖網址','照片網址','圖片網址','網址','URL','url','GoogleDrive連結','Drive連結','產品圖片','產品照片','圖片','照片','檔案ID'];for(var i=0;i<ks.length;i++){var u=照片網址(o[ks[i]]);if(u)return u;}return '';}
   function 加索引(map,k,u){k=clean(k);u=照片網址(u);if(k&&u&&!map[k])map[k]=u;}
-  function 建產品照片索引(){
-    var map={};
-    var db=window.DB||{};
-    [].concat(db.products||[],db.產品||[],db.productList||[],db.workstationGroups||[],db.routes||[]).forEach(function(p){
-      var u=第一照片(p);if(!u)return;
-      ['產品編號','料號','品號','客戶品號','客戶料號','品名','產品名稱'].forEach(function(k){加索引(map,p&&p[k],u);});
-    });
-    return map;
-  }
-  function 套產品照片(){
-    var db=window.DB||{};if(!db.productList||!db.productList.length)return;
-    var map=建產品照片索引();
-    db.productList.forEach(function(p){
-      if(!p)return;var u=第一照片(p)||map[clean(p['產品編號'])]||map[clean(p['客戶品號'])]||map[clean(p['品名'])]||'';
-      if(u){p['產品縮圖網址']=p['產品照片網址']=p['縮圖網址']=p['照片網址']=u;}
-    });
-    document.querySelectorAll('.product-card').forEach(function(card){
-      var p=db.productList[Number(card.dataset.index)];if(!p)return;
-      var u=第一照片(p)||map[clean(p['產品編號'])]||map[clean(p['客戶品號'])]||map[clean(p['品名'])]||'';
-      var box=card.querySelector('.product-thumb');if(!box)return;
-      if(u)box.innerHTML='<img src="'+u.replace(/"/g,'&quot;')+'" alt="產品照片" loading="lazy" onerror="this.parentElement.innerHTML=\'<span>📦</span>\'">';
-      else box.innerHTML='<span>📦</span>';
-    });
-  }
-  function 綁定產品照片(){
-    if(typeof window.buildProductGrid==='function'&&!window.buildProductGrid.__兩排照片){
-      var 原產品=window.buildProductGrid;
-      window.buildProductGrid=function(){var ret=原產品.apply(this,arguments);setTimeout(套產品照片,0);setTimeout(套產品照片,250);return ret;};
-      window.buildProductGrid.__兩排照片=true;
-    }
-    套產品照片();
-  }
+  function 建產品照片索引(){var map={};var db=window.DB||{};[].concat(db.products||[],db.產品||[],db.productList||[],db.workstationGroups||[],db.routes||[]).forEach(function(p){var u=第一照片(p);if(!u)return;['產品編號','料號','品號','客戶品號','客戶料號','品名','產品名稱'].forEach(function(k){加索引(map,p&&p[k],u);});});return map;}
+  function 套產品照片(){var db=window.DB||{};if(!db.productList||!db.productList.length)return;var map=建產品照片索引();db.productList.forEach(function(p){if(!p)return;var u=第一照片(p)||map[clean(p['產品編號'])]||map[clean(p['客戶品號'])]||map[clean(p['品名'])]||'';if(u){p['產品縮圖網址']=p['產品照片網址']=p['縮圖網址']=p['照片網址']=u;}});document.querySelectorAll('.product-card').forEach(function(card){var p=db.productList[Number(card.dataset.index)];if(!p)return;var u=第一照片(p)||map[clean(p['產品編號'])]||map[clean(p['客戶品號'])]||map[clean(p['品名'])]||'';var box=card.querySelector('.product-thumb');if(!box)return;if(u)box.innerHTML='<img src="'+u.replace(/"/g,'&quot;')+'" alt="產品照片" loading="lazy" onerror="this.parentElement.innerHTML=\'<span>📦</span>\'">';else box.innerHTML='<span>📦</span>';});}
+  function 綁定產品照片(){if(typeof window.buildProductGrid==='function'&&!window.buildProductGrid.__兩排照片){var 原產品=window.buildProductGrid;window.buildProductGrid=function(){var ret=原產品.apply(this,arguments);setTimeout(套產品照片,0);setTimeout(套產品照片,250);return ret;};window.buildProductGrid.__兩排照片=true;}套產品照片();}
   window.addEventListener('load',function(){setTimeout(綁定報工班別,0);setTimeout(綁定報工班別,600);setTimeout(移除中班顯示,1200);setTimeout(綁定產品照片,700);setTimeout(套產品照片,1500);});
   document.addEventListener('pointerup',function(e){if(e.target.closest&&e.target.closest('.person-card'))setTimeout(綁定報工班別,180);},true);
-  setInterval(綁定報工班別,1000);
-  setInterval(綁定產品照片,1200);
+  setInterval(綁定報工班別,1000);setInterval(綁定產品照片,1200);
 })();
 </script>
 </head>
