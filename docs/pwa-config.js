@@ -4,7 +4,7 @@ window.PWA_CONFIG = window.PWA_CONFIG || {};
   設定.GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzRvly1OV-C80bMmd2ww4BM1XAH9WTyz62VFDnUxVGiO15kzHahbeHZc2bNTSwdFCqBwQ/exec';
   設定.APP_NAME = '化新精密｜製一組報工作業V4';
   設定.APP_SHORT_NAME = '化新報工';
-  設定.VERSION = 'v5.1.9-defect-picker-lock';
+  設定.VERSION = 'v5.2.0-defect-select-force';
   設定.SPREADSHEET_ID = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
   設定.API_TIMEOUT_MS = 20000;
   設定.API_ACTIONS = {
@@ -12,19 +12,24 @@ window.PWA_CONFIG = window.PWA_CONFIG || {};
     SUBMIT: ['submitWorkReportV4', '寫入報工作業V4']
   };
 
-  // v519：不良原因兩欄格子選擇器穩定鎖定版。
-  // 選擇器打開後不允許背景重繪、不允許背景點擊關閉、不允許觸控穿透；選完卡片才回寫。
-  function 載入不良原因格子選擇器() {
-    var id = 'hx-defect-grid-picker-519';
-    if (document.getElementById(id)) return;
-    var s = document.createElement('script');
-    s.id = id;
-    s.src = './work-report-v4-defect-grid-picker-519.js?v=519';
-    s.defer = true;
-    s.onerror = function () { console.error('[報工V4] 不良原因格子選擇器載入失敗'); };
-    document.head.appendChild(s);
+  function 啟用不良原因修復器() {
+    if (!document.getElementById('hx-defect-grid-picker-519')) {
+      var a = document.createElement('script');
+      a.id = 'hx-defect-grid-picker-519';
+      a.src = './work-report-v4-defect-grid-picker-519.js?v=520';
+      a.defer = true;
+      document.head.appendChild(a);
+    }
+    if (!document.getElementById('hx-defect-select-force-520')) {
+      var b = document.createElement('script');
+      b.id = 'hx-defect-select-force-520';
+      b.src = './work-report-v4-defect-select-force-520.js?v=520';
+      b.defer = true;
+      document.head.appendChild(b);
+    }
   }
-  載入不良原因格子選擇器();
-  window.addEventListener('DOMContentLoaded', 載入不良原因格子選擇器, { once: true });
-  window.addEventListener('load', 載入不良原因格子選擇器, { once: true });
+
+  啟用不良原因修復器();
+  window.addEventListener('DOMContentLoaded', 啟用不良原因修復器, { once: true });
+  window.addEventListener('load', 啟用不良原因修復器, { once: true });
 })(window.PWA_CONFIG);
