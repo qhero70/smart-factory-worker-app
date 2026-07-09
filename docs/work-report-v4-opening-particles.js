@@ -1,7 +1,6 @@
-/* 化新報工 V4｜v5.1.6 開場鎖定 + 不良主檔載入橋接
+/* 化新報工 V4｜v5.1.8 開場鎖定 + 不良原因格子選擇器橋接
  * 開場動畫仍使用 GitHub 歷史正式版。
- * 額外載入 05_不良代碼主檔正式對接修復檔。
- * v516：禁止把 Z/Y 分類當成不良代碼，只允許 Z01/Y01 類代碼。
+ * 額外載入 05_不良代碼主檔兩欄格子選擇器。
  */
 (function(){
   'use strict';
@@ -15,11 +14,11 @@
     s.onerror=function(){console.error('[化新報工] JS 載入失敗',src);};
     document.head.appendChild(s);
   }
-  function 載入不良主檔修復(){
-    載入JS('./work-report-v4-defect-master-fix-514.js?v=516','hx-defect-master-fix-516');
+  function 載入不良原因格子選擇器(){
+    載入JS('./work-report-v4-defect-grid-picker-518.js?v=518','hx-defect-grid-picker-518');
   }
   function 載入正式開場(){
-    載入不良主檔修復();
+    載入不良原因格子選擇器();
     if(window.__HUAXIN_EXACT_OPENING_LOCKED__) return;
     window.__HUAXIN_EXACT_OPENING_LOCKED__=true;
     fetch(原封不動開場JS,{cache:'no-store'})
