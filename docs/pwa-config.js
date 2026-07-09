@@ -13,3 +13,16 @@ window.PWA_CONFIG=window.PWA_CONFIG||{};
     SUBMIT_DEFECT:['submitDefectsV4','寫入不良紀錄v4','寫入不良紀錄v2']
   };
 })(window.PWA_CONFIG);
+
+(function(){
+  function loadOfficial(){
+    if(document.getElementById('hx-work-report-official-500')) return;
+    var s=document.createElement('script');
+    s.id='hx-work-report-official-500';
+    s.src='./work-report-v4-official-500.js?v=500';
+    s.async=false;
+    document.body.appendChild(s);
+  }
+  if(document.readyState==='complete') loadOfficial();
+  else window.addEventListener('load', loadOfficial, {once:true});
+})();
