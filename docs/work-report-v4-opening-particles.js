@@ -1,7 +1,4 @@
-/* 化新報工 V4｜v5.3.0 開場鎖定 + 正式資料庫 v529 對接
- * 開場動畫仍使用 GitHub 歷史正式版。
- * 額外載入：v529 資料庫對接器、519 格子選擇器、520 原生 select 強制攔截器。
- */
+/* 化新報工 V4｜v5.3.3 開場鎖定 + 正式主檔對接 */
 (function(){
   'use strict';
   const 原封不動開場JS='https://cdn.jsdelivr.net/gh/qhero70/smart-factory-worker-app@ab308c06d91b31780ee9409666dbd071e1f101ba/docs/work-report-v4-opening-particles.js';
@@ -14,7 +11,8 @@
     document.head.appendChild(s);
   }
   function 載入正式資料與修復器(){
-    載入JS('./work-report-v4-data-v529-adapter.js?v=530','hx-data-v529-adapter-530');
+    載入JS('./work-report-v4-data-v529-adapter.js?v=533','hx-data-v529-adapter-533');
+    載入JS('./work-report-v4-official-lock-533.js?v=533','hx-official-lock-533');
     載入JS('./work-report-v4-defect-grid-picker-519.js?v=521','hx-defect-grid-picker-519');
     載入JS('./work-report-v4-defect-select-force-520.js?v=521','hx-defect-select-force-520');
   }
