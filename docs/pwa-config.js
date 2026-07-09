@@ -3,7 +3,7 @@ window.PWA_CONFIG=window.PWA_CONFIG||{};
   c.GAS_WEB_APP_URL=['https://script.google.com','/macros/s/','AKfycbzRvly1OV-C80bMmd2ww4BM1XAH9WTyz62VFDnUxVGiO15kzHahbeHZc2bNTSwdFCqBwQ','/exec'].join('');
   c.APP_NAME='化新報工';
   c.APP_SHORT_NAME='化新報工';
-  c.VERSION='v4.9.2';
+  c.VERSION='v4.9.3';
   c.SPREADSHEET_ID='19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
   c.正式主資料庫ID='19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
   c.API_TIMEOUT_MS=20000;
@@ -25,7 +25,7 @@ window.PWA_CONFIG=window.PWA_CONFIG||{};
     document.head.appendChild(s);
   }
   載入一次('./work-report-v4-shift-rules-491.js?v=491','化新報工v491班別工時計算規則');
-  載入一次('./work-report-v4-photo-restore-492.js?v=492','化新報工v492照片還原層');
+  載入一次('./work-report-v4-photo-restore-493.js?v=493','化新報工v493照片還原與選定人員隱藏');
 })();
 
 (function(){
