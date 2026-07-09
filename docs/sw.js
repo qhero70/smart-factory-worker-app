@@ -1,8 +1,8 @@
-const 快取名稱 = 'huaxin-work-report-v4-cache-521-defect-qty-input-fix';
+const 快取名稱 = 'huaxin-work-report-v4-cache-522-photo-display-fix';
 const 預快取清單 = [
   './',
+  './work-report-v4-477.html?v=522&fix=photo-display-fix',
   './work-report-v4-477.html?v=521&fix=defect-qty-input-fix',
-  './work-report-v4-477.html?v=520&fix=defect-select-force',
   './work-report-v4.webmanifest?v=489',
   './pwa-config.js?v=511',
   './gas-bridge.js?v=511',
@@ -10,6 +10,7 @@ const 預快取清單 = [
   './work-report-v4-opening-particles.js?v=490',
   './work-report-v4-defect-grid-picker-519.js?v=521',
   './work-report-v4-defect-select-force-520.js?v=521',
+  './work-report-v4-photo-display-522.js?v=522',
   './work-report-v4-google-ui.css?v=489',
   './assets/huaxin-report-icon.svg?v=489',
   './assets/huaxin-report-splash.svg?v=489'
