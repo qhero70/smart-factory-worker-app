@@ -1,181 +1,50 @@
-/* 報工作業 V4 PWA Bridge v4.8.8
- * 修正重點：
- * 1. 不良原因固定補讀 05_不良代碼主檔，前端選單一定吃主檔。
- * 2. 產品照片固定補讀 06_照片資料庫 + 02_產品主檔照片欄位。
- * 3. 機台照片固定補讀 06_照片資料庫 + 03_機台主檔照片欄位。
- * 4. GAS 回傳缺照片或缺不良原因時，自動用 Google Sheets gviz 補齊，不再只吃半套資料。
- */
+/* 報工作業 V4 PWA Bridge v5.0.9｜照片/不良主檔正式修復 */
 (function(){
 'use strict';
-
-const CFG=window.PWA_CONFIG||{};
-const SS=CFG.SPREADSHEET_ID||CFG.正式主資料庫ID||'19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
-const GAS_URL=(CFG.GAS_WEB_APP_URL||'https://script.google.com/macros/s/AKfycbzRvly1OV-C80bMmd2ww4BM1XAH9WTyz62VFDnUxVGiO15kzHahbeHZc2bNTSwdFCqBwQ/exec').trim();
-const DB_SHEETS={people:'01_人員主檔',products:'02_產品主檔',machines:'03_機台主檔',routes:'08_工站途程機台主檔',defects:'05_不良代碼主檔',photos:'06_照片資料庫'};
-let CACHE=null;
-
-function S(v){return String(v==null?'':v).trim();}
-function norm(v){return S(v).replace(/\.0$/,'');}
-function lower(v){return S(v).toLowerCase();}
-function pick(o,ks){o=o||{};for(const k of ks){if(o[k]!=null&&S(o[k])!=='')return S(o[k]);}return'';}
-function unique(a){const m={};return(a||[]).map(norm).filter(Boolean).filter(x=>!m[x]&&(m[x]=1));}
-function splitIds(s){return unique(S(s).split(/[、,，;；\/\s]+/).filter(x=>/^\d{1,5}(?:\.0)?$/.test(S(x))));}
-function today(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
-function ok(x){return !!(x&&(x.ok===true||x.成功===true||x.success===true));}
-function hasData(x){return !!((x&&((x.人員||x.people||[]).length||(x.報工工站群組||x.routes||x.途程工站群組||[]).length||(x.產品||x.products||[]).length||(x.機台||x.machines||[]).length)));}
-function timeout(ms){return new Promise((_,rej)=>setTimeout(()=>rej(new Error('API 逾時 '+ms+'ms')),ms));}
-function fetchText(url,opt,ms){return Promise.race([fetch(url,opt).then(r=>r.text()),timeout(ms||15000)]);}
-function buildPayload(action,payload){payload=Object.assign({spreadsheetId:SS,正式主資料庫ID:SS,主資料庫ID:SS,action,動作:action,_ts:String(Date.now())},payload||{});const sp=new URLSearchParams();Object.keys(payload).forEach(k=>{const v=payload[k];if(v!=null)sp.set(k,typeof v==='object'?JSON.stringify(v):String(v));});const json=JSON.stringify(payload);sp.set('payload',json);sp.set('資料',json);sp.set('json',json);return sp.toString();}
-async function apiPost(action,payload){if(!GAS_URL)throw new Error('尚未設定 GAS_WEB_APP_URL');const u=new URL(GAS_URL);u.searchParams.set('action',action);u.searchParams.set('動作',action);u.searchParams.set('_ts',Date.now());u.searchParams.set('spreadsheetId',SS);const txt=await fetchText(u.toString(),{method:'POST',mode:'cors',credentials:'omit',cache:'no-store',headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},body:buildPayload(action,payload)},18000);try{return JSON.parse(txt);}catch(e){return{成功:false,success:false,訊息:'GAS 回傳不是 JSON',原始回應:S(txt).slice(0,600)}};}
-
-function driveImageUrl(url){
-  let s=S(url);
-  if(!s)return'';
-  const m1=s.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-  const m2=s.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-  const m3=s.match(/drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)/);
-  const id=(m1&&m1[1])||(m2&&m2[1])||(m3&&m3[1]);
-  return id?`https://drive.google.com/thumbnail?id=${id}&sz=w1200`:s;
-}
-function firstUrl(v){
-  if(!v)return'';
-  if(Array.isArray(v))return firstUrl(v.find(Boolean));
-  if(typeof v==='object')return firstUrl(Object.values(v).find(x=>S(x).startsWith('http')));
-  const arr=S(v).split(/[\n,，;；|]+/).map(driveImageUrl).filter(x=>/^https?:\/\//i.test(x));
-  return arr[0]||'';
-}
-function photoType(t){t=S(t);if(t.includes('人')||/person|people|operator|staff/i.test(t))return'人員';if(t.includes('產')||t.includes('品')||/product|part/i.test(t))return'產品';if(t.includes('機')||t.includes('設備')||/machine|equipment/i.test(t))return'機台';return t;}
-function addPhoto(map,type,key,url){type=photoType(type);key=norm(key);url=firstUrl(url);if(!map[type]||!key||!url)return;map[type][key]=map[type][key]||url;map[type][lower(key)]=map[type][lower(key)]||url;}
-function normalizePhotos(rows){
-  const m={人員:{},產品:{},機台:{}};
-  (rows||[]).forEach(r=>{
-    const vals=Object.values(r||{});
-    const type=photoType(pick(r,['類型','照片類型','分類','資料類型','照片主鍵'])||vals[0]||'');
-    let url=pick(r,['縮圖網址','照片網址','圖片網址','網址','URL','url','連結','Drive連結','GoogleDrive連結']);
-    if(!url)url=vals.find(x=>S(x).startsWith('http'))||'';
-    const keys=[
-      pick(r,['對應ID','對應編號','主鍵','工號','員工編號','產品編號','料號','客戶品號','機台編號','設備編號']),
-      pick(r,['品名','產品名稱','機台名稱','設備名稱','姓名']),
-      vals[1],vals[2]
-    ].filter(Boolean);
-    keys.forEach(k=>addPhoto(m,type,k,url));
-  });
-  return m;
-}
-function photoFor(ph,type,keys){
-  const bucket=ph[photoType(type)]||{};
-  for(const k of (keys||[])){const kk=norm(k);if(kk&&bucket[kk])return bucket[kk];if(kk&&bucket[lower(kk)])return bucket[lower(kk)];}
-  return'';
-}
-
-function normalizeDefects(rows){
-  if(rows&&typeof rows==='object'&&!Array.isArray(rows)&&(rows.Z||rows.Y)){
-    return {Z:(rows.Z||[]).map(defectRow).filter(x=>x.代碼||x.名稱),Y:(rows.Y||[]).map(defectRow).filter(x=>x.代碼||x.名稱)};
-  }
-  const out={Z:[],Y:[]};
-  (Array.isArray(rows)?rows:[]).forEach(r=>{
-    if(S(pick(r,['啟用','是否啟用','使用狀態']))==='否')return;
-    const d=defectRow(r);
-    if(!d.代碼&&!d.名稱)return;
-    let cat=(pick(r,['分類','類別','不良分類','責任類型'])||S(d.代碼).slice(0,1)||'Y').toUpperCase();
-    if(cat!=='Z'&&cat!=='Y')cat=S(d.代碼).toUpperCase().startsWith('Z')?'Z':'Y';
-    d.分類=cat;
-    out[cat].push(d);
-  });
-  return out;
-}
-function defectRow(r){r=r||{};return{代碼:pick(r,['不良代碼','代碼','Code','code','不良原因代碼']),名稱:pick(r,['不良名稱','名稱','不良原因','Reason','reason','中文名稱']),英文名稱:pick(r,['英文名稱','英文','English','english','英文說明','英文原因']),責任歸屬:pick(r,['責任歸屬','責任','責任單位']),分類:pick(r,['分類','類別','不良分類']),啟用:pick(r,['啟用','是否啟用'])||'是'};}
-function defectCount(d){d=d||{};return(d.Z||[]).length+(d.Y||[]).length;}
-
-function goodProductName(n,pid){n=S(n);return !!(n&&!/^產品_\d+$/i.test(n)&&n!==pid&&n!=='無品名');}
-function makeProductIndex(products){const P={};(products||[]).forEach(p=>{if(p.產品編號)P[p.產品編號]=p;if(p.客戶品號)P[p.客戶品號]=p;});return P;}
-function normalizePeople(rows,ph){return(rows||[]).map(p=>{const id=norm(pick(p,['工號','員工編號','Employee ID','employeeId']));const u=firstUrl(pick(p,['照片網址','縮圖網址','圖片網址','頭像網址']))||photoFor(ph,'人員',[id,pick(p,['姓名','Name'])]);return Object.assign({},p,{工號:id,姓名:pick(p,['姓名','Name']),班別:pick(p,['班別','班別名稱'])||'早班',啟用:pick(p,['啟用','是否啟用'])||'是',照片網址:u,縮圖網址:u});}).filter(p=>(p.工號||p.姓名)&&p.啟用!=='否');}
-function normalizeProducts(rows,ph){return(rows||[]).map(p=>{const id=norm(pick(p,['產品編號','料號','品號','productCode']));const cust=norm(pick(p,['客戶品號','客戶料號','customerPartNo']));const name=pick(p,['品名','產品名稱','productName']);const u=firstUrl(pick(p,['產品照片網址','產品縮圖網址','照片網址','縮圖網址','圖片網址']))||photoFor(ph,'產品',[id,cust,name]);return Object.assign({},p,{產品編號:id,客戶品號:cust,品名:name,產品照片網址:u,產品縮圖網址:u,照片網址:u,縮圖網址:u});}).filter(p=>p.產品編號&&goodProductName(p.品名,p.產品編號));}
-function normalizeMachines(rows,ph){return(rows||[]).map(m=>{const id=norm(pick(m,['機台編號','主機台','設備編號','machineId']));const nm=pick(m,['機台名稱','設備名稱','名稱','machineName'])||('機台'+id);const area=pick(m,['區域','廠區','位置']);const model=pick(m,['機台型號','型號','規格']);const u=firstUrl(pick(m,['機台照片網址','照片網址','縮圖網址','圖片網址']))||photoFor(ph,'機台',[id,nm]);return Object.assign({},m,{機台編號:id,主機台:id,機台名稱:nm,設備名稱:nm,區域:area,機台型號:model,照片網址:u,縮圖網址:u,機台照片網址:u});}).filter(m=>m.機台編號);}
-function makeMachineIndex(machines){const M={};(machines||[]).forEach(m=>{M[m.機台編號]=m;if(m.設備名稱)M[m.設備名稱]=m;if(m.機台名稱)M[m.機台名稱]=m;});return M;}
-function machineListFromRoute(r,M,ph){
-  let ids=[];
-  ids=ids.concat(splitIds(pick(r,['機台清單','機台編號清單','可選機台','可用機台','機台列表'])));
-  ids=ids.concat(splitIds([pick(r,['機台編號','主機台','主機台編號','設備編號']),pick(r,['機台/型號/詳情'])].filter(Boolean).join('、')));
-  ids=unique(ids);
-  return ids.map(id=>{
-    const m=M[id]||{};
-    const nm=m.機台名稱||m.設備名稱||('機台'+id);
-    const u=m.照片網址||m.縮圖網址||m.機台照片網址||photoFor(ph,'機台',[id,nm])||'';
-    return {機台編號:id,主機台:id,機台名稱:nm,設備名稱:nm,區域:m.區域||pick(r,['區域'])||'',機台型號:m.機台型號||m.型號||'',照片網址:u,縮圖網址:u,機台照片網址:u};
-  });
-}
-function normalizeRoutes(rows,products,machines,ph){
-  const P=makeProductIndex(products),M=makeMachineIndex(machines);
-  return(rows||[]).map(r=>{
-    const pid=norm(pick(r,['產品編號','料號','品號']));
-    if(!pid)return null;
-    const p=P[pid]||{};
-    let pname=pick(r,['品名','產品名稱'])||p.品名||'';
-    if(!goodProductName(pname,pid))pname=p.品名||'';
-    const station=pick(r,['報工工站名稱','工站名稱','工站','工序名稱']);
-    if(!station)return null;
-    const proc=pick(r,['工序範圍','工序編號_最終','工序編號','工序','OP','作業順序']);
-    const ms=machineListFromRoute(r,M,ph);
-    const cust=pick(r,['客戶品號','客戶料號'])||p.客戶品號||'';
-    const pu=firstUrl(pick(r,['產品照片網址','產品縮圖網址','照片網址','縮圖網址','圖片網址']))||p.產品照片網址||p.照片網址||photoFor(ph,'產品',[pid,cust,pname])||'';
-    return Object.assign({},r,{產品編號:pid,客戶品號:cust,品名:pname,報工工站名稱:station,工站名稱:station,工序範圍:proc,工序:proc,主機台:(ms[0]&&ms[0].機台編號)||'',機台編號:ms.map(x=>x.機台編號).join('、'),機台編號清單:ms.map(x=>x.機台編號),機台清單:ms,產品照片網址:pu,產品縮圖網址:pu,照片網址:pu,縮圖網址:pu,顯示名稱:[station,proc,ms.map(x=>x.機台編號).join('、')].filter(Boolean).join('｜')});
-  }).filter(Boolean);
-}
-function buildProductList(routes,products,ph){
-  const map=new Map();
-  (routes||[]).forEach(gr=>{const key=gr.產品編號+'|'+gr.品名;if(!map.has(key))map.set(key,gr);});
-  (products||[]).forEach(p=>{const key=p.產品編號+'|'+p.品名;if(!map.has(key)){const u=p.產品照片網址||p.照片網址||photoFor(ph,'產品',[p.產品編號,p.客戶品號,p.品名])||'';map.set(key,Object.assign({},p,{報工工站名稱:'',工站名稱:'',產品照片網址:u,產品縮圖網址:u}));}});
-  return Array.from(map.values()).sort((a,b)=>S(a.品名).localeCompare(S(b.品名),'zh-Hant'));
-}
-
-function normalize(raw){
-  raw=raw||{};
-  const ph=normalizePhotos(raw.photos||raw.照片資料庫||raw.照片||[]);
-  const people=normalizePeople(raw.人員||raw.people||[],ph);
-  const products=normalizeProducts(raw.產品||raw.products||[],ph);
-  const machines=normalizeMachines(raw.機台||raw.machines||[],ph);
-  const routes=normalizeRoutes(raw.報工工站群組||raw.routes||raw.途程工站群組||[],products,machines,ph);
-  const defects=normalizeDefects(raw.不良原因||raw.defects||raw.不良原因主檔||[]);
-  const productList=buildProductList(routes,products,ph);
-  return {成功:true,success:true,人員:people,people,產品:products,products,機台:machines,machines,報工工站群組:routes,routes,途程工站群組:routes,產品清單:productList,productList,不良原因:defects,defects,班別清單:raw.班別清單||[{名稱:'早班',值:'早班'},{名稱:'中班',值:'中班'},{名稱:'大夜班',值:'大夜班'}],異常類型:raw.異常類型||['無異常','支援調度','材質異常','換刀','機台停機','待料','品質確認','其他'],筆數:{人員:people.length,產品:productList.length,機台:machines.length,報工工站群組:routes.length,不良原因:defectCount(defects)},訊息:'正式主資料庫讀取完成'};
-}
-function mergeRows(baseRows, sheetRows, keyList){
-  const map=new Map();
-  (sheetRows||[]).forEach(r=>{const key=keyList.map(k=>norm(r[k])).find(Boolean)||JSON.stringify(r);map.set(key,r);});
-  (baseRows||[]).forEach(r=>{const key=keyList.map(k=>norm(r[k])).find(Boolean)||JSON.stringify(r);map.set(key,Object.assign({},map.get(key)||{},r));});
-  return Array.from(map.values());
-}
-function denormalizeForMerge(data){
-  return {people:data.人員||data.people||[],products:data.產品||data.products||[],machines:data.機台||data.machines||[],routes:data.報工工站群組||data.routes||data.途程工站群組||[],defects:data.不良原因||data.defects||[],photos:data.photos||data.照片資料庫||[]};
-}
-function mergeRaw(base,sheets){
-  base=denormalizeForMerge(base||{});sheets=denormalizeForMerge(sheets||{});
-  return {people:mergeRows(base.people,sheets.people,['工號','員工編號','Employee ID']),products:mergeRows(base.products,sheets.products,['產品編號','料號','品號']),machines:mergeRows(base.machines,sheets.machines,['機台編號','設備編號','主機台']),routes:mergeRows(base.routes,sheets.routes,['產品編號','料號','品號','工站名稱','報工工站名稱']),defects:defectCount(normalizeDefects(base.defects))?base.defects:sheets.defects,photos:(base.photos&&base.photos.length)?base.photos:sheets.photos};
-}
-
-async function readSheet(sheet){const url=`https://docs.google.com/spreadsheets/d/${SS}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheet)}&_ts=${Date.now()}`;const txt=await fetchText(url,{cache:'no-store'},9000);const a=txt.indexOf('{'),b=txt.lastIndexOf('}');if(a<0||b<a)throw new Error('讀不到分頁：'+sheet);const data=JSON.parse(txt.slice(a,b+1));const heads=(data.table.cols||[]).map((c,i)=>S(c.label||c.id||('欄'+(i+1))));return(data.table.rows||[]).map(row=>{const o={};(row.c||[]).forEach((c,i)=>{if(heads[i])o[heads[i]]=c?(c.f!==undefined?c.f:c.v):'';});return o;}).filter(o=>Object.values(o).some(x=>S(x)!==''));}
-async function loadSheets(){const raw={};for(const [key,sheet] of Object.entries(DB_SHEETS)){try{raw[key]=await readSheet(sheet);}catch(e){raw[key]=[];console.warn('[V4] sheet load failed',sheet,e);}}return raw;}
-async function loadByGviz(){return normalize(await loadSheets());}
-
-async function loadInit(){
-  if(CACHE)return CACHE;
-  const actions=(CFG.API_ACTIONS&&CFG.API_ACTIONS.INIT)||['取得報工作業v2初始資料','取得報工作業V4初始資料','getWorkReportV4Init','init'];
-  let last=null;
-  for(const a of actions){
-    try{
-      const r=await apiPost(a,{mode:'init'});last=r;
-      if(ok(r)&&hasData(r)){
-        let sheets=null;
-        try{sheets=await loadSheets();}catch(e){console.warn('[V4] gviz enrich failed',e);}
-        CACHE=normalize(sheets?mergeRaw(r,sheets):r);
-        return CACHE;
-      }
-    }catch(e){last=e;console.warn('[V4] GAS init failed',a,e);}
-  }
-  try{CACHE=await loadByGviz();return CACHE;}catch(e){throw(last instanceof Error?last:e);}
-}
-async function submitReport(payload){const actions=(CFG.API_ACTIONS&&CFG.API_ACTIONS.SUBMIT)||['submitWorkReportV4','寫入報工作業V4','寫入報工作業v2'];let last=null;for(const a of actions){try{const r=await apiPost(a,payload);last=r;if(r&&(r.ok===true||r.成功===true||r.success===true||r.reportId||r.報工編號))return r;}catch(e){last=e;}}if(last instanceof Error)throw last;return last||{成功:false,success:false,訊息:'報工送出失敗'};}
-
-window.V4Bridge={loadInit,submitReport,apiPost,today,SS,GAS_URL,readSheet,loadByGviz};
+const C=window.PWA_CONFIG||{},SS=C.SPREADSHEET_ID||'19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8',GAS=(C.GAS_WEB_APP_URL||'https://script.google.com/macros/s/AKfycbzRvly1OV-C80bMmd2ww4BM1XAH9WTyz62VFDnUxVGiO15kzHahbeHZc2bNTSwdFCqBwQ/exec').trim();
+const 工作表={people:'01_人員主檔',products:'02_產品主檔',machines:'03_機台主檔',routes:'08_工站途程機台主檔',defects:'05_不良代碼主檔',photos:'06_照片資料庫'};
+const 讀表動作=['讀取主資料庫分頁','讀取工作表資料','讀取分頁資料','取得工作表資料','取得分頁資料','getSheetRows','readSheet','sheetRows'];let 快取=null;
+function S(v){return String(v==null?'':v).trim()}function N(v){return S(v).replace(/\.0$/,'')}function L(v){return S(v).toLowerCase()}function U(a){const m={};return(a||[]).map(N).filter(Boolean).filter(x=>!m[x]&&(m[x]=1))}
+function P(o,ks){o=o||{};for(const k of ks){if(o[k]!=null&&S(o[k])!=='')return S(o[k])}return''}
+function 行(d,ks){d=d||{};for(const k of ks){const v=d[k];if(Array.isArray(v))return v;if(v&&Array.isArray(v.rows))return v.rows;if(v&&Array.isArray(v.data))return v.data;if(v&&Array.isArray(v.資料))return v.資料}return[]}
+function ids(v){return U(S(v).split(/[、,，;；/\s]+/).filter(x=>/^\d{1,5}(?:\.0)?$/.test(S(x))))}
+function today(){const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function ok(x){return!!(x&&(x.ok===true||x.成功===true||x.success===true))}function has(x){return!!(x&&((x.人員||x.people||[]).length||(x.產品||x.products||[]).length||(x.機台||x.machines||[]).length||(x.報工工站群組||x.routes||x.途程工站群組||[]).length))}
+function to(ms){return new Promise((_,r)=>setTimeout(()=>r(new Error('API 逾時 '+ms+'ms')),ms))}function ft(u,o,ms){return Promise.race([fetch(u,o).then(r=>r.text()),to(ms||15000)])}
+function payload(a,p){p=Object.assign({spreadsheetId:SS,正式主資料庫ID:SS,主資料庫ID:SS,action:a,動作:a,_ts:String(Date.now())},p||{});const sp=new URLSearchParams();Object.keys(p).forEach(k=>{const v=p[k];if(v!=null)sp.set(k,typeof v==='object'?JSON.stringify(v):String(v))});const j=JSON.stringify(p);sp.set('payload',j);sp.set('資料',j);sp.set('json',j);return sp.toString()}
+async function apiPost(a,p){if(!GAS)throw new Error('尚未設定 GAS_WEB_APP_URL');const u=new URL(GAS);u.searchParams.set('action',a);u.searchParams.set('動作',a);u.searchParams.set('_ts',Date.now());u.searchParams.set('spreadsheetId',SS);const t=await ft(u.toString(),{method:'POST',mode:'cors',credentials:'omit',cache:'no-store',headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},body:payload(a,p)},C.API_TIMEOUT_MS||20000);try{return JSON.parse(t)}catch(e){return{成功:false,success:false,訊息:'GAS 回傳不是 JSON',原始回應:S(t).slice(0,600)}}}
+function 圖(v){let s=S(v);if(!s)return'';const um=s.match(/https?:\/\/[^\s"'<>，,；;|)]+/i);if(um)s=um[0];const id=(s.match(/\/file\/d\/([A-Za-z0-9_-]+)/)||[])[1]||(s.match(/[?&]id=([A-Za-z0-9_-]+)/)||[])[1]||(s.match(/drive\.google\.com\/open\?id=([A-Za-z0-9_-]+)/)||[])[1]||((!/^https?:/i.test(s)&&(s.match(/[-_A-Za-z0-9]{20,}/)||[])[0])||'');return id?`https://drive.google.com/thumbnail?id=${id}&sz=w1200`:(/^https?:\/\//i.test(s)?s:'')}
+function first(v){if(!v)return'';if(Array.isArray(v))return first(v.find(Boolean));if(typeof v==='object')return first(Object.values(v).find(Boolean));const s=S(v),a=s.split(/[\n,，;；|]+/).map(圖).filter(Boolean);return a[0]||圖(s)||''}
+function 類(t,r){t=S(t);r=r||{};if(t.includes('人')||/person|people|operator|staff/i.test(t)||r.工號||r.員工編號||r.姓名)return'人員';if(t.includes('機')||t.includes('設備')||/machine|equipment/i.test(t)||r.機台編號||r.設備編號||r.主機台)return'機台';if(t.includes('產')||t.includes('品')||/product|part/i.test(t)||r.產品編號||r.料號||r.客戶品號||r.品名)return'產品';return t||'產品'}
+function 加照(m,t,k,u){t=類(t);k=N(k);u=first(u);if(!m[t]||!k||!u)return;m[t][k]=m[t][k]||u;m[t][L(k)]=m[t][L(k)]||u}
+function 照片(rows){const m={人員:{},產品:{},機台:{}};(rows||[]).forEach(r=>{r=r||{};const v=Object.values(r),t=類(P(r,['類型','照片類型','分類','資料類型','主檔類型','對應類型','照片用途','照片主鍵']),r);let u=P(r,['縮圖網址','照片網址','圖片網址','網址','URL','url','連結','Drive連結','GoogleDrive連結','圖片連結','照片連結','檔案連結','檔案ID','FileID','fileId','imageUrl','ImageURL','圖片','照片','圖檔']);if(!u)u=v.find(x=>first(x))||'';[P(r,['對應ID','對應編號','主鍵','編號','工號','員工編號','產品編號','料號','品號','客戶品號','客戶料號','機台編號','設備編號','主機台']),P(r,['品名','產品名稱','機台名稱','設備名稱','姓名','名稱']),v[1],v[2],v[3]].filter(Boolean).forEach(k=>加照(m,t,k,u))});return m}
+function 找照(ph,t,ks){const b=ph[類(t)]||{};for(const k of(ks||[])){const kk=N(k);if(kk&&b[kk])return b[kk];if(kk&&b[L(kk)])return b[L(kk)]}return''}
+function 不良列(r){r=r||{};return{代碼:P(r,['不良代碼','代碼','Code','code','不良原因代碼','原因代碼']),名稱:P(r,['不良名稱','名稱','不良原因','Reason','reason','中文名稱','中文','說明']),英文名稱:P(r,['英文名稱','英文','English','english','英文說明','英文原因','EN','enName']),責任歸屬:P(r,['責任歸屬','責任','責任單位']),分類:P(r,['分類','類別','不良分類','責任類型']),啟用:P(r,['啟用','是否啟用','使用狀態'])||'是'}}
+function 不良(rows){if(rows&&typeof rows==='object'&&!Array.isArray(rows)&&(rows.Z||rows.Y))return{Z:(rows.Z||[]).map(不良列).filter(x=>x.代碼||x.名稱),Y:(rows.Y||[]).map(不良列).filter(x=>x.代碼||x.名稱)};const o={Z:[],Y:[]};(Array.isArray(rows)?rows:[]).forEach(r=>{if(S(P(r,['啟用','是否啟用','使用狀態']))==='否')return;const d=不良列(r);if(!d.代碼&&!d.名稱)return;let c=(d.分類||S(d.代碼).slice(0,1)||'Y').toUpperCase();if(c!=='Z'&&c!=='Y')c=S(d.代碼).toUpperCase().startsWith('Z')?'Z':'Y';d.分類=c;o[c].push(d)});return o}
+function 不良數(d){d=d||{};return(d.Z||[]).length+(d.Y||[]).length}function 不良原數(r){return 不良數(不良(r))}
+function 好品名(n,p){n=S(n);return!!(n&&!/^產品_\d+$/i.test(n)&&n!==p&&n!=='無品名')}function 產品索引(ps){const P={};(ps||[]).forEach(p=>{if(p.產品編號)P[p.產品編號]=p;if(p.客戶品號)P[p.客戶品號]=p;if(p.品名)P[p.品名]=p});return P}
+function 人員(rows,ph){return(rows||[]).map(p=>{const id=N(P(p,['工號','員工編號','Employee ID','employeeId'])),name=P(p,['姓名','Name','人員名稱']),u=first(P(p,['照片網址','縮圖網址','圖片網址','頭像網址','人員照片','照片','圖片','URL']))||找照(ph,'人員',[id,name]);return Object.assign({},p,{工號:id,姓名:name,班別:P(p,['班別','班別名稱'])||'早班',啟用:P(p,['啟用','是否啟用'])||'是',照片網址:u,縮圖網址:u})}).filter(p=>(p.工號||p.姓名)&&p.啟用!=='否')}
+function 產品(rows,ph){return(rows||[]).map(p=>{const id=N(P(p,['產品編號','料號','品號','productCode'])),cust=N(P(p,['客戶品號','客戶料號','customerPartNo'])),name=P(p,['品名','產品名稱','productName']),u=first(P(p,['產品照片網址','產品縮圖網址','照片網址','縮圖網址','圖片網址','產品圖片','產品照片','圖片','照片','圖檔','URL','url','Drive連結','GoogleDrive連結','檔案ID']))||找照(ph,'產品',[id,cust,name]);return Object.assign({},p,{產品編號:id,客戶品號:cust,品名:name,產品照片網址:u,產品縮圖網址:u,照片網址:u,縮圖網址:u})}).filter(p=>p.產品編號&&好品名(p.品名,p.產品編號))}
+function 機台(rows,ph){return(rows||[]).map(m=>{const id=N(P(m,['機台編號','主機台','設備編號','machineId'])),name=P(m,['機台名稱','設備名稱','名稱','machineName'])||('機台'+id),u=first(P(m,['機台照片網址','照片網址','縮圖網址','圖片網址','機台圖片','機台照片','設備照片','圖片','照片','圖檔','URL','url','Drive連結','GoogleDrive連結','檔案ID']))||找照(ph,'機台',[id,name]);return Object.assign({},m,{機台編號:id,主機台:id,機台名稱:name,設備名稱:name,區域:P(m,['區域','廠區','位置']),機台型號:P(m,['機台型號','型號','規格']),照片網址:u,縮圖網址:u,機台照片網址:u})}).filter(m=>m.機台編號)}
+function 機台索引(ms){const M={};(ms||[]).forEach(m=>{M[m.機台編號]=m;if(m.設備名稱)M[m.設備名稱]=m;if(m.機台名稱)M[m.機台名稱]=m});return M}
+function 途程機台(r,M,ph){let a=[];a=a.concat(ids(P(r,['機台清單','機台編號清單','可選機台','可用機台','機台列表'])));a=a.concat(ids([P(r,['機台編號','主機台','主機台編號','設備編號']),P(r,['機台/型號/詳情'])].filter(Boolean).join('、')));return U(a).map(id=>{const m=M[id]||{},name=m.機台名稱||m.設備名稱||('機台'+id),u=m.照片網址||m.縮圖網址||m.機台照片網址||找照(ph,'機台',[id,name])||'';return{機台編號:id,主機台:id,機台名稱:name,設備名稱:name,區域:m.區域||P(r,['區域'])||'',機台型號:m.機台型號||m.型號||'',照片網址:u,縮圖網址:u,機台照片網址:u}})}
+function 途程(rows,ps,ms,ph){const Pm=產品索引(ps),Mm=機台索引(ms);return(rows||[]).map(r=>{const pid=N(P(r,['產品編號','料號','品號']));if(!pid)return null;const p=Pm[pid]||{};let name=P(r,['品名','產品名稱'])||p.品名||'';if(!好品名(name,pid))name=p.品名||'';const station=P(r,['報工工站名稱','工站名稱','工站','工序名稱']);if(!station)return null;const proc=P(r,['工序範圍','工序編號_最終','工序編號','工序','OP','作業順序']),ml=途程機台(r,Mm,ph),cust=P(r,['客戶品號','客戶料號'])||p.客戶品號||'',pu=first(P(r,['產品照片網址','產品縮圖網址','照片網址','縮圖網址','圖片網址','產品圖片','產品照片','圖片','照片','圖檔']))||p.產品照片網址||p.照片網址||找照(ph,'產品',[pid,cust,name])||'';return Object.assign({},r,{產品編號:pid,客戶品號:cust,品名:name,報工工站名稱:station,工站名稱:station,工序範圍:proc,工序:proc,主機台:(ml[0]&&ml[0].機台編號)||'',機台編號:ml.map(x=>x.機台編號).join('、'),機台編號清單:ml.map(x=>x.機台編號),機台清單:ml,產品照片網址:pu,產品縮圖網址:pu,照片網址:pu,縮圖網址:pu,顯示名稱:[station,proc,ml.map(x=>x.機台編號).join('、')].filter(Boolean).join('｜')})}).filter(Boolean)}
+function 產品清單(routes,ps,ph){const m=new Map();(routes||[]).forEach(g=>{const k=g.產品編號+'|'+g.品名;if(!m.has(k))m.set(k,g)});(ps||[]).forEach(p=>{const k=p.產品編號+'|'+p.品名;if(!m.has(k)){const u=p.產品照片網址||p.照片網址||找照(ph,'產品',[p.產品編號,p.客戶品號,p.品名])||'';m.set(k,Object.assign({},p,{報工工站名稱:'',工站名稱:'',產品照片網址:u,產品縮圖網址:u}))}});return Array.from(m.values()).sort((a,b)=>S(a.品名).localeCompare(S(b.品名),'zh-Hant'))}
+function 拆(d){d=d||{};return{people:行(d,['people','人員','01_人員主檔']),products:行(d,['products','產品','02_產品主檔']),machines:行(d,['machines','機台','03_機台主檔']),routes:行(d,['routes','報工工站群組','途程工站群組','08_工站途程機台主檔']),defects:d.不良原因||d.defects||d.不良原因主檔||d.不良代碼主檔||d['05_不良代碼主檔']||[],photos:行(d,['photos','照片資料庫','照片','06_照片資料庫'])}}
+function mergeRows(a,b,ks){const m=new Map();(a||[]).forEach(r=>m.set(ks.map(k=>N(r[k])).find(Boolean)||JSON.stringify(r),r));(b||[]).forEach(r=>{const k=ks.map(x=>N(r[x])).find(Boolean)||JSON.stringify(r);m.set(k,Object.assign({},m.get(k)||{},r))});return Array.from(m.values())}
+function mergeDef(a,b){const ac=不良原數(a),bc=不良原數(b);if(bc>=ac&&bc>0)return b;if(ac>0&&bc>0)return[].concat(Array.isArray(a)?a:[],Array.isArray(b)?b:[]);return ac>0?a:b}
+function merge(a,b){a=拆(a);b=拆(b);return{people:mergeRows(a.people,b.people,['工號','員工編號','Employee ID']),products:mergeRows(a.products,b.products,['產品編號','料號','品號']),machines:mergeRows(a.machines,b.machines,['機台編號','設備編號','主機台']),routes:mergeRows(a.routes,b.routes,['產品編號','料號','品號','工站名稱','報工工站名稱','工序範圍','工序編號_最終']),defects:mergeDef(a.defects,b.defects),photos:[].concat(a.photos||[],b.photos||[])}}
+function normalize(raw){const r=拆(raw||{}),ph=照片(r.photos),pe=人員(r.people,ph),pr=產品(r.products,ph),ma=機台(r.machines,ph),ro=途程(r.routes,pr,ma,ph),de=不良(r.defects),pl=產品清單(ro,pr,ph);return{成功:true,success:true,人員:pe,people:pe,產品:pr,products:pr,機台:ma,machines:ma,報工工站群組:ro,routes:ro,途程工站群組:ro,產品清單:pl,productList:pl,不良原因:de,defects:de,班別清單:(raw||{}).班別清單||[{名稱:'早班',值:'早班'},{名稱:'中班',值:'中班'},{名稱:'大夜班',值:'大夜班'}],異常類型:(raw||{}).異常類型||['無異常','支援調度','材質異常','換刀','機台停機','待料','品質確認','其他'],筆數:{人員:pe.length,產品:pl.length,機台:ma.length,報工工站群組:ro.length,不良原因:不良數(de),照片資料庫:r.photos.length},訊息:'正式主資料庫讀取完成'}}
+function gasRows(r,sheet){if(Array.isArray(r))return r;if(!r||typeof r!=='object')return[];for(const c of[r[sheet],r.資料,r.data,r.rows,r.records,r.items,r.清單,r.結果,r.照片資料庫,r.不良代碼主檔,r.不良原因主檔]){if(Array.isArray(c))return c;if(c&&Array.isArray(c.rows))return c.rows;if(c&&Array.isArray(c.data))return c.data;if(c&&Array.isArray(c.資料))return c.資料}return[]}
+async function gviz(sheet){const u=`https://docs.google.com/spreadsheets/d/${SS}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheet)}&_ts=${Date.now()}`,t=await ft(u,{cache:'no-store'},9000),a=t.indexOf('{'),b=t.lastIndexOf('}');if(a<0||b<a)throw new Error('讀不到分頁：'+sheet);const d=JSON.parse(t.slice(a,b+1)),h=(d.table.cols||[]).map((c,i)=>S(c.label||c.id||('欄'+(i+1))));return(d.table.rows||[]).map(row=>{const o={};(row.c||[]).forEach((c,i)=>{if(h[i])o[h[i]]=c?(c.f!==undefined?c.f:c.v):''});return o}).filter(o=>Object.values(o).some(x=>S(x)!==''))}
+async function gasSheet(sheet){let last=null;for(const a of 讀表動作){try{const r=await apiPost(a,{sheet,sheetName:sheet,工作表名稱:sheet,分頁名稱:sheet,mode:'readSheet'});last=r;const rows=gasRows(r,sheet);if(rows.length)return rows}catch(e){last=e}}if(last instanceof Error)throw last;return[]}
+async function readSheet(sheet){try{const r=await gviz(sheet);if(r.length)return r}catch(e){console.warn('[V4] gviz sheet load failed',sheet,e)}try{const r=await gasSheet(sheet);if(r.length)return r}catch(e){console.warn('[V4] GAS sheet load failed',sheet,e)}return[]}
+async function loadSheets(){const r={};for(const[k,s]of Object.entries(工作表))r[k]=await readSheet(s);r['05_不良代碼主檔']=r.defects||[];r['06_照片資料庫']=r.photos||[];return r}async function loadByGviz(){return normalize(await loadSheets())}
+async function loadInit(){if(快取)return 快取;const acts=(C.API_ACTIONS&&C.API_ACTIONS.INIT)||['取得報工作業V4初始資料','getWorkReportV4Init','init'];let last=null;for(const a of acts){try{const r=await apiPost(a,{mode:'init',補齊分頁:['05_不良代碼主檔','06_照片資料庫','02_產品主檔','03_機台主檔','08_工站途程機台主檔']});last=r;if(ok(r)&&has(r)){let sh=null;try{sh=await loadSheets()}catch(e){console.warn('[V4] sheet enrich failed',e)}快取=normalize(sh?merge(r,sh):r);return 快取}}catch(e){last=e;console.warn('[V4] GAS init failed',a,e)}}try{快取=await loadByGviz();return 快取}catch(e){throw(last instanceof Error?last:e)}}
+async function submitReport(p){const acts=(C.API_ACTIONS&&C.API_ACTIONS.SUBMIT)||['submitWorkReportV4','寫入報工作業V4'];let last=null;for(const a of acts){try{const r=await apiPost(a,p);last=r;if(r&&(r.ok===true||r.成功===true||r.success===true||r.reportId||r.報工編號))return r}catch(e){last=e}}if(last instanceof Error)throw last;return last||{成功:false,success:false,訊息:'報工送出失敗'}}
+function patchUI(){if(window.__報工V4_509_UI修復完成)return;window.__報工V4_509_UI修復完成=true;const st=document.createElement('style');st.id='報工V4_509_UI修復';st.textContent='.person-photo-lg.no-photo{width:72px!important;height:72px!important;min-width:72px!important;min-height:72px!important;border-radius:20px!important;font-size:12px!important;line-height:1.25!important;display:grid!important;place-items:center!important;padding:6px!important;color:#3568d4!important;background:#eaf1ff!important}.machine-card{min-height:142px!important;border-radius:20px!important;overflow:hidden!important}.machine-no-img{width:72px!important;height:72px!important;min-height:72px!important;margin:16px auto 10px!important;border-radius:18px!important;font-size:26px!important;background:#edf3fb!important;color:#5270a8!important;display:grid!important;place-items:center!important}.machine-card img{width:100%!important;height:100%!important;object-fit:cover!important;display:block!important}.defect-row{display:grid!important;grid-template-columns:minmax(0,1fr) 92px 34px!important;gap:8px!important;align-items:center!important;width:100%!important;max-width:100%!important;overflow:hidden!important}.defect-row select{min-width:0!important;width:100%!important;font-size:15px!important}.defect-row .qty-input{width:100%!important;min-width:0!important;text-align:center!important}.defect-summary{font-size:14px!important;line-height:1.45!important;padding:10px 12px!important;border-radius:16px!important}@media(max-width:430px){.defect-row{grid-template-columns:minmax(0,1fr) 78px 32px!important;gap:6px!important}.defect-row select{font-size:14px!important}.defect-row .qty-input{font-size:14px!important}}';document.head.appendChild(st);function T(v){return S(v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}function A(v){return T(v).replace(/\n/g,'')}function opts(list){return(list||[]).map(x=>{const c=S(x.代碼||x.code||x.不良代碼),n=S(x.名稱||x.name||x.不良名稱||x.不良原因),e=S(x.英文名稱||x.enName||x.英文||x.English);return c?`<option value="${A(c)}">${T([c,n,e].filter(Boolean).join('｜'))}</option>`:''}).join('')}
+window.renderDefectRows=function(){const box=document.getElementById('defectContainer');if(!box||!window.STATE||!window.DB)return;const z=(window.DB.ngReasons&&window.DB.ngReasons.Z)||[],y=(window.DB.ngReasons&&window.DB.ngReasons.Y)||[],total=z.length+y.length;if(!window.STATE.defectRows.length)window.STATE.defectRows.push({id:Date.now(),category:'',code:'',name:'',enName:'',qty:0});if(!total){box.innerHTML='<div class="defect-summary error">⚠️ 未讀到 05_不良代碼主檔，請確認 GAS 初始化資料有回傳不良原因。</div>';if(typeof window.updateDefectSummaryDisplay==='function')window.updateDefectSummaryDisplay();return}box.innerHTML=window.STATE.defectRows.map(r=>`<div class="defect-row" id="defectRow_${r.id}"><select onchange="onDefectReasonChange(${r.id},this.value)"><option value="">── 選擇不良原因 / Select Defect Reason ──</option><optgroup label="Z 素材 / 外觀類">${opts(z)}</optgroup><optgroup label="Y 加工 / 尺寸類">${opts(y)}</optgroup></select><input class="qty-input" type="number" min="0" value="${Number(r.qty)||''}" inputmode="numeric" placeholder="pcs" onchange="onDefectQtyChange(${r.id},this.value)" oninput="onDefectQtyChange(${r.id},this.value)"><button class="defect-delete-btn ripple" onclick="deleteDefectRow(${r.id})" type="button">✕</button></div>`).join('');window.STATE.defectRows.forEach(r=>{if(!r.code)return;const s=document.querySelector(`#defectRow_${r.id} select`);if(s)s.value=r.code});if(typeof window.updateDefectSummaryDisplay==='function')window.updateDefectSummaryDisplay()};
+window.validateDefectAllocation=function(){const ng=Number((document.getElementById('ngQty')||{}).value)||0,rows=(window.STATE&&window.STATE.defectRows)||[],used=rows.filter(r=>Number(r.qty)>0),sum=rows.reduce((a,b)=>a+(Number(b.qty)||0),0);if(sum>ng)return'不良原因分配數量不可超過不良數 / Defect allocation exceeds NG qty';if(ng>0&&!used.length)return'已有不良數，請分配至少一筆不良原因 / Please allocate defect reason';if(used.find(r=>!S(r.code)))return'有輸入分配數量時，必須選擇不良原因 / Defect reason required';return''};
+window.updateDefectSyncNotice=function(){const n=document.getElementById('defectSyncNotice');if(!n||!window.DB)return;const c=((window.DB.ngReasons&&window.DB.ngReasons.Z)||[]).length+((window.DB.ngReasons&&window.DB.ngReasons.Y)||[]).length;n.innerHTML=c?`<div class="caption">✅ 已同步 05_不良代碼主檔：${c} 筆</div>`:'<div class="caption">⚠️ 未同步 05_不良代碼主檔</div>'};setTimeout(()=>{if(typeof window.renderDefectRows==='function')window.renderDefectRows();if(typeof window.updateDefectSyncNotice==='function')window.updateDefectSyncNotice()},0);setTimeout(()=>{if(typeof window.renderDefectRows==='function')window.renderDefectRows();if(typeof window.updateDefectSyncNotice==='function')window.updateDefectSyncNotice()},1200)}
+window.addEventListener('load',()=>setTimeout(patchUI,0));setTimeout(patchUI,1000);window.V4Bridge={loadInit,submitReport,apiPost,today,SS,GAS_URL,readSheet,loadByGviz,loadSheets};
 })();
