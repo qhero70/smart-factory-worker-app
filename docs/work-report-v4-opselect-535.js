@@ -1,7 +1,7 @@
-/* 報工V4｜完成版：產品→工站→OP→機台 v538 */
+/* 報工V4｜穩定完成版：產品→工站→OP→機台 v539 */
 (function(){
-  if(window.__HX_OP_RULE_538__)return;window.__HX_OP_RULE_538__=true;
-  var ruleRows=[],ruleLoaded=false;
+  if(window.__HX_OP_RULE_539__)return;window.__HX_OP_RULE_539__=true;
+  var ruleRows=[],ruleLoaded=false,lastProductKey='',lastRouteSignature='',refreshTimer=0;
   function s(v){return String(v==null?'':v).trim()}
   function n(v){return s(v).replace(/,/g,'').replace(/\.0$/,'').replace(/\s+/g,'').toUpperCase()}
   function nz(v){return n(v).replace(/^0+(?=\d)/,'')}
@@ -16,10 +16,12 @@
   async function loadRules(){if(ruleLoaded)return ruleRows;ruleLoaded=true;try{if(window.V4Bridge&&typeof window.V4Bridge.readSheet==='function'){var rows=await window.V4Bridge.readSheet('04_OP機台對應規則');ruleRows=Array.isArray(rows)?rows.filter(function(r){return first(r,['啟用'])!=='否'}):[]}}catch(e){ruleRows=[]}return ruleRows}
   function pool(){return(window.DB&&(window.DB.workstationGroups||window.DB.routes||window.DB.報工工站群組))||[]}
   async function routesFor(p){var rules=await loadRules();var a=rules.filter(function(r){return same(p,r)}).map(toRoute);if(!a.length)a=pool().filter(function(r){return same(p,r)}).map(toRoute);a.sort(function(x,y){return(Number(x.順序)||0)-(Number(y.順序)||0)});var seen={};return a.filter(function(r){var k=[r.產品編號,r.客戶品號,r.品名,r.順序,r.工站名稱,r.工序範圍,r.機台編號].map(s).join('|');if(seen[k])return false;seen[k]=1;return true})}
-  function draw(a){var sel=document.getElementById('workstationSelect');if(!sel||!a||!a.length)return;sel.innerHTML='<option value="">── 請選擇報工工站 / Select Workstation ──</option>';a.forEach(function(r,i){sel.add(new Option(text(r),String(i)))});}
-  async function rebuild(){if(!window.STATE)return;var p=window.STATE.currentProductGroup||{};if(!first(p,['產品編號','品名','客戶品號']))return;var a=await routesFor(p);if(!a.length)return;window.STATE.productGroupList=a;draw(a);window.HX_ROUTE_RULE_538={count:a.length,routes:a.map(text)};console.info('[報工V4 v538]',window.HX_ROUTE_RULE_538)}
-  function patch(){if(typeof window.selectProduct==='function'&&!window.selectProduct.__r538){var old=window.selectProduct;window.selectProduct=function(){var ret=old.apply(this,arguments);setTimeout(rebuild,20);setTimeout(rebuild,200);setTimeout(rebuild,800);return ret};window.selectProduct.__r538=true}if(typeof window.buildWorkstationSelect==='function'&&!window.buildWorkstationSelect.__r538){var old2=window.buildWorkstationSelect;window.buildWorkstationSelect=function(){var ret=old2.apply(this,arguments);setTimeout(rebuild,0);return ret};window.buildWorkstationSelect.__r538=true}rebuild()}
-  window.addEventListener('load',function(){loadRules().then(function(){setTimeout(patch,300);setTimeout(patch,1200)})});
-  document.addEventListener('click',function(){setTimeout(patch,60)},true);
-  setInterval(patch,1500);
+  function signature(a){return(a||[]).map(text).join('||')}
+  function draw(a){var sel=document.getElementById('workstationSelect');if(!sel||!a||!a.length)return;var sig=signature(a);if(sig===lastRouteSignature&&sel.options.length===a.length+1)return;var old=sel.value;sel.innerHTML='<option value="">── 請選擇報工工站 / Select Workstation ──</option>';a.forEach(function(r,i){sel.add(new Option(text(r),String(i)))});if(old!==''&&a[Number(old)])sel.value=old;lastRouteSignature=sig}
+  async function rebuild(force){if(!window.STATE)return;var p=window.STATE.currentProductGroup||{};var pk=[first(p,['產品編號']),first(p,['客戶品號']),first(p,['品名'])].join('|');if(!pk)return;if(!force&&pk===lastProductKey&&window.STATE.productGroupList&&window.STATE.productGroupList.length)return;var a=await routesFor(p);if(!a.length)return;window.STATE.productGroupList=a;draw(a);lastProductKey=pk;window.HX_ROUTE_RULE_539={count:a.length,routes:a.map(text)};console.info('[報工V4 v539]',window.HX_ROUTE_RULE_539)}
+  function schedule(force){clearTimeout(refreshTimer);refreshTimer=setTimeout(function(){rebuild(force)},40)}
+  function patch(){if(typeof window.selectProduct==='function'&&!window.selectProduct.__r539){var old=window.selectProduct;window.selectProduct=function(){lastProductKey='';lastRouteSignature='';var ret=old.apply(this,arguments);schedule(true);return ret};window.selectProduct.__r539=true}if(typeof window.buildWorkstationSelect==='function'&&!window.buildWorkstationSelect.__r539){var old2=window.buildWorkstationSelect;window.buildWorkstationSelect=function(){var ret=old2.apply(this,arguments);schedule(false);return ret};window.buildWorkstationSelect.__r539=true}}
+  function boot(){loadRules().then(function(){patch();schedule(false)})}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+  window.addEventListener('load',function(){setTimeout(boot,300)},{once:true});
 })();
