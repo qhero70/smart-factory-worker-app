@@ -1,81 +1,56 @@
-const 快取名稱 = 'huaxin-work-report-v4-cache-538-final-op-machine-rule';
+const 快取名稱 = 'huaxin-work-report-v4-cache-539-stable-no-flicker';
 const 預快取清單 = [
   './',
-  './work-report-v4-477.html?v=538&fix=final-op-machine-rule',
+  './work-report-v4-477.html?v=539&fix=stable-no-flicker',
   './work-report-v4-530.html',
   './work-report-v4.webmanifest?v=489',
-  './pwa-config.js?v=538',
+  './pwa-config.js?v=539',
   './gas-bridge.js?v=511',
   './work-report-v4-app-483.js?v=511',
-  './work-report-v4-opening-particles.js?v=538',
+  './work-report-v4-opening-particles.js?v=539',
   './work-report-v4-data-v529-adapter.js?v=533',
   './work-report-v4-official-lock-533.js?v=533',
-  './work-report-v4-route-complete-536.js?v=536',
-  './work-report-v4-opfix-534.js?v=534',
-  './work-report-v4-opselect-535.js?v=538',
+  './work-report-v4-opselect-535.js?v=539',
+  './work-report-v4-photo-stable-539.js?v=539',
   './work-report-v4-ui-lock-531.js?v=531',
   './work-report-v4-defect-grid-picker-519.js?v=521',
   './work-report-v4-defect-select-force-520.js?v=521',
-  './work-report-v4-photo-display-522.js?v=527',
   './work-report-v4-google-ui.css?v=489',
   './assets/huaxin-report-icon.svg?v=489',
   './assets/huaxin-report-splash.svg?v=489'
 ];
 
 self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(快取名稱)
-      .then(cache => cache.addAll(預快取清單))
-      .then(() => self.skipWaiting())
-  );
+  event.waitUntil(caches.open(快取名稱).then(cache => cache.addAll(預快取清單)).then(() => self.skipWaiting()));
 });
-
 self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== 快取名稱).map(k => caches.delete(k))))
-      .then(() => self.clients.claim())
-  );
+  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== 快取名稱).map(k => caches.delete(k)))).then(() => self.clients.claim()));
 });
-
 self.addEventListener('fetch', event => {
   const req = event.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
-
   if (url.hostname.includes('script.google.com')) {
-    event.respondWith(
-      fetch(req).catch(() => new Response(JSON.stringify({ 成功: false, 訊息: '離線狀態，無法寫入 GAS' }), {
-        headers: { 'Content-Type': 'application/json;charset=UTF-8' }
-      }))
-    );
+    event.respondWith(fetch(req).catch(() => new Response(JSON.stringify({ 成功:false, 訊息:'離線狀態，無法寫入 GAS' }),{headers:{'Content-Type':'application/json;charset=UTF-8'}})));
     return;
   }
-
   if (
     url.pathname.endsWith('/pwa-config.js') ||
     url.pathname.endsWith('/work-report-v4-opening-particles.js') ||
     url.pathname.endsWith('/work-report-v4-data-v529-adapter.js') ||
     url.pathname.endsWith('/work-report-v4-official-lock-533.js') ||
-    url.pathname.endsWith('/work-report-v4-route-complete-536.js') ||
-    url.pathname.endsWith('/work-report-v4-opfix-534.js') ||
     url.pathname.endsWith('/work-report-v4-opselect-535.js') ||
+    url.pathname.endsWith('/work-report-v4-photo-stable-539.js') ||
     url.pathname.endsWith('/work-report-v4-ui-lock-531.js')
   ) {
-    event.respondWith(fetch(req, { cache: 'no-store' }).catch(() => caches.match(req)));
+    event.respondWith(fetch(req,{cache:'no-store'}).catch(() => caches.match(req)));
     return;
   }
-
-  event.respondWith(
-    caches.match(req).then(cached => {
-      const fetching = fetch(req).then(res => {
-        if (res && res.ok) {
-          const clone = res.clone();
-          caches.open(快取名稱).then(cache => cache.put(req, clone));
-        }
-        return res;
-      }).catch(() => cached);
-      return cached || fetching;
-    })
-  );
+  event.respondWith(caches.match(req).then(cached => {
+    const fetching = fetch(req).then(res => {
+      if(res&&res.ok){const clone=res.clone();caches.open(快取名稱).then(cache=>cache.put(req,clone));}
+      return res;
+    }).catch(()=>cached);
+    return cached||fetching;
+  }));
 });
