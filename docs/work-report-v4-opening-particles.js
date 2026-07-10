@@ -1,4 +1,4 @@
-/* 化新報工 V4｜v5.3.7 完整途程比對 */
+/* 化新報工 V4｜v5.3.8 完成版：產品→工站→OP→機台 */
 (function(){
   'use strict';
   const 原封不動開場JS='https://cdn.jsdelivr.net/gh/qhero70/smart-factory-worker-app@ab308c06d91b31780ee9409666dbd071e1f101ba/docs/work-report-v4-opening-particles.js';
@@ -15,7 +15,7 @@
     載入JS('./work-report-v4-official-lock-533.js?v=533','hx-official-lock-533');
     載入JS('./work-report-v4-route-complete-536.js?v=536','hx-route-complete-536');
     載入JS('./work-report-v4-opfix-534.js?v=534','hx-opfix-534');
-    載入JS('./work-report-v4-opselect-535.js?v=537','hx-opselect-537');
+    載入JS('./work-report-v4-opselect-535.js?v=538','hx-opselect-538');
     載入JS('./work-report-v4-defect-grid-picker-519.js?v=521','hx-defect-grid-picker-519');
     載入JS('./work-report-v4-defect-select-force-520.js?v=521','hx-defect-select-force-520');
   }
