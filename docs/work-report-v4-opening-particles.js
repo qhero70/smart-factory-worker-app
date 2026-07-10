@@ -1,4 +1,4 @@
-/* 化新報工 V4｜v5.3.8 完成版：產品→工站→OP→機台 */
+/* 化新報工 V4｜v5.3.9 穩定版：不閃爍、不跳動 */
 (function(){
   'use strict';
   const 原封不動開場JS='https://cdn.jsdelivr.net/gh/qhero70/smart-factory-worker-app@ab308c06d91b31780ee9409666dbd071e1f101ba/docs/work-report-v4-opening-particles.js';
@@ -13,9 +13,8 @@
   function 載入正式資料與修復器(){
     載入JS('./work-report-v4-data-v529-adapter.js?v=533','hx-data-v529-adapter-533');
     載入JS('./work-report-v4-official-lock-533.js?v=533','hx-official-lock-533');
-    載入JS('./work-report-v4-route-complete-536.js?v=536','hx-route-complete-536');
-    載入JS('./work-report-v4-opfix-534.js?v=534','hx-opfix-534');
-    載入JS('./work-report-v4-opselect-535.js?v=538','hx-opselect-538');
+    載入JS('./work-report-v4-opselect-535.js?v=539','hx-opselect-539');
+    載入JS('./work-report-v4-photo-stable-539.js?v=539','hx-photo-stable-539');
     載入JS('./work-report-v4-defect-grid-picker-519.js?v=521','hx-defect-grid-picker-519');
     載入JS('./work-report-v4-defect-select-force-520.js?v=521','hx-defect-select-force-520');
   }
@@ -26,9 +25,7 @@
     fetch(原封不動開場JS,{cache:'no-store'})
       .then(r=>{if(!r.ok)throw new Error('開場檔讀取失敗 '+r.status);return r.text();})
       .then(code=>{
-        if(!/原封不動載入使用者上傳開場\.txt/.test(code) || !/原始開場GzipBase64/.test(code)){
-          throw new Error('開場檔驗證失敗');
-        }
+        if(!/原封不動載入使用者上傳開場\.txt/.test(code) || !/原始開場GzipBase64/.test(code)) throw new Error('開場檔驗證失敗');
         (0,eval)(code);
       })
       .catch(err=>{
