@@ -1,18 +1,18 @@
-const 快取名稱 = 'huaxin-work-report-v4-cache-537-route-match-fix';
+const 快取名稱 = 'huaxin-work-report-v4-cache-538-final-op-machine-rule';
 const 預快取清單 = [
   './',
-  './work-report-v4-477.html?v=537&fix=route-match-fix',
+  './work-report-v4-477.html?v=538&fix=final-op-machine-rule',
   './work-report-v4-530.html',
   './work-report-v4.webmanifest?v=489',
-  './pwa-config.js?v=535',
+  './pwa-config.js?v=538',
   './gas-bridge.js?v=511',
   './work-report-v4-app-483.js?v=511',
-  './work-report-v4-opening-particles.js?v=536',
+  './work-report-v4-opening-particles.js?v=538',
   './work-report-v4-data-v529-adapter.js?v=533',
   './work-report-v4-official-lock-533.js?v=533',
   './work-report-v4-route-complete-536.js?v=536',
   './work-report-v4-opfix-534.js?v=534',
-  './work-report-v4-opselect-535.js?v=537',
+  './work-report-v4-opselect-535.js?v=538',
   './work-report-v4-ui-lock-531.js?v=531',
   './work-report-v4-defect-grid-picker-519.js?v=521',
   './work-report-v4-defect-select-force-520.js?v=521',
