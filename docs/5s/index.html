@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta name="theme-color" content="#176b47">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="智慧5S">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="description" content="化新精密製造現場 5S 巡檢、改善、紅牌與物品盤點平台">
+  <title>化新精密｜智慧 5S 管理平台</title>
+  <link rel="manifest" href="./應用程式資訊.webmanifest?v=100">
+  <link rel="icon" href="./智慧5S圖示.svg?v=100" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./智慧5S圖示.svg?v=100">
+  <link rel="stylesheet" href="./智慧5S樣式.css?v=100">
+</head>
+<body>
+  <div id="讀取遮罩" class="讀取遮罩 隱藏" role="status" aria-live="polite">
+    <div class="讀取卡">
+      <div class="讀取圖示">🧹</div>
+      <h2 id="讀取標題">資料處理中</h2>
+      <p id="讀取說明">正在連線智慧工廠中央資料庫…</p>
+    </div>
+  </div>
+
+  <section id="登入頁" class="登入頁">
+    <div class="登入卡">
+      <div class="登入表單">
+        <div class="品牌列">
+          <div class="品牌標誌">5S</div>
+          <div>
+            <div class="品牌名稱">化新精密｜智慧 5S</div>
+            <div class="品牌副標">現場整理整頓與改善追蹤平台</div>
+          </div>
+        </div>
+        <h1 style="font-size:1.9rem;margin:12px 0 4px">工號登入</h1>
+        <p class="提示文字">沿用「01_人員主檔」，不另建帳號。第一次使用需保持網路連線。</p>
+        <div class="欄位群">
+          <label class="欄位標籤" for="登入工號">工號或姓名</label>
+          <input id="登入工號" class="輸入框" autocomplete="username" inputmode="text" placeholder="例如：fhfi573 或 黃嘉欣">
+        </div>
+        <button id="登入按鈕" class="主要按鈕 滿版" type="button">登入智慧 5S</button>
+        <div id="登入離線提示" class="安裝說明 隱藏">目前沒有網路。曾在本裝置登入過的人員仍可使用離線巡檢，資料會先保存在手機。</div>
+        <p class="提示文字" style="text-align:center;margin:4px 0 0">版本 <span id="登入版本">1.0.0</span>｜資料庫：⭐智慧工廠主資料庫</p>
+      </div>
+      <div class="登入展示">
+        <div class="品牌列" style="position:relative;z-index:2">
+          <div class="品牌標誌" style="background:rgba(255,255,255,.16)">化</div>
+          <div>
+            <div class="品牌名稱">化新精密有限公司</div>
+            <div class="品牌副標">HUAXIN PRECISION · SMART 5S</div>
+          </div>
+        </div>
+        <h1 class="登入標題" style="position:relative;z-index:2">讓整理整頓<br>變成可追蹤的改善閉環</h1>
+        <p class="登入說明" style="position:relative;z-index:2">巡檢、拍照、改善、紅牌、盤點與排名全部留在同一份中央資料庫。現場不再依賴口頭交辦，也不怕訊號不佳。</p>
+        <div class="功能標籤" style="position:relative;z-index:2">
+          <span>📋 行動巡檢</span><span>📷 異常拍照</span><span>🛠 改善閉環</span><span>🏷 紅牌追蹤</span><span>📴 離線可用</span><span>📊 主管戰情</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div id="應用程式" class="隱藏">
+    <header class="頂端列">
+      <div class="品牌列" style="margin:0;min-width:0">
+        <div class="品牌標誌" style="width:42px;height:42px;border-radius:14px;font-size:18px">5S</div>
+        <div class="頂端資訊">
+          <div id="頁面標題" class="頁面標題">智慧 5S 戰情中心</div>
+          <div id="頁面副標" class="頁面副標">化新精密｜製造部現場管理</div>
+        </div>
+      </div>
+      <div class="狀態列">
+        <div id="連線狀態" class="狀態徽章"><span class="狀態點"></span><span>在線</span></div>
+        <button id="使用者頭像" class="頭像" type="button" aria-label="開啟使用者設定">5S</button>
+      </div>
+    </header>
+
+    <main id="頁面內容" class="內容" tabindex="-1"></main>
+
+    <button id="浮動按鈕" class="浮動按鈕 隱藏" type="button" aria-label="新增">＋</button>
+
+    <nav class="底部導航" aria-label="主要功能">
+      <button class="導航按鈕 作用中" type="button" data-頁面="首頁"><span class="導航圖示">⌂</span><span>首頁</span></button>
+      <button class="導航按鈕" type="button" data-頁面="巡檢"><span class="導航圖示">✓</span><span>巡檢</span></button>
+      <button class="導航按鈕" type="button" data-頁面="改善"><span class="導航圖示">🛠</span><span>改善</span></button>
+      <button class="導航按鈕" type="button" data-頁面="紅牌"><span class="導航圖示">🏷</span><span>紅牌</span></button>
+      <button class="導航按鈕" type="button" data-頁面="設定"><span class="導航圖示">⚙</span><span>設定</span></button>
+    </nav>
+  </div>
+
+  <div id="彈窗遮罩" class="彈窗遮罩 隱藏" aria-modal="true" role="dialog">
+    <section class="彈窗">
+      <div class="彈窗標題列">
+        <div>
+          <div id="彈窗標題" class="彈窗標題">資料</div>
+          <div id="彈窗副標" class="卡片副標"></div>
+        </div>
+        <button id="關閉彈窗" class="關閉按鈕" type="button" aria-label="關閉">×</button>
+      </div>
+      <div id="彈窗內容"></div>
+    </section>
+  </div>
+
+  <div id="通知" class="通知" role="status" aria-live="polite"></div>
+
+  <noscript>
+    <div style="padding:30px;text-align:center">此平台需要啟用 JavaScript 才能執行。</div>
+  </noscript>
+
+  <script src="./智慧5S設定.js?v=100"></script>
+  <script src="./智慧5S資料庫.js?v=100"></script>
+  <script src="./智慧5S應用程式.js?v=100"></script>
+</body>
+</html>
