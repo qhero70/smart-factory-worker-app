@@ -1,0 +1,90 @@
+:root{
+  --背景:#f3f6f4;
+  --背景深:#e7ece8;
+  --卡片:#ffffff;
+  --文字:#17221b;
+  --次文字:#637068;
+  --品牌:#176b47;
+  --品牌深:#0f4f35;
+  --品牌淺:#dff4e9;
+  --整理:#7b213f;
+  --整頓:#176b47;
+  --清掃:#1976b9;
+  --清潔:#7654c4;
+  --素養:#d68816;
+  --成功:#168756;
+  --警告:#d98b13;
+  --危險:#d64545;
+  --資訊:#2d70c9;
+  --框線:#dce4df;
+  --陰影:0 14px 34px rgba(22,64,42,.10);
+  --圓角:22px;
+  --安全上:env(safe-area-inset-top,0px);
+  --安全下:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC","Microsoft JhengHei",sans-serif;background:var(--背景);color:var(--文字)}
+body{background:
+  radial-gradient(circle at 0 0,rgba(23,107,71,.14),transparent 28%),
+  radial-gradient(circle at 100% 8%,rgba(123,33,63,.10),transparent 24%),
+  linear-gradient(180deg,#f8fbf9 0%,var(--背景) 55%,#eef2ef 100%);
+  padding-top:var(--安全上);padding-bottom:calc(88px + var(--安全下));
+}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.隱藏{display:none!important}
+.讀取遮罩{position:fixed;inset:0;z-index:3000;background:rgba(11,24,16,.72);backdrop-filter:blur(10px);display:grid;place-items:center;color:#fff}
+.讀取卡{width:min(88vw,360px);padding:30px;border-radius:30px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);text-align:center;box-shadow:0 24px 80px rgba(0,0,0,.28)}
+.讀取圖示{font-size:50px;animation:呼吸 1.3s ease-in-out infinite alternate}
+@keyframes 呼吸{from{transform:scale(.92);opacity:.72}to{transform:scale(1.08);opacity:1}}
+.登入頁{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px 16px}
+.登入卡{width:min(100%,980px);display:grid;grid-template-columns:1.05fr .95fr;overflow:hidden;border-radius:38px;background:rgba(255,255,255,.90);box-shadow:0 30px 90px rgba(23,67,45,.18);border:1px solid rgba(255,255,255,.8)}
+.登入表單{padding:46px;display:flex;flex-direction:column;justify-content:center;gap:14px}
+.登入展示{padding:46px;background:linear-gradient(150deg,#0e4b32,#176b47 48%,#8b2748);color:#fff;display:flex;flex-direction:column;justify-content:center;min-height:600px;position:relative;overflow:hidden}
+.登入展示:before,.登入展示:after{content:"";position:absolute;border-radius:50%;background:rgba(255,255,255,.10)}
+.登入展示:before{width:320px;height:320px;right:-120px;top:-80px}.登入展示:after{width:220px;height:220px;left:-80px;bottom:-70px}
+.品牌列{display:flex;align-items:center;gap:12px;margin-bottom:10px}.品牌標誌{width:54px;height:54px;border-radius:18px;display:grid;place-items:center;background:linear-gradient(135deg,var(--品牌),#23a36b);color:#fff;font-size:27px;font-weight:900;box-shadow:0 14px 30px rgba(23,107,71,.28)}
+.品牌名稱{font-weight:950;font-size:1.05rem}.品牌副標{font-size:.72rem;color:var(--次文字);margin-top:3px;letter-spacing:.08em}
+.登入展示 .品牌副標{color:rgba(255,255,255,.72)}
+h1,h2,h3,p{margin-top:0}.登入標題{font-size:clamp(1.9rem,4vw,3.1rem);line-height:1.08;margin:18px 0 14px;font-weight:950}.登入說明{line-height:1.8;color:rgba(255,255,255,.82)}
+.功能標籤{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}.功能標籤 span{padding:9px 13px;border-radius:999px;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.18);font-size:.78rem;font-weight:800}
+.欄位群{display:grid;gap:7px}.欄位標籤{font-size:.79rem;font-weight:900;color:var(--次文字)}
+.輸入框,.選擇框,.文字框{width:100%;border:1px solid var(--框線);background:#fbfdfb;color:var(--文字);border-radius:16px;padding:14px 15px;outline:none;min-height:52px;transition:.2s}
+.文字框{min-height:98px;resize:vertical}.輸入框:focus,.選擇框:focus,.文字框:focus{border-color:var(--品牌);box-shadow:0 0 0 4px rgba(23,107,71,.12)}
+.主要按鈕,.次要按鈕,.危險按鈕,.文字按鈕{border:0;border-radius:16px;min-height:48px;padding:12px 18px;font-weight:950;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.主要按鈕{background:linear-gradient(135deg,var(--品牌),#20895e);color:#fff;box-shadow:0 12px 24px rgba(23,107,71,.24)}
+.次要按鈕{background:#edf4ef;color:var(--品牌深);border:1px solid #d8e7dd}
+.危險按鈕{background:#fff0f0;color:var(--危險);border:1px solid #f0caca}.文字按鈕{background:transparent;color:var(--品牌);padding:8px 10px;min-height:40px}
+.按鈕列{display:flex;gap:10px;flex-wrap:wrap}.滿版{width:100%}.小按鈕{min-height:38px;padding:8px 12px;border-radius:12px;font-size:.78rem}
+.提示文字{font-size:.78rem;color:var(--次文字);line-height:1.65}
+.頂端列{position:sticky;top:0;z-index:800;background:rgba(248,251,249,.88);backdrop-filter:blur(18px);border-bottom:1px solid rgba(210,224,215,.82);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.頂端資訊{min-width:0}.頁面標題{font-size:1.15rem;font-weight:950;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.頁面副標{font-size:.68rem;color:var(--次文字);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.狀態列{display:flex;align-items:center;gap:8px}.狀態徽章{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px;font-size:.7rem;font-weight:900;background:#edf4ef;color:var(--品牌)}.狀態徽章.離線{background:#fff2df;color:#a86100}.狀態點{width:8px;height:8px;border-radius:50%;background:var(--成功);box-shadow:0 0 0 4px rgba(22,135,86,.12)}.離線 .狀態點{background:var(--警告)}
+.頭像{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,var(--品牌),var(--整理));color:#fff;display:grid;place-items:center;font-weight:950;box-shadow:0 8px 18px rgba(23,107,71,.18)}
+.內容{width:min(100%,1180px);margin:0 auto;padding:18px 14px 30px}
+.主視覺{padding:24px;border-radius:28px;background:linear-gradient(135deg,#104d35,#1c8157 55%,#8a2949);color:#fff;box-shadow:0 20px 48px rgba(19,91,61,.22);position:relative;overflow:hidden}.主視覺:after{content:"5S";position:absolute;right:-12px;bottom:-38px;font-size:8.5rem;font-weight:950;color:rgba(255,255,255,.08)}.主視覺 h2{font-size:1.45rem;margin-bottom:8px}.主視覺 p{margin:0;color:rgba(255,255,255,.82);line-height:1.65;max-width:680px}.主視覺操作{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.主視覺 .次要按鈕{background:rgba(255,255,255,.14);color:#fff;border-color:rgba(255,255,255,.20)}
+.網格{display:grid;gap:14px}.統計網格{grid-template-columns:repeat(4,minmax(0,1fr));margin-top:16px}.快速網格{grid-template-columns:repeat(4,minmax(0,1fr));margin-top:16px}.雙欄{grid-template-columns:1.1fr .9fr;margin-top:16px}
+.卡片{background:rgba(255,255,255,.94);border:1px solid rgba(219,229,222,.9);border-radius:var(--圓角);box-shadow:var(--陰影);padding:18px}.卡片標題列{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}.卡片標題{font-size:1rem;font-weight:950}.卡片副標{font-size:.72rem;color:var(--次文字);margin-top:3px}
+.統計卡{min-height:128px;position:relative;overflow:hidden}.統計名稱{font-size:.75rem;color:var(--次文字);font-weight:900}.統計數值{font-size:2rem;font-weight:950;margin-top:10px;letter-spacing:-.03em}.統計圖示{position:absolute;right:14px;bottom:8px;font-size:3.1rem;opacity:.11}.統計趨勢{font-size:.7rem;margin-top:7px;font-weight:850}.成功字{color:var(--成功)}.警告字{color:var(--警告)}.危險字{color:var(--危險)}.資訊字{color:var(--資訊)}
+.快速卡{min-height:136px;text-align:left;border:0;position:relative;overflow:hidden}.快速圖示{width:50px;height:50px;border-radius:17px;display:grid;place-items:center;font-size:24px;color:#fff;margin-bottom:12px}.快速卡 b{font-size:.94rem}.快速卡 small{display:block;margin-top:6px;color:var(--次文字);line-height:1.5}.綠底{background:linear-gradient(135deg,#176b47,#2aa56f)}.酒紅底{background:linear-gradient(135deg,#7b213f,#b64d72)}.藍底{background:linear-gradient(135deg,#1769a5,#36a3dc)}.橙底{background:linear-gradient(135deg,#c5790c,#efb13e)}
+.區段標題{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:22px 0 12px}.區段標題 h2{margin:0;font-size:1.1rem}.區段標題 p{margin:3px 0 0;color:var(--次文字);font-size:.74rem}
+.清單{display:grid;gap:11px}.清單項目{border:1px solid var(--框線);background:#fff;border-radius:18px;padding:14px;display:flex;align-items:center;gap:12px}.清單圖示{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;background:var(--品牌淺);color:var(--品牌);font-size:22px;flex:none}.清單內容{min-width:0;flex:1}.清單主文{font-weight:950;font-size:.9rem}.清單次文{font-size:.72rem;color:var(--次文字);line-height:1.55;margin-top:4px}.清單右側{text-align:right;flex:none}.清單數值{font-weight:950}.標籤{display:inline-flex;align-items:center;padding:5px 9px;border-radius:999px;font-size:.67rem;font-weight:900;background:#eef3ef;color:var(--次文字)}.標籤.綠{background:#e2f5ea;color:#14744a}.標籤.紅{background:#fde6e6;color:#bd3030}.標籤.黃{background:#fff1d4;color:#a76500}.標籤.藍{background:#e5f1fb;color:#17649b}.標籤.紫{background:#eee8fb;color:#6547ad}
+.進度條{height:9px;border-radius:999px;background:#e6ece8;overflow:hidden}.進度條 span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--品牌),#35b77d);transition:.35s}
+.分類條{display:grid;gap:10px}.分類列{display:grid;grid-template-columns:54px 1fr 48px;align-items:center;gap:10px;font-size:.75rem;font-weight:900}
+.排行列{display:grid;grid-template-columns:38px 1fr 60px;align-items:center;gap:10px;padding:11px 0;border-bottom:1px dashed var(--框線)}.排行列:last-child{border-bottom:0}.名次{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;background:#eff3f0;font-weight:950}.名次.前三{background:#fff0c8;color:#8d5a00}.排行分數{text-align:right;font-weight:950;color:var(--品牌)}
+.篩選列{display:flex;gap:8px;overflow:auto;padding-bottom:4px}.篩選按鈕{border:1px solid var(--框線);background:#fff;color:var(--次文字);border-radius:999px;padding:9px 13px;font-size:.72rem;font-weight:900;white-space:nowrap}.篩選按鈕.作用中{background:var(--品牌);color:#fff;border-color:var(--品牌)}
+.區域卡{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}.區域代碼{font-size:.68rem;color:var(--次文字);font-weight:850}.區域名稱{font-size:1rem;font-weight:950;margin-top:4px}.區域資訊{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}.圓形分數{width:60px;height:60px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--品牌) var(--百分比),#e7ece8 0);position:relative}.圓形分數:before{content:"";position:absolute;inset:6px;background:#fff;border-radius:50%}.圓形分數 b{position:relative;font-size:.85rem}
+.巡檢頁頭{position:sticky;top:64px;z-index:500;background:rgba(243,246,244,.94);backdrop-filter:blur(12px);padding:10px 0 12px}.巡檢進度列{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}.巡檢進度列 b{font-size:.85rem}.巡檢項目{background:#fff;border:1px solid var(--框線);border-radius:20px;padding:16px;box-shadow:0 8px 22px rgba(18,61,38,.06)}.巡檢項目.異常{border-color:#f0b1b1;background:#fffafa}.項目上列{display:flex;gap:10px;align-items:flex-start}.項目序號{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;color:#fff;font-weight:950;flex:none}.分類-整理{background:var(--整理)}.分類-整頓{background:var(--整頓)}.分類-清掃{background:var(--清掃)}.分類-清潔{background:var(--清潔)}.分類-素養{background:var(--素養)}.項目內容{font-weight:900;line-height:1.55}.判定基準{font-size:.7rem;color:var(--次文字);line-height:1.5;margin-top:5px}.評分列{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:13px}.評分按鈕{border:1px solid var(--框線);background:#f7faf8;border-radius:14px;min-height:48px;font-weight:950;color:var(--次文字)}.評分按鈕.已選{color:#fff;border-color:transparent}.評分按鈕[data-分數="5"].已選{background:var(--成功)}.評分按鈕[data-分數="3"].已選{background:var(--資訊)}.評分按鈕[data-分數="1"].已選{background:var(--警告)}.評分按鈕[data-分數="0"].已選{background:var(--危險)}
+.異常區{margin-top:13px;padding-top:13px;border-top:1px dashed #efc6c6;display:grid;gap:10px}.照片按鈕{border:1px dashed #9eb7a8;background:#f4faf6;border-radius:15px;min-height:54px;padding:10px;font-weight:900;color:var(--品牌);display:flex;align-items:center;justify-content:center;gap:8px}.照片預覽{width:100%;max-height:220px;object-fit:cover;border-radius:16px;border:1px solid var(--框線)}
+.改善卡{border-left:6px solid var(--資訊)}.改善卡.高{border-left-color:var(--危險)}.改善卡.中{border-left-color:var(--警告)}.改善卡.低{border-left-color:var(--資訊)}.改善標題列{display:flex;justify-content:space-between;gap:10px}.改善標題{font-weight:950;line-height:1.5}.改善資訊{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}.改善描述{font-size:.76rem;color:var(--次文字);line-height:1.6;margin-top:8px}.照片對比{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.照片框{border-radius:16px;overflow:hidden;background:#eef2ef;min-height:120px;display:grid;place-items:center;color:var(--次文字);font-size:.72rem}.照片框 img{width:100%;height:180px;object-fit:cover}.照片框標題{font-size:.7rem;font-weight:900;margin-bottom:5px}
+.紅牌卡{border:2px solid #e95a5a;background:linear-gradient(180deg,#fff,#fff5f5);position:relative}.紅牌卡:before{content:"紅牌";position:absolute;right:12px;top:12px;background:var(--危險);color:#fff;border-radius:8px;padding:5px 8px;font-size:.65rem;font-weight:950}.紅牌編號{font-weight:950;color:var(--危險);font-size:.8rem}.倒數{font-size:1.3rem;font-weight:950}.倒數.逾期{color:var(--危險)}
+.空狀態{padding:36px 18px;text-align:center;color:var(--次文字)}.空狀態圖示{font-size:50px;opacity:.42;margin-bottom:12px}.空狀態 b{display:block;color:var(--文字);margin-bottom:6px}
+.底部導航{position:fixed;left:10px;right:10px;bottom:calc(8px + var(--安全下));z-index:900;height:72px;border-radius:25px;background:rgba(255,255,255,.93);backdrop-filter:blur(18px);border:1px solid rgba(211,223,215,.9);box-shadow:0 18px 44px rgba(19,64,41,.18);display:grid;grid-template-columns:repeat(5,1fr);padding:6px}.導航按鈕{border:0;background:transparent;border-radius:18px;color:#7b8980;font-size:.64rem;font-weight:900;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}.導航圖示{font-size:20px}.導航按鈕.作用中{background:var(--品牌淺);color:var(--品牌)}
+.浮動按鈕{position:fixed;right:18px;bottom:calc(94px + var(--安全下));z-index:850;width:58px;height:58px;border-radius:20px;border:0;background:linear-gradient(135deg,var(--品牌),#2fb57b);color:#fff;font-size:25px;box-shadow:0 16px 30px rgba(23,107,71,.32)}
+.彈窗遮罩{position:fixed;inset:0;z-index:1800;background:rgba(9,20,13,.68);backdrop-filter:blur(8px);display:flex;align-items:flex-end;justify-content:center;padding-top:var(--安全上)}.彈窗{width:min(100%,720px);max-height:92dvh;overflow:auto;background:#f8fbf9;border-radius:28px 28px 0 0;padding:18px 16px calc(24px + var(--安全下));box-shadow:0 -30px 70px rgba(0,0,0,.28)}.彈窗標題列{position:sticky;top:-18px;background:rgba(248,251,249,.96);backdrop-filter:blur(12px);z-index:5;padding:18px 0 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--框線)}.彈窗標題{font-size:1.05rem;font-weight:950}.關閉按鈕{width:40px;height:40px;border-radius:14px;border:0;background:#edf2ef;color:var(--次文字);font-size:20px}.表單網格{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}.跨欄{grid-column:1/-1}
+.通知{position:fixed;left:50%;bottom:calc(96px + var(--安全下));z-index:2800;transform:translate(-50%,20px);opacity:0;pointer-events:none;transition:.25s;max-width:calc(100vw - 32px);background:#183126;color:#fff;border-radius:16px;padding:13px 18px;font-weight:900;box-shadow:0 16px 36px rgba(0,0,0,.24)}.通知.顯示{opacity:1;transform:translate(-50%,0)}.通知.錯誤{background:#8f2929}.通知.警告{background:#8c5b0b}
+.同步面板{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;background:#eef5f0;border-radius:16px;margin-top:12px}.同步面板 b{font-size:.83rem}.同步面板 small{display:block;color:var(--次文字);margin-top:3px}
+.安裝說明{background:#eef5f0;border-radius:18px;padding:14px;font-size:.78rem;line-height:1.7;color:var(--次文字)}
+@media(max-width:900px){.登入卡{grid-template-columns:1fr}.登入展示{display:none}.登入表單{padding:32px 22px;min-height:620px}.統計網格,.快速網格{grid-template-columns:repeat(2,1fr)}.雙欄{grid-template-columns:1fr}.內容{padding-top:14px}.主視覺{padding:20px}.表單網格{grid-template-columns:1fr}.跨欄{grid-column:auto}}
+@media(max-width:480px){.統計卡{min-height:112px;padding:15px}.統計數值{font-size:1.65rem}.快速卡{min-height:126px;padding:15px}.頂端列{padding:9px 10px}.狀態徽章 span:last-child{display:none}.內容{padding-left:10px;padding-right:10px}.評分列{gap:6px}.評分按鈕{min-height:44px}.照片對比{grid-template-columns:1fr}.彈窗{padding-left:12px;padding-right:12px}.主視覺:after{font-size:6.5rem}}
+@media print{.頂端列,.底部導航,.浮動按鈕,.主要按鈕,.次要按鈕,.危險按鈕{display:none!important}body{padding:0;background:#fff}.內容{width:100%;max-width:none}.卡片{box-shadow:none;break-inside:avoid}}
