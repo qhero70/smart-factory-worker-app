@@ -1,0 +1,47 @@
+{
+  "name": "化新精密｜智慧 5S 管理平台",
+  "short_name": "智慧5S",
+  "description": "製造現場 5S 巡檢、改善、紅牌、物品盤點與主管戰情平台",
+  "id": "./index.html",
+  "start_url": "./index.html?來源=PWA",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
+  "background_color": "#f3f6f4",
+  "theme_color": "#176b47",
+  "lang": "zh-Hant-TW",
+  "dir": "ltr",
+  "orientation": "any",
+  "categories": ["business", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "./智慧5S圖示.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "開始巡檢",
+      "short_name": "巡檢",
+      "description": "直接進入 5S 巡檢區域選擇",
+      "url": "./index.html?頁面=巡檢",
+      "icons": [{"src":"./智慧5S圖示.svg","sizes":"any","type":"image/svg+xml"}]
+    },
+    {
+      "name": "改善追蹤",
+      "short_name": "改善",
+      "description": "查看待改善與逾期案件",
+      "url": "./index.html?頁面=改善",
+      "icons": [{"src":"./智慧5S圖示.svg","sizes":"any","type":"image/svg+xml"}]
+    },
+    {
+      "name": "紅牌管理",
+      "short_name": "紅牌",
+      "description": "查看紅牌暫存與處置進度",
+      "url": "./index.html?頁面=紅牌",
+      "icons": [{"src":"./智慧5S圖示.svg","sizes":"any","type":"image/svg+xml"}]
+    }
+  ]
+}
