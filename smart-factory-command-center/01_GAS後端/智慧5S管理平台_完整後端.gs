@@ -1,6 +1,6 @@
 /**
  * 化新精密｜智慧 5S 管理平台｜完整後端擴充模組
- * 版本：1.0.0
+ * 版本：1.0.2
  * 用途：初始化分頁、戰情統計、LINE 待通知發送、照片轉存 Google Drive。
  *
  * 目前 PWA 已可沿用既有通用 API：sheetData、appendRow、updateRow 直接運作。
@@ -8,7 +8,7 @@
  *   '智慧5S_嘗試處理動作_'
  */
 
-var 智慧5S_版本 = '1.0.0';
+var 智慧5S_版本 = '1.0.2';
 var 智慧5S_預設試算表識別碼 = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
 var 智慧5S_照片資料夾名稱 = '智慧5S照片資料庫';
 

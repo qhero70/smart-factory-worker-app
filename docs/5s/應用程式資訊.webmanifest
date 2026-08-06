@@ -15,9 +15,15 @@
   "categories": ["business", "productivity", "utilities"],
   "icons": [
     {
-      "src": "./智慧5S圖示.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "./智慧5S圖示-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./智慧5S圖示-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ],
@@ -27,21 +33,21 @@
       "short_name": "巡檢",
       "description": "直接進入 5S 巡檢區域選擇",
       "url": "./index.html?頁面=巡檢",
-      "icons": [{"src":"./智慧5S圖示.svg","sizes":"any","type":"image/svg+xml"}]
+      "icons": [{"src":"./智慧5S圖示-192.png","sizes":"192x192","type":"image/png"}]
     },
     {
       "name": "改善追蹤",
       "short_name": "改善",
       "description": "查看待改善與逾期案件",
       "url": "./index.html?頁面=改善",
-      "icons": [{"src":"./智慧5S圖示.svg","sizes":"any","type":"image/svg+xml"}]
+      "icons": [{"src":"./智慧5S圖示-192.png","sizes":"192x192","type":"image/png"}]
     },
     {
       "name": "紅牌管理",
       "short_name": "紅牌",
       "description": "查看紅牌暫存與處置進度",
       "url": "./index.html?頁面=紅牌",
-      "icons": [{"src":"./智慧5S圖示.svg","sizes":"any","type":"image/svg+xml"}]
+      "icons": [{"src":"./智慧5S圖示-192.png","sizes":"192x192","type":"image/png"}]
     }
   ]
 }

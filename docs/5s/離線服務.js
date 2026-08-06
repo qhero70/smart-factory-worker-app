@@ -1,5 +1,5 @@
 'use strict';
-const 快取版本 = '化新精密-智慧5S-v1.0.1';
+const 快取版本 = '化新精密-智慧5S-v1.0.2';
 const 應用程式外殼 = [
   './',
   './index.html',
@@ -10,6 +10,8 @@ const 應用程式外殼 = [
   './智慧5S應用程式.js',
   './應用程式資訊.webmanifest',
   './智慧5S圖示.svg',
+  './智慧5S圖示-192.png',
+  './智慧5S圖示-512.png',
   './離線頁.html'
 ];
 
@@ -33,6 +35,7 @@ self.addEventListener('fetch', 事件 => {
   const 請求 = 事件.request;
   if (請求.method !== 'GET') return;
   const 網址 = new URL(請求.url);
+  const 讀取本機快取 = () => caches.match(請求, { ignoreSearch: true });
 
   if (網址.hostname.includes('script.google.com') || 網址.hostname.includes('script.googleusercontent.com')) {
     事件.respondWith(fetch(請求, { cache: 'no-store' }));
@@ -60,13 +63,13 @@ self.addEventListener('fetch', 事件 => {
           if (回應 && 回應.ok) caches.open(快取版本).then(快取 => 快取.put(請求, 回應.clone()));
           return 回應;
         })
-        .catch(() => caches.match(請求))
+        .catch(() => 讀取本機快取())
     );
     return;
   }
 
   事件.respondWith(
-    caches.match(請求).then(快取回應 => {
+    讀取本機快取().then(快取回應 => {
       const 網路請求 = fetch(請求).then(回應 => {
         if (回應 && 回應.ok && 網址.origin === self.location.origin) {
           caches.open(快取版本).then(快取 => 快取.put(請求, 回應.clone()));

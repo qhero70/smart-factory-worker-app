@@ -998,7 +998,7 @@
     綁定固定事件();
     更新連線狀態();
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => navigator.serviceWorker.register('./離線服務.js?v=100', { scope: './' }).catch(錯誤 => console.warn('離線服務註冊失敗', 錯誤)));
+      window.addEventListener('load', () => navigator.serviceWorker.register('./離線服務.js?v=102', { scope: './' }).catch(錯誤 => console.warn('離線服務註冊失敗', 錯誤)));
     }
     try {
       const 已登入 = JSON.parse(localStorage.getItem(使用者快取鍵) || 'null');
