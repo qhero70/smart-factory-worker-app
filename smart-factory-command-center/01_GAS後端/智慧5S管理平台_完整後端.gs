@@ -31,6 +31,11 @@ var 智慧5S_分頁規格 = {
 
 function 智慧5S_嘗試處理動作_(參數) {
   var 動作 = String((參數 && (參數.action || 參數['動作'])) || '').trim();
+  if (動作 === 'updateRow' || 動作 === '智慧5S_更新資料列') {
+    var 分頁名稱 = String((參數 && (參數.sheet || 參數.sheetName || 參數['分頁'] || 參數['分頁名稱'])) || '').trim();
+    if (分頁名稱.indexOf('5S_') !== 0) return null;
+    return 智慧5S_更新資料列_(參數);
+  }
   if (動作 === '智慧5S_健康檢查') return 智慧5S_健康檢查_();
   if (動作 === '智慧5S_初始化') return 智慧5S_初始化_();
   if (動作 === '智慧5S_取得戰情') return 智慧5S_取得戰情_(參數);
@@ -38,6 +43,87 @@ function 智慧5S_嘗試處理動作_(參數) {
   if (動作 === '智慧5S_發送待通知') return 智慧5S_發送待通知_(參數);
   if (動作 === '智慧5S_儲存照片') return 智慧5S_儲存照片_(參數);
   return null;
+}
+
+/**
+ * 正式 PWA 的改善、紅牌流程需要 updateRow；主 API v5.2.5 尚未提供此路由。
+ * 本函式只允許更新 5S_ 分頁，並依正式表頭對齊欄位，避免陣列順序不同造成錯欄。
+ */
+function 智慧5S_更新資料列_(參數) {
+  var 分頁名稱 = String((參數 && (參數.sheet || 參數.sheetName || 參數['分頁'] || 參數['分頁名稱'])) || '').trim();
+  if (分頁名稱.indexOf('5S_') !== 0) throw new Error('只允許更新 5S_ 分頁');
+
+  var 列號 = Number(參數 && (參數.rowNumber || 參數['列號'] || 參數['_列號']));
+  if (!列號 || 列號 < 2 || Math.floor(列號) !== 列號) throw new Error('rowNumber 必須是大於等於 2 的整數');
+
+  var 資料庫 = 智慧5S_取得資料庫_();
+  var 分頁 = 資料庫.getSheetByName(分頁名稱);
+  if (!分頁) throw new Error('找不到分頁：' + 分頁名稱);
+  if (列號 > 分頁.getLastRow()) throw new Error('rowNumber 超出資料範圍：' + 列號);
+
+  var 鎖 = LockService.getScriptLock();
+  鎖.waitLock(30000);
+  try {
+    var 最後欄 = Math.max(分頁.getLastColumn(), 1);
+    var 正式欄位 = 分頁.getRange(1, 1, 1, 最後欄).getDisplayValues()[0].map(function (欄名) { return String(欄名 || '').trim(); });
+    var 原值 = 分頁.getRange(列號, 1, 1, 最後欄).getValues()[0];
+    var 傳入欄位 = 智慧5S_解析陣列參數_(參數 && (參數.headers || 參數['欄位']));
+    var 傳入值 = 智慧5S_解析陣列參數_(參數 && (參數.values || 參數['值']));
+    var 物件資料 = 參數 && (參數.row || 參數.object || 參數['資料']);
+    if (typeof 物件資料 === 'string') {
+      try { 物件資料 = JSON.parse(物件資料); } catch (錯誤) { 物件資料 = null; }
+    }
+
+    var 更新欄位數 = 0;
+    if (物件資料 && typeof 物件資料 === 'object' && !Array.isArray(物件資料)) {
+      正式欄位.forEach(function (欄名, 索引) {
+        if (欄名 && Object.prototype.hasOwnProperty.call(物件資料, 欄名)) {
+          原值[索引] = 物件資料[欄名] == null ? '' : 物件資料[欄名];
+          更新欄位數++;
+        }
+      });
+    } else if (傳入欄位.length && 傳入值.length) {
+      傳入欄位.forEach(function (欄名, 索引) {
+        var 正式索引 = 正式欄位.indexOf(String(欄名 || '').trim());
+        if (正式索引 >= 0 && 索引 < 傳入值.length) {
+          原值[正式索引] = 傳入值[索引] == null ? '' : 傳入值[索引];
+          更新欄位數++;
+        }
+      });
+    } else if (傳入值.length) {
+      for (var 索引 = 0; 索引 < Math.min(傳入值.length, 最後欄); 索引++) {
+        原值[索引] = 傳入值[索引] == null ? '' : 傳入值[索引];
+        更新欄位數++;
+      }
+    }
+
+    if (!更新欄位數) throw new Error('沒有可更新的 5S 欄位');
+    分頁.getRange(列號, 1, 1, 最後欄).setValues([原值]);
+    SpreadsheetApp.flush();
+    return {
+      成功: true,
+      ok: true,
+      success: true,
+      action: 'updateRow',
+      sheet: 分頁名稱,
+      rowNumber: 列號,
+      更新欄位數: 更新欄位數,
+      版本: 智慧5S_版本
+    };
+  } finally {
+    鎖.releaseLock();
+  }
+}
+
+function 智慧5S_解析陣列參數_(值) {
+  if (Array.isArray(值)) return 值.slice();
+  if (typeof 值 === 'string' && 值.trim().charAt(0) === '[') {
+    try {
+      var 結果 = JSON.parse(值);
+      return Array.isArray(結果) ? 結果 : [];
+    } catch (錯誤) { return []; }
+  }
+  return [];
 }
 
 function 智慧5S_取得資料庫_() {
