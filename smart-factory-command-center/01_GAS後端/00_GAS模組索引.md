@@ -27,7 +27,8 @@ smart-factory-command-center/01_GAS後端/總控_38_6_doPost最終接線.gs
 ## 二、主後端 doPost 正式順序
 
 ```text
-37_LINE 指令中心
+智慧5S LINE 群組綁定
+→ 37_LINE 指令中心
 → 34_LINE 角色選單分流
 → 33_LINE 身份權限檢查
 → 31_LINE 主管戰情日期快選
@@ -112,6 +113,8 @@ smart-factory-command-center/01_GAS後端/總控_38_6_doPost最終接線.gs
 36_LINE_角色選單維護與權限異常修復工具.gs
 37_LINE_指令中心與快捷指令總表.gs
 38_LINE_指令中心RichMenu快捷按鈕優化.gs
+智慧5S_LINE群組綁定.gs
+智慧5S_LINE唯一Bot橋接.gs
 總控_38_6_doPost最終接線.gs
 ```
 
@@ -129,6 +132,8 @@ GAS 測試：
 初始化37_LINE指令中心與快捷指令總表
 測試34_LINE角色分流_本機規格
 測試38_LINE快捷RichMenu_本機規格
+測試_智慧5S_LINE群組綁定_解析指令
+測試_智慧5S_LINE橋接_通知內容與發送結果
 ```
 
 LINE 測試：
@@ -144,6 +149,9 @@ LINE 測試：
 主管戰情
 今日戰情
 昨日戰情
+5S群組說明
+5S群組狀態
+5S群組綁定 全部
 ```
 
 ---

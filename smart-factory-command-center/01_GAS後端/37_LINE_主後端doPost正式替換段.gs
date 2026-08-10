@@ -8,6 +8,11 @@ function doPost(e) {
   const action = String((p && (p.action || p['動作'])) || '').trim();
 
   if (p && p.events && Array.isArray(p.events)) {
+    if (typeof 智慧5S_LINE群組綁定_嘗試處理Webhook_ === 'function') {
+      var 智慧5S群組結果 = 智慧5S_LINE群組綁定_嘗試處理Webhook_(p);
+      if (智慧5S群組結果 && 智慧5S群組結果.已處理) return 主程式_安全輸出JSON_(智慧5S群組結果);
+    }
+
     if (typeof LINE指令中心37_嘗試處理Webhook_ === 'function') {
       var 指令中心結果 = LINE指令中心37_嘗試處理Webhook_(p);
       if (指令中心結果 && 指令中心結果.已處理) return 主程式_安全輸出JSON_(指令中心結果);
