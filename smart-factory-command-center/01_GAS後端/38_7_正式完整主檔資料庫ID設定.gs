@@ -1,26 +1,30 @@
 /**
- * 38.7｜正式完整主檔資料庫 ID 設定工具
- * 版本：v1.7.5_38.7_master_database_id
+ * 化新精密｜唯一正式主資料庫 ID 設定工具
+ * 版本：v1.8.0_智慧5S_唯一正式主資料庫
  *
  * 用途：
  * 1. 不修改既有主後端核心函數。
- * 2. 透過 Script Properties 寫入「智慧製造_SPREADSHEET_ID」。
- * 3. 既有 取得試算表_() 會優先讀取此屬性，因此可安全切換到正式完整主檔資料庫。
+ * 2. 同步寫入「智慧製造_SPREADSHEET_ID」與「智慧製造中央作戰資料庫_ID」。
+ * 3. 既有共用後端與智慧 5S 模組均使用同一份正式資料庫。
  *
- * 正式完整主檔資料庫：
- * 智慧製造中央作戰指揮中心資料庫_38_7正式完整主檔版
+ * 正式資料庫：
+ * https://docs.google.com/spreadsheets/d/19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8/edit
  */
 
-var 智慧製造38_7_正式完整主檔資料庫ID = '10j1009HMaZol47urKrwt6sWYc3KyxjZGnlHBX5qItnU';
+var 智慧製造38_7_正式完整主檔資料庫ID = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
 
 function 套用38_7正式完整主檔資料庫ID() {
   var id = 智慧製造38_7_正式完整主檔資料庫ID;
   PropertiesService.getScriptProperties().setProperty('智慧製造_SPREADSHEET_ID', id);
-  PropertiesService.getScriptProperties().setProperty('智慧製造_資料庫版本', 'v38.7_master_import');
-  PropertiesService.getScriptProperties().setProperty('智慧製造_資料庫名稱', '智慧製造中央作戰指揮中心資料庫_38_7正式完整主檔版');
+  PropertiesService.getScriptProperties().setProperty('智慧製造中央作戰資料庫_ID', id);
+  PropertiesService.getScriptProperties().setProperty('智慧製造_資料庫版本', 'v1.8.0_智慧5S_唯一正式主資料庫');
   PropertiesService.getScriptProperties().setProperty('智慧製造_資料庫更新時間', Utilities.formatDate(new Date(), 'Asia/Taipei', 'yyyy-MM-dd HH:mm:ss'));
 
   var ss = SpreadsheetApp.openById(id);
+  PropertiesService.getScriptProperties().setProperty('智慧製造_資料庫名稱', ss.getName());
+  var 初始化結果 = typeof 初始化33_LINE主管權限與身份綁定 === 'function'
+    ? 初始化33_LINE主管權限與身份綁定()
+    : { 成功: false, 訊息: '尚未載入 33_LINE 模組，資料庫 ID 已完成切換。' };
   return {
     成功: true,
     success: true,
@@ -28,8 +32,13 @@ function 套用38_7正式完整主檔資料庫ID() {
     資料庫ID: id,
     資料庫名稱: ss.getName(),
     資料庫網址: ss.getUrl(),
+    初始化33_LINE: 初始化結果,
     驗證: 測試38_7正式完整主檔資料庫ID()
   };
+}
+
+function 套用智慧5S唯一正式主資料庫() {
+  return 套用38_7正式完整主檔資料庫ID();
 }
 
 function 測試38_7正式完整主檔資料庫ID() {
@@ -49,7 +58,10 @@ function 測試38_7正式完整主檔資料庫ID() {
     '10_工單主檔',
     '10_排程需求池',
     '19_人員排班規則',
-    '20_今日派班'
+    '20_今日派班',
+    '5S_區域主檔',
+    '33_LINE身份權限',
+    '33_LINE權限紀錄'
   ];
   var report = required.map(function(name) {
     var sh = ss.getSheetByName(name);
@@ -75,12 +87,14 @@ function 測試38_7正式完整主檔資料庫ID() {
 function 讀取38_7目前資料庫設定() {
   var props = PropertiesService.getScriptProperties();
   var id = String(props.getProperty('智慧製造_SPREADSHEET_ID') || '').trim();
+  var 中央ID = String(props.getProperty('智慧製造中央作戰資料庫_ID') || '').trim();
   return {
     成功: true,
     success: true,
     目前智慧製造_SPREADSHEET_ID: id,
+    目前智慧製造中央作戰資料庫_ID: 中央ID,
     正式完整主檔資料庫ID: 智慧製造38_7_正式完整主檔資料庫ID,
-    是否已套用正式版: id === 智慧製造38_7_正式完整主檔資料庫ID,
+    是否已套用正式版: id === 智慧製造38_7_正式完整主檔資料庫ID && 中央ID === 智慧製造38_7_正式完整主檔資料庫ID,
     資料庫版本: props.getProperty('智慧製造_資料庫版本') || '',
     資料庫名稱: props.getProperty('智慧製造_資料庫名稱') || '',
     資料庫更新時間: props.getProperty('智慧製造_資料庫更新時間') || ''

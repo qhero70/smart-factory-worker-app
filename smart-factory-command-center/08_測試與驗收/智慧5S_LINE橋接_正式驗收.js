@@ -21,6 +21,8 @@ const 後端目錄 = 路徑工具.join(專案根目錄, 'smart-factory-command-c
 const 群組程式路徑 = 路徑工具.join(後端目錄, '智慧5S_LINE群組綁定.gs');
 const 橋接程式路徑 = 路徑工具.join(後端目錄, '智慧5S_LINE唯一Bot橋接.gs');
 const 身分程式路徑 = 路徑工具.join(後端目錄, '33_LINE_主管權限與身份綁定.gs');
+const 資料庫設定程式路徑 = 路徑工具.join(後端目錄, '38_7_正式完整主檔資料庫ID設定.gs');
+const 鎖定程式路徑 = 路徑工具.join(專案根目錄, 'gas', '鎖定正式主資料庫_智慧工廠主資料庫.gs');
 
 const 結果 = [];
 
@@ -98,10 +100,16 @@ class 模擬分頁 {
 }
 
 class 模擬資料庫 {
-  constructor(分頁物件) {
+  constructor(分頁物件, 識別碼, 名稱) {
     this.分頁 = Object.assign({}, 分頁物件 || {});
+    this.識別碼 = 識別碼 || '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
+    this.名稱 = 名稱 || '⭐智慧工廠主資料庫';
+    this.開啟紀錄 = [];
   }
 
+  getId() { return this.識別碼; }
+  getName() { return this.名稱; }
+  getUrl() { return 'https://docs.google.com/spreadsheets/d/' + this.識別碼 + '/edit'; }
   getSheetByName(名稱) { return this.分頁[名稱] || null; }
   insertSheet(名稱) {
     const 分頁 = new 模擬分頁(名稱, []);
@@ -111,7 +119,8 @@ class 模擬資料庫 {
 }
 
 function 建立基礎環境(資料庫, 覆寫) {
-  const 指令屬性 = Object.assign({ LINE_CHANNEL_ACCESS_TOKEN: '測試權杖' }, 覆寫?.指令屬性 || {});
+  const 指令屬性 = 覆寫?.指令屬性 || {};
+  if (!Object.prototype.hasOwnProperty.call(指令屬性, 'LINE_CHANNEL_ACCESS_TOKEN')) 指令屬性.LINE_CHANNEL_ACCESS_TOKEN = '測試權杖';
   const 觸發器 = 覆寫?.觸發器 || [];
   const 環境 = {
     console,
@@ -128,11 +137,14 @@ function 建立基礎環境(資料庫, 覆寫) {
     encodeURIComponent,
     PropertiesService: {
       getScriptProperties() {
-        return { getProperty: 名稱 => 指令屬性[名稱] || '' };
+        return {
+          getProperty: 名稱 => 指令屬性[名稱] || '',
+          setProperty(名稱, 值) { 指令屬性[名稱] = String(值); return this; }
+        };
       }
     },
     SpreadsheetApp: {
-      openById() { return 資料庫; },
+      openById(識別碼) { 資料庫.開啟紀錄.push(識別碼); return 資料庫; },
       flush() {}
     },
     LockService: {
@@ -198,6 +210,14 @@ function 通知紀錄資料() {
   ];
 }
 
+function 人員主檔資料(LINE_USER_ID) {
+  return [
+    ['工號', '姓名', '部門', '組別', '職稱', '班別', 'LINE_USER_ID', '啟用', '備註', '更新時間'],
+    ['fhfi573', '黃嘉欣', '製造部', '製一組', '工程師', '早班', LINE_USER_ID || '', '是', '', '2026-08-10 18:00:00'],
+    ['A002', '測試人員', '製造部', '製一組', '作業員', '早班', '', '是', '', '2026-08-10 18:00:00']
+  ];
+}
+
 function 已通過受控測試通知資料() {
   const 資料 = 通知紀錄資料();
   資料.push(['5S-LINE-TEST-001', '受控群組測試', 'LINE群組', 'C測試群組', '測試推播', '測試成功', '已發送', '2026-08-10 17:30:00', '', '5S-LINE-TEST-001']);
@@ -209,10 +229,12 @@ function 取得欄位值(分頁, 列號, 欄名) {
   return 分頁.資料[列號 - 1][欄位.indexOf(欄名)];
 }
 
-驗收('語法', '三個 GAS 模組可由 V8 JavaScript 解析', () => {
+驗收('語法', '五個 GAS 模組可由 V8 JavaScript 解析', () => {
   new 虛擬機.Script(檔案系統.readFileSync(群組程式路徑, 'utf8'));
   new 虛擬機.Script(檔案系統.readFileSync(橋接程式路徑, 'utf8'));
   new 虛擬機.Script(檔案系統.readFileSync(身分程式路徑, 'utf8'));
+  new 虛擬機.Script(檔案系統.readFileSync(資料庫設定程式路徑, 'utf8'));
+  new 虛擬機.Script(檔案系統.readFileSync(鎖定程式路徑, 'utf8'));
 });
 
 驗收('指令', '六種正式指令皆可正確解析', () => {
@@ -243,17 +265,137 @@ function 取得欄位值(分頁, 列號, 欄名) {
   斷言.equal(上下文.智慧5S_LINE群組綁定_檢查管理權限_({ 啟用: '否', 角色: '主管', 權限等級: 99 }, 'U5').允許, false);
 });
 
-驗收('身分接線', '綁定指令、工程師權限與 LINE 直接回覆備援可用', () => {
-  let 發送請求 = null;
-  const 上下文 = 載入程式(身分程式路徑, 建立基礎環境(new 模擬資料庫({}), {
-    PropertiesService: {
-      getScriptProperties() {
-        return {
-          getProperty: 名稱 => 名稱 === 'LINE_CHANNEL_ACCESS_TOKEN' ? '測試權杖' : '',
-          setProperty() {}
-        };
+驗收('唯一主庫', '兩份 33_LINE 程式一致且完全移除舊資料庫 ID', () => {
+  const 正式內容 = 檔案系統.readFileSync(身分程式路徑, 'utf8');
+  const 備份內容 = 檔案系統.readFileSync(路徑工具.join(專案根目錄, 'gas', '33_LINE_主管權限與身份綁定.gs'), 'utf8');
+  const 設定內容 = 檔案系統.readFileSync(資料庫設定程式路徑, 'utf8');
+  const 鎖定內容 = 檔案系統.readFileSync(鎖定程式路徑, 'utf8');
+  斷言.equal(備份內容, 正式內容, 'gas 與指令中心的 33_LINE 程式必須完全一致');
+  斷言.ok(正式內容.includes("LINE身份權限33_正式主庫ID = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8'"));
+  斷言.ok(!正式內容.includes('1JA0-kxVO6x3NbCgjmUurkwd8lffolj0pbInissLl8BQ'));
+  斷言.ok(正式內容.includes('SpreadsheetApp.openById(LINE身份權限33_正式主庫ID)'));
+  斷言.ok(設定內容.includes("智慧製造38_7_正式完整主檔資料庫ID = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8'"));
+  斷言.ok(設定內容.includes("setProperty('智慧製造_SPREADSHEET_ID', id)"));
+  斷言.ok(設定內容.includes("setProperty('智慧製造中央作戰資料庫_ID', id)"));
+  斷言.ok(!設定內容.includes('10j1009HMaZol47urKrwt6sWYc3KyxjZGnlHBX5qItnU'));
+  斷言.ok(鎖定內容.includes("正式主資料庫_ID = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8'"));
+  斷言.ok(鎖定內容.includes("正式主資料庫_共用屬性鍵 = '智慧製造_SPREADSHEET_ID'"));
+});
+
+驗收('資料庫設定', '一次套用會鎖定兩個 Script Property 並建立兩個 33_LINE 分頁', () => {
+  const 屬性 = { LINE_CHANNEL_ACCESS_TOKEN: '測試權杖' };
+  const 資料庫 = new 模擬資料庫({ '01_人員主檔': new 模擬分頁('01_人員主檔', 人員主檔資料()) });
+  const 上下文 = 載入程式(身分程式路徑, 建立基礎環境(資料庫, { 指令屬性: 屬性 }));
+  const 套用 = 上下文.套用33_LINE唯一正式主資料庫設定();
+  斷言.equal(套用.成功, true);
+  斷言.equal(套用.驗收.成功, true);
+  斷言.equal(屬性.智慧製造_SPREADSHEET_ID, 資料庫.識別碼);
+  斷言.equal(屬性.智慧製造中央作戰資料庫_ID, 資料庫.識別碼);
+  斷言.ok(資料庫.getSheetByName('33_LINE身份權限'));
+  斷言.ok(資料庫.getSheetByName('33_LINE權限紀錄'));
+  斷言.deepEqual(
+    Array.from(資料庫.getSheetByName('33_LINE身份權限').資料[0]),
+    ['LINE_USER_ID', '工號', '姓名', '部門', '組別', '職稱', '角色', '權限等級', '允許主管入口', '允許主檔檢查', '允許AI摘要', '允許報工', '啟用', '綁定方式', '綁定時間', '最後互動時間', '備註']
+  );
+});
+
+驗收('未綁定查詢', '一對一輸入權限檢查會明確回覆尚未綁定', () => {
+  const 資料庫 = new 模擬資料庫({ '01_人員主檔': new 模擬分頁('01_人員主檔', 人員主檔資料()) });
+  const 回覆 = [];
+  const 上下文 = 載入程式(身分程式路徑, 建立基礎環境(資料庫, {
+    UrlFetchApp: {
+      fetch(網址, 設定) {
+        回覆.push({ 網址, 設定 });
+        return { getResponseCode: () => 200, getContentText: () => '{}' };
       }
-    },
+    }
+  }));
+  const 結果 = 上下文.LINE身份權限_嘗試處理Webhook_({ events: [{
+    type: 'message', replyToken: 'R未綁定', source: { type: 'user', userId: 'U未綁定' }, message: { type: 'text', text: '權限檢查' }
+  }] });
+  斷言.equal(結果.已處理, true);
+  斷言.equal(回覆.length, 1);
+  斷言.ok(JSON.parse(回覆[0].設定.payload).messages[0].text.includes('目前尚未綁定身分'));
+  斷言.ok(資料庫.getSheetByName('33_LINE身份權限'));
+  斷言.ok(資料庫.getSheetByName('33_LINE權限紀錄'));
+});
+
+驗收('身分綁定', 'fhfi573 會寫入黃嘉欣完整身分、權限 60 並回寫人員主檔', () => {
+  const 人員分頁 = new 模擬分頁('01_人員主檔', 人員主檔資料());
+  const 資料庫 = new 模擬資料庫({ '01_人員主檔': 人員分頁 });
+  const 回覆文字 = [];
+  const 上下文 = 載入程式(身分程式路徑, 建立基礎環境(資料庫, {
+    UrlFetchApp: {
+      fetch(網址, 設定) {
+        回覆文字.push(JSON.parse(設定.payload).messages[0].text);
+        return { getResponseCode: () => 200, getContentText: () => '{}' };
+      }
+    }
+  }));
+
+  const 綁定結果 = 上下文.LINE身份權限_嘗試處理Webhook_({ events: [{
+    type: 'message', replyToken: 'R綁定', source: { type: 'user', userId: 'U黃嘉欣' }, message: { type: 'text', text: '綁定 fhfi573' }
+  }] });
+  斷言.equal(綁定結果.已處理, true);
+  斷言.ok(回覆文字[0].includes('身分綁定成功'));
+  const 身份分頁 = 資料庫.getSheetByName('33_LINE身份權限');
+  斷言.equal(取得欄位值(身份分頁, 2, 'LINE_USER_ID'), 'U黃嘉欣');
+  斷言.equal(取得欄位值(身份分頁, 2, '工號'), 'fhfi573');
+  斷言.equal(取得欄位值(身份分頁, 2, '姓名'), '黃嘉欣');
+  斷言.equal(取得欄位值(身份分頁, 2, '部門'), '製造部');
+  斷言.equal(取得欄位值(身份分頁, 2, '組別'), '製一組');
+  斷言.equal(取得欄位值(身份分頁, 2, '職稱'), '工程師');
+  斷言.equal(取得欄位值(身份分頁, 2, '角色'), '工程師');
+  斷言.equal(取得欄位值(身份分頁, 2, '權限等級'), 60);
+  斷言.equal(取得欄位值(人員分頁, 2, 'LINE_USER_ID'), 'U黃嘉欣');
+
+  const 查詢結果 = 上下文.LINE身份權限_嘗試處理Webhook_({ events: [{
+    type: 'message', replyToken: 'R查詢', source: { type: 'user', userId: 'U黃嘉欣' }, message: { type: 'text', text: '權限檢查' }
+  }] });
+  斷言.equal(查詢結果.已處理, true);
+  const 查詢回覆 = 回覆文字[1];
+  ['黃嘉欣', 'fhfi573', '製造部', '製一組', '工程師', '權限等級：60'].forEach(文字 => 斷言.ok(查詢回覆.includes(文字)));
+  斷言.ok(資料庫.getSheetByName('33_LINE權限紀錄').getLastRow() >= 4);
+  斷言.ok(資料庫.開啟紀錄.every(id => id === 資料庫.識別碼), '所有開啟動作都必須指向唯一正式主庫');
+});
+
+驗收('解除綁定', '解除後同步清空人員主檔 LINE_USER_ID，避免權限被自動重建', () => {
+  const 人員分頁 = new 模擬分頁('01_人員主檔', 人員主檔資料());
+  const 資料庫 = new 模擬資料庫({ '01_人員主檔': 人員分頁 });
+  const 上下文 = 載入程式(身分程式路徑, 建立基礎環境(資料庫));
+  斷言.equal(上下文.LINE身份權限33_綁定身份_('U解除測試', 'fhfi573').成功, true);
+  斷言.equal(上下文.LINE身份權限33_解除綁定_('U解除測試').成功, true);
+  斷言.equal(取得欄位值(人員分頁, 2, 'LINE_USER_ID'), '');
+  斷言.equal(上下文.LINE身份權限33_取得身份_('U解除測試'), null);
+});
+
+驗收('批次身分路由', '已處理的權限查詢會移除，其他事件仍交給原有路由', () => {
+  const 資料庫 = new 模擬資料庫({ '01_人員主檔': new 模擬分頁('01_人員主檔', 人員主檔資料()) });
+  const 上下文 = 載入程式(身分程式路徑, 建立基礎環境(資料庫));
+  const 內容 = { events: [
+    { type: 'message', replyToken: 'R1', source: { type: 'user', userId: 'U1' }, message: { type: 'text', text: '權限檢查' } },
+    { type: 'message', replyToken: 'R2', source: { type: 'user', userId: 'U1' }, message: { type: 'text', text: '指令' } }
+  ] };
+  const 結果 = 上下文.LINE身份權限_嘗試處理Webhook_(內容);
+  斷言.equal(結果.已處理, false);
+  斷言.equal(結果.已部分處理, true);
+  斷言.equal(內容.events.length, 1);
+  斷言.equal(內容.events[0].message.text, '指令');
+});
+
+驗收('非身分指令', '無關文字不會開啟試算表或攔截既有功能', () => {
+  const 資料庫 = new 模擬資料庫({});
+  const 上下文 = 載入程式(身分程式路徑, 建立基礎環境(資料庫));
+  const 結果 = 上下文.LINE身份權限_嘗試處理Webhook_({ events: [{
+    type: 'message', replyToken: 'R1', source: { type: 'user', userId: 'U1' }, message: { type: 'text', text: '5S群組說明' }
+  }] });
+  斷言.equal(結果, null);
+  斷言.equal(資料庫.開啟紀錄.length, 0);
+});
+
+驗收('LINE 回覆', '直接回覆成功會驗證請求，HTTP 失敗不會靜默吞掉', () => {
+  let 發送請求 = null;
+  const 成功上下文 = 載入程式(身分程式路徑, 建立基礎環境(new 模擬資料庫({}), {
     UrlFetchApp: {
       fetch(網址, 設定) {
         發送請求 = { 網址, 設定 };
@@ -261,12 +403,16 @@ function 取得欄位值(分頁, 列號, 欄名) {
       }
     }
   }));
-  斷言.equal(上下文.LINE身份權限33_解析綁定工號_('綁定 fhfi573'), 'fhfi573');
-  斷言.equal(上下文.LINE身份權限33_依人員推定權限_({ 職稱: '工程師' }).權限等級, 60);
-  const 回覆結果 = 上下文.LINE身份權限33_回覆_('R身分測試', '身分測試回覆');
-  斷言.equal(回覆結果.成功, true);
+  斷言.equal(成功上下文.LINE身份權限33_解析綁定工號_('綁定 fhfi573'), 'fhfi573');
+  斷言.equal(成功上下文.LINE身份權限33_依人員推定權限_({ 職稱: '工程師' }).權限等級, 60);
+  斷言.equal(成功上下文.LINE身份權限33_回覆_('R身分測試', '身分測試回覆').成功, true);
   斷言.equal(發送請求.網址, 'https://api.line.me/v2/bot/message/reply');
   斷言.equal(JSON.parse(發送請求.設定.payload).messages[0].text, '身分測試回覆');
+
+  const 失敗上下文 = 載入程式(身分程式路徑, 建立基礎環境(new 模擬資料庫({}), {
+    UrlFetchApp: { fetch: () => ({ getResponseCode: () => 401, getContentText: () => '{"message":"Unauthorized"}' }) }
+  }));
+  斷言.throws(() => 失敗上下文.LINE身份權限33_回覆_('R失敗', '測試'), /HTTP 401/);
 });
 
 驗收('群組驗證', '只接受 Bot 真正所在且 LINE 回傳識別碼一致的群組', () => {

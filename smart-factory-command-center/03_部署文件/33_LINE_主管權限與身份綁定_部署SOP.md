@@ -1,5 +1,9 @@
 # 33_LINE｜主管權限與身份綁定｜部署 SOP
 
+目前正式版本：v1.8.0｜唯一正式主資料庫｜自包含版
+
+唯一正式試算表 ID：`19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8`
+
 ## 一、模組定位
 
 第 33 階段只處理 LINE 身份綁定與權限控管，不改 Rich Menu 圖片，不改 PWA，不進入排程。
@@ -25,59 +29,32 @@ smart-factory-command-center/01_GAS後端/33_LINE_主管權限與身份綁定.gs
 | 33_LINE身份權限 | LINE_USER_ID、工號、姓名、角色、權限欄位 |
 | 33_LINE權限紀錄 | 每次綁定、查詢、攔截、放行紀錄 |
 
-## 四、主後端接線位置
+## 四、主後端接線
 
-在 `智慧製造中央作戰指揮中心.gs` 的 `doPost(e)` 裡，找到這一段：
+正式 `doPost(e)` 已完成下列順序，本次不修改：
 
-```javascript
-if (p && p.events && Array.isArray(p.events)) {
-```
-
-在它下一行立刻插入：
-
-```javascript
-    if (typeof LINE身份權限_嘗試處理Webhook_ === 'function') {
-      var 身份權限結果 = LINE身份權限_嘗試處理Webhook_(p);
-      if (身份權限結果 && 身份權限結果.已處理) return 主程式_安全輸出JSON_(身份權限結果);
-    }
-```
-
-插入後的正確樣子：
-
-```javascript
-  if (p && p.events && Array.isArray(p.events)) {
-    if (typeof LINE身份權限_嘗試處理Webhook_ === 'function') {
-      var 身份權限結果 = LINE身份權限_嘗試處理Webhook_(p);
-      if (身份權限結果 && 身份權限結果.已處理) return 主程式_安全輸出JSON_(身份權限結果);
-    }
-
-    if (typeof LINE主管戰情日期快選_嘗試處理Webhook_ === 'function') {
-      var 日期快選結果 = LINE主管戰情日期快選_嘗試處理Webhook_(p);
-      if (日期快選結果 && 日期快選結果.已處理) return 主程式_安全輸出JSON_(日期快選結果);
-    }
-```
+1. 智慧 5S 群組指令。
+2. LINE 身分綁定與權限檢查。
+3. 原有 NEXUS OS API。
 
 ## 五、部署順序
 
-1. 將 `33_LINE_主管權限與身份綁定.gs` 加入 Apps Script 專案。
-2. 在主後端 `doPost(e)` 接入上方 5 行權限閘門。
+1. 完整覆蓋 Apps Script 內的 `33_LINE_主管權限與身份綁定.gs`。
+2. 不修改 `智慧5S_LINE群組綁定.gs`、`智慧5S_LINE唯一Bot橋接.gs` 或 `doPost(e)`。
 3. 執行：
 
 ```javascript
-初始化33_LINE主管權限與身份綁定()
+套用33_LINE唯一正式主資料庫設定()
 ```
 
 4. 執行：
 
 ```javascript
-測試_33_LINE主管權限與身份綁定_本機規格()
+驗收33_LINE正式資料庫設定()
 ```
 
-5. 執行：
-
-```javascript
-測試_33_LINE主管權限_模擬未綁定主管指令()
-```
+5. 驗收結果必須為 `成功: true`，並顯示黃嘉欣為工程師、權限等級 60。
+6. 更新既有 Web App 部署；保留原部署 ID 與網址，不建立第二個入口。
 
 ## 六、LINE 使用方式
 

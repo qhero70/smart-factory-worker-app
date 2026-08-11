@@ -7,10 +7,12 @@
 const 正式主資料庫_ID = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
 const 正式主資料庫_名稱 = '⭐智慧工廠主資料庫';
 const 正式主資料庫_屬性鍵 = '智慧製造中央作戰資料庫_ID';
+const 正式主資料庫_共用屬性鍵 = '智慧製造_SPREADSHEET_ID';
 
 function 鎖定正式主資料庫_智慧工廠主資料庫() {
   const ss = SpreadsheetApp.openById(正式主資料庫_ID);
   PropertiesService.getScriptProperties().setProperty(正式主資料庫_屬性鍵, 正式主資料庫_ID);
+  PropertiesService.getScriptProperties().setProperty(正式主資料庫_共用屬性鍵, 正式主資料庫_ID);
   return {
     ok: true,
     success: true,
@@ -24,13 +26,15 @@ function 鎖定正式主資料庫_智慧工廠主資料庫() {
 
 function 檢查目前鎖定資料庫() {
   const id = PropertiesService.getScriptProperties().getProperty(正式主資料庫_屬性鍵) || '';
+  const 共用id = PropertiesService.getScriptProperties().getProperty(正式主資料庫_共用屬性鍵) || '';
   let result = {
     ok: !!id,
     success: !!id,
     成功: !!id,
     目前鎖定ID: id,
+    目前共用ID: 共用id,
     正式主資料庫ID: 正式主資料庫_ID,
-    是否為正式主資料庫: id === 正式主資料庫_ID
+    是否為正式主資料庫: id === 正式主資料庫_ID && 共用id === 正式主資料庫_ID
   };
   if (id) {
     const ss = SpreadsheetApp.openById(id);
