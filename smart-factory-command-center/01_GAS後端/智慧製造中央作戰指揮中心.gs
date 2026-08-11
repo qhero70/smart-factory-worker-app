@@ -1,6 +1,6 @@
 /**
  * 智慧製造中央作戰指揮中心｜正式主後端
- * 版本：v1.6.8｜整理主入口 + LINE 主管戰情日期快選 + 主管戰情直連
+ * 版本：v1.6.9｜整理主入口 + 智慧5S群組 + LINE身分權限 + 主管戰情
  *
  * 正式入口：
  * 1. 報工頁：GAS Web App URL?page=07_報工作業V2
@@ -11,7 +11,7 @@
 
 const 系統設定 = {
   系統名稱: '智慧製造中央作戰指揮中心',
-  版本: 'v1.6.8_主入口整理_LINE主管戰情日期快選_班別_報工V2',
+  版本: 'v1.6.9_主入口整理_智慧5S群組_LINE身分權限_主管戰情_報工V2',
   時區: 'Asia/Taipei',
   主資料庫ID: '',
   LINE_CHANNEL_ACCESS_TOKEN: '',
@@ -54,6 +54,11 @@ function doPost(e) {
     if (typeof 智慧5S_LINE群組綁定_嘗試處理Webhook_ === 'function') {
       var 智慧5S群組結果 = 智慧5S_LINE群組綁定_嘗試處理Webhook_(p);
       if (智慧5S群組結果 && 智慧5S群組結果.已處理) return 主程式_安全輸出JSON_(智慧5S群組結果);
+    }
+
+    if (typeof LINE身份權限_嘗試處理Webhook_ === 'function') {
+      var 身份權限結果 = LINE身份權限_嘗試處理Webhook_(p);
+      if (身份權限結果 && 身份權限結果.已處理) return 主程式_安全輸出JSON_(身份權限結果);
     }
 
     if (typeof LINE主管戰情日期快選_嘗試處理Webhook_ === 'function') {

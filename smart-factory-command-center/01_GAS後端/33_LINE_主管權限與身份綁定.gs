@@ -1,13 +1,14 @@
 /**
  * 33_LINE｜主管權限與身份綁定
  * 專案：製造部智慧製造應用總部
- * 版本：v1.7.0
+ * 版本：v1.7.1
  *
  * 目的：讓 LINE Bot 先知道使用者是誰，再判斷能否使用主管入口、主檔檢查、AI摘要等敏感功能。
  * 原則：報工作業先保持可用；主管戰情、今日戰情、昨日戰情、主檔檢查、AI摘要需通過身份權限。
  */
 
-const LINE身份權限33_版本 = 'v1.7.0_33_LINE主管權限與身份綁定';
+const LINE身份權限33_版本 = 'v1.7.1_33_LINE主管權限與身份綁定_LINE回覆備援';
+const LINE身份權限33_初始化版本屬性 = 'LINE身份權限33_初始化版本';
 const LINE身份權限33_身份表 = '33_LINE身份權限';
 const LINE身份權限33_紀錄表 = '33_LINE權限紀錄';
 const LINE身份權限33_身份欄位 = ['LINE_USER_ID', '工號', '姓名', '部門', '組別', '職稱', '角色', '權限等級', '允許主管入口', '允許主檔檢查', '允許AI摘要', '允許報工', '啟用', '綁定方式', '綁定時間', '最後互動時間', '備註'];
@@ -17,7 +18,16 @@ function 初始化33_LINE主管權限與身份綁定() {
   const ss = 取得試算表_();
   LINE身份權限33_建立或修復表_(ss, LINE身份權限33_身份表, LINE身份權限33_身份欄位);
   LINE身份權限33_建立或修復表_(ss, LINE身份權限33_紀錄表, LINE身份權限33_紀錄欄位);
-  LINE身份權限33_寫入紀錄_({ LINE_USER_ID: 'SYSTEM', 工號: '', 姓名: '' }, '初始化33_LINE主管權限與身份綁定', '系統', '完成', '系統', 99, LINE身份權限33_版本);
+  let 已記錄版本 = '';
+  try {
+    已記錄版本 = String(PropertiesService.getScriptProperties().getProperty(LINE身份權限33_初始化版本屬性) || '');
+  } catch (err) {}
+  if (已記錄版本 !== LINE身份權限33_版本) {
+    LINE身份權限33_寫入紀錄_({ LINE_USER_ID: 'SYSTEM', 工號: '', 姓名: '' }, '初始化33_LINE主管權限與身份綁定', '系統', '完成', '系統', 99, LINE身份權限33_版本);
+    try {
+      PropertiesService.getScriptProperties().setProperty(LINE身份權限33_初始化版本屬性, LINE身份權限33_版本);
+    } catch (err) {}
+  }
   return { 成功: true, 訊息: '33_LINE主管權限與身份綁定初始化完成', 版本: LINE身份權限33_版本, 工作表: [LINE身份權限33_身份表, LINE身份權限33_紀錄表] };
 }
 
@@ -312,8 +322,30 @@ function LINE身份權限33_寫入紀錄_(身份, text, 指令類型, 判斷結�
 
 function LINE身份權限33_回覆_(replyToken, text) {
   if (!replyToken) return;
-  if (typeof LINE主管戰情直連_送出回覆_ === 'function') return LINE主管戰情直連_送出回覆_(replyToken, String(text || '').slice(0, 4900));
-  if (typeof 回覆LINE_ === 'function') return 回覆LINE_(replyToken, String(text || '').slice(0, 4900));
+  const 安全文字 = String(text || '').slice(0, 4900);
+  if (typeof LINE主管戰情直連_送出回覆_ === 'function') return LINE主管戰情直連_送出回覆_(replyToken, 安全文字);
+  if (typeof 回覆LINE_ === 'function') return 回覆LINE_(replyToken, 安全文字);
+
+  // 舊版 NEXUS OS 專案可能沒有上列兩個回覆函式，因此直接沿用既有 Bot 權杖回覆。
+  let 權杖 = '';
+  try {
+    權杖 = String(PropertiesService.getScriptProperties().getProperty('LINE_CHANNEL_ACCESS_TOKEN') || '').trim();
+  } catch (err) {}
+  if (!權杖) throw new Error('既有 LINE Bot 尚未設定 LINE_CHANNEL_ACCESS_TOKEN。');
+
+  const 回應 = UrlFetchApp.fetch('https://api.line.me/v2/bot/message/reply', {
+    method: 'post',
+    contentType: 'application/json',
+    headers: { Authorization: 'Bearer ' + 權杖 },
+    payload: JSON.stringify({
+      replyToken: replyToken,
+      messages: [{ type: 'text', text: 安全文字 }]
+    }),
+    muteHttpExceptions: true
+  });
+  const 狀態碼 = Number(回應.getResponseCode());
+  if (狀態碼 >= 300) throw new Error('LINE 身分權限回覆失敗，狀態碼：' + 狀態碼);
+  return { 成功: true, 狀態碼: 狀態碼 };
 }
 
 function LINE身份權限33_文字_(v) {

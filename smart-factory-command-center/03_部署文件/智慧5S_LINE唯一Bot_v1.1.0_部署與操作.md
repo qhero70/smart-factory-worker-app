@@ -4,7 +4,7 @@
 
 適用系統：智慧 5S 管理平台 v1.0.2
 
-LINE 模組版本：v1.1.0
+LINE 模組版本：v1.1.1（群組綁定 v1.1.0＋身分權限接線修正）
 
 ## 一、正式架構
 
@@ -31,19 +31,36 @@ LINE 模組版本：v1.1.0
 
 ## 三、部署檔案
 
-將下列兩個完整檔案同步到既有 NEXUS OS Apps Script 專案：
+將下列三個完整檔案同步到既有 NEXUS OS Apps Script 專案：
 
 1. `智慧5S_LINE群組綁定.gs`
 2. `智慧5S_LINE唯一Bot橋接.gs`
+3. `33_LINE_主管權限與身份綁定.gs`
 
-現行 Webhook 主路由必須在其他 LINE 模組之前呼叫：
+目前 NEXUS OS 雲端專案使用 `主檔_取得參數(e)` 與 `主檔_API路由(參數)`。實際生效的 `doPost(e)` 必須完整替換為下列版本，先處理 5S 群組指令，再處理 LINE 身分權限指令，最後才回到原有 API：
 
 ```javascript
-if (typeof 智慧5S_LINE群組綁定_嘗試處理Webhook_ === 'function') {
-  var 智慧5S群組結果 = 智慧5S_LINE群組綁定_嘗試處理Webhook_(p);
-  if (智慧5S群組結果 && 智慧5S群組結果.已處理) {
-    return 主程式_安全輸出JSON_(智慧5S群組結果);
+function doPost(e) {
+  var 參數 = 主檔_取得參數(e);
+
+  if (參數 && Array.isArray(參數.events)) {
+    if (typeof 智慧5S_LINE群組綁定_嘗試處理Webhook_ === 'function') {
+      var 智慧5S群組結果 = 智慧5S_LINE群組綁定_嘗試處理Webhook_(參數);
+      if (智慧5S群組結果 && 智慧5S群組結果.已處理) {
+        return 主檔_JSON輸出(智慧5S群組結果, 參數);
+      }
+    }
+
+    if (typeof LINE身份權限_嘗試處理Webhook_ === 'function') {
+      var LINE身份權限結果 = LINE身份權限_嘗試處理Webhook_(參數);
+      if (LINE身份權限結果 && LINE身份權限結果.已處理) {
+        return 主檔_JSON輸出(LINE身份權限結果, 參數);
+      }
+    }
   }
+
+  var 結果 = 主檔_API路由(參數);
+  return 主檔_JSON輸出(結果, 參數);
 }
 ```
 
@@ -58,14 +75,15 @@ Git 已同步三份現行路由來源：
 ## 四、雲端發布順序
 
 1. 先確認既有 `LINE_CHANNEL_ACCESS_TOKEN` Script Property 存在；不得讀出、複製或寫入 Git。
-2. 新增或覆蓋上述兩個 v1.1.0 模組。
-3. 將 5S 群組處理器接到實際生效的 `doPost(e)` 第一順位。
+2. 新增或覆蓋上述三個模組。
+3. 將 5S 群組處理器接到實際生效的 `doPost(e)` 第一順位，身分權限處理器接第二順位。
 4. 儲存專案。
 5. 執行 `測試_智慧5S_LINE群組綁定_解析指令()`，結果必須為 `成功: true`。
 6. 執行 `測試_智慧5S_LINE橋接_通知內容與發送結果()`，結果必須為 `成功: true`。
-7. 執行 `智慧5S_LINE橋接_健康檢查()`；此時四區尚未綁群組可顯示不可正式啟用，屬正常保護。
-8. 更新既有 Web App 部署為新版本，保留原部署與 Webhook URL，不新增第二個 Webhook。
-9. 到 LINE Developers 確認 Webhook 使用中，並已允許 Bot 加入群組。
+7. 執行 `初始化33_LINE主管權限與身份綁定()`，確認建立 `33_LINE身份權限` 與 `33_LINE權限紀錄`。
+8. 執行 `智慧5S_LINE橋接_健康檢查()`；此時四區尚未綁群組可顯示不可正式啟用，屬正常保護。
+9. 更新既有 Web App 部署為新版本，保留原部署與 Webhook URL，不新增第二個 Webhook。
+10. 到 LINE Developers 確認 Webhook 使用中，並已允許 Bot 加入群組。
 
 ## 五、現場第一次啟用
 
@@ -187,7 +205,7 @@ Git 已同步三份現行路由來源：
 node smart-factory-command-center/08_測試與驗收/智慧5S_LINE橋接_正式驗收.js
 ```
 
-v1.1.0 封版結果：15 項通過、0 項失敗。測試完全在記憶體執行，不連線、不推播、不修改正式資料。
+v1.1.1 封版結果：16 項通過、0 項失敗。測試完全在記憶體執行，不連線、不推播、不修改正式資料。
 
 ## 十一、2026-08-10 正式資料唯讀核對
 

@@ -20,6 +20,7 @@ const 專案根目錄 = 路徑工具.resolve(__dirname, '..', '..');
 const 後端目錄 = 路徑工具.join(專案根目錄, 'smart-factory-command-center', '01_GAS後端');
 const 群組程式路徑 = 路徑工具.join(後端目錄, '智慧5S_LINE群組綁定.gs');
 const 橋接程式路徑 = 路徑工具.join(後端目錄, '智慧5S_LINE唯一Bot橋接.gs');
+const 身分程式路徑 = 路徑工具.join(後端目錄, '33_LINE_主管權限與身份綁定.gs');
 
 const 結果 = [];
 
@@ -208,9 +209,10 @@ function 取得欄位值(分頁, 列號, 欄名) {
   return 分頁.資料[列號 - 1][欄位.indexOf(欄名)];
 }
 
-驗收('語法', '兩個 GAS 模組可由 V8 JavaScript 解析', () => {
+驗收('語法', '三個 GAS 模組可由 V8 JavaScript 解析', () => {
   new 虛擬機.Script(檔案系統.readFileSync(群組程式路徑, 'utf8'));
   new 虛擬機.Script(檔案系統.readFileSync(橋接程式路徑, 'utf8'));
+  new 虛擬機.Script(檔案系統.readFileSync(身分程式路徑, 'utf8'));
 });
 
 驗收('指令', '六種正式指令皆可正確解析', () => {
@@ -239,6 +241,32 @@ function 取得欄位值(分頁, 列號, 欄名) {
   斷言.equal(上下文.智慧5S_LINE群組綁定_檢查管理權限_({ 啟用: '是', 角色: '工程師', 權限等級: 60 }, 'U3').允許, true);
   斷言.equal(上下文.智慧5S_LINE群組綁定_檢查管理權限_({ 啟用: '是', 角色: '主管', 允許主管入口: '是' }, 'U4').允許, true);
   斷言.equal(上下文.智慧5S_LINE群組綁定_檢查管理權限_({ 啟用: '否', 角色: '主管', 權限等級: 99 }, 'U5').允許, false);
+});
+
+驗收('身分接線', '綁定指令、工程師權限與 LINE 直接回覆備援可用', () => {
+  let 發送請求 = null;
+  const 上下文 = 載入程式(身分程式路徑, 建立基礎環境(new 模擬資料庫({}), {
+    PropertiesService: {
+      getScriptProperties() {
+        return {
+          getProperty: 名稱 => 名稱 === 'LINE_CHANNEL_ACCESS_TOKEN' ? '測試權杖' : '',
+          setProperty() {}
+        };
+      }
+    },
+    UrlFetchApp: {
+      fetch(網址, 設定) {
+        發送請求 = { 網址, 設定 };
+        return { getResponseCode: () => 200, getContentText: () => '{}' };
+      }
+    }
+  }));
+  斷言.equal(上下文.LINE身份權限33_解析綁定工號_('綁定 fhfi573'), 'fhfi573');
+  斷言.equal(上下文.LINE身份權限33_依人員推定權限_({ 職稱: '工程師' }).權限等級, 60);
+  const 回覆結果 = 上下文.LINE身份權限33_回覆_('R身分測試', '身分測試回覆');
+  斷言.equal(回覆結果.成功, true);
+  斷言.equal(發送請求.網址, 'https://api.line.me/v2/bot/message/reply');
+  斷言.equal(JSON.parse(發送請求.設定.payload).messages[0].text, '身分測試回覆');
 });
 
 驗收('群組驗證', '只接受 Bot 真正所在且 LINE 回傳識別碼一致的群組', () => {
@@ -401,11 +429,12 @@ function 取得欄位值(分頁, 列號, 欄名) {
   斷言.equal(發送次數, 0);
 });
 
-驗收('路由接線', '三份現行 doPost 來源皆優先接入 5S 群組處理器', () => {
+驗收('路由接線', '三份現行 doPost 來源皆接入 5S 群組與身分權限處理器', () => {
   const 檔案 = ['總控_38_6_doPost最終接線.gs', '37_LINE_主後端doPost正式替換段.gs', '智慧製造中央作戰指揮中心.gs'];
   檔案.forEach(名稱 => {
     const 內容 = 檔案系統.readFileSync(路徑工具.join(後端目錄, 名稱), 'utf8');
     斷言.ok(內容.includes('智慧5S_LINE群組綁定_嘗試處理Webhook_'), 名稱 + ' 未接入 5S 群組處理器');
+    斷言.ok(內容.includes('LINE身份權限_嘗試處理Webhook_'), 名稱 + ' 未接入身分權限處理器');
   });
 });
 
