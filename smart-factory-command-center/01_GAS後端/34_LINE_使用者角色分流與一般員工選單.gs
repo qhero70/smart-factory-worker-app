@@ -100,7 +100,7 @@ function 套用34_LINE指定選單_(lineUserId, 目標選單, 身份) {
 
 function 批次同步34_LINE所有已綁定使用者選單() {
   初始化34_LINE使用者角色分流與一般員工選單();
-  const sh = 取得試算表_().getSheetByName('33_LINE身份權限');
+  const sh = LINE角色分流34_取得正式資料庫_().getSheetByName('33_LINE身份權限');
   if (!sh || sh.getLastRow() < 2) return { 成功: true, 訊息: '沒有已綁定使用者', 總數: 0 };
   const rows = LINE角色分流34_讀表物件_(sh).filter(r => LINE角色分流34_文字_(r.LINE_USER_ID) && LINE角色分流34_文字_(r.啟用 || '是') !== '否');
   let ok = 0, fail = 0, errors = [];
