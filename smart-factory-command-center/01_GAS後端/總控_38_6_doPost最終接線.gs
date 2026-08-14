@@ -6,35 +6,64 @@ function doPost(e) {
   const action = String((p && (p.action || p['動作'])) || '').trim();
 
   if (p && p.events && Array.isArray(p.events)) {
+    var LINE重送守門 = typeof LINE訊息重送防護_準備_ === 'function'
+      ? LINE訊息重送防護_準備_(p)
+      : null;
+    if (LINE重送守門 && LINE重送守門.全部重複) {
+      return 主程式_安全輸出JSON_({ ok: true, success: true, 已處理: true, 模組: 'LINE訊息重送防護', 訊息: '重複 Webhook 已安全略過', 重複數: LINE重送守門.重複數 });
+    }
     if (typeof 智慧5S_LINE群組綁定_嘗試處理Webhook_ === 'function') {
       var 智慧5S群組結果 = 智慧5S_LINE群組綁定_嘗試處理Webhook_(p);
-      if (智慧5S群組結果 && 智慧5S群組結果.已處理) return 主程式_安全輸出JSON_(智慧5S群組結果);
+      if (智慧5S群組結果 && 智慧5S群組結果.已處理) {
+        if (LINE重送守門) LINE訊息重送防護_完成_(LINE重送守門);
+        return 主程式_安全輸出JSON_(智慧5S群組結果);
+      }
     }
     if (typeof LINE指令中心37_嘗試處理Webhook_ === 'function') {
       var 指令中心結果 = LINE指令中心37_嘗試處理Webhook_(p);
-      if (指令中心結果 && 指令中心結果.已處理) return 主程式_安全輸出JSON_(指令中心結果);
+      if (指令中心結果 && 指令中心結果.已處理) {
+        if (LINE重送守門) LINE訊息重送防護_完成_(LINE重送守門);
+        return 主程式_安全輸出JSON_(指令中心結果);
+      }
     }
     if (typeof LINE角色分流34_嘗試處理Webhook_ === 'function') {
       var 角色分流結果 = LINE角色分流34_嘗試處理Webhook_(p);
-      if (角色分流結果 && 角色分流結果.已處理) return 主程式_安全輸出JSON_(角色分流結果);
+      if (角色分流結果 && 角色分流結果.已處理) {
+        if (LINE重送守門) LINE訊息重送防護_完成_(LINE重送守門);
+        return 主程式_安全輸出JSON_(角色分流結果);
+      }
     }
     if (typeof LINE身份權限_嘗試處理Webhook_ === 'function') {
       var 身份權限結果 = LINE身份權限_嘗試處理Webhook_(p);
-      if (身份權限結果 && 身份權限結果.已處理) return 主程式_安全輸出JSON_(身份權限結果);
+      if (身份權限結果 && 身份權限結果.已處理) {
+        if (LINE重送守門) LINE訊息重送防護_完成_(LINE重送守門);
+        return 主程式_安全輸出JSON_(身份權限結果);
+      }
     }
     if (typeof LINE主管戰情日期快選_嘗試處理Webhook_ === 'function') {
       var 日期快選結果 = LINE主管戰情日期快選_嘗試處理Webhook_(p);
-      if (日期快選結果 && 日期快選結果.已處理) return 主程式_安全輸出JSON_(日期快選結果);
+      if (日期快選結果 && 日期快選結果.已處理) {
+        if (LINE重送守門) LINE訊息重送防護_完成_(LINE重送守門);
+        return 主程式_安全輸出JSON_(日期快選結果);
+      }
     }
     if (typeof LINE主管戰情日期快選_嘗試處理Webhook_ !== 'function' && typeof LINE主管戰情日期快選_建立回覆_ === 'function') {
       var 日期快選補救結果 = 主後端_LINE日期快選補救處理_(p);
-      if (日期快選補救結果 && 日期快選補救結果.已處理) return 主程式_安全輸出JSON_(日期快選補救結果);
+      if (日期快選補救結果 && 日期快選補救結果.已處理) {
+        if (LINE重送守門) LINE訊息重送防護_完成_(LINE重送守門);
+        return 主程式_安全輸出JSON_(日期快選補救結果);
+      }
     }
     if (typeof LINE主管戰情直連_嘗試處理Webhook_ === 'function') {
       var 主管戰情LINE結果 = LINE主管戰情直連_嘗試處理Webhook_(p);
-      if (主管戰情LINE結果 && 主管戰情LINE結果.已處理) return 主程式_安全輸出JSON_(主管戰情LINE結果);
+      if (主管戰情LINE結果 && 主管戰情LINE結果.已處理) {
+        if (LINE重送守門) LINE訊息重送防護_完成_(LINE重送守門);
+        return 主程式_安全輸出JSON_(主管戰情LINE結果);
+      }
     }
-    return 處理LINEWebhook_(p);
+    var 一般LINE結果 = 處理LINEWebhook_(p);
+    if (LINE重送守門) LINE訊息重送防護_完成_(LINE重送守門);
+    return 一般LINE結果;
   }
 
   var handlers = [

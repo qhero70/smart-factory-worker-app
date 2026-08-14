@@ -1,31 +1,49 @@
 /**
  * 34_LINE｜使用者角色分流與一般員工選單
- * 版本：v1.7.1
+ * 版本：v1.8.1
  * 目的：主管/工程師使用主管入口；一般員工使用報工入口。
  */
 
-const LINE角色分流34_版本 = 'v1.7.1_34_LINE使用者角色分流與一般員工選單';
+const LINE角色分流34_版本 = 'v1.8.1_34_LINE使用者角色分流與一般員工選單_沿用既有RichMenu';
 const LINE角色分流34_紀錄表 = '34_LINE選單分流紀錄';
+const LINE角色分流34_正式主庫ID = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
+const LINE角色分流34_初始化版本屬性 = 'LINE角色分流34_初始化版本';
 const LINE角色分流34_紀錄欄位 = ['時間戳', 'LINE_USER_ID', '工號', '姓名', '角色', '權限等級', '目標選單', 'richMenuId', '動作', '結果', '備註'];
 
 function 初始化34_LINE使用者角色分流與一般員工選單() {
-  const ss = 取得試算表_();
+  const ss = LINE角色分流34_取得正式資料庫_();
   LINE角色分流34_建立或修復表_(ss, LINE角色分流34_紀錄表, LINE角色分流34_紀錄欄位);
-  LINE角色分流34_寫入紀錄_({ LINE_USER_ID: 'SYSTEM', 角色: '系統', 權限等級: 99 }, '系統', '', '初始化', '完成', LINE角色分流34_版本);
+  const 屬性 = PropertiesService.getScriptProperties();
+  if (LINE角色分流34_文字_(屬性.getProperty(LINE角色分流34_初始化版本屬性)) !== LINE角色分流34_版本) {
+    LINE角色分流34_寫入紀錄_({ LINE_USER_ID: 'SYSTEM', 角色: '系統', 權限等級: 99 }, '系統', '', '初始化', '完成', LINE角色分流34_版本);
+    屬性.setProperty(LINE角色分流34_初始化版本屬性, LINE角色分流34_版本);
+  }
   return { 成功: true, 訊息: '34_LINE角色分流初始化完成', 版本: LINE角色分流34_版本, 工作表: LINE角色分流34_紀錄表 };
 }
 
 function LINE角色分流34_嘗試處理Webhook_(payload) {
   const events = Array.isArray(payload && payload.events) ? payload.events : [];
   if (!events.length) return null;
-  初始化34_LINE使用者角色分流與一般員工選單();
   let 已處理 = 0, 已更新選單 = 0;
+  const 待後續事件 = [];
   events.forEach(function(ev) {
     const r = LINE角色分流34_處理單一事件_(ev || {});
     if (r && r.已處理) 已處理++;
+    else 待後續事件.push(ev);
     if (r && r.已更新選單) 已更新選單++;
   });
-  return 已處理 > 0 ? { ok: true, success: true, 已處理: true, 已更新選單, 訊息: '34_LINE角色分流已處理' } : null;
+  if (!已處理) return null;
+  payload.events = 待後續事件;
+  return {
+    ok: true,
+    success: true,
+    已處理: 待後續事件.length === 0,
+    已部分處理: 待後續事件.length > 0,
+    已更新選單: 已更新選單,
+    處理筆數: 已處理,
+    待後續路由筆數: 待後續事件.length,
+    訊息: '34_LINE角色分流已處理'
+  };
 }
 
 function LINE角色分流34_處理單一事件_(ev) {
@@ -35,27 +53,22 @@ function LINE角色分流34_處理單一事件_(ev) {
   const replyToken = ev.replyToken;
   if (!text || !lineUserId) return null;
 
-  const 綁定工號 = LINE角色分流34_解析綁定工號_(text);
-  if (綁定工號 && typeof LINE身份權限33_綁定身份_ === 'function') {
-    const bind = LINE身份權限33_綁定身份_(lineUserId, 綁定工號);
-    const menu = bind && bind.成功 ? 套用34_LINE使用者角色選單(lineUserId) : null;
-    LINE角色分流34_回覆_(replyToken, (bind && bind.文字 ? bind.文字 : '身份綁定完成') + '\n\n' + LINE角色分流34_選單結果文字_(menu));
-    return { 已處理: true, 已更新選單: !!(menu && menu.成功), 綁定結果: bind, 選單結果: menu };
-  }
-
   if (/^(選單更新|更新選單|重整選單|我的選單)$/i.test(text)) {
+    初始化34_LINE使用者角色分流與一般員工選單();
     const menu = 套用34_LINE使用者角色選單(lineUserId);
     LINE角色分流34_回覆_(replyToken, LINE角色分流34_選單結果文字_(menu));
     return { 已處理: true, 已更新選單: !!(menu && menu.成功), 選單結果: menu };
   }
 
   if (/^(員工選單|一般選單|報工選單)$/i.test(text)) {
+    初始化34_LINE使用者角色分流與一般員工選單();
     const menu = 套用34_LINE指定選單_(lineUserId, '一般員工入口');
     LINE角色分流34_回覆_(replyToken, LINE角色分流34_選單結果文字_(menu));
     return { 已處理: true, 已更新選單: !!(menu && menu.成功), 選單結果: menu };
   }
 
   if (/^(主管選單|主管入口選單)$/i.test(text)) {
+    初始化34_LINE使用者角色分流與一般員工選單();
     const 身份 = LINE角色分流34_取得身份_(lineUserId);
     if (!身份 || !LINE角色分流34_是否主管選單_(身份)) {
       LINE角色分流34_回覆_(replyToken, '⛔ 目前身份不可切換主管選單。');
@@ -126,11 +139,77 @@ function LINE角色分流34_取得身份_(lineUserId) {
 }
 
 function LINE角色分流34_取得主管RichMenuId_() {
-  return LINE角色分流34_文字_(PropertiesService.getScriptProperties().getProperty('LINE_RICH_MENU_主管入口_ID'));
+  var 屬性 = PropertiesService.getScriptProperties();
+  var id = LINE角色分流34_文字_(屬性.getProperty('LINE_RICH_MENU_主管入口_ID'));
+  if (id) return id;
+  var 同步 = 同步34_LINE現有RichMenu設定();
+  return LINE角色分流34_文字_(同步 && 同步.主管入口 && 同步.主管入口.richMenuId);
 }
 
 function LINE角色分流34_取得一般員工RichMenuId_() {
-  return LINE角色分流34_文字_(PropertiesService.getScriptProperties().getProperty('LINE_RICH_MENU_一般員工_ID'));
+  var 屬性 = PropertiesService.getScriptProperties();
+  var id = LINE角色分流34_文字_(屬性.getProperty('LINE_RICH_MENU_一般員工_ID'));
+  if (id) return id;
+  var 同步 = 同步34_LINE現有RichMenu設定();
+  return LINE角色分流34_文字_(同步 && 同步.一般員工入口 && 同步.一般員工入口.richMenuId);
+}
+
+/**
+ * 從 LINE 官方帳號列出既有 Rich Menu，自動辨識主管入口與報工入口。
+ * 只寫入既有 richMenuId，不建立新選單、不上傳新圖片。
+ */
+function 同步34_LINE現有RichMenu設定() {
+  var 回應 = LINE角色分流34_呼叫LINEAPI_('get', 'https://api.line.me/v2/bot/richmenu/list', null);
+  var 清單 = Array.isArray(回應 && 回應.richmenus) ? 回應.richmenus : [];
+  var 主管入口 = LINE角色分流34_挑選RichMenu_(清單, '主管入口');
+  var 一般員工入口 = LINE角色分流34_挑選RichMenu_(清單, '一般員工入口');
+  if (主管入口 && 一般員工入口 && LINE角色分流34_文字_(主管入口.richMenuId) === LINE角色分流34_文字_(一般員工入口.richMenuId)) {
+    一般員工入口 = LINE角色分流34_挑選RichMenu_(清單.filter(function (m) { return LINE角色分流34_文字_(m.richMenuId) !== LINE角色分流34_文字_(主管入口.richMenuId); }), '一般員工入口');
+  }
+
+  if (!一般員工入口) {
+    try {
+      var 預設 = LINE角色分流34_呼叫LINEAPI_('get', 'https://api.line.me/v2/bot/user/all/richmenu', null);
+      var 預設ID = LINE角色分流34_文字_(預設 && 預設.richMenuId);
+      if (預設ID) 一般員工入口 = 清單.filter(function (m) { return LINE角色分流34_文字_(m.richMenuId) === 預設ID; })[0] || { richMenuId: 預設ID, name: 'LINE目前預設選單' };
+    } catch (忽略預設選單錯誤) {}
+  }
+
+  var 屬性 = PropertiesService.getScriptProperties();
+  if (主管入口 && 主管入口.richMenuId) 屬性.setProperty('LINE_RICH_MENU_主管入口_ID', 主管入口.richMenuId);
+  if (一般員工入口 && 一般員工入口.richMenuId) 屬性.setProperty('LINE_RICH_MENU_一般員工_ID', 一般員工入口.richMenuId);
+
+  return {
+    成功: !!(主管入口 || 一般員工入口),
+    訊息: '已沿用 LINE 官方帳號既有 Rich Menu，未建立第二套選單。',
+    選單總數: 清單.length,
+    主管入口: 主管入口 ? { richMenuId: 主管入口.richMenuId, 名稱: 主管入口.name || '', 聊天列文字: 主管入口.chatBarText || '' } : null,
+    一般員工入口: 一般員工入口 ? { richMenuId: 一般員工入口.richMenuId, 名稱: 一般員工入口.name || '', 聊天列文字: 一般員工入口.chatBarText || '' } : null
+  };
+}
+
+function LINE角色分流34_挑選RichMenu_(清單, 目標) {
+  var 候選 = (清單 || []).map(function (選單) {
+    var 名稱 = LINE角色分流34_文字_(選單.name);
+    var 聊天列 = LINE角色分流34_文字_(選單.chatBarText);
+    var 動作文字 = JSON.stringify(選單.areas || []);
+    var 分數 = 0;
+    if (/v1\.7\.5|38_LINE|38_/i.test(名稱)) 分數 += 80;
+    if (目標 === '主管入口') {
+      if (/主管|戰情/i.test(名稱)) 分數 += 120;
+      if (/主管/i.test(聊天列)) 分數 += 80;
+      if (/主管戰情|今日戰情/.test(動作文字)) 分數 += 50;
+      if (/報工入口|一般員工|員工快捷/i.test(名稱 + 聊天列)) 分數 -= 160;
+    } else {
+      if (/一般員工|員工快捷|報工入口/i.test(名稱)) 分數 += 120;
+      if (/報工|員工/i.test(聊天列)) 分數 += 80;
+      if (/我的狀態|身份綁定|選單說明/.test(動作文字)) 分數 += 50;
+      if (/主管入口|主管快捷/i.test(名稱 + 聊天列)) 分數 -= 160;
+    }
+    return { 選單: 選單, 分數: 分數 };
+  }).filter(function (項目) { return 項目.分數 > 0; });
+  候選.sort(function (a, b) { return b.分數 - a.分數; });
+  return 候選.length ? 候選[0].選單 : null;
 }
 
 function LINE角色分流34_呼叫LINEAPI_(method, url, payload) {
@@ -165,13 +244,20 @@ function LINE角色分流34_讀表物件_(sh) {
 
 function LINE角色分流34_寫入紀錄_(身份, 目標選單, richMenuId, 動作, 結果, 備註) {
   try {
-    const sh = LINE角色分流34_建立或修復表_(取得試算表_(), LINE角色分流34_紀錄表, LINE角色分流34_紀錄欄位);
+    const sh = LINE角色分流34_建立或修復表_(LINE角色分流34_取得正式資料庫_(), LINE角色分流34_紀錄表, LINE角色分流34_紀錄欄位);
     sh.appendRow([new Date(), 身份.LINE_USER_ID || '', 身份.工號 || '', 身份.姓名 || '', 身份.角色 || '', 身份.權限等級 || '', 目標選單 || '', richMenuId || '', 動作 || '', 結果 || '', 備註 || '']);
   } catch (err) {}
 }
 
+function LINE角色分流34_取得正式資料庫_() {
+  const 資料庫 = SpreadsheetApp.openById(LINE角色分流34_正式主庫ID);
+  if (!資料庫 || String(資料庫.getId()) !== LINE角色分流34_正式主庫ID) throw new Error('34_LINE 正式主資料庫驗證失敗。');
+  return 資料庫;
+}
+
 function LINE角色分流34_回覆_(replyToken, text) {
   if (!replyToken) return;
+  if (typeof LINE身份權限33_回覆_ === 'function') return LINE身份權限33_回覆_(replyToken, String(text || '').slice(0, 4900));
   if (typeof LINE主管戰情直連_送出回覆_ === 'function') return LINE主管戰情直連_送出回覆_(replyToken, String(text || '').slice(0, 4900));
   if (typeof 回覆LINE_ === 'function') return 回覆LINE_(replyToken, String(text || '').slice(0, 4900));
 }

@@ -1,34 +1,51 @@
 /**
  * 37_LINE｜指令中心與快捷指令總表
- * 版本：v1.7.4
+ * 版本：v1.8.1
  * 目的：建立 LINE 指令中心，讓使用者可查詢主管指令、員工指令、系統維護與我的狀態。
  */
 
-const LINE指令中心37_版本 = 'v1.7.4_37_LINE指令中心與快捷指令總表';
+const LINE指令中心37_版本 = 'v1.8.1_37_LINE指令中心與快捷指令總表_正式主庫';
 const LINE指令中心37_總表 = '37_LINE指令中心';
 const LINE指令中心37_紀錄表 = '37_LINE指令使用紀錄';
+const LINE指令中心37_正式主庫ID = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
+const LINE指令中心37_初始化版本屬性 = 'LINE指令中心37_初始化版本';
 const LINE指令中心37_總表欄位 = ['分類', '指令', '別名', '權限', '說明', '範例', '排序', '啟用', '備註'];
 const LINE指令中心37_紀錄欄位 = ['時間戳', 'LINE_USER_ID', '工號', '姓名', '角色', '收到文字', '指令分類', '回覆結果', '備註'];
 
 function 初始化37_LINE指令中心與快捷指令總表() {
-  const ss = 取得試算表_();
+  const ss = LINE指令中心37_取得正式資料庫_();
   const sh = LINE指令中心37_建立或修復表_(ss, LINE指令中心37_總表, LINE指令中心37_總表欄位);
   LINE指令中心37_建立或修復表_(ss, LINE指令中心37_紀錄表, LINE指令中心37_紀錄欄位);
   LINE指令中心37_補預設指令_(sh);
-  LINE指令中心37_寫入紀錄_({ LINE_USER_ID: 'SYSTEM', 工號: '', 姓名: '', 角色: '系統' }, '初始化37', '系統', '完成', LINE指令中心37_版本);
+  const 屬性 = PropertiesService.getScriptProperties();
+  if (LINE指令中心37_文字_(屬性.getProperty(LINE指令中心37_初始化版本屬性)) !== LINE指令中心37_版本) {
+    LINE指令中心37_寫入紀錄_({ LINE_USER_ID: 'SYSTEM', 工號: '', 姓名: '', 角色: '系統' }, '初始化37', '系統', '完成', LINE指令中心37_版本);
+    屬性.setProperty(LINE指令中心37_初始化版本屬性, LINE指令中心37_版本);
+  }
   return { 成功: true, 訊息: '37_LINE指令中心與快捷指令總表初始化完成', 版本: LINE指令中心37_版本, 工作表: [LINE指令中心37_總表, LINE指令中心37_紀錄表] };
 }
 
 function LINE指令中心37_嘗試處理Webhook_(payload) {
   const events = Array.isArray(payload && payload.events) ? payload.events : [];
   if (!events.length) return null;
-  初始化37_LINE指令中心與快捷指令總表();
   let 已處理 = 0;
+  const 待後續事件 = [];
   events.forEach(function(ev) {
     const r = LINE指令中心37_處理單一事件_(ev || {});
     if (r && r.已處理) 已處理++;
+    else 待後續事件.push(ev);
   });
-  return 已處理 > 0 ? { ok: true, success: true, 已處理: true, 訊息: '37_LINE指令中心已處理 webhook' } : null;
+  if (!已處理) return null;
+  payload.events = 待後續事件;
+  return {
+    ok: true,
+    success: true,
+    已處理: 待後續事件.length === 0,
+    已部分處理: 待後續事件.length > 0,
+    處理筆數: 已處理,
+    待後續路由筆數: 待後續事件.length,
+    訊息: '37_LINE指令中心已處理 webhook'
+  };
 }
 
 function LINE指令中心37_處理單一事件_(ev) {
@@ -39,6 +56,7 @@ function LINE指令中心37_處理單一事件_(ev) {
   if (!text) return null;
   const cmd = LINE指令中心37_判斷指令_(text);
   if (!cmd) return null;
+  初始化37_LINE指令中心與快捷指令總表();
   const 身份 = LINE指令中心37_取得身份_(lineUserId) || { LINE_USER_ID: lineUserId, 工號: '', 姓名: '', 角色: '未綁定', 權限等級: '', 允許主管入口: '否', 允許主檔檢查: '否', 允許AI摘要: '否', 允許報工: '是' };
   let msg = '';
   if (cmd === '指令中心') msg = LINE指令中心37_建立總覽回覆_(身份);
@@ -95,6 +113,7 @@ function LINE指令中心37_建立我的狀態回覆_(身份) {
     '姓名：' + (身份.姓名 || '-') + '\n' +
     '工號：' + (身份.工號 || '-') + '\n' +
     '部門：' + (身份.部門 || '-') + '\n' +
+    '組別：' + (身份.組別 || '-') + '\n' +
     '職稱：' + (身份.職稱 || '-') + '\n' +
     '角色：' + (身份.角色 || '未綁定') + '\n' +
     '權限等級：' + (身份.權限等級 || '-') + '\n' +
@@ -102,7 +121,8 @@ function LINE指令中心37_建立我的狀態回覆_(身份) {
     '主管入口：' + (身份.允許主管入口 || '否') + '\n' +
     '主檔檢查：' + (身份.允許主檔檢查 || '否') + '\n' +
     'AI摘要：' + (身份.允許AI摘要 || '否') + '\n' +
-    '報工作業：' + (身份.允許報工 || '是');
+    '報工作業：' + (身份.允許報工 || '是') + '\n' +
+    '資料庫：唯一正式主庫';
 }
 
 function LINE指令中心37_建立選單說明回覆_(身份) {
@@ -151,7 +171,7 @@ function LINE指令中心37_預設指令資料_() {
 }
 
 function LINE指令中心37_讀指令表_() {
-  const sh = LINE指令中心37_建立或修復表_(取得試算表_(), LINE指令中心37_總表, LINE指令中心37_總表欄位);
+  const sh = LINE指令中心37_建立或修復表_(LINE指令中心37_取得正式資料庫_(), LINE指令中心37_總表, LINE指令中心37_總表欄位);
   return LINE指令中心37_讀表物件_(sh);
 }
 
@@ -198,13 +218,20 @@ function LINE指令中心37_讀表物件_(sh) {
 
 function LINE指令中心37_寫入紀錄_(身份, text, 分類, 結果, 備註) {
   try {
-    const sh = LINE指令中心37_建立或修復表_(取得試算表_(), LINE指令中心37_紀錄表, LINE指令中心37_紀錄欄位);
+    const sh = LINE指令中心37_建立或修復表_(LINE指令中心37_取得正式資料庫_(), LINE指令中心37_紀錄表, LINE指令中心37_紀錄欄位);
     sh.appendRow([new Date(), 身份.LINE_USER_ID || '', 身份.工號 || '', 身份.姓名 || '', 身份.角色 || '', text || '', 分類 || '', 結果 || '', 備註 || '']);
   } catch (err) {}
 }
 
+function LINE指令中心37_取得正式資料庫_() {
+  const 資料庫 = SpreadsheetApp.openById(LINE指令中心37_正式主庫ID);
+  if (!資料庫 || String(資料庫.getId()) !== LINE指令中心37_正式主庫ID) throw new Error('37_LINE 正式主資料庫驗證失敗。');
+  return 資料庫;
+}
+
 function LINE指令中心37_回覆_(replyToken, text) {
   if (!replyToken) return;
+  if (typeof LINE身份權限33_回覆_ === 'function') return LINE身份權限33_回覆_(replyToken, String(text || '').slice(0, 4900));
   if (typeof LINE主管戰情直連_送出回覆_ === 'function') return LINE主管戰情直連_送出回覆_(replyToken, String(text || '').slice(0, 4900));
   if (typeof 回覆LINE_ === 'function') return 回覆LINE_(replyToken, String(text || '').slice(0, 4900));
 }
