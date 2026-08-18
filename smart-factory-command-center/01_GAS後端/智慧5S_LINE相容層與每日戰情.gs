@@ -1,25 +1,76 @@
 /**
  * 化新精密｜智慧5S LINE 相容層與每日戰情
- * 版本：1.0.0
+ * 版本：1.0.1
  *
  * 目的：
  * 1. 補齊舊 LINE 通知模組呼叫但專案內缺少的 取得試算表()。
- * 2. 不覆寫既有 發送LINE通知()，只做相容。
+ * 2. 優先沿用 NEXUS OS 既有主資料庫設定，不硬改全系統資料庫流向。
  * 3. 每日建立智慧5S戰情摘要通知，寫入既有 5S_通知紀錄。
- * 4. 紅牌到期前 7 天、3 天、1 天與逾期時建立提醒；依日期去重。
- * 5. 通知仍由既有 智慧5S_LINE橋接_處理待通知() 統一發送。
+ * 4. 紅牌到期前 7 天、3 天、1 天、當日與逾期時建立提醒，依日期去重。
+ * 5. 自動排除「系統驗收／智慧5S自動驗收」測試資料，不污染主管戰情。
+ * 6. 通知仍由既有 智慧5S_LINE橋接_處理待通知() 統一發送。
  */
 
-var 智慧5S_每日戰情_版本 = '1.0.0';
+var 智慧5S_每日戰情_版本 = '1.0.1';
 var 智慧5S_每日戰情_資料庫ID = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
 var 智慧5S_每日戰情_排程函式 = '智慧5S_每日戰情_自動執行';
 
 /**
  * 舊 LINE 通知模組相容層。
- * 若其他正式模組已定義同名函式，請不要重複貼入 Apps Script。
+ * 解析優先順序：
+ * 1. NEXUS OS 全域 系統設定.主資料庫ID
+ * 2. Script Properties 常見主資料庫鍵
+ * 3. 綁定型 Apps Script 的目前試算表
+ * 4. 智慧5S中央資料庫（安全回退）
  */
 function 取得試算表() {
+  var 候選ID = [];
+
+  try {
+    if (typeof 系統設定 !== 'undefined' && 系統設定 && 系統設定.主資料庫ID) {
+      候選ID.push(String(系統設定.主資料庫ID).trim());
+    }
+  } catch (忽略錯誤) {}
+
+  try {
+    var 屬性 = PropertiesService.getScriptProperties();
+    [
+      '主資料庫ID',
+      '資料庫ID',
+      'SPREADSHEET_ID',
+      'MASTER_SPREADSHEET_ID',
+      'MAIN_SPREADSHEET_ID',
+      'MAIN_DATABASE_ID',
+      'MASTER_DB_ID'
+    ].forEach(function (鍵名) {
+      var 值 = String(屬性.getProperty(鍵名) || '').trim();
+      if (值) 候選ID.push(值);
+    });
+  } catch (忽略錯誤2) {}
+
+  for (var i = 0; i < 候選ID.length; i++) {
+    try {
+      return SpreadsheetApp.openById(候選ID[i]);
+    } catch (忽略錯誤3) {}
+  }
+
+  try {
+    var 目前試算表 = SpreadsheetApp.getActiveSpreadsheet();
+    if (目前試算表) return 目前試算表;
+  } catch (忽略錯誤4) {}
+
   return SpreadsheetApp.openById(智慧5S_每日戰情_資料庫ID);
+}
+
+function 智慧5S_相容層健康檢查() {
+  var 試算表 = 取得試算表();
+  return {
+    成功: Boolean(試算表),
+    版本: 智慧5S_每日戰情_版本,
+    試算表ID: 試算表 ? 試算表.getId() : '',
+    試算表名稱: 試算表 ? 試算表.getName() : '',
+    智慧5S中央資料庫ID: 智慧5S_每日戰情_資料庫ID
+  };
 }
 
 function 智慧5S_每日戰情_自動執行() {
@@ -42,6 +93,7 @@ function 智慧5S_每日戰情_建立通知() {
   var 改善分頁 = 資料庫.getSheetByName('5S_改善單');
   var 通知分頁 = 資料庫.getSheetByName('5S_通知紀錄');
   var 區域分頁 = 資料庫.getSheetByName('5S_區域主檔');
+
   if (!紅牌分頁 || !改善分頁 || !通知分頁 || !區域分頁) {
     throw new Error('智慧5S每日戰情缺少必要分頁');
   }
@@ -57,15 +109,18 @@ function 智慧5S_每日戰情_建立通知() {
 
   var 紅牌資料 = 智慧5S_每日戰情_讀取表格_(紅牌分頁);
   var 待處置 = 紅牌資料.filter(function (列) {
+    if (智慧5S_每日戰情_是否測試紅牌_(列)) return false;
     var 狀態 = String(列['案件狀態'] || '').trim();
     return 狀態 && ['已結案', '已完成', '作廢'].indexOf(狀態) < 0;
   });
 
   var 已逾期 = 0;
   var 七日內到期 = 0;
+
   待處置.forEach(function (列) {
     var 到期 = 智慧5S_每日戰情_解析日期_(列['預定處置日']);
     if (!到期) return;
+
     var 剩餘天數 = 智慧5S_每日戰情_日期差_(今天, 到期);
     if (剩餘天數 < 0) 已逾期++;
     if (剩餘天數 >= 0 && 剩餘天數 <= 7) 七日內到期++;
@@ -73,8 +128,16 @@ function 智慧5S_每日戰情_建立通知() {
     if ([7, 3, 1, 0].indexOf(剩餘天數) >= 0 || 剩餘天數 < 0) {
       var 紅牌編號 = String(列['紅牌編號'] || '').trim();
       var 去重鍵 = '5S-RP-DEADLINE-' + 紅牌編號 + '-' + 今天字串;
-      var 狀態文字 = 剩餘天數 < 0 ? '已逾期 ' + Math.abs(剩餘天數) + ' 天' : (剩餘天數 === 0 ? '今天到期' : '剩 ' + 剩餘天數 + ' 天到期');
-      var 摘要 = '【5S紅牌期限提醒】' + 紅牌編號 + '｜' + String(列['區域'] || '') + '｜' + String(列['物品名稱'] || '') + '｜' + 狀態文字 + '｜預定處置日：' + String(列['預定處置日'] || '');
+      var 狀態文字 = 剩餘天數 < 0
+        ? '已逾期 ' + Math.abs(剩餘天數) + ' 天'
+        : (剩餘天數 === 0 ? '今天到期' : '剩 ' + 剩餘天數 + ' 天到期');
+
+      var 摘要 = '【5S紅牌期限提醒】' + 紅牌編號 +
+        '｜' + String(列['區域'] || '') +
+        '｜' + String(列['物品名稱'] || '') +
+        '｜' + 狀態文字 +
+        '｜預定處置日：' + String(列['預定處置日'] || '');
+
       if (智慧5S_每日戰情_新增通知_(通知分頁, {
         通知編號: '5S-DEADLINE-' + 紅牌編號 + '-' + 今天字串.replace(/-/g, ''),
         通知場景: '紅牌期限提醒',
@@ -92,12 +155,18 @@ function 智慧5S_每日戰情_建立通知() {
 
   var 改善資料 = 智慧5S_每日戰情_讀取表格_(改善分頁);
   var 改善未結案 = 改善資料.filter(function (列) {
+    if (智慧5S_每日戰情_是否測試改善_(列)) return false;
     var 狀態 = String(列['狀態'] || '').trim();
     return 狀態 && ['已結案', '已完成', '作廢'].indexOf(狀態) < 0;
   }).length;
 
   var 每日去重鍵 = '5S-DAILY-' + 今天字串;
-  var 每日摘要 = '【智慧5S每日戰情】' + 今天字串 + '｜待處置紅牌：' + 待處置.length + '｜7日內到期：' + 七日內到期 + '｜已逾期：' + 已逾期 + '｜改善未結案：' + 改善未結案;
+  var 每日摘要 = '【智慧5S每日戰情】' + 今天字串 +
+    '｜待處置紅牌：' + 待處置.length +
+    '｜7日內到期：' + 七日內到期 +
+    '｜已逾期：' + 已逾期 +
+    '｜改善未結案：' + 改善未結案;
+
   if (智慧5S_每日戰情_新增通知_(通知分頁, {
     通知編號: '5S-DAILY-' + 今天字串.replace(/-/g, ''),
     通知場景: '每日5S戰情',
@@ -112,6 +181,7 @@ function 智慧5S_每日戰情_建立通知() {
   })) 新增通知數++;
 
   SpreadsheetApp.flush();
+
   return {
     成功: true,
     日期: 今天字串,
@@ -131,7 +201,12 @@ function 智慧5S_每日戰情_建立每日觸發器() {
     .atHour(8)
     .nearMinute(5)
     .create();
-  return { 成功: true, 版本: 智慧5S_每日戰情_版本, 訊息: '智慧5S每日戰情觸發器已建立，約每日08:05執行' };
+
+  return {
+    成功: true,
+    版本: 智慧5S_每日戰情_版本,
+    訊息: '智慧5S每日戰情觸發器已建立，約每日08:05執行'
+  };
 }
 
 function 智慧5S_每日戰情_停止每日觸發器() {
@@ -152,9 +227,13 @@ function 智慧5S_每日戰情_刪除觸發器_() {
 
 function 智慧5S_每日戰情_取得主要群組_(區域分頁) {
   if (區域分頁.getLastRow() < 2) return '';
+
   var 欄位 = 區域分頁.getRange(1, 1, 1, 區域分頁.getLastColumn()).getDisplayValues()[0];
   var 索引 = {};
-  欄位.forEach(function (欄名, i) { 索引[String(欄名 || '').trim()] = i; });
+  欄位.forEach(function (欄名, i) {
+    索引[String(欄名 || '').trim()] = i;
+  });
+
   var 資料 = 區域分頁.getRange(2, 1, 區域分頁.getLastRow() - 1, 欄位.length).getDisplayValues();
   for (var i = 0; i < 資料.length; i++) {
     var 啟用 = String(資料[i][索引['啟用']] || '是').trim();
@@ -166,37 +245,68 @@ function 智慧5S_每日戰情_取得主要群組_(區域分頁) {
 
 function 智慧5S_每日戰情_讀取表格_(分頁) {
   if (分頁.getLastRow() < 2) return [];
+
   var 欄位 = 分頁.getRange(1, 1, 1, 分頁.getLastColumn()).getDisplayValues()[0];
   var 資料 = 分頁.getRange(2, 1, 分頁.getLastRow() - 1, 欄位.length).getDisplayValues();
+
   return 資料.map(function (列) {
     var 物件 = {};
-    欄位.forEach(function (欄名, i) { 物件[String(欄名 || '').trim()] = 列[i]; });
+    欄位.forEach(function (欄名, i) {
+      物件[String(欄名 || '').trim()] = 列[i];
+    });
     return 物件;
   });
+}
+
+function 智慧5S_每日戰情_是否測試紅牌_(列) {
+  var 編號 = String(列['紅牌編號'] || '').trim();
+  var 名稱 = String(列['物品名稱'] || '').trim();
+  var 原因 = String(列['紅牌原因'] || '').trim();
+
+  return 編號.indexOf('5S-RED-ACC-') === 0 ||
+    名稱.indexOf('智慧5S自動驗收') >= 0 ||
+    原因.indexOf('系統正式驗收') >= 0;
+}
+
+function 智慧5S_每日戰情_是否測試改善_(列) {
+  var 單號 = String(列['改善單號'] || '').trim();
+  var 來源類型 = String(列['來源類型'] || '').trim();
+  var 標題 = String(列['問題標題'] || '').trim();
+
+  return 來源類型 === '系統驗收' ||
+    單號.indexOf('5S-KZN-ACC-') === 0 ||
+    標題.indexOf('智慧5S自動驗收') >= 0;
 }
 
 function 智慧5S_每日戰情_新增通知_(通知分頁, 物件) {
   var 欄位 = 通知分頁.getRange(1, 1, 1, 通知分頁.getLastColumn()).getDisplayValues()[0];
   var 去重鍵索引 = 欄位.indexOf('去重鍵');
   if (去重鍵索引 < 0) throw new Error('5S_通知紀錄缺少去重鍵欄位');
+
   if (通知分頁.getLastRow() >= 2) {
     var 現有 = 通知分頁.getRange(2, 去重鍵索引 + 1, 通知分頁.getLastRow() - 1, 1).getDisplayValues();
     for (var i = 0; i < 現有.length; i++) {
-      if (String(現有[i][0] || '').trim() === String(物件.去重鍵 || '').trim()) return false;
+      if (String(現有[i][0] || '').trim() === String(物件.去重鍵 || '').trim()) {
+        return false;
+      }
     }
   }
+
   通知分頁.appendRow(欄位.map(function (欄名) {
     return 物件[欄名] !== undefined ? 物件[欄名] : '';
   }));
+
   return true;
 }
 
 function 智慧5S_每日戰情_解析日期_(值) {
   if (!值) return null;
   if (Object.prototype.toString.call(值) === '[object Date]' && !isNaN(值.getTime())) return 值;
+
   var 文字 = String(值).trim().replace(/\//g, '-');
   var m = 文字.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
   if (!m) return null;
+
   return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 12, 0, 0);
 }
 
