@@ -15,11 +15,6 @@
     return String(內容 ?? '').trim();
   }
 
-  function 數值(內容) {
-    const 結果 = Number(內容);
-    return Number.isFinite(結果) ? 結果 : 0;
-  }
-
   function 轉義(內容) {
     return String(內容 ?? '').replace(/[&<>'"]/g, 字元 => ({
       '&': '&amp;',
@@ -235,6 +230,13 @@
     更新計時器 = setTimeout(() => 更新目前頁面(Boolean(強制更新)), 80);
   }
 
+  function 是否為模組自身變更(變更) {
+    if (變更.target?.closest?.('#G1整理戰情')) return true;
+    const 節點 = [...變更.addedNodes, ...變更.removedNodes].filter(節點項目 => 節點項目.nodeType === 1);
+    if (!節點.length) return false;
+    return 節點.every(節點項目 => 節點項目.id === 'G1整理戰情' || 節點項目.closest?.('#G1整理戰情'));
+  }
+
   function 綁定更新事件() {
     document.addEventListener('click', 事件 => {
       if (事件.target.closest('[data-頁面], [data-紅牌篩選], [data-動作="更新紅牌"], [data-動作="重新整理首頁"]')) {
@@ -244,7 +246,11 @@
     }, true);
 
     const 觀察器 = new MutationObserver(變更清單 => {
-      const 有頁面變更 = 變更清單.some(變更 => 變更.type === 'childList' && (變更.target.id === '頁面內容' || 變更.target.closest?.('#頁面內容')));
+      const 有頁面變更 = 變更清單.some(變更 => {
+        if (變更.type !== 'childList') return false;
+        if (是否為模組自身變更(變更)) return false;
+        return 變更.target.id === '頁面內容' || Boolean(變更.target.closest?.('#頁面內容'));
+      });
       if (有頁面變更) 排程更新(false);
     });
 
