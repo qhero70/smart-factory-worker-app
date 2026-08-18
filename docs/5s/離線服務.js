@@ -1,5 +1,5 @@
 'use strict';
-const 快取版本 = '化新精密-智慧5S-v1.0.4';
+const 快取版本 = '化新精密-智慧5S-v1.0.5';
 const 應用程式外殼 = [
   './',
   './index.html',
@@ -10,6 +10,7 @@ const 應用程式外殼 = [
   './智慧5S應用程式.js',
   './智慧5S_G1整理戰情.js',
   './智慧5S_主管戰情.js',
+  './智慧5S_區域風險排名.js',
   './應用程式資訊.webmanifest',
   './智慧5S圖示.svg',
   './智慧5S圖示-192.png',
@@ -57,7 +58,7 @@ self.addEventListener('fetch', 事件 => {
     return;
   }
 
-  const 是否核心腳本 = /智慧5S設定\.js|智慧5S資料庫\.js|智慧5S資料修復\.js|智慧5S應用程式\.js|智慧5S_G1整理戰情\.js|智慧5S_主管戰情\.js|智慧5S樣式\.css/.test(網址.pathname);
+  const 是否核心腳本 = /智慧5S設定\.js|智慧5S資料庫\.js|智慧5S資料修復\.js|智慧5S應用程式\.js|智慧5S_G1整理戰情\.js|智慧5S_主管戰情\.js|智慧5S_區域風險排名\.js|智慧5S樣式\.css/.test(網址.pathname);
   if (是否核心腳本) {
     事件.respondWith(
       fetch(請求, { cache: 'no-store' })
