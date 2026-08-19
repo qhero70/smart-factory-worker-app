@@ -1,7 +1,7 @@
 window.智慧5S設定 = Object.freeze({
   系統名稱: '化新精密｜智慧 5S 管理平台',
   系統短名: '智慧5S',
-  版本: '1.0.9',
+  版本: '1.0.10',
   後端網址: 'https://script.google.com/macros/s/AKfycbzRvly1OV-C80bMmd2ww4BM1XAH9WTyz62VFDnUxVGiO15kzHahbeHZc2bNTSwdFCqBwQ/exec',
   試算表識別碼: '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8',
   讀取上限: 5000,
