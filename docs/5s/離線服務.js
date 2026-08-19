@@ -1,5 +1,5 @@
 'use strict';
-const 快取版本 = '化新精密-智慧5S-v1.0.7';
+const 快取版本 = '化新精密-智慧5S-v1.0.8';
 const 應用程式外殼 = [
   './',
   './index.html',
