@@ -30,6 +30,46 @@
     }, 其他參數 || {});
   }
 
+  function JSONP讀取(網址物件) {
+    return new Promise((完成, 失敗) => {
+      const 回呼名稱 = `智慧5S_JSONP_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      const 網址 = new URL(網址物件.toString());
+      網址.searchParams.set('callback', 回呼名稱);
+      網址.searchParams.set('_', String(Date.now()));
+
+      const 指令碼 = document.createElement('script');
+      let 已結束 = false;
+      const 清理 = () => {
+        if (已結束) return;
+        已結束 = true;
+        clearTimeout(計時器);
+        try { delete 全域[回呼名稱]; } catch (錯誤) { 全域[回呼名稱] = undefined; }
+        if (指令碼.parentNode) 指令碼.parentNode.removeChild(指令碼);
+      };
+
+      全域[回呼名稱] = 資料 => {
+        清理();
+        if (資料 && 資料.ok === false) return 失敗(new Error(資料.error || 資料.訊息 || '後端讀取失敗'));
+        if (資料 && 資料.成功 === false) return 失敗(new Error(資料.訊息 || '後端讀取失敗'));
+        完成(資料);
+      };
+
+      指令碼.async = true;
+      指令碼.src = 網址.toString();
+      指令碼.onerror = () => {
+        清理();
+        失敗(new Error('JSONP 後端連線失敗'));
+      };
+
+      const 計時器 = setTimeout(() => {
+        清理();
+        失敗(new Error('JSONP 後端讀取逾時'));
+      }, Math.max(設定.請求逾時毫秒, 12000));
+
+      document.head.appendChild(指令碼);
+    });
+  }
+
   async function 讀取後端(動作, 其他參數) {
     if (!navigator.onLine) throw new Error('目前離線');
     const 網址 = new URL(設定.後端網址);
@@ -49,7 +89,13 @@
       if (資料 && 資料.成功 === false) throw new Error(資料.訊息 || '後端讀取失敗');
       return 資料;
     } catch (錯誤) {
-      if (錯誤.name === 'AbortError') throw new Error('後端讀取逾時');
+      if (錯誤.name === 'AbortError') {
+        try { return await JSONP讀取(網址); } catch (備援錯誤) { throw new Error('後端讀取逾時'); }
+      }
+      const 訊息 = String(錯誤 && (錯誤.message || 錯誤) || '');
+      if (/Load failed|Failed to fetch|NetworkError|TypeError|fetch/i.test(訊息)) {
+        return JSONP讀取(網址);
+      }
       throw 錯誤;
     } finally {
       逾時.清除();
