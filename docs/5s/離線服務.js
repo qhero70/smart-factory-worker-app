@@ -2,7 +2,7 @@
 
 /**
  * 化新精密｜智慧5S PWA 離線服務
- * 版本：1.0.9
+ * 版本：1.0.10
  *
  * iOS 修正重點：
  * 1. Service Worker 僅處理本站同網域資源。
@@ -10,9 +10,10 @@
  * 3. 所有 respondWith 路徑都保證回傳有效 Response，不回傳 undefined。
  * 4. 導航失敗時回首頁快取或離線頁，最後仍有 503 HTML 保底。
  * 5. 核心資源 Network-First，失敗後回快取；無快取則回 503 Response。
+ * 6. v1.0.10 前端資料層加入 JSONP 備援，Service Worker 不介入該跨網域通道。
  */
 
-const 快取版本 = '化新精密-智慧5S-v1.0.9';
+const 快取版本 = '化新精密-智慧5S-v1.0.10';
 
 const 應用程式外殼 = [
   './',
@@ -84,13 +85,7 @@ self.addEventListener('fetch', 事件 => {
     return;
   }
 
-  /**
-   * 關鍵修正：
-   * Service Worker 只管理 GitHub Pages 本站資源。
-   * script.google.com、script.googleusercontent.com 或其他 API
-   * 一律不使用 respondWith，避免 iOS WebKit 將跨網域 Load failed
-   * 升級為 FetchEvent.respondWith 錯誤。
-   */
+  // 跨網域請求交還瀏覽器處理；包含 Apps Script 與 JSONP script 載入。
   if (網址.origin !== self.location.origin) return;
 
   const 讀取本機快取 = async () => {
@@ -143,10 +138,6 @@ self.addEventListener('fetch', 事件 => {
     return;
   }
 
-  /**
-   * 其他本站靜態資源：Cache-First + 背景更新。
-   * 無論網路或快取狀態如何，都保證 respondWith 回傳 Response。
-   */
   事件.respondWith((async () => {
     const 快取回應 = await 讀取本機快取();
 
