@@ -2,7 +2,7 @@
 
 /**
  * 化新精密｜智慧5S PWA 離線服務
- * 版本：1.0.11
+ * 版本：1.0.12
  *
  * iOS / 正式 GAS 相容重點：
  * 1. Service Worker 僅處理本站同網域資源。
@@ -10,10 +10,11 @@
  * 3. 所有 respondWith 路徑都保證回傳有效 Response，不回傳 undefined。
  * 4. 導航失敗時回首頁快取或離線頁，最後仍有 503 HTML 保底。
  * 5. 核心資源 Network-First，失敗後回快取；無快取則回 503 Response。
- * 6. 資料層採 fetch + JSONP 備援，並同時相容 action 與正式 api 路由。
+ * 6. 資料層採 fetch + JSONP 備援，同時相容 action 與正式 api 路由。
+ * 7. JSONP callback 使用純英文名稱，符合後端安全規則。
  */
 
-const 快取版本 = '化新精密-智慧5S-v1.0.11';
+const 快取版本 = '化新精密-智慧5S-v1.0.12';
 
 const 應用程式外殼 = [
   './',
@@ -85,7 +86,6 @@ self.addEventListener('fetch', 事件 => {
     return;
   }
 
-  // 跨網域請求交還瀏覽器處理；包含 Apps Script 與 JSONP script 載入。
   if (網址.origin !== self.location.origin) return;
 
   const 讀取本機快取 = async () => {
