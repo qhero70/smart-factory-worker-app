@@ -93,7 +93,12 @@
 
   function JSONP讀取(網址物件) {
     return new Promise((完成, 失敗) => {
-      const 回呼名稱 = `智慧5S_JSONP_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      /**
+       * 必須使用純英文 callback。
+       * 後端 JSONP 安全規則只允許 [A-Za-z_$][0-9A-Za-z_$...]*，
+       * 中文 callback 會被拒絕並造成 Safari script.onerror。
+       */
+      const 回呼名稱 = `smart5s_jsonp_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
       const 網址 = new URL(網址物件.toString());
       網址.searchParams.set('callback', 回呼名稱);
       網址.searchParams.set('_', String(Date.now()));
