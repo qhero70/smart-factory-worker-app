@@ -1,0 +1,25 @@
+/* 化新精密｜智慧5S v1.1.2
+ * 多入口底部導航修復：原版固定 5 欄，新增「可視化」「製一組」後會換行。
+ * 改為可水平滑動的單列導航，保留 iPhone 安全區。
+ */
+.底部導航{
+  display:flex!important;
+  grid-template-columns:none!important;
+  gap:3px;
+  overflow-x:auto;
+  overflow-y:hidden;
+  scrollbar-width:none;
+  -webkit-overflow-scrolling:touch;
+  padding:6px 7px!important;
+}
+.底部導航::-webkit-scrollbar{display:none}
+.底部導航 .導航按鈕{
+  flex:1 0 62px;
+  min-width:62px;
+  padding-left:5px;
+  padding-right:5px;
+}
+@media(max-width:480px){
+  .底部導航 .導航按鈕{flex-basis:58px;min-width:58px;font-size:.6rem}
+  .底部導航 .導航圖示{font-size:19px}
+}
