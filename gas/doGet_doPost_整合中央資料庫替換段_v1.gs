@@ -1,32 +1,85 @@
 /**
- * doGet / doPost 整合中央資料庫替換段 v1
- * 對應你目前上傳的「智慧製造中央作戰指揮中心｜正式主後端 v1.7.5」
+ * doGet / doPost 整合中央資料庫替換段 v1.1
+ * 化新精密｜智慧5S iPhone JSONP 相容修復版
  *
- * 使用方式：
- * 1. 保留原本主後端其他所有函數。
- * 2. 只把原本 function doGet(e) 與 function doPost(e) 兩段替換成下面這兩段。
- * 3. 另新增中央資料庫API_命名空間版_v1.gs。
- * 4. 重新部署 Web App 新版本。
+ * 修復重點：
+ * 1. 所有 doGet API 回應統一經過 JSONP 相容層。
+ * 2. 若網址帶 callback，會把既有 TextOutput / JSON 轉成 callback({...});。
+ * 3. callback 僅允許安全的 JavaScript 函數名稱，避免任意程式碼注入。
+ * 4. 沒有 callback 時完全維持原本 JSON / HTML 行為。
+ * 5. 不影響 LINE Webhook、報工、中央資料庫、38.7 主線。
  */
 
+function 主後端_取得GET參數_(e) {
+  e = e || { parameter: {} };
+  return e.parameter || {};
+}
+
+function 主後端_驗證JSONP回呼名稱_(callbackName) {
+  var 名稱 = String(callbackName || '').trim();
+  if (!名稱) return '';
+  return /^[A-Za-z_$][0-9A-Za-z_$]*$/.test(名稱) ? 名稱 : '';
+}
+
+function 主後端_輸出JSONP_(callbackName, content) {
+  var 回呼名稱 = 主後端_驗證JSONP回呼名稱_(callbackName);
+  if (!回呼名稱) {
+    throw new Error('JSONP callback 名稱格式不合法');
+  }
+
+  var 內容文字 = '';
+
+  if (content && typeof content.getContent === 'function') {
+    內容文字 = String(content.getContent() || '').trim();
+  } else if (typeof content === 'string') {
+    內容文字 = String(content || '').trim();
+  } else {
+    內容文字 = JSON.stringify(content == null ? null : content);
+  }
+
+  if (!內容文字) 內容文字 = 'null';
+
+  // 若原本不是 JSON，仍包成合法 JSON 字串，避免產生無效 JavaScript。
+  try {
+    JSON.parse(內容文字);
+  } catch (錯誤) {
+    內容文字 = JSON.stringify(內容文字);
+  }
+
+  return ContentService
+    .createTextOutput(回呼名稱 + '(' + 內容文字 + ');')
+    .setMimeType(ContentService.MimeType.JAVASCRIPT);
+}
+
+function 主後端_套用JSONP若需要_(e, output) {
+  var p = 主後端_取得GET參數_(e);
+  var callbackName = 主後端_驗證JSONP回呼名稱_(p.callback || p.jsonp || p.cb);
+  if (!callbackName) return output;
+  return 主後端_輸出JSONP_(callbackName, output);
+}
+
 function doGet(e) {
+  e = e || { parameter: {} };
+  var p = 主後端_取得GET參數_(e);
+  var page = 文字_(p.page || p.頁面 || p.p);
+  var action = 文字_(p.action || p.動作);
+
   // =========================================================
   // 中央資料庫 API 分流：必須放最前面
   // 支援 V2.6 PWA：status / 初始化 / 自檢 / schema
-  // 不影響原 LINE、報工、38.7 主線。
+  // JSONP 要在最外層包裝，避免中央 API 回傳純 JSON 導致 iPhone script.onerror。
   // =========================================================
   if (typeof 中央資料庫API_嘗試處理GET_ === 'function') {
     var 中央資料庫結果 = 中央資料庫API_嘗試處理GET_(e);
-    if (中央資料庫結果) return 中央資料庫結果;
+    if (中央資料庫結果) {
+      return 主後端_套用JSONP若需要_(e, 中央資料庫結果);
+    }
   }
 
   var r = 報工作業V4_PWA_嘗試處理動作_(e);
-  if (r) return r;
-
-  e = e || { parameter: {} };
-  const p = e.parameter || {};
-  const page = 文字_(p.page || p.頁面 || p.p);
-  const action = 文字_(p.action || p.動作);
+  if (r) {
+    return 主後端_套用JSONP若需要_(e, r);
+  }
 
   // =========================================================
   // 38.7 主線直接路由
@@ -34,15 +87,18 @@ function doGet(e) {
   if (action && typeof 主線38_7_直接路由_ === 'function') {
     var 主線38_7結果 = 主線38_7_直接路由_(p);
     if (主線38_7結果) {
-      return 主程式_安全輸出JSON_(主線38_7結果);
+      return 主後端_套用JSONP若需要_(e, 主程式_安全輸出JSON_(主線38_7結果));
     }
   }
 
+  // HTML 頁面維持原本輸出，不做 JSONP。
   if (page) return 輸出HTML_(正規化頁面名稱_(page));
 
-  if (action) return 主程式_安全輸出JSON_(處理API請求_(action, p));
+  if (action) {
+    return 主後端_套用JSONP若需要_(e, 主程式_安全輸出JSON_(處理API請求_(action, p)));
+  }
 
-  return 主程式_安全輸出JSON_(健康檢查());
+  return 主後端_套用JSONP若需要_(e, 主程式_安全輸出JSON_(健康檢查()));
 }
 
 function doPost(e) {
