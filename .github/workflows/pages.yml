@@ -20,6 +20,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: 檢查智慧5S核心語法
+        run: |
+          node --check 'docs/5s/智慧5S設定.js'
+          node --check 'docs/5s/智慧5S資料庫.js'
+          node --check 'docs/5s/智慧5S_Google試算表直讀備援.js'
+          node --check 'docs/5s/智慧5S資料修復.js'
+          node --check 'docs/5s/智慧5S應用程式.js'
+          node --check 'docs/5s/智慧5S_可視化標準管理.js'
+          node --check 'docs/5s/離線服務.js'
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Disable Jekyll
