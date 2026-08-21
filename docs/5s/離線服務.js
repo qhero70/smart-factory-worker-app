@@ -2,19 +2,19 @@
 
 /**
  * 化新精密｜智慧5S PWA 離線服務
- * 版本：1.0.12
+ * 版本：1.0.13
  *
- * iOS / 正式 GAS 相容重點：
+ * iOS / 正式 GAS / Google 試算表直讀相容重點：
  * 1. Service Worker 僅處理本站同網域資源。
- * 2. Google Apps Script 與其他跨網域 API 完全交還瀏覽器處理。
+ * 2. Google Apps Script、Google Visualization API 與其他跨網域 API 完全交還瀏覽器處理。
  * 3. 所有 respondWith 路徑都保證回傳有效 Response，不回傳 undefined。
  * 4. 導航失敗時回首頁快取或離線頁，最後仍有 503 HTML 保底。
  * 5. 核心資源 Network-First，失敗後回快取；無快取則回 503 Response。
- * 6. 資料層採 fetch + JSONP 備援，同時相容 action 與正式 api 路由。
- * 7. JSONP callback 使用純英文名稱，符合後端安全規則。
+ * 6. 資料層採 GAS fetch + GAS JSONP + Google 試算表 JSONP 三層讀取備援。
+ * 7. JSONP callback 全部使用純英文名稱，避免 Safari / 後端安全規則拒絕。
  */
 
-const 快取版本 = '化新精密-智慧5S-v1.0.12';
+const 快取版本 = '化新精密-智慧5S-v1.0.13';
 
 const 應用程式外殼 = [
   './',
@@ -22,6 +22,7 @@ const 應用程式外殼 = [
   './智慧5S樣式.css',
   './智慧5S設定.js',
   './智慧5S資料庫.js',
+  './智慧5S_Google試算表直讀備援.js',
   './智慧5S資料修復.js',
   './智慧5S應用程式.js',
   './智慧5S_G1整理戰情.js',
@@ -115,7 +116,7 @@ self.addEventListener('fetch', 事件 => {
     return;
   }
 
-  const 是否核心腳本 = /智慧5S設定\.js|智慧5S資料庫\.js|智慧5S資料修復\.js|智慧5S應用程式\.js|智慧5S_G1整理戰情\.js|智慧5S_主管戰情\.js|智慧5S_區域風險排名\.js|智慧5S_趨勢分析\.js|智慧5S_巡檢覆蓋與今日任務\.js|智慧5S樣式\.css/.test(網址.pathname);
+  const 是否核心腳本 = /智慧5S設定\.js|智慧5S資料庫\.js|智慧5S_Google試算表直讀備援\.js|智慧5S資料修復\.js|智慧5S應用程式\.js|智慧5S_G1整理戰情\.js|智慧5S_主管戰情\.js|智慧5S_區域風險排名\.js|智慧5S_趨勢分析\.js|智慧5S_巡檢覆蓋與今日任務\.js|智慧5S樣式\.css/.test(網址.pathname);
 
   if (是否核心腳本) {
     事件.respondWith((async () => {
