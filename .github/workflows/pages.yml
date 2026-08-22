@@ -30,6 +30,7 @@ jobs:
           node --check 'docs/5s/智慧5S_可視化標準管理.js'
           node --check 'docs/5s/智慧5S_製一組標準展開.js'
           node --check 'docs/5s/智慧5S_A5現場照片盤點.js'
+          node --check 'docs/5s/智慧5S_A5首次稽核準備.js'
           node --check 'docs/5s/離線服務.js'
       - name: Configure Pages
         uses: actions/configure-pages@v5
