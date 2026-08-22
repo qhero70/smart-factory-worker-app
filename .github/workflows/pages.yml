@@ -42,9 +42,12 @@ jobs:
           node --check 'docs/5s/智慧5S_A5首次稽核準備.js'
           node --check 'docs/5s/智慧5S_Roar事件通知.js'
           node --check 'docs/5s/智慧5S_UIUX優化.js'
+          node --check 'docs/5s/智慧5S_iPhone導航修復.js'
           node --check 'docs/5s/離線服務.js'
           test -f 'docs/5s/製一智慧5S圖示.svg'
-          grep -q "v=1200" 'docs/5s/index.html'
+          grep -q "v=1210" 'docs/5s/index.html'
+          grep -q 'data-page="巡檢"' 'docs/5s/index.html'
+          grep -q '智慧5S_iPhone導航修復.js' 'docs/5s/index.html'
           grep -q '"name":"製一｜智慧5S"' 'docs/5s/應用程式資訊.webmanifest'
       - name: Configure Pages
         uses: actions/configure-pages@v5
