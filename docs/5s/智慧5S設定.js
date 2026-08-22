@@ -1,7 +1,7 @@
 window.智慧5S設定 = Object.freeze({
   系統名稱: '化新精密｜智慧 5S 管理平台',
   系統短名: '智慧5S',
-  版本: '1.1.2',
+  版本: '1.1.3',
   後端網址: 'https://script.google.com/macros/s/AKfycbzRvly1OV-C80bMmd2ww4BM1XAH9WTyz62VFDnUxVGiO15kzHahbeHZc2bNTSwdFCqBwQ/exec',
   試算表識別碼: '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8',
   Google試算表直讀備援: true,
@@ -38,6 +38,8 @@ window.智慧5S設定 = Object.freeze({
     製一組產線途程: '5S_製一組產線途程',
     製一組機台基線: '5S_製一組機台基線',
     製一組標準照片待拍: '5S_製一組標準照片待拍',
-    製一組換線標準: '5S_製一組換線標準'
+    製一組換線標準: '5S_製一組換線標準',
+    現場照片清冊: '5S_現場照片清冊',
+    現場改善候選: '5S_現場改善候選'
   })
 });
