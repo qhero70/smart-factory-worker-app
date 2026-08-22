@@ -3,7 +3,7 @@
   "short_name":"製一5S",
   "description":"化新精密製一組 5S 可視化、巡檢、改善、紅牌QR與現場標準管理平台",
   "id":"./index.html",
-  "start_url":"./index.html?來源=PWA&v=1210",
+  "start_url":"./index.html?來源=PWA&v=1220",
   "scope":"./",
   "display":"standalone",
   "background_color":"#f3f6f4",
@@ -11,14 +11,14 @@
   "lang":"zh-Hant-TW",
   "orientation":"any",
   "icons":[
-    {"src":"./製一智慧5S圖示.svg?v=1210","sizes":"any","type":"image/svg+xml","purpose":"any maskable"},
-    {"src":"./智慧5S圖示-192.png?v=1210","sizes":"192x192","type":"image/png","purpose":"any"},
-    {"src":"./智慧5S圖示-512.png?v=1210","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+    {"src":"./製一智慧5S圖示.svg?v=1220","sizes":"any","type":"image/svg+xml","purpose":"any maskable"},
+    {"src":"./智慧5S圖示-192.png?v=1220","sizes":"192x192","type":"image/png","purpose":"any"},
+    {"src":"./智慧5S圖示-512.png?v=1220","sizes":"512x512","type":"image/png","purpose":"any maskable"}
   ],
   "shortcuts":[
-    {"name":"紅牌管理與QR處置","short_name":"紅牌QR","description":"紅牌填寫、A4半張掛牌、掃碼處置與主管複查","url":"./index.html?頁面=紅牌&v=1210","icons":[{"src":"./製一智慧5S圖示.svg?v=1210","sizes":"any","type":"image/svg+xml"}]},
-    {"name":"A5首次稽核準備","short_name":"A5稽核","description":"20項0-4分正式稽核前置條件與剩餘阻斷","url":"./index.html?頁面=A5稽核&v=1210","icons":[{"src":"./製一智慧5S圖示.svg?v=1210","sizes":"any","type":"image/svg+xml"}]},
-    {"name":"製一組標準中心","short_name":"製一組","description":"A4/A5/A6/A7/A8/B2/B5 產品線標準照片與換線管理","url":"./index.html?頁面=製一組&v=1210","icons":[{"src":"./製一智慧5S圖示.svg?v=1210","sizes":"any","type":"image/svg+xml"}]},
-    {"name":"開始巡檢","short_name":"巡檢","description":"直接進入5S巡檢","url":"./index.html?頁面=巡檢&v=1210","icons":[{"src":"./製一智慧5S圖示.svg?v=1210","sizes":"any","type":"image/svg+xml"}]}
+    {"name":"紅牌管理與QR處置","short_name":"紅牌QR","description":"紅牌填寫、A4半張掛牌、掃碼處置與主管複查","url":"./index.html?頁面=紅牌&v=1220","icons":[{"src":"./製一智慧5S圖示.svg?v=1220","sizes":"any","type":"image/svg+xml"}]},
+    {"name":"A5首次稽核準備","short_name":"A5稽核","description":"20項0-4分正式稽核前置條件與剩餘阻斷","url":"./index.html?頁面=A5稽核&v=1220","icons":[{"src":"./製一智慧5S圖示.svg?v=1220","sizes":"any","type":"image/svg+xml"}]},
+    {"name":"製一組標準中心","short_name":"製一組","description":"A4/A5/A6/A7/A8/B2/B5 產品線標準照片與換線管理","url":"./index.html?頁面=製一組&v=1220","icons":[{"src":"./製一智慧5S圖示.svg?v=1220","sizes":"any","type":"image/svg+xml"}]},
+    {"name":"開始巡檢","short_name":"巡檢","description":"直接進入5S巡檢","url":"./index.html?頁面=巡檢&v=1220","icons":[{"src":"./製一智慧5S圖示.svg?v=1220","sizes":"any","type":"image/svg+xml"}]}
   ]
 }
