@@ -1,5 +1,5 @@
 'use strict';
-const 快取版本='化新精密-製一智慧5S-v1.2.1';
+const 快取版本='化新精密-製一智慧5S-v1.2.2';
 const 應用程式外殼=['./','./index.html','./智慧5S樣式.css','./智慧5S_導航擴充修復.css','./智慧5S_UIUX優化.css','./智慧5S設定.js','./智慧5S資料庫.js','./智慧5S_Google試算表直讀備援.js','./智慧5S資料修復.js','./智慧5S_登入防護.js','./智慧5S應用程式.js','./智慧5S_紅牌掃碼閉環.js','./智慧5S_紅牌結案防呆.js','./智慧5S_G1整理戰情.js','./智慧5S_主管戰情.js','./智慧5S_區域風險排名.js','./智慧5S_趨勢分析.js','./智慧5S_巡檢覆蓋與今日任務.js','./智慧5S_首頁精簡.js','./智慧5S_可視化標準管理.js','./智慧5S_製一組標準展開.js','./智慧5S_A5現場照片盤點.js','./智慧5S_A5首次稽核準備.js','./智慧5S_Roar事件通知.js','./智慧5S_UIUX優化.js','./智慧5S_iPhone導航修復.js','./應用程式資訊.webmanifest','./製一智慧5S圖示.svg','./智慧5S圖示-192.png','./智慧5S圖示-512.png','./離線頁.html'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(快取版本).then(async c=>{for(const r of 應用程式外殼){try{await c.add(r)}catch(err){console.warn('預快取略過',r,err)}}}).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(ns=>Promise.all(ns.filter(n=>n!==快取版本).map(n=>caches.delete(n)))).then(()=>self.clients.claim())));
