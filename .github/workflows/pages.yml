@@ -52,6 +52,8 @@ jobs:
           grep -q '智慧5S_效能核心.js' 'docs/5s/index.html'
           grep -q "const 版本='1.2.3'" 'docs/5s/智慧5S_iPhone導航修復.js'
           grep -q "const 版本 = '1.2.3'" 'docs/5s/智慧5S_效能核心.js'
+          grep -q '製一｜智慧5S v1.2.3' 'docs/5s/智慧5S_首頁精簡.js'
+          ! grep -q 'observe(document.documentElement' 'docs/5s/智慧5S_首頁精簡.js'
           grep -q '"name":"製一｜智慧5S"' 'docs/5s/應用程式資訊.webmanifest'
       - name: Configure Pages
         uses: actions/configure-pages@v5
