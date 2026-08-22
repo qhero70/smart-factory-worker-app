@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="製一｜智慧5S">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0d5136"/>
+      <stop offset="0.62" stop-color="#168052"/>
+      <stop offset="1" stop-color="#0b3d2a"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".22"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#062d1d" flood-opacity=".35"/>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="116" fill="url(#bg)"/>
+  <path d="M24 70C126 20 256 16 488 82v120C316 132 154 134 24 190Z" fill="url(#shine)"/>
+  <g filter="url(#shadow)">
+    <rect x="72" y="72" width="368" height="368" rx="92" fill="#fff" fill-opacity=".97"/>
+  </g>
+  <rect x="108" y="108" width="296" height="68" rx="24" fill="#eaf6ef"/>
+  <text x="256" y="154" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'PingFang TC','Microsoft JhengHei',sans-serif" font-size="48" font-weight="900" fill="#0f5f3f">製一</text>
+  <text x="256" y="326" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-size="178" font-weight="1000" letter-spacing="-12" fill="#176b47">5S</text>
+  <path d="M156 365h116" stroke="#d99018" stroke-width="22" stroke-linecap="round"/>
+  <path d="M300 358l25 25 48-61" fill="none" stroke="#d99018" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="390" cy="118" r="34" fill="#d99018"/>
+  <path d="M373 120h34M390 103v34" stroke="#fff" stroke-width="10" stroke-linecap="round"/>
+</svg>
