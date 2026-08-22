@@ -10,6 +10,7 @@
    * 3. 首頁、巡檢、改善、紅牌、設定以可靠 URL 路由切換；同一工作階段不會被登出。
    * 4. 可視化維持單頁中心，由智慧5S可視化管理模組直接開啟。
    * 5. 動態新增的第六個「可視化」按鈕也會自動綁定。
+   * 6. window load 後再次註冊 v1210 Service Worker，蓋過舊核心 v102 註冊順序。
    */
 
   const 版本 = '1.2.1';
@@ -135,6 +136,8 @@
       const btn = e.target.closest && e.target.closest('.底部導航 .導航按鈕');
       if (btn) 綁定按鈕(btn);
     }, true);
+
+    window.addEventListener('load', () => setTimeout(更新ServiceWorker, 350), {once:true});
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', 初始化, {once:true});
