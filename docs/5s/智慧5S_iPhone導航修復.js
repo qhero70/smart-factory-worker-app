@@ -7,6 +7,7 @@
   const 核心頁面=new Set(['首頁','巡檢','改善','紅牌','設定']);
   const 原始事件=new WeakMap();
   let 正在備援=false;
+  let 正在排序=false;
 
   function 文字(v){return String(v==null?'':v).trim();}
   function 從按鈕取得頁面(btn){
@@ -63,9 +64,15 @@
     btn.dataset.iphoneNavFix='122';
   }
   function 整理順序(){
-    const nav=document.querySelector('.底部導航');if(!nav)return;
+    const nav=document.querySelector('.底部導航');if(!nav||正在排序)return;
     const buttons=Array.from(nav.querySelectorAll('.導航按鈕'));
-    順序.forEach(page=>{const b=buttons.find(x=>從按鈕取得頁面(x)===page);if(b)nav.appendChild(b);});
+    const target=順序.map(page=>buttons.find(x=>從按鈕取得頁面(x)===page)).filter(Boolean);
+    const current=buttons.map(從按鈕取得頁面).join('|');
+    const desired=target.map(從按鈕取得頁面).join('|');
+    if(current===desired)return;
+    正在排序=true;
+    target.forEach(b=>nav.appendChild(b));
+    requestAnimationFrame(()=>{正在排序=false;});
   }
   function 綁定全部導航(){document.querySelectorAll('.底部導航 .導航按鈕').forEach(綁定按鈕);整理順序();}
   function 注入樣式(){
