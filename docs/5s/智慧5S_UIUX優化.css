@@ -1,0 +1,92 @@
+/* 製一｜智慧5S v1.2.0｜響應式 UI / UX 強化 */
+:root{
+  --UIUX綠:#176b47;--UIUX深綠:#0f4f35;--UIUX淺綠:#e9f5ef;--UIUX紅:#b4121b;--UIUX黃:#d99018;
+  --UIUX陰影:0 12px 34px rgba(21,63,46,.10);--UIUX浮起:0 16px 34px rgba(15,79,53,.18);
+  --UIUX圓角:22px;--UIUX觸控:48px;
+}
+html{scroll-behavior:smooth;-webkit-tap-highlight-color:transparent}
+body{overscroll-behavior-y:none}
+button,.主要按鈕,.次要按鈕,.危險按鈕,.快速按鈕,.導航按鈕,.頭像,.關閉按鈕{
+  position:relative;overflow:hidden;min-height:var(--UIUX觸控);touch-action:manipulation;
+  transition:transform .18s cubic-bezier(.2,.8,.2,1),box-shadow .18s ease,filter .18s ease,background-color .18s ease,opacity .18s ease;
+}
+@media(hover:hover) and (pointer:fine){
+  button:not(:disabled):hover,.主要按鈕:not(:disabled):hover,.次要按鈕:not(:disabled):hover,.危險按鈕:not(:disabled):hover{transform:translateY(-2px);box-shadow:var(--UIUX浮起);filter:saturate(1.05)}
+  .卡片:hover{box-shadow:0 15px 38px rgba(21,63,46,.10)}
+}
+button.按壓中,.主要按鈕.按壓中,.次要按鈕.按壓中,.危險按鈕.按壓中{transform:translateY(1px) scale(.985)!important;box-shadow:0 4px 12px rgba(15,79,53,.12)!important}
+.按鍵波紋{position:absolute;border-radius:999px;background:rgba(255,255,255,.34);transform:scale(0);animation:UIUX波紋 .5s ease-out;pointer-events:none;z-index:0}
+@keyframes UIUX波紋{to{transform:scale(2.5);opacity:0}}
+button.載入中,.主要按鈕.載入中,.危險按鈕.載入中{pointer-events:none;filter:saturate(.8);padding-right:44px!important}
+button.載入中::after,.主要按鈕.載入中::after,.危險按鈕.載入中::after{content:"";position:absolute;right:15px;top:50%;width:17px;height:17px;margin-top:-9px;border:2px solid rgba(255,255,255,.48);border-top-color:#fff;border-radius:50%;animation:UIUX轉圈 .72s linear infinite}
+@keyframes UIUX轉圈{to{transform:rotate(360deg)}}
+
+/* 卡片與可收合資料 */
+.卡片{transition:box-shadow .2s ease,transform .2s ease,border-color .2s ease;background:rgba(255,255,255,.97)}
+.卡片標題列{gap:10px;position:relative}
+.收合按鈕,.主視覺收合按鈕{margin-left:auto;width:42px;min-width:42px;height:42px;min-height:42px;border:1px solid #d9e5df;border-radius:14px;background:#f7faf8;color:#315548;font-size:19px;font-weight:900;box-shadow:none;padding:0}
+.卡片.已收合{padding-bottom:12px!important}
+.卡片.已收合>:not(.卡片標題列){display:none!important}
+.可收合主視覺{position:relative;transition:max-height .3s ease,padding .3s ease}
+.主視覺收合按鈕{position:absolute;right:14px;top:14px;width:auto;min-width:62px;padding:0 12px;font-size:12px;background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.25);color:#fff;z-index:3}
+.主視覺.已收合{max-height:78px;overflow:hidden;padding-top:16px;padding-bottom:16px}
+.主視覺.已收合>*:not(.主視覺收合按鈕):not(.品牌列){display:none!important}
+.UIUX長資料區.已精簡{position:relative;max-height:360px;overflow:hidden;padding-bottom:72px!important}
+.UIUX長資料區.已精簡::after{content:"";position:absolute;left:0;right:0;bottom:0;height:92px;background:linear-gradient(transparent,rgba(255,255,255,.98) 48%);pointer-events:none}
+.UIUX展開長資料{position:sticky!important;bottom:10px;z-index:3;margin:12px auto 0!important;display:flex!important;width:max-content;max-width:92%;justify-content:center}
+
+/* 新增盤點表單：清楚的四步驟 */
+.UIUX盤點表單{padding-bottom:88px}
+.表單步驟標題{grid-column:1/-1;display:flex;align-items:center;gap:11px;margin:12px 0 0;padding:12px 14px;border-radius:18px;background:linear-gradient(135deg,#eef8f3,#f8fbf9);border:1px solid #dcebe3}
+.表單步驟標題>span{display:grid;place-items:center;width:34px;height:34px;border-radius:12px;background:var(--UIUX綠);color:#fff;font-weight:1000;box-shadow:0 6px 14px rgba(23,107,71,.2)}
+.表單步驟標題 b{display:block;color:#143f2f;font-size:14px}.表單步驟標題 small{display:block;margin-top:2px;color:#789087;font-size:11px}
+.UIUX盤點表單 .欄位群{padding:10px 12px;border:1px solid transparent;border-radius:18px;transition:background .2s,border-color .2s}
+.UIUX盤點表單 .欄位群:focus-within{background:#f8fcfa;border-color:#b8d9c8}
+.UIUX盤點表單 input,.UIUX盤點表單 select,.UIUX盤點表單 textarea{font-size:16px;min-height:52px;border-radius:16px!important}
+.UIUX盤點表單 textarea{min-height:92px}
+.UIUX欄位提示{display:block;margin-top:7px;color:#668078;font-size:12px;line-height:1.5}
+.UIUX自訂位置{margin-top:8px}
+.UIUX必填提示{background:#fff7f5!important;border-color:#efc5c0!important}
+.UIUX盤點表單.判定非必要::before{content:"🏷 已判定非必要：送出後會自動建立紅牌與改善追蹤";display:block;grid-column:1/-1;margin:8px 0 0;padding:11px 13px;border-radius:15px;background:#fff0f0;color:#8e1820;font-size:12px;font-weight:800;border:1px solid #f0c3c6}
+.UIUX固定送出列{position:sticky;bottom:-1px;z-index:8;padding:12px 0 calc(10px + env(safe-area-inset-bottom));background:linear-gradient(transparent 0,#fff 24%);backdrop-filter:blur(10px)}
+
+/* 全螢幕 / 事件中心 */
+.全螢幕按鈕,.Roar事件按鈕{width:44px;min-width:44px;height:44px;min-height:44px;border:1px solid #dbe7e1;border-radius:14px;background:#fff;color:#34584c;display:grid;place-items:center;font-size:19px;padding:0;box-shadow:0 4px 12px rgba(23,65,49,.06)}
+.全螢幕按鈕.作用中{background:var(--UIUX深綠);color:#fff}
+.Roar事件按鈕{position:relative}.Roar未讀數{position:absolute;right:-5px;top:-5px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:#c3262f;color:#fff;font-size:10px;font-weight:900;display:grid;place-items:center;border:2px solid #fff}
+.Roar浮動區{position:fixed;right:max(12px,env(safe-area-inset-right));top:calc(74px + env(safe-area-inset-top));z-index:9999;width:min(390px,calc(100vw - 24px));display:grid;gap:9px;pointer-events:none}
+.Roar浮動通知{pointer-events:auto;width:100%;display:grid;grid-template-columns:38px 1fr 24px;align-items:center;gap:9px;padding:12px;border:1px solid #dce7e1;border-radius:18px;background:rgba(255,255,255,.97);box-shadow:0 18px 44px rgba(15,52,38,.2);text-align:left;color:#243b33;animation:Roar入場 .25s cubic-bezier(.2,.8,.2,1)}
+.Roar浮動通知.離場{opacity:0;transform:translateX(18px)}
+@keyframes Roar入場{from{opacity:0;transform:translateY(-10px) scale(.98)}to{opacity:1;transform:none}}
+.Roar圖示{width:34px;height:34px;border-radius:12px;display:grid;place-items:center;background:#edf6f1;color:var(--UIUX綠);font-weight:1000;font-size:18px}
+.Roar-警告 .Roar圖示,.Roar圖示.Roar-警告{background:#fff4df;color:#a86707}.Roar-錯誤 .Roar圖示,.Roar圖示.Roar-錯誤{background:#ffeded;color:#b4121b}.Roar-成功 .Roar圖示,.Roar圖示.Roar-成功{background:#e9f8ef;color:#167044}
+.Roar文案{min-width:0}.Roar文案 b{display:block;font-size:13px}.Roar文案 small{display:block;margin-top:3px;font-size:12px;line-height:1.4;color:#647970;white-space:normal}.Roar關閉{font-size:18px;color:#8aa097;text-align:center}
+.Roar抽屜遮罩{position:fixed;inset:0;z-index:10000;background:rgba(9,28,21,.42);backdrop-filter:blur(5px);display:none;justify-content:flex-end}.Roar抽屜遮罩.顯示{display:flex}
+.Roar抽屜{width:min(460px,100%);height:100%;background:#f6f9f7;box-shadow:-20px 0 48px rgba(7,35,24,.2);padding:calc(18px + env(safe-area-inset-top)) 16px calc(18px + env(safe-area-inset-bottom));overflow:auto;animation:Roar抽屜入 .24s ease}
+@keyframes Roar抽屜入{from{transform:translateX(100%)}to{transform:none}}
+.Roar抽屜標題{display:flex;align-items:flex-start;gap:12px}.Roar抽屜標題>div{flex:1}.Roar抽屜標題 b{display:block;font-size:20px;color:#173f30}.Roar抽屜標題 small{display:block;color:#789087;margin-top:4px}.Roar關閉抽屜{width:44px;min-width:44px;border:0;border-radius:14px;background:#e8efeb;color:#405e53;font-size:22px}.Roar抽屜操作{display:flex;gap:8px;margin:16px 0}.Roar抽屜操作 button{min-height:40px;border:1px solid #d6e3dc;border-radius:12px;background:#fff;color:#36584c;padding:0 12px;font-weight:800}.Roar事件清單{display:grid;gap:9px}.Roar事件列{display:grid;grid-template-columns:38px 1fr;gap:10px;padding:12px;border-radius:17px;background:#fff;border:1px solid #dce7e1}.Roar事件列.已讀{opacity:.65}.Roar事件列 b{font-size:13px}.Roar事件列 p{margin:4px 0;font-size:12px;line-height:1.5;color:#526b62}.Roar事件列 small{font-size:10px;color:#8a9d95}.Roar空狀態{text-align:center;color:#7c9188;padding:50px 10px}
+
+/* 模態視窗／表單：手機底部抽屜，桌機置中 */
+@media(max-width:720px){
+  .彈窗遮罩{align-items:flex-end!important;padding:0!important}
+  .彈窗{width:100%!important;max-width:none!important;max-height:93dvh!important;border-radius:28px 28px 0 0!important;padding-bottom:env(safe-area-inset-bottom);box-shadow:0 -22px 48px rgba(12,43,31,.22)!important}
+  .彈窗標題列{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.95);backdrop-filter:blur(14px);padding-top:4px}
+  .內容{padding-left:12px!important;padding-right:12px!important}
+  .狀態列{gap:6px}.全螢幕按鈕,.Roar事件按鈕{width:40px;min-width:40px;height:40px;min-height:40px}.頭像{width:40px!important;height:40px!important}
+  .主視覺{border-radius:22px!important}.主視覺標題{font-size:1.7rem!important}
+  .統計網格{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}.統計卡{padding:13px!important}
+  .快速網格{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}.雙欄{grid-template-columns:1fr!important}
+  .表單網格{grid-template-columns:1fr!important;gap:4px!important}.UIUX盤點表單 .欄位群{grid-column:1/-1!important}
+  .卡片{border-radius:19px!important;padding:14px!important}.清單項目{padding:12px!important}
+  .底部導航{padding-bottom:calc(7px + env(safe-area-inset-bottom))!important}
+  .導航按鈕{min-width:72px!important}
+  .Roar浮動區{top:calc(64px + env(safe-area-inset-top))}
+}
+@media(min-width:721px) and (max-width:1100px){
+  .內容{max-width:100%!important;padding-left:22px!important;padding-right:22px!important}.統計網格{grid-template-columns:repeat(3,minmax(0,1fr))!important}.快速網格{grid-template-columns:repeat(3,minmax(0,1fr))!important}.雙欄{grid-template-columns:1fr 1fr!important}
+}
+@media(min-width:1101px){
+  .內容{max-width:1320px!important}.統計網格{grid-template-columns:repeat(6,minmax(0,1fr))!important}.快速網格{grid-template-columns:repeat(6,minmax(0,1fr))!important}.卡片{border-radius:24px!important}.彈窗{max-width:860px!important}
+}
+@media(display-mode:standalone){body{padding-top:env(safe-area-inset-top)}.頂端列{padding-top:env(safe-area-inset-top)}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
