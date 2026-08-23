@@ -8,6 +8,10 @@
   function 可視化按鈕(){return document.getElementById('可視化導航')||Array.from(document.querySelectorAll('.導航按鈕')).find(b=>文字(b.getAttribute('data-page')||b.getAttribute('data-頁面'))==='可視化');}
   function 標記(){document.querySelectorAll('.底部導航 .導航按鈕').forEach(b=>{const p=文字(b.getAttribute('data-page')||b.getAttribute('data-頁面'));b.classList.toggle('作用中',p==='可視化'||b.id==='可視化導航');});}
   function 更新網址(){try{const u=new URL(location.href);u.searchParams.set('頁面','可視化');u.searchParams.set('v',入口版本);history.replaceState({頁面:'可視化'},'',u.toString());}catch(_){}}
+  function 載入A5照片回接(){
+    if(全域.智慧5SA5標準照片回接||document.getElementById('A5標準照片回接腳本'))return;
+    const s=document.createElement('script');s.id='A5標準照片回接腳本';s.src=`./智慧5S_A5標準照片回接_v1280.js?v=${入口版本}`;s.async=true;document.head.appendChild(s);
+  }
   function 顯示載入失敗(){
     const main=document.getElementById('頁面內容');if(!main)return;
     const t=document.getElementById('頁面標題');const s=document.getElementById('頁面副標');
@@ -16,7 +20,7 @@
     const b=document.getElementById('可視化核心重試');if(b)b.onclick=()=>開啟(true);
   }
   function 開啟(force){
-    標記();更新網址();
+    標記();更新網址();載入A5照片回接();
     const mod=全域.智慧5S可視化管理;
     if(mod&&typeof mod.進入可視化中心==='function'){
       try{mod.進入可視化中心();標記();更新網址();return true;}catch(e){console.warn('可視化核心執行失敗',e);}
@@ -33,6 +37,7 @@
     開啟(false);
   }
   function 綁定(){
+    載入A5照片回接();
     const b=可視化按鈕();if(b){b.setAttribute('data-page','可視化');b.setAttribute('data-頁面','可視化');b.type='button';}
     document.addEventListener('click',點擊,true);
     const page=new URLSearchParams(location.search).get('頁面');
@@ -41,5 +46,5 @@
     }
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',綁定,{once:true});else綁定();
-  全域.智慧5S可視化路由=Object.freeze({版本,開啟});
+  全域.智慧5S可視化路由=Object.freeze({版本,開啟,載入A5照片回接});
 })(window);
