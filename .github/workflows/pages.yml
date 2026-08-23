@@ -14,12 +14,137 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       pages: write
       id-token: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 套用智慧5S v1.2.4正式修補
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def load(path): return Path(path).read_text(encoding='utf-8')
+          def save(path, text): Path(path).write_text(text, encoding='utf-8')
+          def replace_once(text, old, new, label):
+              if old not in text:
+                  raise SystemExit(f'修補目標不存在：{label}')
+              return text.replace(old, new, 1)
+
+          app_path = 'docs/5s/智慧5S應用程式.js'
+          app = load(app_path)
+
+          if 'function 巡檢項目滿分' not in app:
+              marker = '  function 顯示巡檢入口() {'
+              helper = '''  function 巡檢項目滿分(項目) {
+            return 數值(項目 && 項目.原始資料 ? 項目.原始資料.最高分 : 5, 5);
+          }
+          function 產生機台巡檢檔號(區域代碼) {
+            return `MCHK-${文字(區域代碼).replace(/\\s+/g,'')}`;
+          }
+          function 產生巡檢單號(區域代碼) {
+            const d = 現在();
+            const 日期碼 = `${d.getFullYear()}${補零(d.getMonth()+1)}${補零(d.getDate())}`;
+            const 時間碼 = `${補零(d.getHours())}${補零(d.getMinutes())}${補零(d.getSeconds())}`;
+            return `5S-CHK-${文字(區域代碼).replace(/\\s+/g,'')}-${日期碼}-${時間碼}`;
+          }
+          function 建立評分列HTML(資料) {
+            const 最高分 = 數值(資料.最高分, 5);
+            const 選項 = 最高分 === 4
+              ? [[4,'符合'],[3,'輕微'],[2,'明顯'],[1,'嚴重'],[0,'失控']]
+              : [[5,'符合'],[3,'輕微'],[1,'異常'],[0,'重大']];
+            return `<div class="評分列 ${選項.length === 5 ? '五階評分' : '四階評分'}">${選項.map(([分數,標籤文字]) => `<button class="評分按鈕" type="button" data-分數="${分數}">${分數}<br><small>${標籤文字}</small></button>`).join('')}</div>`;
+          }
+'''
+              if marker not in app: raise SystemExit('找不到巡檢函式插入點')
+              app = app.replace(marker, helper + marker, 1)
+
+              app = replace_once(app,
+                """      await Promise.all([
+                安全讀取分頁(設定.分頁.區域主檔, true),
+                安全讀取分頁(設定.分頁.檢查項目, true)
+              ]);""",
+                """      await Promise.all([
+                安全讀取分頁(設定.分頁.區域主檔, true),
+                安全讀取分頁(設定.分頁.檢查項目, true),
+                安全讀取分頁(設定.分頁.機台巡檢設定, true)
+              ]);""", '載入機台巡檢設定')
+
+              app = replace_once(app,
+                """  function 開始巡檢(區域) {
+            const 清單代碼 = 文字(區域.檢查清單代碼);""",
+                """  function 開始巡檢(區域) {
+            const 機台設定 = (狀態.資料[設定.分頁.機台巡檢設定] || []).find(列 => 文字(列['5S子區域代碼']) === 文字(區域.區域代碼) && 文字(列.設定狀態) !== '停用');
+            const 清單代碼 = 文字(機台設定 && 機台設定.檢查清單代碼) || 文字(區域.檢查清單代碼);""", '使用機台巡檢設定')
+
+              app = replace_once(app,
+                "狀態.目前巡檢 = { 區域, 項目, 開始時間: 完整時間字串(現在()), 備註: '' };",
+                "狀態.目前巡檢 = { 區域, 項目, 機台巡檢檔號: 文字(機台設定 && 機台設定.機台巡檢檔號) || 產生機台巡檢檔號(區域.區域代碼), 清單版本: 文字(機台設定 && 機台設定.清單版本) || 'V1.0', 開始時間: 完整時間字串(現在()), 備註: '' };", '機台固定巡檢檔號')
+
+              app = replace_once(app,
+                '<div style="margin-top:7px"><span class="標籤">${轉義(分類)}</span>${數值(資料.權重,1) > 1 ? `<span class="標籤 紅" style="margin-left:6px">重大權重 ×${數值(資料.權重,1)}</span>` : \'\'}</div></div></div>',
+                '<div style="margin-top:7px"><span class="標籤">${轉義(分類)}</span><span class="標籤 藍" style="margin-left:6px">${轉義(資料.項目代碼)}</span>${數值(資料.權重,1) > 1 ? `<span class="標籤 紅" style="margin-left:6px">重大權重 ×${數值(資料.權重,1)}</span>` : \'\'}</div></div></div>', '顯示點檢項目代碼')
+
+              old_score = '''        <div class="評分列">
+                  <button class="評分按鈕" type="button" data-分數="5">5<br><small>符合</small></button>
+                  <button class="評分按鈕" type="button" data-分數="3">3<br><small>輕微</small></button>
+                  <button class="評分按鈕" type="button" data-分數="1">1<br><small>異常</small></button>
+                  <button class="評分按鈕" type="button" data-分數="0">0<br><small>重大</small></button>
+                </div>'''
+              app = replace_once(app, old_score, '        ${建立評分列HTML(資料)}', '動態0-4評分列')
+
+              app = replace_once(app,
+                '<div class="巡檢進度列"><div><b>${轉義(巡檢.區域.區域名稱)}</b><div class="卡片副標">${轉義(巡檢.區域.檢查清單代碼)}</div></div><b id="巡檢進度文字">0 / ${巡檢.項目.length}</b></div>',
+                '<div class="巡檢進度列"><div><b>${轉義(巡檢.區域.區域名稱)}</b><div class="卡片副標">${轉義(巡檢.機台巡檢檔號)}｜${轉義(巡檢.清單版本)}｜${轉義(巡檢.區域.檢查清單代碼)}</div></div><b id="巡檢進度文字">0 / ${巡檢.項目.length}</b></div>', '巡檢頁檔號')
+
+              app = replace_once(app, 'const 異常 = 分數 < 5;', 'const 異常 = 分數 < 巡檢項目滿分(項目);', '評分異常門檻')
+              app = replace_once(app, 'const 未填原因 = 巡檢.項目.findIndex(項目 => 項目.分數 < 5 && !文字(項目.異常原因));', 'const 未填原因 = 巡檢.項目.findIndex(項目 => 項目.分數 < 巡檢項目滿分(項目) && !文字(項目.異常原因));', '異常原因門檻')
+              app = replace_once(app, 'const 未拍照 = 巡檢.項目.findIndex(項目 => 項目.分數 < 5 && !項目.照片資料);', 'const 未拍照 = 巡檢.項目.findIndex(項目 => 項目.分數 < 巡檢項目滿分(項目) && !項目.照片資料);', '異常照片門檻')
+              app = replace_once(app, "const 巡檢單號 = 產生識別碼('5S-INS');", 'const 巡檢單號 = 產生巡檢單號(巡檢.區域.區域代碼);', '正式巡檢單號')
+              app = replace_once(app, 'if (項目.分數 < 5) 異常項數 += 1;', 'if (項目.分數 < 巡檢項目滿分(項目)) 異常項數 += 1;', '異常項數')
+              app = replace_once(app, "巡檢.項目.forEach(項目 => {\n      const 是否異常 = 項目.分數 < 5;", "巡檢.項目.forEach((項目, 項目索引) => {\n      const 是否異常 = 項目.分數 < 巡檢項目滿分(項目);", '明細異常門檻')
+              app = replace_once(app, "const 明細編號 = 產生識別碼('5S-DTL');", 'const 明細編號 = `${巡檢單號}-${補零(項目索引 + 1)}`;', '01-20明細編號')
+              app = replace_once(app, "const 嚴重度 = 項目.分數 === 0 ? '高' : (項目.分數 === 1 ? '中' : '低');", "const 嚴重度 = 項目.分數 <= 1 ? '高' : (項目.分數 === 2 ? '中' : '低');", '0-4嚴重度')
+              app = replace_once(app, "來源類型: '巡檢異常', 來源單號: 巡檢單號,", "來源類型: '巡檢異常', 來源單號: 明細編號,", '改善精確來源')
+              app = replace_once(app, "navigator.serviceWorker.register('./離線服務.js?v=102', { scope: './' })", "navigator.serviceWorker.register('./離線服務.js?v=1240', { scope: './' })", 'Service Worker入口')
+
+          save(app_path, app)
+
+          css_path = 'docs/5s/智慧5S_UIUX優化.css'
+          css = load(css_path)
+          if '/* v1.2.4｜0-4巡檢五階評分 */' not in css:
+              css += '''
+
+          /* v1.2.4｜0-4巡檢五階評分 */
+          .評分列.五階評分{grid-template-columns:repeat(5,minmax(0,1fr))!important}
+          .評分列.五階評分 .評分按鈕{padding:8px 2px;min-width:0}
+          .評分按鈕[data-分數="4"].已選{background:var(--成功)!important;color:#fff!important}
+          .評分按鈕[data-分數="3"].已選{background:var(--資訊)!important;color:#fff!important}
+          .評分按鈕[data-分數="2"].已選{background:#d99018!important;color:#fff!important}
+          .評分按鈕[data-分數="1"].已選{background:#b94a48!important;color:#fff!important}
+          .評分按鈕[data-分數="0"].已選{background:var(--危險)!important;color:#fff!important}
+          @media(max-width:390px){.評分列.五階評分{gap:5px}.評分列.五階評分 .評分按鈕{font-size:.86rem}.評分列.五階評分 small{font-size:.6rem}}
+          '''
+          save(css_path, css)
+
+          index_path = 'docs/5s/index.html'
+          index = load(index_path).replace('v=1230','v=1240').replace('id="登入版本">1.2.3','id="登入版本">1.2.4')
+          save(index_path, index)
+          PY
+
+          if ! git diff --quiet -- docs/5s; then
+            git config user.name '智慧5S正式部署'
+            git config user.email 'actions@users.noreply.github.com'
+            git add docs/5s
+            git commit -m 'fix(5S): v1.2.4通知中心與機台20項0-4正式建檔'
+            git push origin HEAD:main
+          fi
+
       - name: 檢查智慧5S核心語法
         run: |
           node --check 'docs/5s/智慧5S設定.js'
@@ -46,7 +171,16 @@ jobs:
           node --check 'docs/5s/智慧5S_iPhone導航修復.js'
           node --check 'docs/5s/離線服務.js'
           test -f 'docs/5s/製一智慧5S圖示.svg'
-          grep -q "v=1230" 'docs/5s/index.html'
+          grep -q "v=1240" 'docs/5s/index.html'
+          grep -q "版本: '1.2.4'" 'docs/5s/智慧5S設定.js'
+          grep -q "入口版本碼: '1240'" 'docs/5s/智慧5S設定.js'
+          grep -q "機台巡檢設定: '5S_機台巡檢設定'" 'docs/5s/智慧5S設定.js'
+          grep -q "const 版本 = '1.2.4'" 'docs/5s/智慧5S_Roar事件通知.js'
+          grep -q "\[\[4,'符合'\],\[3,'輕微'\],\[2,'明顯'\]" 'docs/5s/智慧5S應用程式.js'
+          grep -q '產生巡檢單號' 'docs/5s/智慧5S應用程式.js'
+          grep -q '機台巡檢檔號' 'docs/5s/智慧5S應用程式.js'
+          grep -q '五階評分' 'docs/5s/智慧5S_UIUX優化.css'
+          ! grep -q "離線服務.js?v=102" 'docs/5s/智慧5S應用程式.js'
           grep -q 'data-page="巡檢"' 'docs/5s/index.html'
           grep -q 'id="可視化導航"' 'docs/5s/index.html'
           grep -q '智慧5S_效能核心.js' 'docs/5s/index.html'
@@ -55,6 +189,7 @@ jobs:
           grep -q '製一｜智慧5S v1.2.3' 'docs/5s/智慧5S_首頁精簡.js'
           ! grep -q 'observe(document.documentElement' 'docs/5s/智慧5S_首頁精簡.js'
           grep -q '"name":"製一｜智慧5S"' 'docs/5s/應用程式資訊.webmanifest'
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Disable Jekyll
