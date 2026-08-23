@@ -1,9 +1,9 @@
 (function (全域) {
   'use strict';
 
-  /** 製一｜智慧5S iPhone / PWA 導航與頁首修復 v1.2.7 */
-  const 版本='1.2.7';
-  const 入口版本='1270';
+  /** 製一｜智慧5S iPhone / PWA 導航與頁首修復 v1.2.8 */
+  const 版本='1.2.8';
+  const 入口版本='1280';
   const 順序=['首頁','巡檢','改善','紅牌','可視化','設定'];
   const 核心頁面=new Set(['首頁','巡檢','改善','紅牌','設定']);
   const 原始事件=new WeakMap();
@@ -20,7 +20,7 @@
   function 標記(page){document.querySelectorAll('.底部導航 .導航按鈕').forEach(b=>b.classList.toggle('作用中',頁面(b)===page));}
   function 更新網址(page){try{const u=new URL(location.href);u.searchParams.set('頁面',page);u.searchParams.set('v',入口版本);history.replaceState({頁面:page},'',u.toString());}catch(_){}}
   function 已完成(page){
-    if(page==='可視化')return !!document.querySelector('.可視化頁');
+    if(page==='可視化')return !!document.querySelector('.視覺核心');
     const title=文字(document.getElementById('頁面標題')?.textContent);
     const map={首頁:'戰情',巡檢:'巡檢',改善:'改善',紅牌:'紅牌',設定:'設定'};
     return title.includes(map[page]||page);
@@ -54,10 +54,9 @@
     if(mod&&typeof mod.進入可視化中心==='function'){
       try{mod.進入可視化中心();更新網址(page);return;}catch(err){console.warn('可視化開啟失敗',err);}
     }
-    // 可視化不再直接跳首頁；交給 v1.2.7 可視化路由修復模組重試。
-    const route=全域.智慧5S可視化路由修復;
-    if(route&&typeof route.開啟可視化==='function'){
-      try{route.開啟可視化(true);return;}catch(err){console.warn('可視化路由修復失敗',err);}
+    const route=全域.智慧5S可視化路由;
+    if(route&&typeof route.開啟==='function'){
+      try{route.開啟(true);return;}catch(err){console.warn('可視化路由失敗',err);}
     }
     備援(page);
   }
@@ -72,11 +71,11 @@
     const page=頁面(btn);if(!順序.includes(page))return;
     btn.setAttribute('data-page',page);btn.setAttribute('data-頁面',page);
     btn.style.touchAction='manipulation';
-    if(btn.dataset.iphoneNavFix==='127')return;
+    if(btn.dataset.iphoneNavFix==='128')return;
     if(typeof btn.onclick==='function')原始事件.set(btn,btn.onclick);
     btn.onclick=null;
     btn.addEventListener('click',點擊,false);
-    btn.dataset.iphoneNavFix='127';
+    btn.dataset.iphoneNavFix='128';
   }
   function 整理(){
     const nav=document.querySelector('.底部導航');if(!nav)return;
