@@ -25,6 +25,13 @@
     const map={首頁:'戰情',巡檢:'巡檢',改善:'改善',紅牌:'紅牌',設定:'設定'};
     return title.includes(map[page]||page);
   }
+  function 補強機台履歷入口(){
+    const mod=全域.智慧5S機台履歷;
+    if(mod&&typeof mod.補強履歷按鈕==='function'){
+      try{mod.補強履歷按鈕();}catch(_){}
+    }
+  }
+  function 排程機台履歷入口(){[180,450,900,1500,2400].forEach(ms=>setTimeout(補強機台履歷入口,ms));}
   function 備援(page){
     if(正在備援)return;正在備援=true;
     try{const u=new URL(location.href);u.searchParams.set('頁面',page);u.searchParams.set('v',入口版本);location.assign(u.toString());}
@@ -37,6 +44,7 @@
       const fn=原始事件.get(btn);
       if(typeof fn==='function')fn.call(btn,e);
       更新網址(page);
+      if(page==='巡檢')排程機台履歷入口();
       setTimeout(()=>{if(!已完成(page))備援(page);},1200);
     }catch(err){console.warn('智慧5S導航執行失敗',err);備援(page);}
   }
@@ -122,5 +130,5 @@
     更新ServiceWorker();
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',初始化,{once:true});else初始化();
-  全域.智慧5SiPhone導航修復=Object.freeze({版本,整理,樣式});
+  全域.智慧5SiPhone導航修復=Object.freeze({版本,整理,樣式,排程機台履歷入口});
 })(window);
