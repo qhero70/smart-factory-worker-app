@@ -1,9 +1,9 @@
 (function (全域) {
   'use strict';
 
-  /** 製一｜智慧5S iPhone / PWA 導航修復 v1.2.3 */
-  const 版本='1.2.3';
-  const 入口版本='1230';
+  /** 製一｜智慧5S iPhone / PWA 導航與頁首修復 v1.2.5 */
+  const 版本='1.2.5';
+  const 入口版本='1250';
   const 順序=['首頁','巡檢','改善','紅牌','可視化','設定'];
   const 核心頁面=new Set(['首頁','巡檢','改善','紅牌','設定']);
   const 原始事件=new WeakMap();
@@ -37,8 +37,6 @@
       const fn=原始事件.get(btn);
       if(typeof fn==='function')fn.call(btn,e);
       更新網址(page);
-      // 舊版220ms就強制整頁重載，4G/iPhone上會造成「按一下卡幾秒」。
-      // 新版只在1.2秒後確認真的沒有切頁才使用URL備援。
       setTimeout(()=>{if(!已完成(page))備援(page);},1200);
     }catch(err){console.warn('智慧5S導航執行失敗',err);備援(page);}
   }
@@ -61,16 +59,15 @@
     const page=頁面(btn);if(!順序.includes(page))return;
     btn.setAttribute('data-page',page);btn.setAttribute('data-頁面',page);
     btn.style.touchAction='manipulation';
-    if(btn.dataset.iphoneNavFix==='123')return;
+    if(btn.dataset.iphoneNavFix==='125')return;
     if(typeof btn.onclick==='function')原始事件.set(btn,btn.onclick);
     btn.onclick=null;
     btn.addEventListener('click',點擊,false);
-    btn.dataset.iphoneNavFix='123';
+    btn.dataset.iphoneNavFix='125';
   }
   function 整理(){
     const nav=document.querySelector('.底部導航');if(!nav)return;
     const all=Array.from(nav.querySelectorAll('.導航按鈕'));
-    // 底部只保留6個核心入口，A5/製一組等功能改由首頁快速作業進入。
     all.forEach(b=>{if(!順序.includes(頁面(b)))b.remove();});
     const remain=Array.from(nav.querySelectorAll('.導航按鈕'));
     順序.forEach(p=>{const b=remain.find(x=>頁面(x)===p);if(b){綁定(b);nav.appendChild(b);}});
@@ -78,11 +75,41 @@
   function 樣式(){
     document.getElementById('智慧5S_iPhone導航修復樣式')?.remove();
     const s=document.createElement('style');s.id='智慧5S_iPhone導航修復樣式';s.textContent=`
+      /* 底部六大入口 */
       .底部導航{z-index:9998!important;pointer-events:auto!important;display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr))!important;gap:2px!important;overflow:visible!important;isolation:isolate}
       .底部導航 .導航按鈕{pointer-events:auto!important;touch-action:manipulation!important;min-width:0!important;width:100%!important;padding:7px 1px!important;-webkit-tap-highlight-color:transparent;position:relative;z-index:1}
       .底部導航 .導航按鈕>span:last-child{font-size:10.5px!important;white-space:nowrap!important}
       .底部導航 .導航圖示{font-size:17px!important}
       .底部導航::before,.底部導航::after{pointer-events:none!important}
+
+      /* v1.2.5｜iPhone 頁首工具列：鈴鐺、紅點不可再被裁切或互相覆蓋 */
+      .頂端列{overflow:visible!important;isolation:isolate;padding-right:calc(10px + env(safe-area-inset-right))!important}
+      .頂端列>.品牌列{flex:1 1 auto!important;min-width:0!important;max-width:none!important;overflow:hidden!important}
+      .頂端列>.品牌列>.品牌標誌{flex:0 0 42px!important}
+      .頂端資訊{min-width:0!important;overflow:hidden!important}
+      .狀態列{display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:7px!important;flex:0 0 auto!important;min-width:max-content!important;max-width:none!important;overflow:visible!important;position:relative!important;z-index:60!important}
+      .狀態列>*{flex-shrink:0!important}
+      .狀態列 button,.全螢幕按鈕,.Roar事件按鈕,.頭像{overflow:visible!important;clip-path:none!important}
+      .全螢幕按鈕,.Roar事件按鈕,.頭像{flex:0 0 42px!important;width:42px!important;min-width:42px!important;height:42px!important;min-height:42px!important;margin:0!important}
+      .Roar事件按鈕{position:relative!important;z-index:66!important;line-height:1!important}
+      .Roar事件按鈕>span:first-child{display:grid!important;place-items:center!important;width:100%!important;height:100%!important;position:relative!important;z-index:1!important;transform:none!important}
+      .Roar未讀數{z-index:72!important;right:-5px!important;top:-6px!important;overflow:visible!important;pointer-events:none!important;transform:none!important}
+      .全螢幕按鈕{z-index:64!important}.頭像{z-index:62!important}
+
+      @media(max-width:430px){
+        .頂端列{gap:7px!important;padding-left:10px!important;padding-right:calc(8px + env(safe-area-inset-right))!important}
+        .頂端列>.品牌列{gap:8px!important}
+        .頂端列>.品牌列>.品牌標誌{flex-basis:40px!important;width:40px!important;height:40px!important;min-width:40px!important}
+        .頁面標題{font-size:1.02rem!important}.頁面副標{font-size:.61rem!important}
+        .狀態列{gap:5px!important}
+        .狀態徽章{width:22px!important;min-width:22px!important;height:40px!important;min-height:40px!important;padding:0!important;background:transparent!important;display:grid!important;place-items:center!important;overflow:visible!important}
+        .狀態徽章>span:last-child{display:none!important}
+        .狀態點{margin:0!important}
+        .全螢幕按鈕,.Roar事件按鈕,.頭像{flex-basis:40px!important;width:40px!important;min-width:40px!important;height:40px!important;min-height:40px!important}
+      }
+      @media(max-width:370px){
+        .頁面副標{display:none!important}.頂端列>.品牌列{gap:6px!important}.狀態列{gap:4px!important}
+      }
     `;document.head.appendChild(s);
   }
   function 更新ServiceWorker(){
@@ -95,5 +122,5 @@
     更新ServiceWorker();
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',初始化,{once:true});else初始化();
-  全域.智慧5SiPhone導航修復=Object.freeze({版本,整理});
+  全域.智慧5SiPhone導航修復=Object.freeze({版本,整理,樣式});
 })(window);
