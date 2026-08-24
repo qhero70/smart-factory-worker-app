@@ -1,8 +1,8 @@
 (function (全域) {
   'use strict';
 
-  const 版本='1.2.9';
-  const 入口版本='1290';
+  const 版本='1.3.0';
+  const 入口版本='1300';
 
   function 文字(v){return String(v==null?'':v).trim();}
   function 可視化按鈕(){return document.getElementById('可視化導航')||Array.from(document.querySelectorAll('.導航按鈕')).find(b=>文字(b.getAttribute('data-page')||b.getAttribute('data-頁面'))==='可視化');}
@@ -17,7 +17,11 @@
   async function 載入A5照片回接(){
     try{
       if(!全域.智慧5SA5內建照片)await 載入腳本('A5照片內建資料腳本',`./智慧5S_A5照片內建資料_v1290.js?v=${入口版本}`);
-      if(!全域.智慧5SA5標準照片回接)await 載入腳本('A5標準照片回接腳本',`./智慧5S_A5標準照片回接_v1290.js?v=${入口版本}`);
+      const mod=全域.智慧5SA5標準照片回接;
+      if(!mod||!文字(mod.版本).startsWith('1.3.0')){
+        document.getElementById('A5標準照片回接腳本')?.remove();
+        await 載入腳本('A5標準照片回接腳本',`./智慧5S_A5標準照片回接_v1300.js?v=${入口版本}`);
+      }
     }catch(e){console.warn('A5照片模組載入失敗',e);}
   }
   function 顯示載入失敗(){
@@ -27,8 +31,8 @@
     main.innerHTML='<section class="卡片"><div class="卡片標題">可視化核心尚未完成載入</div><div class="卡片副標" style="margin-top:6px">請按重新載入；系統不會再跳回首頁。</div><button id="可視化核心重試" class="主要按鈕 滿版" type="button" style="margin-top:12px">重新載入可視化</button></section>';
     const b=document.getElementById('可視化核心重試');if(b)b.onclick=()=>開啟(true);
   }
-  function 開啟(force){
-    標記();更新網址();載入A5照片回接();
+  async function 開啟(force){
+    標記();更新網址();await 載入A5照片回接();
     const mod=全域.智慧5S可視化管理;
     if(mod&&typeof mod.進入可視化中心==='function'){
       try{mod.進入可視化中心();標記();更新網址();return true;}catch(e){console.warn('可視化核心執行失敗',e);}
