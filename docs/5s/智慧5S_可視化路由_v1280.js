@@ -1,16 +1,24 @@
 (function (全域) {
   'use strict';
 
-  const 版本='1.2.8';
-  const 入口版本='1280';
+  const 版本='1.2.9';
+  const 入口版本='1290';
 
   function 文字(v){return String(v==null?'':v).trim();}
   function 可視化按鈕(){return document.getElementById('可視化導航')||Array.from(document.querySelectorAll('.導航按鈕')).find(b=>文字(b.getAttribute('data-page')||b.getAttribute('data-頁面'))==='可視化');}
   function 標記(){document.querySelectorAll('.底部導航 .導航按鈕').forEach(b=>{const p=文字(b.getAttribute('data-page')||b.getAttribute('data-頁面'));b.classList.toggle('作用中',p==='可視化'||b.id==='可視化導航');});}
   function 更新網址(){try{const u=new URL(location.href);u.searchParams.set('頁面','可視化');u.searchParams.set('v',入口版本);history.replaceState({頁面:'可視化'},'',u.toString());}catch(_){}}
-  function 載入A5照片回接(){
-    if(全域.智慧5SA5標準照片回接||document.getElementById('A5標準照片回接腳本'))return;
-    const s=document.createElement('script');s.id='A5標準照片回接腳本';s.src=`./智慧5S_A5標準照片回接_v1280.js?v=${入口版本}`;s.async=true;document.head.appendChild(s);
+  function 載入腳本(id,src){
+    return new Promise((resolve,reject)=>{
+      if(document.getElementById(id)){resolve();return;}
+      const s=document.createElement('script');s.id=id;s.src=src;s.async=false;s.onload=()=>resolve();s.onerror=()=>reject(new Error('腳本載入失敗：'+src));document.head.appendChild(s);
+    });
+  }
+  async function 載入A5照片回接(){
+    try{
+      if(!全域.智慧5SA5內建照片)await 載入腳本('A5照片內建資料腳本',`./智慧5S_A5照片內建資料_v1290.js?v=${入口版本}`);
+      if(!全域.智慧5SA5標準照片回接)await 載入腳本('A5標準照片回接腳本',`./智慧5S_A5標準照片回接_v1290.js?v=${入口版本}`);
+    }catch(e){console.warn('A5照片模組載入失敗',e);}
   }
   function 顯示載入失敗(){
     const main=document.getElementById('頁面內容');if(!main)return;
