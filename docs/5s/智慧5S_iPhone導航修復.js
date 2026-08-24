@@ -1,9 +1,9 @@
 (function (全域) {
   'use strict';
 
-  /** 製一｜智慧5S iPhone / PWA 導航與頁首修復 v1.2.9 */
-  const 版本='1.2.9';
-  const 入口版本='1290';
+  /** 製一｜智慧5S iPhone / PWA 導航與頁首修復 v1.3.0 */
+  const 版本='1.3.0';
+  const 入口版本='1300';
   const 順序=['首頁','巡檢','改善','紅牌','可視化','設定'];
   const 核心頁面=new Set(['首頁','巡檢','改善','紅牌','設定']);
   const 原始事件=new WeakMap();
@@ -71,11 +71,11 @@
     const page=頁面(btn);if(!順序.includes(page))return;
     btn.setAttribute('data-page',page);btn.setAttribute('data-頁面',page);
     btn.style.touchAction='manipulation';
-    if(btn.dataset.iphoneNavFix==='129')return;
+    if(btn.dataset.iphoneNavFix==='130')return;
     if(typeof btn.onclick==='function')原始事件.set(btn,btn.onclick);
     btn.onclick=null;
     btn.addEventListener('click',點擊,false);
-    btn.dataset.iphoneNavFix='129';
+    btn.dataset.iphoneNavFix='130';
   }
   function 整理(){
     const nav=document.querySelector('.底部導航');if(!nav)return;
