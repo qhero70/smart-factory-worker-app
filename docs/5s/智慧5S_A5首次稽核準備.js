@@ -46,5 +46,5 @@
   function 建立導航(){const nav=document.querySelector('.底部導航');if(!nav||document.getElementById('A5稽核導航'))return;const b=document.createElement('button');b.id='A5稽核導航';b.className='導航按鈕';b.type='button';b.dataset.頁面='A5稽核';b.innerHTML='<span class="導航圖示">▣</span><span>A5稽核</span>';b.addEventListener('click',進入A5首次稽核準備);nav.appendChild(b)}
   function 嘗試自動進入(){if(已自動進入)return;const 目標=new URLSearchParams(location.search).get('頁面'),app=document.getElementById('應用程式');if(目標==='A5稽核'&&app&&!app.classList.contains('隱藏')){已自動進入=true;進入A5首次稽核準備()}}
   function 初始化(){建立導航();嘗試自動進入();const app=document.getElementById('應用程式');if(app)new MutationObserver(()=>{建立導航();嘗試自動進入()}).observe(app,{attributes:true,attributeFilter:['class']})}
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',初始化);else初始化();全域.智慧5S_A5首次稽核準備=Object.freeze({版本,進入A5首次稽核準備});
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',初始化);else 初始化();全域.智慧5S_A5首次稽核準備=Object.freeze({版本,進入A5首次稽核準備});
 })(window);

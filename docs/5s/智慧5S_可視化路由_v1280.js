@@ -57,6 +57,6 @@
       let n=0;const timer=setInterval(()=>{n++;const app=document.getElementById('應用程式');if(app&&!app.classList.contains('隱藏')){clearInterval(timer);開啟(false);}else if(n>=32)clearInterval(timer);},250);
     }
   }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',綁定,{once:true});else綁定();
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',綁定,{once:true});else 綁定();
   全域.智慧5S可視化路由=Object.freeze({版本,開啟,載入A5照片回接});
 })(window);

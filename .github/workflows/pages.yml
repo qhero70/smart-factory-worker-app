@@ -23,53 +23,42 @@ jobs:
 
       - name: 檢查智慧5S核心語法
         run: |
-          node --check 'docs/5s/智慧5S設定.js'
-          node --check 'docs/5s/智慧5S資料庫.js'
-          node --check 'docs/5s/智慧5S_Google試算表直讀備援.js'
-          node --check 'docs/5s/智慧5S資料修復.js'
-          node --check 'docs/5s/智慧5S_登入防護.js'
-          node --check 'docs/5s/智慧5S應用程式.js'
-          node --check 'docs/5s/智慧5S_紅牌掃碼閉環.js'
-          node --check 'docs/5s/智慧5S_紅牌列印退出修復_v1260.js'
-          node --check 'docs/5s/智慧5S_紅牌結案防呆.js'
-          node --check 'docs/5s/智慧5S_效能核心.js'
-          node --check 'docs/5s/智慧5S_G1整理戰情.js'
-          node --check 'docs/5s/智慧5S_主管戰情.js'
-          node --check 'docs/5s/智慧5S_區域風險排名.js'
-          node --check 'docs/5s/智慧5S_趨勢分析.js'
-          node --check 'docs/5s/智慧5S_巡檢覆蓋與今日任務.js'
-          node --check 'docs/5s/智慧5S_首頁精簡.js'
-          node --check 'docs/5s/智慧5S_可視化核心_v1280.js'
-          node --check 'docs/5s/智慧5S_製一組標準展開.js'
-          node --check 'docs/5s/智慧5S_A5現場照片盤點.js'
-          node --check 'docs/5s/智慧5S_A5首次稽核準備.js'
-          node --check 'docs/5s/智慧5S_Roar事件通知.js'
-          node --check 'docs/5s/智慧5S_機台巡檢_v1240.js'
-          node --check 'docs/5s/智慧5S_巡檢週期防重_v1320.js'
-          node --check 'docs/5s/智慧5S_機台履歷_v1250.js'
-          node --check 'docs/5s/智慧5S_ISO巡檢存檔_v1330.js'
-          node --check 'docs/5s/智慧5S_履歷首次載入修復_v1340.js'
-          node --check 'docs/5s/智慧5S_UIUX優化.js'
-          node --check 'docs/5s/智慧5S_iPhone導航修復.js'
-          node --check 'docs/5s/智慧5S_可視化路由_v1280.js'
-          node --check 'docs/5s/離線服務.js'
+          mapfile -d '' js_files < <(find docs/5s -maxdepth 1 -type f -name '*.js' -print0 | sort -z)
+          test "${#js_files[@]}" -gt 0
+          for file in "${js_files[@]}"; do
+            node --check "$file"
+          done
+
+          python3 -m json.tool 'docs/5s/應用程式資訊.webmanifest' >/dev/null
           test -f 'docs/5s/製一智慧5S圖示.svg'
+          ! grep -R -n -E 'else初始化|else綁定|manifest truncated' \
+            --include='*.js' --include='*.svg' docs/5s
 
           # 正式入口版本驗收：只鎖目前入口，不再用歷史1280阻擋新版部署。
-          grep -q "版本: '1.3.4'" 'docs/5s/智慧5S設定.js'
-          grep -q "入口版本碼: '1340'" 'docs/5s/智慧5S設定.js'
-          grep -q '智慧5S_機台履歷_v1250.js?v=1340' 'docs/5s/index.html'
-          grep -q '智慧5S_ISO巡檢存檔_v1330.js?v=1340' 'docs/5s/index.html'
-          grep -q '智慧5S_履歷首次載入修復_v1340.js?v=1340' 'docs/5s/index.html'
-          grep -q '智慧5S_可視化核心_v1280.js?v=1340' 'docs/5s/index.html'
-          grep -q '智慧5S_可視化路由_v1280.js?v=1340' 'docs/5s/index.html'
+          grep -q "版本: '1.3.5'" 'docs/5s/智慧5S設定.js'
+          grep -q "入口版本碼: '1350'" 'docs/5s/智慧5S設定.js'
+          grep -q '智慧5S_機台履歷_v1250.js?v=1350' 'docs/5s/index.html'
+          grep -q '智慧5S_ISO巡檢存檔_v1330.js?v=1350' 'docs/5s/index.html'
+          grep -q '智慧5S_履歷首次載入修復_v1340.js?v=1350' 'docs/5s/index.html'
+          grep -q '智慧5S_可視化核心_v1280.js?v=1350' 'docs/5s/index.html'
+          grep -q '智慧5S_可視化路由_v1280.js?v=1350' 'docs/5s/index.html'
           grep -q '首次開啟' 'docs/5s/智慧5S_履歷首次載入修復_v1340.js'
           grep -q '建立存檔資料' 'docs/5s/智慧5S_履歷首次載入修復_v1340.js'
           grep -q '"name":"製一｜智慧5S"' 'docs/5s/應用程式資訊.webmanifest'
-          grep -q 'v=1340' 'docs/5s/應用程式資訊.webmanifest'
-          grep -q '頁面=可視化&v=1340' 'docs/5s/應用程式資訊.webmanifest'
-          grep -q '製一智慧5S-v1.3.4' 'docs/5s/離線服務.js'
+          grep -q 'v=1350' 'docs/5s/應用程式資訊.webmanifest'
+          grep -q '頁面=可視化&v=1350' 'docs/5s/應用程式資訊.webmanifest'
+          grep -q '製一智慧5S-v1.3.5' 'docs/5s/離線服務.js'
           grep -q '智慧5S_履歷首次載入修復_v1340.js' 'docs/5s/離線服務.js'
+
+          # A5 現場照片需完整內建，確保離線稽核仍能看見11張正式照片。
+          mapfile -t a5_photos < <(find docs/5s/assets/a5 -maxdepth 1 -type f -name 'SITE-A5-*.jpg' | sort)
+          test "${#a5_photos[@]}" -eq 11
+          for number in $(seq -f '%03g' 8 18); do
+            photo="SITE-A5-${number}.jpg"
+            test -s "docs/5s/assets/a5/$photo"
+            grep -q "$photo" 'docs/5s/智慧5S_A5照片內建資料_v1290.js'
+            grep -q "$photo" 'docs/5s/離線服務.js'
+          done
 
           # 既有核心結構防退版。
           grep -q '先註冊，再做任何初始化' 'docs/5s/智慧5S_可視化核心_v1280.js'

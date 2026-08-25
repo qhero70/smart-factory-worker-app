@@ -291,6 +291,6 @@
     },true);
   }
 
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',初始化,{once:true});else初始化();
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',初始化,{once:true});else 初始化();
   全域.智慧5SUIUX=Object.freeze({版本,更新盤點位置選項,切換全螢幕,執行補強,整理區域選單,排序巡檢區域卡片});
 })(window);

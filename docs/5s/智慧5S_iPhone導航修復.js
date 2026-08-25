@@ -120,6 +120,6 @@
     navigator.serviceWorker.register(`./離線服務.js?v=${入口版本}`,{scope:'./'}).then(reg=>{if(reg.waiting)reg.waiting.postMessage('立即啟用新版');reg.update().catch(()=>{});}).catch(()=>{});
   }
   function 初始化(){樣式();setTimeout(整理,0);setTimeout(整理,250);setTimeout(整理,900);更新ServiceWorker();}
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',初始化,{once:true});else初始化();
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',初始化,{once:true});else 初始化();
   全域.智慧5SiPhone導航修復=Object.freeze({版本,整理,樣式,排程機台履歷入口});
 })(window);

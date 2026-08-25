@@ -358,7 +358,7 @@
     const 參數=new URLSearchParams(location.search); if(參數.get('頁面')==='可視化'){setTimeout(進入可視化中心,700);}
   }
 
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',初始化);else初始化();
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',初始化);else 初始化();
 
   全域.智慧5S可視化管理 = Object.freeze({進入可視化中心,重新整理:()=>{狀態.快取={};return顯示目前分頁();},版本:模組版本});
 })(window);
