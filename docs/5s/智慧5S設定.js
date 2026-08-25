@@ -2,12 +2,15 @@ window.智慧5S設定 = Object.freeze({
   系統名稱: '化新精密｜製一｜智慧5S',
   系統短名: '製一｜智慧5S',
   PWA顯示名稱: '製一｜智慧5S',
-  版本: '1.3.0',
-  入口版本碼: '1300',
+  版本: '1.3.1',
+  入口版本碼: '1310',
   登入模式: '每次新工作階段需登入',
   Roar事件通知: true,
   A5標準照片顯示模式: 'PWA離線優先＋中央背景同步',
   A5標準照片Drive依賴: false,
+  稽核標準版本: 'V2.0-0821',
+  稽核項目數: 25,
+  稽核滿分: 100,
   紅牌列印版型: 'A4半張（A5 148×210mm）',
   後端網址: 'https://script.google.com/macros/s/AKfycbzRvly1OV-C80bMmd2ww4BM1XAH9WTyz62VFDnUxVGiO15kzHahbeHZc2bNTSwdFCqBwQ/exec',
   試算表識別碼: '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8',
@@ -17,7 +20,7 @@ window.智慧5S設定 = Object.freeze({
   照片最大字元: 42000,
   改善期限天數: 7,
   紅牌期限天數: 30,
-  及格分數: 85,
+  及格分數: 80,
   分頁: Object.freeze({
     人員主檔: '01_人員主檔', 區域主檔: '5S_區域主檔', 檢查項目: '5S_檢查項目', 系統參數: '5S_系統參數',
     機台巡檢設定: '5S_機台巡檢設定', 巡檢主檔: '5S_巡檢主檔', 巡檢明細: '5S_巡檢明細', 改善單: '5S_改善單', 改善歷程: '5S_改善歷程',
@@ -30,3 +33,22 @@ window.智慧5S設定 = Object.freeze({
     A5標準化任務: '5S_A5標準化任務', A5首次稽核準備: '5S_A5首次稽核準備'
   })
 });
+
+(function(){
+  const id='智慧5S稽核標準0821_v1310';
+  if(!document.getElementById(id)){
+    const s=document.createElement('script');
+    s.id=id;
+    s.src='./智慧5S_稽核標準0821_v1310.js?v=1310';
+    s.async=false;
+    document.head.appendChild(s);
+  }
+  if('serviceWorker' in navigator){
+    window.addEventListener('load',()=>{
+      navigator.serviceWorker.register('./離線服務.js?v=1310',{scope:'./'}).then(reg=>{
+        if(reg.waiting)reg.waiting.postMessage('立即啟用新版');
+        reg.update().catch(()=>{});
+      }).catch(()=>{});
+    },{once:true});
+  }
+})();
