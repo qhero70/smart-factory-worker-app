@@ -11,8 +11,8 @@
   const 版本 = '1.3.3';
   const 設定 = 全域.智慧5S設定 || {};
   const 資料庫 = 全域.智慧5S資料庫;
-  const ISO文件號 = 'HX-5S-FM-001';
-  const ISO版次 = 'A/0';
+  const ISO文件號 = String(設定.ISO巡檢表文件號 || 'HX-5S-FM-001').trim();
+  const ISO版次 = String(設定.ISO巡檢表版次 || 'A/0').trim();
   const 存檔索引分頁 = (設定.分頁 && 設定.分頁.巡檢存檔索引) || '5S_巡檢存檔索引';
   const 列印紀錄鍵 = '智慧5S_ISO巡檢列印紀錄_v1330';
   const 快取 = new Map();
@@ -21,7 +21,9 @@
 
   function 文字(v) { return String(v == null ? '' : v).trim(); }
   function 數值(v, d) {
-    const n = Number(String(v == null ? '' : v).replace('%', ''));
+    const raw = String(v == null ? '' : v).replace('%', '').trim();
+    if (!raw) return d == null ? 0 : d;
+    const n = Number(raw);
     return Number.isFinite(n) ? n : (d == null ? 0 : d);
   }
   function 轉義(v) {
@@ -267,7 +269,7 @@
 
   async function 注入履歷存檔卡() {
     const panel = document.querySelector('#MH機台履歷遮罩 .MH面板');
-    if (!panel || panel.querySelector('.ISO存檔卡[data-ready="1"]')) return;
+    if (!panel || panel.querySelector('.ISO存檔卡[data-ready="1"],.ISO存檔卡[data-loading="1"]')) return;
     const header = panel.querySelector('.MH頭 small');
     const m = 文字(header && header.textContent).match(/MCHK-[A-Z]\d+-[A-Za-z0-9_-]+/i);
     if (!m) return;
@@ -277,18 +279,21 @@
     if (!card) {
       card = document.createElement('section');
       card.className = 'ISO存檔卡';
+      card.dataset.loading = '1';
       card.innerHTML = `<div class="ISO存檔標題"><b>📄 ISO巡檢存檔</b><span>${ISO文件號}｜${ISO版次}</span></div><div class="MH空">正在合併中央紀錄與手機待同步資料…</div>`;
       const summary = panel.querySelector('.MH摘要');
       summary ? summary.insertAdjacentElement('afterend', card) : panel.appendChild(card);
     }
 
+    card.dataset.loading = '1';
     const data = await 建立存檔資料(mchk);
     更新舊履歷摘要(panel, data);
     const entries = 組合紀錄項目(data);
     const waiting = data.masters.filter(x => x._同步狀態 === '手機待同步').length;
+    card.dataset.loading = '0';
     card.dataset.ready = '1';
     card.dataset.mchk = mchk;
-    card.innerHTML = `<div class="ISO存檔標題"><b>📄 ISO巡檢存檔</b><span>${ISO文件號}｜${ISO版次}</span></div>
+    card.innerHTML = `<div class="ISO存檔標題"><b>📄 ISO巡檔存檔</b><span>${ISO文件號}｜${ISO版次}</span></div>
       <div class="ISO存檔工具"><button class="ISO小按鈕 主" type="button" data-iso-sync="${轉義(mchk)}">立即同步待存檔${waiting?`（${waiting}）`:''}</button><span style="font-size:.66rem;color:#718178;align-self:center">A4表格｜25項明細｜可列印／儲存PDF</span></div>
       <div>${entries.length ? entries.map(e => {
         const r=e.row, rate=數值(r.得分率,-1), isPlaceholder=e.type==='placeholder';
