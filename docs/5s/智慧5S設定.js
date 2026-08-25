@@ -2,8 +2,8 @@ window.智慧5S設定 = Object.freeze({
   系統名稱: '化新精密｜製一｜智慧5S',
   系統短名: '製一｜智慧5S',
   PWA顯示名稱: '製一｜智慧5S',
-  版本: '1.3.2',
-  入口版本碼: '1320',
+  版本: '1.3.3',
+  入口版本碼: '1330',
   登入模式: '每次新工作階段需登入',
   Roar事件通知: true,
   A5標準照片顯示模式: 'PWA離線優先＋中央背景同步',
@@ -13,6 +13,9 @@ window.智慧5S設定 = Object.freeze({
   稽核滿分: 100,
   巡檢防重模式: '依機台巡檢頻率鎖定，未到期不重複巡檢',
   納管區域: 'A3/A4/A5/A6/A7/A8/B2/B5',
+  ISO巡檢表文件號: 'HX-5S-FM-001',
+  ISO巡檢表版次: 'A/0',
+  巡檢存檔編號規則: '5S-REC-{區域}-{機台}-{YYYYMMDD}-{NNN}',
   紅牌列印版型: 'A4半張（A5 148×210mm）',
   後端網址: 'https://script.google.com/macros/s/AKfycbzRvly1OV-C80bMmd2ww4BM1XAH9WTyz62VFDnUxVGiO15kzHahbeHZc2bNTSwdFCqBwQ/exec',
   試算表識別碼: '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8',
@@ -25,7 +28,7 @@ window.智慧5S設定 = Object.freeze({
   及格分數: 80,
   分頁: Object.freeze({
     人員主檔: '01_人員主檔', 區域主檔: '5S_區域主檔', 檢查項目: '5S_檢查項目', 系統參數: '5S_系統參數',
-    機台巡檢設定: '5S_機台巡檢設定', 巡檢主檔: '5S_巡檢主檔', 巡檢明細: '5S_巡檢明細', 改善單: '5S_改善單', 改善歷程: '5S_改善歷程',
+    機台巡檢設定: '5S_機台巡檢設定', 巡檢主檔: '5S_巡檢主檔', 巡檢明細: '5S_巡檢明細', 巡檢存檔索引: '5S_巡檢存檔索引', 改善單: '5S_改善單', 改善歷程: '5S_改善歷程',
     全物品盤點: '5S_全物品盤點', 紅牌追蹤: '5S_紅牌追蹤', 紅牌列印紀錄: '5S_紅牌列印紀錄', 紅牌處置歷程: '5S_紅牌處置歷程', 非必要品處置: '5S_非必要品處置', 照片: '5S_照片',
     通知紀錄: '5S_通知紀錄', 區域日統計: '5S_區域日統計', 排名快照: '5S_排名快照', 標準照片主檔: '5S_標準照片主檔',
     標準對照卡: '5S_標準對照卡', 責任區主檔: '5S_責任區主檔', 導入進度: '5S_導入進度', 稽核週期: '5S_稽核週期',
@@ -37,17 +40,17 @@ window.智慧5S設定 = Object.freeze({
 });
 
 (function(){
-  const id='智慧5S稽核標準0821_v1320';
+  const id='智慧5S稽核標準0821_v1330';
   if(!document.getElementById(id)){
     const s=document.createElement('script');
     s.id=id;
-    s.src='./智慧5S_稽核標準0821_v1310.js?v=1320';
+    s.src='./智慧5S_稽核標準0821_v1310.js?v=1330';
     s.async=false;
     document.head.appendChild(s);
   }
   if('serviceWorker' in navigator){
     window.addEventListener('load',()=>{
-      navigator.serviceWorker.register('./離線服務.js?v=1320',{scope:'./'}).then(reg=>{
+      navigator.serviceWorker.register('./離線服務.js?v=1330',{scope:'./'}).then(reg=>{
         if(reg.waiting)reg.waiting.postMessage('立即啟用新版');
         reg.update().catch(()=>{});
       }).catch(()=>{});
