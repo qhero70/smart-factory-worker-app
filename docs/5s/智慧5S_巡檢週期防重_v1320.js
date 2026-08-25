@@ -6,7 +6,7 @@
    * 1. 修正舊版20項殘留文字，正式顯示25項／100分。
    * 2. 依每台機台巡檢頻率計算下次到期日；未到期前不再出現在待巡檢清單。
    * 3. 同時讀取中央巡檢主檔、手機離線待同步佇列與本機完成鎖，避免重複巡檢。
-   * 4. 本期已完成機台收進折疊區，保留可追溯性但禁止重複開單。
+   * 4. 本期已完成機台以 hidden 鎖定，不刪DOM，避免重繪與操作卡頓。
    */
   const 版本 = '1.3.2';
   const 設定 = 全域.智慧5S設定 || {};
@@ -20,6 +20,7 @@
   let 套用中 = false;
 
   function 文字(v) { return String(v == null ? '' : v).trim(); }
+  function 設文字(el, value) { const t = String(value == null ? '' : value); if (el && el.textContent !== t) el.textContent = t; }
   function 補零(n) { return String(n).padStart(2, '0'); }
   function 日期字串(d) {
     const x = d instanceof Date ? d : new Date(d || Date.now());
@@ -63,9 +64,10 @@
   function 記錄完成(id, dateText) {
     id = 文字(id).toUpperCase();
     const d = 安全日期(dateText);
-    if (!id || !d) return;
+    if (!id || !d) return false;
     const old = 完成日期.get(id);
-    if (!old || d > old) 完成日期.set(id, d);
+    if (!old || d > old) { 完成日期.set(id, d); return true; }
+    return false;
   }
   function 讀本機完成() {
     try {
@@ -170,24 +172,26 @@
     if (!page) return;
     const title = document.getElementById('頁面標題');
     const subtitle = document.getElementById('頁面副標');
-    if (title) title.textContent = '機台25項行動巡檢';
-    if (subtitle) subtitle.textContent = '一機一檔｜4/3/2/1/0｜完成後依巡檢週期鎖定';
+    設文字(title, '機台25項行動巡檢');
+    設文字(subtitle, '一機一檔｜4/3/2/1/0｜完成後依巡檢週期鎖定');
 
     const hero = page.querySelector('.主視覺');
     if (hero) {
       const h = hero.querySelector('h2');
       const p = hero.querySelector('p');
       const total = 機台設定.size || 94;
-      if (h) h.textContent = `${total}台機台，一機一份巡檢檔`;
-      if (p) p.textContent = '25項標準只維護一份母版。完成後依巡檢頻率自動鎖定，到期才重新出現在待巡檢清單；每次巡檢建立1張主單與01～25明細。';
+      設文字(h, `${total}台機台，一機一份巡檢檔`);
+      設文字(p, '25項標準只維護一份母版。完成後依巡檢頻率自動鎖定，到期才重新出現在待巡檢清單；每次巡檢建立1張主單與01～25明細。');
     }
 
     page.querySelectorAll('.MCHK開始').forEach(el => {
-      if (!/完成|確認/.test(el.textContent || '')) el.textContent = '開始 25 項';
+      if (!/完成|確認/.test(el.textContent || '')) 設文字(el, '開始 25 項');
     });
     page.querySelectorAll('small').forEach(el => {
-      if (/20項明細|01[～~-]20|20項/.test(el.textContent || '')) {
-        el.textContent = (el.textContent || '').replace(/20項明細/g, '25項明細').replace(/01[～~-]20/g, '01～25').replace(/20項/g, '25項');
+      const old = el.textContent || '';
+      if (/20項明細|01[～~-]20|20項/.test(old)) {
+        const next = old.replace(/20項明細/g, '25項明細').replace(/01[～~-]20/g, '01～25').replace(/20項/g, '25項');
+        設文字(el, next);
       }
     });
   }
@@ -198,10 +202,11 @@
     const m = (result.textContent || '').match(/MCHK-[A-Z]\d+-[A-Za-z0-9_-]+/i);
     if (!m) return;
     const id = m[0].toUpperCase();
-    if (完成日期.get(id) !== 今日()) {
-      記錄完成(id, 今日());
-      寫本機完成();
-    }
+    if (記錄完成(id, 今日())) 寫本機完成();
+  }
+
+  function 完成摘要HTML(done) {
+    return `<summary><span>✅ 本期已完成 ${done.length} 台</span><span style="font-size:.68rem;color:#728078">未到期不重複巡檢</span></summary><div class="MCHK完成內容">${done.map(x => `<div class="MCHK完成列"><div><b>${x.name.replace(/[&<>]/g, '')}</b><small>完成 ${x.last}｜下次 ${x.next}</small></div><span class="MCHK完成勾">已鎖定</span></div>`).join('')}</div>`;
   }
 
   function 套用清單鎖定() {
@@ -214,41 +219,55 @@
 
     if (!資料就緒) {
       cards.forEach(card => {
-        card.classList.add('MCHK確認中');
+        if (!card.classList.contains('MCHK確認中')) card.classList.add('MCHK確認中');
         const badge = card.querySelector('.MCHK開始');
-        if (badge) { badge.textContent = '確認中…'; badge.classList.add('MCHK確認中標籤'); }
+        if (badge) {
+          設文字(badge, '確認中…');
+          if (!badge.classList.contains('MCHK確認中標籤')) badge.classList.add('MCHK確認中標籤');
+        }
       });
       return;
     }
 
     const done = [];
+    let pending = 0;
     cards.forEach(card => {
-      card.classList.remove('MCHK確認中');
+      if (card.classList.contains('MCHK確認中')) card.classList.remove('MCHK確認中');
       const badge = card.querySelector('.MCHK開始');
-      if (badge) badge.classList.remove('MCHK確認中標籤');
+      if (badge && badge.classList.contains('MCHK確認中標籤')) badge.classList.remove('MCHK確認中標籤');
       const id = 文字(card.dataset.mchk).toUpperCase();
       const status = 本期狀態(id);
       if (!status.已完成) {
-        if (badge) badge.textContent = '開始 25 項';
+        if (card.hidden) card.hidden = false;
+        if (card.dataset.巡檢鎖定) delete card.dataset.巡檢鎖定;
+        if (badge) 設文字(badge, '開始 25 項');
+        pending += 1;
         return;
       }
+      if (!card.hidden) card.hidden = true;
+      card.dataset.巡檢鎖定 = '1';
       const name = 文字((card.querySelector('b') || {}).textContent) || id;
       done.push({ id, name, last: status.上次, next: status.下次 });
-      card.remove();
     });
 
-    const old = page.querySelector('.MCHK完成摘要');
-    if (old) old.remove();
+    const signature = done.map(x => `${x.id}:${x.last}:${x.next}`).join('|');
+    let details = page.querySelector('.MCHK完成摘要');
     if (done.length) {
-      const details = document.createElement('details');
-      details.className = 'MCHK完成摘要';
-      details.innerHTML = `<summary><span>✅ 本期已完成 ${done.length} 台</span><span style="font-size:.68rem;color:#728078">未到期不重複巡檢</span></summary><div class="MCHK完成內容">${done.map(x => `<div class="MCHK完成列"><div><b>${x.name.replace(/[&<>]/g, '')}</b><small>完成 ${x.last}｜下次 ${x.next}</small></div><span class="MCHK完成勾">已鎖定</span></div>`).join('')}</div>`;
-      list.insertAdjacentElement('afterend', details);
+      if (!details) {
+        details = document.createElement('details');
+        details.className = 'MCHK完成摘要';
+        list.insertAdjacentElement('afterend', details);
+      }
+      if (details.dataset.signature !== signature) {
+        details.dataset.signature = signature;
+        details.innerHTML = 完成摘要HTML(done);
+      }
+    } else if (details) {
+      details.remove();
     }
 
-    const pending = list.querySelectorAll('.MCHK機台卡').length;
     const headerP = page.querySelector('.區段標題 p');
-    if (headerP) headerP.textContent = `待巡檢 ${pending} 台｜本期完成 ${done.length} 台｜總計 ${機台設定.size || pending + done.length} 台`;
+    設文字(headerP, `待巡檢 ${pending} 台｜本期完成 ${done.length} 台｜總計 ${機台設定.size || pending + done.length} 台`);
   }
 
   function 套用() {
