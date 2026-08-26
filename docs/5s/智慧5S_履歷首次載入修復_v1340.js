@@ -2,13 +2,13 @@
   'use strict';
 
   /**
-   * 製一｜智慧5S 機台履歷首次載入修復 v1.3.4
+   * 製一｜智慧5S 機台履歷首次載入修復 v1.3.6
    * 問題：首次開啟機台履歷時，中央履歷面板可能先完成，但手機 IndexedDB 待同步巡檢資料尚未合併，
    *       造成第一次顯示「尚無巡檢」，關閉後第二次開啟才出現 100%／巡檢累計／ISO存檔。
    * 修正：不再使用固定毫秒猜測載入時間；等待最終機台履歷面板真正建立後，再 await ISO 模組完成中央＋手機佇列合併，
    *       同一次開啟立即更新摘要與 ISO 巡檢存檔卡。
    */
-  const 版本 = '1.3.4';
+  const 版本 = '1.3.6';
   let 工作序號 = 0;
   const 執行中 = new Map();
 
@@ -116,7 +116,7 @@
       <div>${entries.length ? entries.map(e => {
         const r = e.row || {};
         const rate = 數值(r.得分率, -1);
-        return `<div class="ISO存檔列"><div><b>${轉義(e.no || '')}</b><small>${轉義(日期(r.巡檢日期 || r.送出時間) || '日期待回補')}｜${轉義(r.巡檢單號 || '巡檢單號待回補')}</small><small>分數：${rate>=0?`${Math.round(rate)}%／${評等(rate)}級`:'待回補'}｜異常：${轉義(文字(r.異常項數) || '—')}</small><span class="ISO狀態 ${/待/.test(文字(e.status))?'待':''}">${轉義(e.status || '')}</span></div><button class="ISO小按鈕" type="button" data-iso-open="${轉義(e.no || '')}" data-mchk="${轉義(mchk)}" ${e.placeholder?'disabled':''}>${e.placeholder?'待回補':'查看／列印'}</button></div>`;
+        return `<div class="ISO存檔列"><div><b>${轉義(e.no || '')}</b><small>${轉義(日期(r.巡檢日期 || r.送出時間) || '日期待回補')}｜${轉義(r.巡檢單號 || '巡檢單號待回補')}</small><small>分數：${rate>=0?`${Math.round(rate)}%／${評等(rate)}級`:'待回補'}｜異常：${轉義(文字(r.異常項數) || '—')}</small><span class="ISO狀態 ${/待/.test(文字(e.status))?'待':''}">${轉義(e.status || '')}</span></div><button class="ISO小按鈕 ${e.placeholder?'待':''}" type="button" data-iso-open="${轉義(e.no || '')}" data-mchk="${轉義(mchk)}">${e.placeholder?'查看／列印（待回補）':'查看／列印'}</button></div>`;
       }).join('') : '<div class="MH空">目前沒有巡檢存檔。</div>'}</div>`;
   }
 

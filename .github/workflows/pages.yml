@@ -35,20 +35,26 @@ jobs:
             --include='*.js' --include='*.svg' docs/5s
 
           # 正式入口版本驗收：只鎖目前入口，不再用歷史1280阻擋新版部署。
-          grep -q "版本: '1.3.5'" 'docs/5s/智慧5S設定.js'
-          grep -q "入口版本碼: '1350'" 'docs/5s/智慧5S設定.js'
-          grep -q '智慧5S_機台履歷_v1250.js?v=1350' 'docs/5s/index.html'
-          grep -q '智慧5S_ISO巡檢存檔_v1330.js?v=1350' 'docs/5s/index.html'
-          grep -q '智慧5S_履歷首次載入修復_v1340.js?v=1350' 'docs/5s/index.html'
-          grep -q '智慧5S_可視化核心_v1280.js?v=1350' 'docs/5s/index.html'
-          grep -q '智慧5S_可視化路由_v1280.js?v=1350' 'docs/5s/index.html'
+          grep -q "版本: '1.3.6'" 'docs/5s/智慧5S設定.js'
+          grep -q "入口版本碼: '1360'" 'docs/5s/智慧5S設定.js'
+          grep -q '智慧5S_機台履歷_v1250.js?v=1360' 'docs/5s/index.html'
+          grep -q '智慧5S_ISO巡檢存檔_v1330.js?v=1360' 'docs/5s/index.html'
+          grep -q '智慧5S_履歷首次載入修復_v1340.js?v=1360' 'docs/5s/index.html'
+          grep -q '智慧5S_可視化核心_v1280.js?v=1360' 'docs/5s/index.html'
+          grep -q '智慧5S_可視化路由_v1280.js?v=1360' 'docs/5s/index.html'
           grep -q '首次開啟' 'docs/5s/智慧5S_履歷首次載入修復_v1340.js'
           grep -q '建立存檔資料' 'docs/5s/智慧5S_履歷首次載入修復_v1340.js'
           grep -q '"name":"製一｜智慧5S"' 'docs/5s/應用程式資訊.webmanifest'
-          grep -q 'v=1350' 'docs/5s/應用程式資訊.webmanifest'
-          grep -q '頁面=可視化&v=1350' 'docs/5s/應用程式資訊.webmanifest'
-          grep -q '製一智慧5S-v1.3.5' 'docs/5s/離線服務.js'
+          grep -q 'v=1360' 'docs/5s/應用程式資訊.webmanifest'
+          grep -q '頁面=可視化&v=1360' 'docs/5s/應用程式資訊.webmanifest'
+          grep -q '製一智慧5S-v1.3.6' 'docs/5s/離線服務.js'
           grep -q '智慧5S_履歷首次載入修復_v1340.js' 'docs/5s/離線服務.js'
+
+          # 待回補存檔仍須保留列印入口；文件內需明確警示不是完整稽核證據。
+          grep -q '查看／列印（待回補）' 'docs/5s/智慧5S_ISO巡檢存檔_v1330.js'
+          grep -q '查看／列印（待回補）' 'docs/5s/智慧5S_履歷首次載入修復_v1340.js'
+          grep -q '待回補預覽' 'docs/5s/智慧5S_ISO巡檢存檔_v1330.js'
+          grep -q '不得視為完整稽核證據' 'docs/5s/智慧5S_ISO巡檢存檔_v1330.js'
 
           # A5 現場照片需完整內建，確保離線稽核仍能看見11張正式照片。
           mapfile -t a5_photos < <(find docs/5s/assets/a5 -maxdepth 1 -type f -name 'SITE-A5-*.jpg' | sort)

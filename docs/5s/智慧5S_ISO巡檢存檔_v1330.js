@@ -2,13 +2,13 @@
   'use strict';
 
   /**
-   * 製一｜智慧5S ISO巡檢存檔 v1.3.3
+   * 製一｜智慧5S ISO巡檢存檔 v1.3.6
    * - 將中央已同步資料與手機 IndexedDB 待同步佇列合併成一份機台巡檢履歷。
    * - 每次巡檢產生可追溯存檔編號，顯示 ISO 文件號／版次。
    * - 提供 25 項正式巡檢表格與 A4 列印／iPhone 儲存 PDF。
    * - 未取得原始分數時只標示「待回補」，絕不補造分數。
    */
-  const 版本 = '1.3.3';
+  const 版本 = '1.3.6';
   const 設定 = 全域.智慧5S設定 || {};
   const 資料庫 = 全域.智慧5S資料庫;
   const ISO文件號 = String(設定.ISO巡檢表文件號 || 'HX-5S-FM-001').trim();
@@ -205,7 +205,7 @@
     s.textContent = `
       .ISO存檔卡{border:1px solid #cfe2d7;background:linear-gradient(145deg,#fff,#f3f9f5);border-radius:20px;padding:15px;margin-top:11px;box-shadow:0 9px 25px rgba(22,64,42,.06)}
       .ISO存檔標題{display:flex;justify-content:space-between;gap:8px;align-items:center}.ISO存檔標題 b{font-size:.94rem}.ISO存檔標題 span{font-size:.64rem;color:#6d8075}
-      .ISO存檔工具{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.ISO小按鈕{border:1px solid #cfe1d6;background:#fff;color:#176b47;border-radius:13px;padding:9px 11px;font-weight:900;font-size:.7rem}.ISO小按鈕.主{background:#176b47;color:#fff;border-color:#176b47}.ISO小按鈕:disabled{opacity:.45}
+      .ISO存檔工具{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.ISO小按鈕{border:1px solid #cfe1d6;background:#fff;color:#176b47;border-radius:13px;padding:9px 11px;font-weight:900;font-size:.7rem}.ISO小按鈕.主{background:#176b47;color:#fff;border-color:#176b47}.ISO小按鈕.待{border-color:#e6c47e;background:#fff8e7;color:#865400}.ISO小按鈕:disabled{opacity:.45}
       .ISO存檔列{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:11px 0;border-bottom:1px dashed #dfe8e2}.ISO存檔列:last-child{border-bottom:0}.ISO存檔列 b{font-size:.77rem;word-break:break-all}.ISO存檔列 small{display:block;color:#718178;font-size:.65rem;line-height:1.5;margin-top:3px}.ISO狀態{display:inline-block;padding:4px 8px;border-radius:999px;font-size:.62rem;font-weight:900;margin-top:5px;background:#e7f5ec;color:#16744b}.ISO狀態.待{background:#fff0d9;color:#9a5f00}
       .ISO遮罩{position:fixed;inset:0;z-index:2147483600;background:rgba(5,25,17,.60);backdrop-filter:blur(6px);display:flex;align-items:stretch;justify-content:center}.ISO面板{width:min(920px,100%);height:100%;overflow:auto;background:#eef3f0;padding:calc(12px + env(safe-area-inset-top)) 10px calc(20px + env(safe-area-inset-bottom))}
       .ISO操作{position:sticky;top:calc(-12px - env(safe-area-inset-top));z-index:5;margin:calc(-12px - env(safe-area-inset-top)) -10px 10px;padding:calc(10px + env(safe-area-inset-top)) 10px 10px;background:rgba(244,248,246,.96);backdrop-filter:blur(14px);display:flex;gap:8px;justify-content:flex-end;border-bottom:1px solid #d3dfd8}.ISO操作 button{border:0;border-radius:13px;padding:10px 13px;font-weight:950}.ISO列印鈕{background:#176b47;color:#fff}.ISO關閉鈕{background:#e3ebe6;color:#345347}
@@ -297,7 +297,7 @@
       <div class="ISO存檔工具"><button class="ISO小按鈕 主" type="button" data-iso-sync="${轉義(mchk)}">立即同步待存檔${waiting?`（${waiting}）`:''}</button><span style="font-size:.66rem;color:#718178;align-self:center">A4表格｜25項明細｜可列印／儲存PDF</span></div>
       <div>${entries.length ? entries.map(e => {
         const r=e.row, rate=數值(r.得分率,-1), isPlaceholder=e.type==='placeholder';
-        return `<div class="ISO存檔列"><div><b>${轉義(e.no)}</b><small>${轉義(日期字串(r.巡檢日期||r.送出時間)||'日期待回補')}｜${轉義(r.巡檢單號||'巡檢單號待回補')}</small><small>分數：${rate>=0?`${Math.round(rate)}%／${評等(rate)}級`:'待回補'}｜異常：${文字(r.異常項數)||'—'}</small><span class="ISO狀態 ${/待/.test(e.status)?'待':''}">${轉義(e.status)}</span></div><button class="ISO小按鈕" type="button" data-iso-open="${轉義(e.no)}" data-mchk="${轉義(mchk)}" ${isPlaceholder?'disabled':''}>${isPlaceholder?'待回補':'查看／列印'}</button></div>`;
+        return `<div class="ISO存檔列"><div><b>${轉義(e.no)}</b><small>${轉義(日期字串(r.巡檢日期||r.送出時間)||'日期待回補')}｜${轉義(r.巡檢單號||'巡檢單號待回補')}</small><small>分數：${rate>=0?`${Math.round(rate)}%／${評等(rate)}級`:'待回補'}｜異常：${文字(r.異常項數)||'—'}</small><span class="ISO狀態 ${/待/.test(e.status)?'待':''}">${轉義(e.status)}</span></div><button class="ISO小按鈕 ${isPlaceholder?'待':''}" type="button" data-iso-open="${轉義(e.no)}" data-mchk="${轉義(mchk)}">${isPlaceholder?'查看／列印（待回補）':'查看／列印'}</button></div>`;
       }).join('') : '<div class="MH空">目前沒有巡檢存檔。若本機剛完成巡檢，請按「立即同步待存檔」。</div>'}</div>`;
   }
 
@@ -310,7 +310,9 @@
   function 開啟正式文件(data, master) {
     關閉正式文件();
     const no = master._存檔編號;
-    const details = data.details.filter(r => 文字(r.巡檢單號) === 文字(master.巡檢單號)).sort(明細排序);
+    const inspectionNo = 文字(master.巡檢單號);
+    const details = inspectionNo ? data.details.filter(r => 文字(r.巡檢單號) === inspectionNo).sort(明細排序) : [];
+    const isPlaceholder = !!master._索引占位;
     const machine = data.machine || {};
     const rate = 數值(master.得分率, -1);
     const total = 文字(master.總得分) || '—';
@@ -325,10 +327,10 @@
     overlay.id = 'ISO巡檢表遮罩';
     overlay.className = 'ISO遮罩';
     overlay.innerHTML = `<div class="ISO面板"><div class="ISO操作"><button class="ISO列印鈕" type="button">列印／儲存PDF</button><button class="ISO關閉鈕" type="button">關閉</button></div><article class="ISO紙張">
-      <header class="ISO文件頭"><div><h1>製一｜智慧5S 機台5S巡檢紀錄表</h1><p>25項／0～4分／滿分100分｜電子巡檢正式紀錄</p></div><table class="ISO文件資訊"><tr><th>ISO文件號</th><td>${轉義(ISO文件號)}</td><th>版次</th><td>${轉義(ISO版次)}</td></tr><tr><th>存檔編號</th><td colspan="3">${轉義(no)}</td></tr></table></header>
+      <header class="ISO文件頭"><div><h1>製一｜智慧5S 機台5S巡檢紀錄表</h1><p>25項／0～4分／滿分100分｜${isPlaceholder?'待回補預覽':'電子巡檢正式紀錄'}</p></div><table class="ISO文件資訊"><tr><th>ISO文件號</th><td>${轉義(ISO文件號)}</td><th>版次</th><td>${轉義(ISO版次)}</td></tr><tr><th>存檔編號</th><td colspan="3">${轉義(no)}</td></tr></table></header>
       <table class="ISO基本"><tr><th>機台巡檢檔號</th><td>${轉義(data.mchk)}</td><th>巡檢單號</th><td>${轉義(master.巡檢單號||'—')}</td></tr><tr><th>區域</th><td>${轉義(machine.主區域||'')}</td><th>機台</th><td>${轉義(machine.機台編號||'')}｜${轉義(machine.機台名稱||'')}</td></tr><tr><th>巡檢日期</th><td>${轉義(日期字串(master.巡檢日期||master.送出時間)||'—')}</td><th>巡檢人</th><td>${轉義(master.巡檢人工號||'')} ${轉義(master.巡檢人姓名||'')}</td></tr><tr><th>開始時間</th><td>${轉義(master.開始時間||'—')}</td><th>送出時間</th><td>${轉義(master.送出時間||'—')}</td></tr><tr><th>同步狀態</th><td>${轉義(master._同步狀態)}</td><th>列印次數</th><td>${列印次數(no)}</td></tr></table>
       <section class="ISO總結"><div><small>總得分</small><b>${轉義(total)} / ${轉義(max)}</b></div><div><small>得分率</small><b>${rate>=0?`${Math.round(rate)}%`:'—'}</b></div><div><small>評等</small><b>${轉義(評等(rate))}</b></div><div><small>異常項數</small><b>${轉義(exceptionCount)}</b></div></section>
-      ${details.length===25?'':`<div class="ISO待回補">目前取得 ${details.length} / 25 項原始明細。未取得的資料不補造；請先返回履歷按「立即同步待存檔」。</div>`}
+      ${details.length===25?'':`<div class="ISO待回補">${isPlaceholder?'此筆目前只有存檔索引，原始巡檢主單尚待手機回補。':'目前取得 '+details.length+' / 25 項原始明細。'} 未取得的資料不補造；本頁仍可列印／儲存 PDF，但不得視為完整稽核證據。請返回履歷按「立即同步待存檔」。</div>`}
       <table class="ISO明細表"><thead><tr><th class="序">序</th><th class="類">5S</th><th class="碼">項目代碼</th><th>檢查內容</th><th class="分">分數</th><th class="判">判定</th><th>異常原因</th><th class="改">改善單號</th></tr></thead><tbody>${rows || '<tr><td colspan="8" style="text-align:center;padding:18px">25項原始明細尚待回補</td></tr>'}</tbody></table>
       <section class="ISO簽核"><div>巡檢人：${轉義(master.巡檢人姓名||'')}<br>日期：${轉義(日期字串(master.巡檢日期)||'')}</div><div>區域負責人：<br>日期：</div><div>主管複核：<br>日期：</div></section>
       <div class="ISO註記">文件管理：本表電子原始紀錄以「存檔編號＋巡檢單號」追溯。列印／另存PDF為輸出副本；若25項原始明細未完整回補，不得視為完整稽核證據。系統文件號 ${轉義(ISO文件號)}／版次 ${轉義(ISO版次)} 可由文管參數統一調整。</div>
@@ -349,11 +351,15 @@
 
   async function 開啟存檔(mchk, no) {
     const data = await 建立存檔資料(mchk);
-    const master = data.masters.find(r => r._存檔編號 === no);
+    const master = data.masters.find(r => r._存檔編號 === no)
+      || data.placeholders.find(r => r._存檔編號 === no);
     if (!master) {
-      if (全域.智慧5SRoar && 全域.智慧5SRoar.發送) 全域.智慧5SRoar.發送({類型:'警告',標題:'巡檢資料待回補',內容:`${no} 尚未取得原始巡檢主單`,來源:'ISO巡檢存檔'});
-      else alert('此筆只有存檔索引，原始巡檢主單尚待手機回補。');
+      if (全域.智慧5SRoar && 全域.智慧5SRoar.發送) 全域.智慧5SRoar.發送({類型:'警告',標題:'巡檢存檔不存在',內容:`${no} 找不到巡檢主單或存檔索引`,來源:'ISO巡檢存檔'});
+      else alert('找不到此筆巡檢主單或存檔索引。');
       return;
+    }
+    if (master._索引占位 && 全域.智慧5SRoar && 全域.智慧5SRoar.發送) {
+      全域.智慧5SRoar.發送({類型:'警告',標題:'列印待回補存檔',內容:`${no} 原始巡檢主單尚待手機回補；輸出表將標示資料未完整。`,來源:'ISO巡檢存檔'});
     }
     開啟正式文件(data, master);
   }
