@@ -1,7 +1,7 @@
 /**
  * ============================================================
  * 化新精密｜智慧5S 區域統計排名自動化
- * 版本：1.0.0
+ * 版本：1.3.6
  * ============================================================
  * 功能：
  * 1. 每日依正式資料重算 5S_區域日統計。
@@ -13,10 +13,11 @@
  * ============================================================
  */
 
-var 智慧5S_區域統計_版本 = '1.0.0';
+var 智慧5S_區域統計_版本 = '1.3.6';
 var 智慧5S_區域統計_資料庫ID = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
 var 智慧5S_區域統計_排程函式 = '智慧5S_區域統計_每日自動執行';
-var 智慧5S_區域統計_PWA網址 = 'https://qhero70.github.io/smart-factory-worker-app/5s/?v=105';
+var 智慧5S_區域統計_PWA正式入口 = 'https://qhero70.github.io/smart-factory-worker-app/5s/';
+var 智慧5S_區域統計_PWA版本備援 = '1360';
 
 function 智慧5S_區域統計_每日自動執行() {
   var 統計結果 = 智慧5S_區域統計_產生今日統計();
@@ -220,7 +221,7 @@ function 智慧5S_區域統計_建立排名通知(統計結果) {
   var 摘要 = '【智慧5S主管排名】' + 統計結果.日期 +
     '｜TOP3：' + (前三 || '尚無資料') +
     (優先 ? '｜優先處理：' + 優先.區域名稱 + ' ' + 優先.分數 + '分｜' + 優先.說明 : '') +
-    '｜開啟戰情：' + 智慧5S_區域統計_PWA網址;
+    '｜開啟戰情：' + 智慧5S_區域統計_取得PWA網址_('可視化');
 
   var 去重鍵 = '5S-RANK-' + 統計結果.日期;
   var 新增 = 智慧5S_區域統計_新增通知_(通知分頁, {
@@ -272,6 +273,36 @@ function 智慧5S_區域統計_健康檢查() {
     缺少分頁: 缺少,
     LINE橋接可用: typeof 智慧5S_LINE橋接_處理待通知 === 'function'
   };
+}
+
+function 智慧5S_區域統計_取得PWA網址_(頁面) {
+  if (typeof LINE智慧5S入口39_取得網址_ === 'function') {
+    return LINE智慧5S入口39_取得網址_(頁面 || '首頁');
+  }
+  var 參數 = {};
+  try {
+    var 資料庫 = SpreadsheetApp.openById(智慧5S_區域統計_資料庫ID);
+    var 分頁 = 資料庫.getSheetByName('5S_系統參數');
+    if (分頁 && 分頁.getLastRow() >= 2) {
+      var 資料 = 分頁.getDataRange().getDisplayValues();
+      var 欄位 = 資料.shift().map(function (值) { return String(值 || '').trim(); });
+      var 鍵欄 = 欄位.indexOf('參數鍵');
+      var 值欄 = 欄位.indexOf('參數值');
+      資料.forEach(function (列) {
+        var 鍵 = 鍵欄 >= 0 ? String(列[鍵欄] || '').trim() : '';
+        if (鍵 && 值欄 >= 0) 參數[鍵] = String(列[值欄] || '').trim();
+      });
+    }
+  } catch (錯誤) {
+    console.warn('智慧5S排名讀取PWA版本失敗：' + 錯誤);
+  }
+  var 基底 = String(參數['PWA正式入口網址'] || 智慧5S_區域統計_PWA正式入口).trim();
+  var 版本 = String(參數['PWA入口版本'] || 智慧5S_區域統計_PWA版本備援).replace(/\D/g, '') || 智慧5S_區域統計_PWA版本備援;
+  基底 = 基底.replace(/([?&])v=\d+/g, '$1').replace(/([?&])頁面=[^&]*/g, '$1').replace(/([?&])來源=[^&]*/g, '$1');
+  基底 = 基底.replace(/\?&/g, '?').replace(/&&+/g, '&').replace(/[?&]+$/, '');
+  var 網址 = 基底 + (基底.indexOf('?') >= 0 ? '&' : '?') + '來源=LINEBOT&v=' + 版本;
+  if (頁面 && 頁面 !== '首頁') 網址 += '&頁面=' + encodeURIComponent(頁面);
+  return 網址;
 }
 
 function 智慧5S_區域統計_寫入日統計_(分頁, 日期, 區域清單) {

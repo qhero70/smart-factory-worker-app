@@ -73,6 +73,14 @@ function doPost(e) {
       }
     }
 
+    if (typeof LINE智慧5S入口39_嘗試處理Webhook_ === 'function') {
+      var 智慧5S入口39結果 = LINE智慧5S入口39_嘗試處理Webhook_(p);
+      if (智慧5S入口39結果 && 智慧5S入口39結果.已處理) {
+        if (LINE重送守門) LINE訊息重送防護_完成_(LINE重送守門);
+        return 主程式_安全輸出JSON_(智慧5S入口39結果);
+      }
+    }
+
     if (typeof LINE指令中心37_嘗試處理Webhook_ === 'function') {
       var 指令中心結果 = LINE指令中心37_嘗試處理Webhook_(p);
       if (指令中心結果 && 指令中心結果.已處理) {

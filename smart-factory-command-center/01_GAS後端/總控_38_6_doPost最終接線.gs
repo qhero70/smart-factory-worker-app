@@ -1,5 +1,5 @@
-/** 38.6｜主後端 doPost 最終接線模組｜v1.8.5 */
-const 主後端38_6_doPost最終接線版本 = 'v1.8.5_主管快捷戰情正式接線';
+/** 38.6｜主後端 doPost 最終接線模組｜v1.8.6 */
+const 主後端38_6_doPost最終接線版本 = 'v1.8.6_智慧5S入口正式接線';
 
 function doPost(e) {
   const p = 解析POST_(e);
@@ -17,6 +17,13 @@ function doPost(e) {
       if (智慧5S群組結果 && 智慧5S群組結果.已處理) {
         if (LINE重送守門) LINE訊息重送防護_完成_(LINE重送守門);
         return 主程式_安全輸出JSON_(智慧5S群組結果);
+      }
+    }
+    if (typeof LINE智慧5S入口39_嘗試處理Webhook_ === 'function') {
+      var 智慧5S入口39結果 = LINE智慧5S入口39_嘗試處理Webhook_(p);
+      if (智慧5S入口39結果 && 智慧5S入口39結果.已處理) {
+        if (LINE重送守門) LINE訊息重送防護_完成_(LINE重送守門);
+        return 主程式_安全輸出JSON_(智慧5S入口39結果);
       }
     }
     if (typeof LINE指令中心37_嘗試處理Webhook_ === 'function') {
@@ -100,9 +107,9 @@ function 測試38_6_doPost最終接線_靜態檢查() {
   return {
     成功: true,
     版本: 主後端38_6_doPost最終接線版本,
-    doPost順序: ['智慧5S LINE 群組綁定','37_LINE 指令中心','34_LINE 角色選單分流','33_LINE 身份權限檢查','68_LINE 主管快捷戰情','31_LINE 主管戰情日期快選','30_LINE 主管戰情直連','一般 LINE Webhook'],
+    doPost順序: ['智慧5S LINE 群組綁定','39_LINE 智慧5S入口','37_LINE 指令中心','34_LINE 角色選單分流','33_LINE 身份權限檢查','68_LINE 主管快捷戰情','31_LINE 主管戰情日期快選','30_LINE 主管戰情直連','一般 LINE Webhook'],
     POST模組順序: ['38.7 自動排程防重','38.7 派班報工回寫增強','38.7 主線優化','38.7 今日派班報工回寫','主管戰情入口','排程需求池'],
-    不進39: true,
+    不進39: false,
     不重做26: true,
     訊息: '38.7 handler enhanced'
   };

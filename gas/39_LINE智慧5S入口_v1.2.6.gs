@@ -1,14 +1,14 @@
 /**
- * 化新精密｜39_LINE 智慧5S入口 v1.2.6
+ * 化新精密｜39_LINE 智慧5S入口 v1.3.6
  *
  * 文字指令：智慧5S / 5S / 智慧5S入口 / 5S入口 / 5S巡檢
  * 回覆：LINE Flex「開啟智慧5S」按鈕。
  * PWA 網址及版本從 5S_系統參數動態讀取，避免 LINE 與 PWA 版本分流。
  */
-var LINE智慧5S入口39_版本_ = 'v1.2.6';
+var LINE智慧5S入口39_版本_ = 'v1.3.6';
 var LINE智慧5S入口39_試算表ID_ = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
 var LINE智慧5S入口39_正式入口_ = 'https://qhero70.github.io/smart-factory-worker-app/5s/';
-var LINE智慧5S入口39_版本備援_ = '1260';
+var LINE智慧5S入口39_版本備援_ = '1360';
 
 function LINE智慧5S入口39_嘗試處理Webhook_(內容) {
   var events = 內容 && Array.isArray(內容.events) ? 內容.events : [];

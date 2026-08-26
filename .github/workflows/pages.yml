@@ -50,6 +50,11 @@ jobs:
           grep -q '製一智慧5S-v1.3.6' 'docs/5s/離線服務.js'
           grep -q '智慧5S_履歷首次載入修復_v1340.js' 'docs/5s/離線服務.js'
 
+          # LINE Bot 與 Rich Menu 正式入口不得再退回舊 v=103／105。
+          node 'smart-factory-command-center/08_測試與驗收/智慧5S_LINE_v1.3.6_正式驗收.js'
+          test -s 'docs/line/richmenu-supervisor-v186.png'
+          test -s 'docs/line/richmenu-worker-v186.png'
+
           # 待回補存檔仍須保留列印入口；文件內需明確警示不是完整稽核證據。
           grep -q '查看／列印（待回補）' 'docs/5s/智慧5S_ISO巡檢存檔_v1330.js'
           grep -q '查看／列印（待回補）' 'docs/5s/智慧5S_履歷首次載入修復_v1340.js'

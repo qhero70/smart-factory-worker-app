@@ -1,6 +1,6 @@
 /**
  * 化新精密｜製一｜智慧5S
- * 5S 動態稽核 LINE 提醒 v1.2.6
+ * 5S 動態稽核 LINE 提醒 v1.3.6
  *
  * 改版重點：
  * 1. LINE 不再一次列出全部機台；改為區域摘要 + 最優先 8 項。
@@ -12,11 +12,11 @@
  * 注意：本檔提交 GitHub 不等於正式 Apps Script 已部署；需同步至正式 GAS 專案後才會影響 LINE 實際訊息。
  */
 
-var 智慧5S動態稽核_版本_ = 'v1.2.6';
+var 智慧5S動態稽核_版本_ = 'v1.3.6';
 var 智慧5S動態稽核_試算表ID_ = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
 var 智慧5S動態稽核_觸發函數_ = '智慧5S_自動執行每日稽核提醒';
 var 智慧5S動態稽核_正式入口_ = 'https://qhero70.github.io/smart-factory-worker-app/5s/';
-var 智慧5S動態稽核_入口版本備援_ = '1260';
+var 智慧5S動態稽核_入口版本備援_ = '1360';
 
 function 智慧5S動態稽核_嘗試處理動作_(payload) {
   payload = payload || {};

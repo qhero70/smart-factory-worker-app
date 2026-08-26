@@ -8,7 +8,7 @@
  *   '智慧5S_嘗試處理動作_'
  */
 
-var 智慧5S_版本 = '1.0.2';
+var 智慧5S_版本 = '1.3.6';
 var 智慧5S_預設試算表識別碼 = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
 var 智慧5S_照片資料夾名稱 = '智慧5S照片資料庫';
 

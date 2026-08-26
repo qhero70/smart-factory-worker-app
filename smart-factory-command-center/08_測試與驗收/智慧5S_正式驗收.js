@@ -114,7 +114,7 @@ function 驗收版本與PWA() {
   const 應用程式 = 檔案系統.readFileSync(路徑工具.join(前端目錄, '智慧5S應用程式.js'), 'utf8');
   const 後端 = 檔案系統.readFileSync(後端路徑, 'utf8');
   const 版本 = 擷取設定值(設定程式, '版本');
-  const 快取查詢版本 = 版本.replace(/\D/g, '');
+  const 快取查詢版本 = 擷取設定值(設定程式, '入口版本碼');
 
   記錄('版本一致性', '首頁顯示版本', 首頁.includes(`>${版本}</span>`), 版本);
   const 首頁查詢版本 = Array.from(首頁.matchAll(/[?&]v=(\d+)/g), 配對 => 配對[1]);
@@ -125,7 +125,7 @@ function 驗收版本與PWA() {
     `共 ${首頁查詢版本.length} 個資源標記，應為 v=${快取查詢版本}`
   );
   記錄('版本一致性', 'Service Worker 快取版本', 離線服務.includes(`v${版本}`), 版本);
-  記錄('版本一致性', 'Service Worker 註冊版本', 應用程式.includes(`離線服務.js?v=${快取查詢版本}`), `v=${快取查詢版本}`);
+  記錄('版本一致性', 'Service Worker 註冊版本', (設定程式 + 應用程式).includes(`離線服務.js?v=${快取查詢版本}`), `v=${快取查詢版本}`);
   記錄('版本一致性', 'GAS 模組版本', 後端.includes(`var 智慧5S_版本 = '${版本}'`), 版本);
 
   let 資訊;
@@ -146,7 +146,8 @@ function 驗收版本與PWA() {
     let 說明 = 規格 ? 規格.src : 'Manifest 未設定';
     if (通過) {
       try {
-        const 圖片尺寸 = 取得PNG尺寸(路徑工具.resolve(前端目錄, 規格.src));
+        const 圖片路徑 = String(規格.src || '').split(/[?#]/)[0];
+        const 圖片尺寸 = 取得PNG尺寸(路徑工具.resolve(前端目錄, 圖片路徑));
         通過 = 圖片尺寸.寬 === 尺寸 && 圖片尺寸.高 === 尺寸;
         說明 = `${圖片尺寸.寬}×${圖片尺寸.高} PNG`;
       } catch (錯誤) {
@@ -165,7 +166,7 @@ function 驗收版本與PWA() {
     '離線快取',
     '忽略版本查詢參數',
     /caches\.match\(請求,\s*\{\s*ignoreSearch:\s*true\s*\}\)/.test(離線服務),
-    '首次安裝後即使資源帶有 ?v=102 仍可命中離線外殼'
+    `首次安裝後即使資源帶有 ?v=${快取查詢版本} 仍可命中離線外殼`
   );
 }
 

@@ -1,6 +1,6 @@
 /**
  * 化新精密｜智慧 5S｜既有唯一 LINE Bot 通知橋接
- * 版本：1.1.0
+ * 版本：1.3.6
  *
  * 部署位置：既有「NEXUS OS 智慧製造系統」Apps Script 專案。
  * 原則：
@@ -12,11 +12,12 @@
  * 6. 所有啟用區域完成群組設定，且沒有直接通知衝突觸發器後，才允許建立排程。
  */
 
-var 智慧5S_LINE橋接_版本 = '1.1.0';
+var 智慧5S_LINE橋接_版本 = '1.3.6';
 var 智慧5S_LINE橋接_中央資料庫ID = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
 var 智慧5S_LINE橋接_通知分頁 = '5S_通知紀錄';
 var 智慧5S_LINE橋接_區域分頁 = '5S_區域主檔';
-var 智慧5S_LINE橋接_PWA網址 = 'https://qhero70.github.io/smart-factory-worker-app/5s/?v=102';
+var 智慧5S_LINE橋接_PWA正式入口 = 'https://qhero70.github.io/smart-factory-worker-app/5s/';
+var 智慧5S_LINE橋接_PWA版本備援 = '1360';
 var 智慧5S_LINE橋接_排程函式 = '智慧5S_LINE橋接_每小時';
 var 智慧5S_LINE橋接_衝突函式 = ['智慧5S_發送待通知自動化'];
 
@@ -302,11 +303,58 @@ function 智慧5S_LINE橋接_發送區域測試(區域代碼或名稱, 確認文
 }
 
 function 智慧5S_LINE橋接_建立通知內容_(原始內容, 通知編號) {
-  var 內容 = String(原始內容 || '').trim();
+  var 入口 = 智慧5S_LINE橋接_取得PWA網址_('首頁');
+  var 內容 = 智慧5S_LINE橋接_正規化舊入口_(String(原始內容 || '').trim());
   var 行 = [內容];
   if (通知編號) 行.push('通知編號：' + String(通知編號).trim());
-  if (內容.indexOf(智慧5S_LINE橋接_PWA網址) < 0) 行.push('開啟智慧 5S：' + 智慧5S_LINE橋接_PWA網址);
+  if (內容.indexOf(入口) < 0) 行.push('開啟智慧 5S：' + 入口);
   return 行.filter(Boolean).join('\n');
+}
+
+function 智慧5S_LINE橋接_取得系統參數_() {
+  var 結果 = {};
+  try {
+    var 資料庫 = SpreadsheetApp.openById(智慧5S_LINE橋接_中央資料庫ID);
+    var 分頁 = 資料庫.getSheetByName('5S_系統參數');
+    if (!分頁 || 分頁.getLastRow() < 2) return 結果;
+    var 資料 = 分頁.getDataRange().getDisplayValues();
+    var 欄位 = 資料.shift().map(function (值) { return String(值 || '').trim(); });
+    var 鍵欄 = 欄位.indexOf('參數鍵');
+    var 值欄 = 欄位.indexOf('參數值');
+    if (鍵欄 < 0 || 值欄 < 0) return 結果;
+    資料.forEach(function (列) {
+      var 鍵 = String(列[鍵欄] || '').trim();
+      if (鍵) 結果[鍵] = String(列[值欄] || '').trim();
+    });
+  } catch (錯誤) {
+    console.warn('智慧5S LINE橋接讀取系統參數失敗：' + 錯誤);
+  }
+  return 結果;
+}
+
+function 智慧5S_LINE橋接_取得PWA網址_(頁面) {
+  if (typeof LINE智慧5S入口39_取得網址_ === 'function') {
+    return LINE智慧5S入口39_取得網址_(頁面 || '首頁');
+  }
+  var 參數 = 智慧5S_LINE橋接_取得系統參數_();
+  var 屬性 = PropertiesService.getScriptProperties();
+  var 基底 = String(參數['PWA正式入口網址'] || 屬性.getProperty('智慧5S_PWA網址') || 智慧5S_LINE橋接_PWA正式入口).trim();
+  var 版本 = String(參數['PWA入口版本'] || 智慧5S_LINE橋接_PWA版本備援).replace(/\D/g, '') || 智慧5S_LINE橋接_PWA版本備援;
+  基底 = 基底.replace(/([?&])v=\d+/g, '$1').replace(/([?&])頁面=[^&]*/g, '$1').replace(/([?&])來源=[^&]*/g, '$1');
+  基底 = 基底.replace(/\?&/g, '?').replace(/&&+/g, '&').replace(/[?&]+$/, '');
+  var 分隔 = 基底.indexOf('?') >= 0 ? '&' : '?';
+  var 網址 = 基底 + 分隔 + '來源=LINEBOT&v=' + 版本;
+  if (頁面 && 頁面 !== '首頁') 網址 += '&頁面=' + encodeURIComponent(頁面);
+  return 網址;
+}
+
+function 智慧5S_LINE橋接_正規化舊入口_(內容) {
+  var 文字 = String(內容 || '');
+  var 入口正規式 = /https:\/\/qhero70\.github\.io\/smart-factory-worker-app\/5s\/?\?[^\s｜]*/gi;
+  return 文字.replace(入口正規式, function (舊網址, 索引, 全文) {
+    var 前文 = 全文.slice(Math.max(0, 索引 - 20), 索引);
+    return 智慧5S_LINE橋接_取得PWA網址_(前文.indexOf('開啟戰情') >= 0 ? '可視化' : '首頁');
+  });
 }
 
 function 智慧5S_LINE橋接_確認發送結果_(結果) {
@@ -372,7 +420,7 @@ function 測試_智慧5S_LINE橋接_通知內容與發送結果() {
   var 內容 = 智慧5S_LINE橋接_建立通知內容_('【5S重大異常】測試區｜地面油污', '5S-MSG-TEST');
   var 有摘要 = 內容.indexOf('【5S重大異常】') >= 0;
   var 有編號 = 內容.indexOf('5S-MSG-TEST') >= 0;
-  var 有入口 = 內容.indexOf(智慧5S_LINE橋接_PWA網址) >= 0;
+  var 有入口 = 內容.indexOf(智慧5S_LINE橋接_取得PWA網址_('首頁')) >= 0;
   var 可接受空回傳 = true;
   try { 智慧5S_LINE橋接_確認發送結果_(undefined); } catch (錯誤) { 可接受空回傳 = false; }
   var 可攔截失敗 = false;

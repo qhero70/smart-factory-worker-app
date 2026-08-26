@@ -86,7 +86,7 @@ function doPost(e) {
       LINE身份權限33_前置同步Webhook_(p);
     }
 
-    // v1.2.6：智慧5S / 5S 直接回傳目前正式 PWA 入口。
+    // v1.3.6：智慧5S / 5S 直接回傳目前正式 PWA 入口。
     // 放在37/34/33之前，避免被一般指令路由吃掉。
     if (typeof LINE智慧5S入口39_嘗試處理Webhook_ === 'function') {
       var 智慧5S入口39結果 = LINE智慧5S入口39_嘗試處理Webhook_(p);

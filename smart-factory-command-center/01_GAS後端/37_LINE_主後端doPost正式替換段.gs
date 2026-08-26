@@ -1,7 +1,7 @@
 /**
  * 37_LINE｜主後端 doPost(e) 正式替換段
  * 用途：複製本段替換「智慧製造中央作戰指揮中心.gs」原本 doPost(e)。
- * 版本：v1.7.4_37_LINE指令中心接線
+ * 版本：v1.8.6_智慧5S入口接線
  */
 function doPost(e) {
   const p = 解析POST_(e);
@@ -11,6 +11,11 @@ function doPost(e) {
     if (typeof 智慧5S_LINE群組綁定_嘗試處理Webhook_ === 'function') {
       var 智慧5S群組結果 = 智慧5S_LINE群組綁定_嘗試處理Webhook_(p);
       if (智慧5S群組結果 && 智慧5S群組結果.已處理) return 主程式_安全輸出JSON_(智慧5S群組結果);
+    }
+
+    if (typeof LINE智慧5S入口39_嘗試處理Webhook_ === 'function') {
+      var 智慧5S入口39結果 = LINE智慧5S入口39_嘗試處理Webhook_(p);
+      if (智慧5S入口39結果 && 智慧5S入口39結果.已處理) return 主程式_安全輸出JSON_(智慧5S入口39結果);
     }
 
     if (typeof LINE指令中心37_嘗試處理Webhook_ === 'function') {

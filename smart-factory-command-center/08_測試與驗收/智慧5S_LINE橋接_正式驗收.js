@@ -491,7 +491,7 @@ function 取得欄位值(分頁, 列號, 欄名) {
   const 上下文 = 載入程式(橋接程式路徑, 建立基礎環境(new 模擬資料庫({})));
   const 內容 = 上下文.智慧5S_LINE橋接_建立通知內容_('【5S紅牌】測試物品', 'MSG-100');
   斷言.ok(內容.includes('MSG-100'));
-  斷言.ok(內容.includes('https://qhero70.github.io/smart-factory-worker-app/5s/?v=102'));
+  斷言.ok(內容.includes('https://qhero70.github.io/smart-factory-worker-app/5s/?來源=LINEBOT&v=1360'));
   const 再建立 = 上下文.智慧5S_LINE橋接_建立通知內容_(內容, 'MSG-100');
   斷言.equal((再建立.match(/https:\/\/qhero70\.github\.io/g) || []).length, 1);
 });

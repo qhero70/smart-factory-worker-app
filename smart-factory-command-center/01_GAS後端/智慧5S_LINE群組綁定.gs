@@ -17,7 +17,7 @@ var 智慧5S_LINE群組綁定_版本 = '1.1.0';
 var 智慧5S_LINE群組綁定_中央資料庫ID = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
 var 智慧5S_LINE群組綁定_區域分頁 = '5S_區域主檔';
 var 智慧5S_LINE群組綁定_紀錄分頁 = '5S_LINE群組綁定紀錄';
-var 智慧5S_LINE群組綁定_PWA網址 = 'https://qhero70.github.io/smart-factory-worker-app/5s/?v=102';
+var 智慧5S_LINE群組綁定_PWA網址 = 'https://qhero70.github.io/smart-factory-worker-app/5s/?來源=LINEBOT&v=1360';
 var 智慧5S_LINE群組綁定_紀錄欄位 = [
   '時間戳', '動作', 'LINE群組識別碼', 'LINE群組名稱', '區域代碼', '區域名稱',
   '操作者LINE_USER_ID', '操作者工號', '操作者姓名', '結果', '備註'
