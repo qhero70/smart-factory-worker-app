@@ -7,13 +7,14 @@
 const RichMenu38_版本 = 'v1.8.6_38_LINE智慧5S快捷入口';
 const RichMenu38_寬度 = 1200;
 const RichMenu38_高度 = 810;
+const RichMenu38_正式主庫ID = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
 const RichMenu38_預設主管圖片 = 'https://qhero70.github.io/smart-factory-worker-app/line/richmenu-supervisor-v186.png';
 const RichMenu38_預設員工圖片 = 'https://qhero70.github.io/smart-factory-worker-app/line/richmenu-worker-v186.png';
 const RichMenu38_紀錄表 = '38_LINE快捷選單上線紀錄';
 const RichMenu38_紀錄欄位 = ['時間戳', '版本', '目標選單', 'richMenuId', '動作', '結果', '圖片網址', '備註'];
 
 function 初始化38_LINE指令中心RichMenu快捷按鈕優化() {
-  const ss = 取得試算表_();
+  const ss = RichMenu38_取得正式試算表_();
   RichMenu38_建立或修復表_(ss, RichMenu38_紀錄表, RichMenu38_紀錄欄位);
   RichMenu38_寫入紀錄_('系統', '', '初始化', '完成', '', RichMenu38_版本);
   return { 成功: true, 訊息: '38_LINE指令中心RichMenu快捷按鈕優化初始化完成', 版本: RichMenu38_版本, 工作表: RichMenu38_紀錄表 };
@@ -140,4 +141,5 @@ function RichMenu38_取得WebAppURL_() { try { return String(ScriptApp.getServic
 function RichMenu38_取得Token_() { if (typeof 取得LINEToken_ === 'function') return String(取得LINEToken_() || '').trim(); return String(PropertiesService.getScriptProperties().getProperty('LINE_CHANNEL_ACCESS_TOKEN') || '').trim(); }
 function RichMenu38_呼叫LINE_(method, url, payload) { const opt = { method: method, headers: { Authorization: 'Bearer ' + RichMenu38_取得Token_() }, muteHttpExceptions: true }; if (payload !== null && payload !== undefined) { opt.contentType = 'application/json'; opt.payload = JSON.stringify(payload); } const res = UrlFetchApp.fetch(url, opt); const code = res.getResponseCode(); const body = res.getContentText() || '{}'; if (code < 200 || code >= 300) throw new Error('LINE API 失敗 HTTP ' + code + '：' + body); try { return JSON.parse(body || '{}'); } catch (err) { return { 狀態碼: code, 原始回應: body }; } }
 function RichMenu38_建立或修復表_(ss, name, headers) { if (typeof 建立或修復表_ === 'function') return 建立或修復表_(ss, name, headers); let sh = ss.getSheetByName(name); if (!sh) sh = ss.insertSheet(name); if (sh.getLastRow() < 1) sh.getRange(1, 1, 1, headers.length).setValues([headers]); return sh; }
-function RichMenu38_寫入紀錄_(target, richMenuId, action, result, imageUrl, note) { try { const sh = RichMenu38_建立或修復表_(取得試算表_(), RichMenu38_紀錄表, RichMenu38_紀錄欄位); sh.appendRow([new Date(), RichMenu38_版本, target, richMenuId, action, result, imageUrl, note || '']); } catch (err) {} }
+function RichMenu38_取得正式試算表_() { return SpreadsheetApp.openById(RichMenu38_正式主庫ID); }
+function RichMenu38_寫入紀錄_(target, richMenuId, action, result, imageUrl, note) { try { const sh = RichMenu38_建立或修復表_(RichMenu38_取得正式試算表_(), RichMenu38_紀錄表, RichMenu38_紀錄欄位); sh.appendRow([new Date(), RichMenu38_版本, target, richMenuId, action, result, imageUrl, note || '']); } catch (err) {} }
