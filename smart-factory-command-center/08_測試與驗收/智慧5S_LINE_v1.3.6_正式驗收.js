@@ -160,6 +160,15 @@ function 取得PNG資訊(檔案) {
   斷言.ok(!/(^|[^\p{L}\p{N}_])取得試算表_\s*\(/u.test(程式), '不得依賴正式專案不存在的取得試算表_函式');
 });
 
+驗收('安全發布', 'Rich Menu 先取得圖片，失敗時不留空白新選單', () => {
+  const 程式 = 讀取(快捷選單程式);
+  const 函式 = 程式.match(/function RichMenu38_建立並上傳_\([\s\S]*?\n\}/)?.[0] || '';
+  斷言.ok(函式, '找不到 RichMenu38_建立並上傳_');
+  斷言.ok(函式.indexOf('RichMenu38_讀圖片_') < 函式.indexOf('/v2/bot/richmenu/validate'), '必須先取得圖片再建立選單');
+  斷言.ok(函式.includes("RichMenu38_呼叫LINE_('delete'"), '圖片上傳失敗時必須回收本次新建選單');
+  斷言.ok(程式.includes('function 測試38_LINEBot唯讀連線()'), '必須提供無副作用的 Bot 連線測試');
+});
+
 驗收('版本清理', '正式啟用模組不再寫死 v=102／103／105', () => {
   [正式入口程式, 快捷選單程式, 群組橋接程式, 排名程式,
     路徑工具.join(專案根目錄, 'gas', '39_LINE智慧5S入口_v1.2.6.gs'),
