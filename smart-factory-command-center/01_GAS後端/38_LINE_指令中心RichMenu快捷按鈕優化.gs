@@ -39,6 +39,17 @@ function 測試38_LINE快捷RichMenu圖片讀取() {
   };
 }
 
+function 測試38_LINEBot唯讀連線() {
+  const bot = RichMenu38_呼叫LINE_('get', 'https://api.line.me/v2/bot/info', null);
+  return {
+    成功: true,
+    訊息: '38 LINE Bot 唯讀連線成功',
+    Bot名稱: String(bot.displayName || ''),
+    BotID: String(bot.basicId || ''),
+    官方帳號ID: String(bot.userId || '')
+  };
+}
+
 function 建立38_LINE主管快捷RichMenu() {
   const id = RichMenu38_建立並上傳_('主管入口', RichMenu38_取得主管設定_(), RichMenu38_主管圖片網址_());
   PropertiesService.getScriptProperties().setProperty('LINE_RICH_MENU_主管入口_ID', id);
@@ -107,14 +118,21 @@ function RichMenu38_取得員工設定_() {
 }
 
 function RichMenu38_建立並上傳_(name, menu, imageUrl) {
+  // 圖片必須先完整讀取，避免外部圖源失敗時留下沒有圖片的空白 Rich Menu。
+  const blob = RichMenu38_讀圖片_(imageUrl);
   RichMenu38_呼叫LINE_('post', 'https://api.line.me/v2/bot/richmenu/validate', menu);
   const created = RichMenu38_呼叫LINE_('post', 'https://api.line.me/v2/bot/richmenu', menu);
   const id = created.richMenuId;
   if (!id) throw new Error('LINE 未回傳 richMenuId：' + JSON.stringify(created));
-  const blob = RichMenu38_讀圖片_(imageUrl);
-  const res = UrlFetchApp.fetch('https://api-data.line.me/v2/bot/richmenu/' + encodeURIComponent(id) + '/content', { method: 'post', contentType: 'image/png', headers: { Authorization: 'Bearer ' + RichMenu38_取得Token_() }, payload: blob.getBytes(), muteHttpExceptions: true });
-  if (res.getResponseCode() < 200 || res.getResponseCode() >= 300) throw new Error(name + ' 圖片上傳失敗 HTTP ' + res.getResponseCode() + '：' + res.getContentText());
-  return id;
+  try {
+    const res = UrlFetchApp.fetch('https://api-data.line.me/v2/bot/richmenu/' + encodeURIComponent(id) + '/content', { method: 'post', contentType: 'image/png', headers: { Authorization: 'Bearer ' + RichMenu38_取得Token_() }, payload: blob.getBytes(), muteHttpExceptions: true });
+    if (res.getResponseCode() < 200 || res.getResponseCode() >= 300) throw new Error(name + ' 圖片上傳失敗 HTTP ' + res.getResponseCode() + '：' + res.getContentText());
+    return id;
+  } catch (err) {
+    // 只回收本次剛建立且尚未完成的選單，不碰任何既有正式選單。
+    try { RichMenu38_呼叫LINE_('delete', 'https://api.line.me/v2/bot/richmenu/' + encodeURIComponent(id), null); } catch (cleanupErr) {}
+    throw err;
+  }
 }
 
 function RichMenu38_檢查設定_(m) {
