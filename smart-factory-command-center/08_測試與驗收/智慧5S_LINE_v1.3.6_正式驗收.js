@@ -169,6 +169,15 @@ function 取得PNG資訊(檔案) {
   斷言.ok(程式.includes('function 測試38_LINEBot唯讀連線()'), '必須提供無副作用的 Bot 連線測試');
 });
 
+驗收('狀態驗證', '預設選單設定後必須回讀LINE並提供無副作用的一致性檢查', () => {
+  const 程式 = 讀取(快捷選單程式);
+  斷言.ok(程式.includes('function 測試38_LINE目前RichMenu狀態()'), '缺少 Rich Menu 狀態唯讀測試');
+  斷言.ok(程式.includes("RichMenu38_呼叫LINE_('get', 'https://api.line.me/v2/bot/user/all/richmenu', null)"), '必須向 LINE 回讀目前預設選單');
+  const 函式 = 程式.match(/function 設定38_LINE一般員工快捷RichMenu為預設\(\)[\s\S]*?\n\}/)?.[0] || '';
+  斷言.ok(函式.includes('RichMenu38_取得目前預設RichMenu_()'), '設為預設後必須立即回讀驗證');
+  斷言.ok(函式.includes('currentId !== id'), '回讀 ID 不一致時必須阻擋成功紀錄');
+});
+
 驗收('版本清理', '正式啟用模組不再寫死 v=102／103／105', () => {
   [正式入口程式, 快捷選單程式, 群組橋接程式, 排名程式,
     路徑工具.join(專案根目錄, 'gas', '39_LINE智慧5S入口_v1.2.6.gs'),

@@ -50,6 +50,24 @@ function 測試38_LINEBot唯讀連線() {
   };
 }
 
+function 測試38_LINE目前RichMenu狀態() {
+  const props = PropertiesService.getScriptProperties();
+  const managerId = String(props.getProperty('LINE_RICH_MENU_主管入口_ID') || '').trim();
+  const workerId = String(props.getProperty('LINE_RICH_MENU_一般員工_ID') || '').trim();
+  const current = RichMenu38_取得目前預設RichMenu_();
+  const defaultId = String(current.richMenuId || '').trim();
+  const matched = !!workerId && defaultId === workerId;
+  return {
+    成功: !!managerId && !!workerId && matched,
+    訊息: matched ? '38 LINE Rich Menu 狀態一致' : '員工選單ID與LINE目前預設不一致，請重新執行設定預設後再同步使用者',
+    主管選單ID: managerId,
+    員工選單ID: workerId,
+    LINE目前預設選單ID: defaultId,
+    預設一致: matched,
+    版本: RichMenu38_版本
+  };
+}
+
 function 建立38_LINE主管快捷RichMenu() {
   const id = RichMenu38_建立並上傳_('主管入口', RichMenu38_取得主管設定_(), RichMenu38_主管圖片網址_());
   PropertiesService.getScriptProperties().setProperty('LINE_RICH_MENU_主管入口_ID', id);
@@ -68,8 +86,11 @@ function 設定38_LINE一般員工快捷RichMenu為預設() {
   const id = String(PropertiesService.getScriptProperties().getProperty('LINE_RICH_MENU_一般員工_ID') || '').trim();
   if (!id) throw new Error('缺少 LINE_RICH_MENU_一般員工_ID，請先建立一般員工快捷 Rich Menu。');
   RichMenu38_呼叫LINE_('post', 'https://api.line.me/v2/bot/user/all/richmenu/' + encodeURIComponent(id), null);
-  RichMenu38_寫入紀錄_('一般員工入口', id, '設為全體預設', '完成', RichMenu38_員工圖片網址_(), '未指定者預設報工入口');
-  return { 成功: true, 訊息: '38 一般員工快捷 Rich Menu 已設為預設', richMenuId: id };
+  const current = RichMenu38_取得目前預設RichMenu_();
+  const currentId = String(current.richMenuId || '').trim();
+  if (currentId !== id) throw new Error('LINE 預設 Rich Menu 驗證失敗：預期 ' + id + '，實際 ' + (currentId || '空白'));
+  RichMenu38_寫入紀錄_('一般員工入口', id, '設為全體預設並回讀驗證', '完成', RichMenu38_員工圖片網址_(), '未指定者預設報工入口；LINE回讀ID一致');
+  return { 成功: true, 訊息: '38 一般員工快捷 Rich Menu 已設為預設並驗證', richMenuId: id, LINE目前預設選單ID: currentId };
 }
 
 function 一鍵上線38_LINE快捷RichMenu並同步() {
@@ -157,6 +178,7 @@ function RichMenu38_員工圖片網址_() { return String(PropertiesService.getS
 function RichMenu38_智慧5S網址_() { if (typeof LINE智慧5S入口39_取得網址_ === 'function') return LINE智慧5S入口39_取得網址_('首頁'); return 'https://qhero70.github.io/smart-factory-worker-app/5s/?來源=LINEBOT_RICHMENU&v=1360'; }
 function RichMenu38_取得WebAppURL_() { try { return String(ScriptApp.getService().getUrl() || '').trim(); } catch (err) { return ''; } }
 function RichMenu38_取得Token_() { if (typeof 取得LINEToken_ === 'function') return String(取得LINEToken_() || '').trim(); return String(PropertiesService.getScriptProperties().getProperty('LINE_CHANNEL_ACCESS_TOKEN') || '').trim(); }
+function RichMenu38_取得目前預設RichMenu_() { return RichMenu38_呼叫LINE_('get', 'https://api.line.me/v2/bot/user/all/richmenu', null); }
 function RichMenu38_呼叫LINE_(method, url, payload) { const opt = { method: method, headers: { Authorization: 'Bearer ' + RichMenu38_取得Token_() }, muteHttpExceptions: true }; if (payload !== null && payload !== undefined) { opt.contentType = 'application/json'; opt.payload = JSON.stringify(payload); } const res = UrlFetchApp.fetch(url, opt); const code = res.getResponseCode(); const body = res.getContentText() || '{}'; if (code < 200 || code >= 300) throw new Error('LINE API 失敗 HTTP ' + code + '：' + body); try { return JSON.parse(body || '{}'); } catch (err) { return { 狀態碼: code, 原始回應: body }; } }
 function RichMenu38_建立或修復表_(ss, name, headers) { if (typeof 建立或修復表_ === 'function') return 建立或修復表_(ss, name, headers); let sh = ss.getSheetByName(name); if (!sh) sh = ss.insertSheet(name); if (sh.getLastRow() < 1) sh.getRange(1, 1, 1, headers.length).setValues([headers]); return sh; }
 function RichMenu38_取得正式試算表_() { return SpreadsheetApp.openById(RichMenu38_正式主庫ID); }
