@@ -178,6 +178,18 @@ function 取得PNG資訊(檔案) {
   斷言.ok(函式.includes('currentId !== id'), '回讀 ID 不一致時必須阻擋成功紀錄');
 });
 
+驗收('重複防護', '既有選單修復不得新建，完整上線必須優先沿用相同ID或名稱', () => {
+  const 程式 = 讀取(快捷選單程式);
+  const 修復函式 = 程式.match(/function 修復38_LINE既有RichMenu預設並同步\(\)[\s\S]*?\n\}/)?.[0] || '';
+  const 上線函式 = 程式.match(/function 一鍵上線38_LINE快捷RichMenu並同步\(\)[\s\S]*?\n\}/)?.[0] || '';
+  斷言.ok(修復函式, '缺少既有選單安全修復函式');
+  斷言.ok(!修復函式.includes('建立38_LINE'), '既有選單安全修復不得建立新 Rich Menu');
+  斷言.ok(!修復函式.includes('RichMenu38_建立並上傳_'), '既有選單安全修復不得呼叫建立 API');
+  斷言.ok(修復函式.includes('RichMenu38_批次同步已綁定使用者_()'), '安全修復必須同步已綁定使用者');
+  斷言.ok(上線函式.includes('RichMenu38_取得或建立選單_'), '完整上線必須先搜尋既有選單');
+  斷言.ok(程式.includes("RichMenu38_呼叫LINE_('get', 'https://api.line.me/v2/bot/richmenu/list', null)"), '必須先讀取 LINE Rich Menu 清單');
+});
+
 驗收('版本清理', '正式啟用模組不再寫死 v=102／103／105', () => {
   [正式入口程式, 快捷選單程式, 群組橋接程式, 排名程式,
     路徑工具.join(專案根目錄, 'gas', '39_LINE智慧5S入口_v1.2.6.gs'),

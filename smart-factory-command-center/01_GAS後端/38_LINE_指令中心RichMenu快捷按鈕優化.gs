@@ -93,15 +93,63 @@ function 設定38_LINE一般員工快捷RichMenu為預設() {
   return { 成功: true, 訊息: '38 一般員工快捷 Rich Menu 已設為預設並驗證', richMenuId: id, LINE目前預設選單ID: currentId };
 }
 
+function 修復38_LINE既有RichMenu預設並同步() {
+  初始化38_LINE指令中心RichMenu快捷按鈕優化();
+  測試38_LINE快捷RichMenu_本機規格();
+  const boss = RichMenu38_取得既有選單_('主管入口', 'LINE_RICH_MENU_主管入口_ID', RichMenu38_取得主管設定_());
+  const worker = RichMenu38_取得既有選單_('一般員工入口', 'LINE_RICH_MENU_一般員工_ID', RichMenu38_取得員工設定_());
+  const def = 設定38_LINE一般員工快捷RichMenu為預設();
+  const sync = RichMenu38_批次同步已綁定使用者_();
+  const status = 測試38_LINE目前RichMenu狀態();
+  if (!status.成功) throw new Error('38 LINE Rich Menu 修復後驗證失敗：' + status.訊息);
+  RichMenu38_寫入紀錄_('系統', worker.richMenuId, '沿用既有選單並完成預設與使用者同步', '完成', RichMenu38_員工圖片網址_(), '主管=' + boss.richMenuId + '；員工=' + worker.richMenuId + '；未建立新選單');
+  return { 成功: true, 訊息: '38 既有 Rich Menu 已完成預設、同步與回讀驗證', 主管: boss, 一般員工: worker, 預設: def, 同步: sync, 狀態: status };
+}
+
 function 一鍵上線38_LINE快捷RichMenu並同步() {
   初始化38_LINE指令中心RichMenu快捷按鈕優化();
   測試38_LINE快捷RichMenu_本機規格();
   測試38_LINE快捷RichMenu圖片讀取();
-  const boss = 建立38_LINE主管快捷RichMenu();
-  const worker = 建立38_LINE一般員工快捷RichMenu();
+  const boss = RichMenu38_取得或建立選單_('主管入口', 'LINE_RICH_MENU_主管入口_ID', RichMenu38_取得主管設定_(), RichMenu38_主管圖片網址_(), 建立38_LINE主管快捷RichMenu);
+  const worker = RichMenu38_取得或建立選單_('一般員工入口', 'LINE_RICH_MENU_一般員工_ID', RichMenu38_取得員工設定_(), RichMenu38_員工圖片網址_(), 建立38_LINE一般員工快捷RichMenu);
   const def = 設定38_LINE一般員工快捷RichMenu為預設();
-  const sync = typeof 批次同步34_LINE所有已綁定使用者選單 === 'function' ? 批次同步34_LINE所有已綁定使用者選單() : { 成功: false, 訊息: '找不到批次同步34函數' };
+  const sync = RichMenu38_批次同步已綁定使用者_();
   return { 成功: true, 訊息: '38 快捷 Rich Menu 已上線並同步', 主管: boss, 一般員工: worker, 預設: def, 同步: sync };
+}
+
+function RichMenu38_取得既有選單_(target, propertyKey, menu) {
+  const props = PropertiesService.getScriptProperties();
+  const list = RichMenu38_取得RichMenu清單_();
+  const propertyId = String(props.getProperty(propertyKey) || '').trim();
+  const hit = list.find(function(item) { return propertyId && String(item.richMenuId || '').trim() === propertyId; })
+    || list.find(function(item) { return String(item.name || '').trim() === String(menu.name || '').trim(); });
+  if (!hit || !hit.richMenuId) throw new Error('找不到既有 ' + target + ' v1.8.6 Rich Menu；為避免重複建立，已停止上線。');
+  const id = String(hit.richMenuId).trim();
+  props.setProperty(propertyKey, id);
+  return { 成功: true, 訊息: '已沿用既有 ' + target + ' Rich Menu', richMenuId: id, 是否新建: false };
+}
+
+function RichMenu38_取得或建立選單_(target, propertyKey, menu, imageUrl, createFn) {
+  try {
+    const existing = RichMenu38_取得既有選單_(target, propertyKey, menu);
+    RichMenu38_寫入紀錄_(target, existing.richMenuId, '沿用既有選單', '完成', imageUrl, '偵測到相同ID或相同名稱，未重複建立');
+    return existing;
+  } catch (err) {
+    if (typeof createFn !== 'function') throw err;
+    return createFn();
+  }
+}
+
+function RichMenu38_取得RichMenu清單_() {
+  const result = RichMenu38_呼叫LINE_('get', 'https://api.line.me/v2/bot/richmenu/list', null);
+  return Array.isArray(result && result.richmenus) ? result.richmenus : [];
+}
+
+function RichMenu38_批次同步已綁定使用者_() {
+  if (typeof 批次同步34_LINE所有已綁定使用者選單 !== 'function') throw new Error('找不到批次同步34_LINE所有已綁定使用者選單()，已停止並保留現況。');
+  const result = 批次同步34_LINE所有已綁定使用者選單();
+  if (!result || result.成功 === false) throw new Error('已綁定使用者 Rich Menu 同步失敗：' + String(result && result.訊息 || '未知錯誤'));
+  return result;
 }
 
 function RichMenu38_取得主管設定_() {
