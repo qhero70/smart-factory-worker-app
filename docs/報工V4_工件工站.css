@@ -1,0 +1,189 @@
+/* 工件與工站｜依使用者提供的 V2 HTML 還原，僅作用於工件頁。 */
+#stepPage1 {
+  --工件主色: #0a66e5;
+  --工件選中色: #e6f0fd;
+  --工件底色: #ffffff;
+  --工件次底色: #f8fafc;
+  --工件文字: #0f172a;
+  --工件次文字: #64748b;
+  --工件邊框: #e2e8f0;
+  --工件照片邊框: #94a3b8;
+  --工件陰影: 0 8px 24px rgba(15, 23, 42, .08);
+}
+@media (prefers-color-scheme: dark) {
+  #stepPage1 {
+    --工件主色: #3b82f6;
+    --工件選中色: rgba(59, 130, 246, .15);
+    --工件底色: #151b28;
+    --工件次底色: #1e2536;
+    --工件文字: #f8fafc;
+    --工件次文字: #94a3b8;
+    --工件邊框: #2e3c54;
+    --工件照片邊框: #475569;
+    --工件陰影: 0 8px 24px rgba(0, 0, 0, .4);
+  }
+}
+#productScanModal #productVideo { width: 100%; max-height: 280px; border-radius: 16px; margin-top: 12px; object-fit: cover; background: #111827; }
+#stepPage1 .guide-card { display: none; }
+#stepPage1 .glass-card { padding: 24px; background: var(--工件底色); color: var(--工件文字); }
+#stepPage1 .field-label, #stepPage1 .section-head { color: var(--工件文字); }
+#stepPage1 input, #stepPage1 select { color: var(--工件文字); background: var(--工件次底色); border-color: var(--工件邊框); }
+#stepPage1 .caption { color: var(--工件次文字); }
+#stepPage1 .section-head { margin-bottom: 20px; font-size: 20px; }
+#stepPage1 .hx-product-large-scan {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 60px;
+  margin-bottom: 16px;
+  padding: 18px;
+  border: 2px dashed var(--工件主色);
+  border-radius: 24px;
+  background: var(--工件選中色);
+  color: var(--工件主色);
+  font-size: 16px;
+  font-weight: 800;
+}
+#stepPage1 .search-row { display: block !important; margin-bottom: 16px; }
+#stepPage1 .search-scan-icon { display: none !important; }
+#stepPage1 .search-input { min-height: 48px; }
+#stepPage1 .product-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+  max-height: 400px !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding: 4px !important;
+  touch-action: pan-y !important;
+  -webkit-overflow-scrolling: touch;
+}
+#stepPage1 .product-card {
+  position: relative !important;
+  display: flex !important;
+  flex-direction: column;
+  min-height: 0 !important;
+  padding: 0 !important;
+  border: 1.5px solid var(--工件邊框) !important;
+  border-radius: 16px !important;
+  background: var(--工件底色) !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+  cursor: pointer;
+}
+#stepPage1 .product-card.hidden { display: none !important; }
+#stepPage1 .product-card:active { transform: scale(.95); }
+#stepPage1 .product-card.selected {
+  border-color: var(--工件主色) !important;
+  background: var(--工件選中色) !important;
+  outline: none !important;
+  box-shadow: var(--工件陰影) !important;
+}
+#stepPage1 .product-card:after, #stepPage1 .machine-card:after { display: none !important; }
+#stepPage1 .product-thumb {
+  position: relative !important;
+  inset: auto !important;
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 4 / 3;
+  flex-shrink: 0;
+  background: var(--工件次底色) !important;
+  color: var(--工件次文字) !important;
+  font-size: 24px !important;
+  border-radius: 0 !important;
+}
+#stepPage1 .product-thumb img { width: 100% !important; height: 100% !important; object-fit: cover !important; }
+#stepPage1 .product-name, #stepPage1 .product-code,
+#stepPage1 .machine-number, #stepPage1 .machine-info {
+  position: static !important;
+  inset: auto !important;
+  display: block !important;
+  text-shadow: none !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+  -webkit-line-clamp: unset !important;
+}
+#stepPage1 .product-name {
+  padding: 12px 8px 4px;
+  color: var(--工件文字) !important;
+  font-size: 15px !important;
+  line-height: 1.45 !important;
+  font-weight: 800 !important;
+}
+#stepPage1 .product-code {
+  padding: 0 8px 12px;
+  color: var(--工件次文字) !important;
+  font-size: 12px !important;
+  line-height: 1.4 !important;
+  font-weight: 600 !important;
+}
+#stepPage1 #selectedProductArea {
+  margin-top: 24px !important;
+  padding: 24px 0 0 !important;
+  border-top: 1px solid var(--工件邊框);
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+#stepPage1 #selectedProductDisplay {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 110px;
+  padding: 16px;
+  border: 2px dashed var(--工件照片邊框);
+  border-radius: 24px;
+  background: var(--工件次底色);
+}
+#stepPage1 #selectedProductDisplay .person-photo-lg,
+#stepPage1 #selectedProductDisplay > img {
+  width: 96px !important;
+  height: 96px !important;
+  min-width: 96px !important;
+  flex-shrink: 0;
+  border-radius: 16px;
+  object-fit: cover;
+}
+#stepPage1 #selectedProductDisplay > div:last-child { min-width: 0; overflow-wrap: anywhere; }
+#stepPage1 .person-info-name { color: var(--工件文字); font-size: 20px; font-weight: 900; }
+#stepPage1 #routeDetailsArea {
+  position: static !important;
+  margin-top: 0 !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+#stepPage1 .grid-2 { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 12px !important; }
+#stepPage1 #routeDetailsArea .grid-3 { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 12px !important; }
+#stepPage1 input, #stepPage1 select { min-height: 48px; font-size: 16px; }
+#stepPage1 .machine-grid { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 12px !important; margin-top: 12px; }
+#stepPage1 .machine-card {
+  min-height: 0 !important;
+  padding: 12px !important;
+  background: var(--工件次底色) !important;
+  border: 1px solid var(--工件邊框) !important;
+  border-radius: 16px !important;
+  box-shadow: none !important;
+}
+#stepPage1 .machine-card.selected { border-color: var(--工件主色) !important; }
+#stepPage1 .machine-card > img, #stepPage1 .machine-no-img {
+  position: static !important;
+  inset: auto !important;
+  width: 100% !important;
+  height: 100px !important;
+  min-height: 100px !important;
+  border-radius: 10px !important;
+  object-fit: cover !important;
+}
+#stepPage1 .machine-number { margin-top: 8px; font-size: 18px !important; font-weight: 900 !important; color: var(--工件主色) !important; text-align: left !important; }
+#stepPage1 .machine-info { margin-top: 4px; font-size: 13px !important; font-weight: 500 !important; color: var(--工件次文字) !important; text-align: left !important; }
+@media (min-width: 431px) and (max-width: 768px) {
+  #stepPage1 .product-grid, #stepPage1 .machine-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+}
+@media (max-width: 430px) {
+  #stepPage1 .glass-card { padding: 16px; }
+  #stepPage1 .product-grid, #stepPage1 .machine-grid,
+  #stepPage1 .grid-2, #stepPage1 #routeDetailsArea .grid-3 { grid-template-columns: minmax(0, 1fr) !important; }
+}

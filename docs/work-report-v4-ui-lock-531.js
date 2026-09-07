@@ -17,7 +17,8 @@ html,body{max-width:100%!important;overflow-x:hidden!important;touch-action:pan-
     document.head.appendChild(st);
   }
   function offset(){var h=document.querySelector('.site-header');document.documentElement.style.setProperty('--hx-v4-header-height',Math.ceil(h?h.getBoundingClientRect().height:86)+'px');}
-  function flow(){var s=!!(window.STATE&&window.STATE.currentProductGroup),w=!!(window.STATE&&window.STATE.currentWorkstation),a=g('selectedProductArea'),r=g('routeDetailsArea');if(a)a.classList.toggle('hidden',!s);if(r)r.classList.toggle('hidden',!w);}
+  // V2 流程：選定產品後顯示完整欄位，尚未選工站時保留空白值。
+  function flow(){var 已選產品=!!(window.STATE&&window.STATE.currentProductGroup),區域=g('selectedProductArea'),明細=g('routeDetailsArea');if(區域)區域.classList.toggle('hidden',!已選產品);if(明細)明細.classList.toggle('hidden',!已選產品);}
   function safeTap(){if(window.__HX_V4_SAFE_TAP_531__)return;window.__HX_V4_SAFE_TAP_531__=true;var start=null;document.addEventListener('pointerdown',function(e){var c=e.target.closest&&e.target.closest('.person-card,.product-card,.machine-card');if(c)start={card:c,x:e.clientX,y:e.clientY,moved:false};},true);document.addEventListener('pointermove',function(e){if(!start)return;if(Math.abs(e.clientX-start.x)>8||Math.abs(e.clientY-start.y)>8){start.moved=true;start.card.classList.add('hx-touch-moving');}},true);document.addEventListener('pointerup',function(){if(start&&start.card){var c=start.card;setTimeout(function(){c.classList.remove('hx-touch-moving');},80);}start=null;},true);}
   function scanFlag(){window.HX_V4_SCAN_MODE={smallIcon:true,manualInput:true,keyboardScanner:true};}
   function boot(){addStyle();offset();flow();safeTap();scanFlag();}

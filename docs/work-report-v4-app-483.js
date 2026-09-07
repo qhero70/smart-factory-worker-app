@@ -1,6 +1,6 @@
 'use strict';
 
-/* 化新報工 V4｜正式主程式 v5.0.5
+/* 化新報工 V4｜正式主程式 v5.4.1｜工件工站沿用 V2 版型
  * 直接修改正式主檔，不使用外掛修補檔。
  * 對接：pwa-config.js + gas-bridge.js
  * 寫入：09_報工；不良資料由後端同步 09_不良紀錄。
@@ -248,7 +248,7 @@ function buildProductList() {
     const key = gr.產品編號 + '|' + gr.品名;
     if (!map.has(key)) map.set(key, Object.assign({}, base, gr, { 產品縮圖網址: u, 產品照片網址: u, 照片網址: u }));
   });
-  productMap.forEach((p, key) => { if (!map.has(key)) map.set(key, p); });
+  // 與 V2 相同：依報工工站群組建立工件清單，不混入無工站可報工的產品。
   return Array.from(map.values()).sort((a, b) => clean(a.品名).localeCompare(clean(b.品名), 'zh-Hant'));
 }
 
@@ -531,7 +531,7 @@ function buildProductGrid() {
     return;
   }
   container.innerHTML = DB.productList.map((gr, index) => {
-    const dname = cleanProductName(gr.品名 || '');
+    const dname = 清理工件顯示名稱(gr.品名 || '');
     const url = firstPhoto(gr, ['產品縮圖網址','產品照片網址','縮圖網址','照片網址','圖片網址','URL']);
     const thumb = url ? `<img src="${safeAttr(url)}" onerror="this.parentElement.innerHTML='<span>📦</span>'">` : '<span>📦</span>';
     return `<div class="product-card ripple" data-index="${index}" data-pid="${safeAttr(gr.產品編號 || '')}">
@@ -570,20 +570,25 @@ function selectProduct(indexOrKey) {
   const idx = DB.productList.indexOf(gr);
   const t = document.querySelector(`.product-card[data-index="${idx}"]`);
   if (t) t.classList.add('selected');
-  STATE.productGroupList = DB.workstationGroups.filter(x => x.產品編號 === gr.產品編號 && (!gr.品名 || !x.品名 || x.品名 === gr.品名));
+  STATE.productGroupList = DB.workstationGroups.filter(x => x.產品編號 === gr.產品編號 && x.品名 === gr.品名);
   STATE.currentProductGroup = STATE.productGroupList[0] || gr;
   STATE.currentWorkstation = null;
   STATE.currentMachineId = '';
   setVal('productCode', gr.產品編號 || '');
-  setVal('productName', cleanProductName(gr.品名 || ''));
+  setVal('productName', 清理工件顯示名稱(gr.品名 || ''));
   showProductPhoto(gr);
   buildWorkstationSelect();
   const area = g('selectedProductArea'); if (area) area.classList.remove('hidden');
-  const detail = g('routeDetailsArea'); if (detail) detail.classList.add('hidden');
+  const detail = g('routeDetailsArea'); if (detail) detail.classList.remove('hidden');
   STATE.stepDone[1] = false;
   updatePreview();
   updateConfirmSummary();
-  roar('📦', '已選定產品 / Product Selected', (gr.品名 || '') + '（' + (gr.產品編號 || '') + '）', 'success');
+  roar('📦', '已選定產品', (gr.品名 || '') + '（' + (gr.產品編號 || '') + '）', 'success');
+}
+
+function 清理工件顯示名稱(名稱) {
+  return String(名稱 || '').replace(/^[-/：；（）$@「」。，、？！._—|～《》¥\[\]{}#%^*+=·\s]+/g, '')
+    .replace(/[-/：；（）$@「」。，、？！._—|～《》¥\[\]{}#%^*+=·\s]+$/g, '').trim() || 名稱;
 }
 
 function showProductPhoto(gr) {
@@ -592,13 +597,13 @@ function showProductPhoto(gr) {
   const url = firstPhoto(gr, ['產品縮圖網址','產品照片網址','縮圖網址','照片網址','圖片網址','URL']);
   disp.className = 'selected-person-display populated';
   disp.innerHTML = imgHTML(url, '無產品照', false) +
-    `<div><div class="person-info-name">${safeTxt(gr?.品名 ? cleanProductName(gr.品名) : '尚未選產品')}</div><div class="caption" style="margin-top:3px;">${safeTxt(gr?.產品編號 || '')}</div></div>`;
+    `<div><div class="person-info-name">${safeTxt(gr?.品名 ? 清理工件顯示名稱(gr.品名) : '尚未選產品')}</div><div class="caption" style="margin-top:3px;">${safeTxt(gr?.產品編號 || '')}</div></div>`;
 }
 
 function buildWorkstationSelect() {
   const s = g('workstationSelect');
   if (!s) return;
-  s.innerHTML = '<option value="">── 請選擇報工工站 / Select Workstation ──</option>';
+  s.innerHTML = '<option value="">── 請選擇報工工站 ──</option>';
   STATE.productGroupList.forEach((gr, i) => s.add(new Option(gr.顯示名稱 || [gr.報工工站名稱, gr.工序範圍, gr.主機台].filter(Boolean).join('｜'), String(i))));
   clearWorkstationFields();
 }
@@ -607,7 +612,12 @@ function onWorkstationChange() {
   const i = val('workstationSelect');
   STATE.currentWorkstation = i === '' ? null : STATE.productGroupList[Number(i)];
   const gr = STATE.currentWorkstation || {};
-  if (!STATE.currentWorkstation) { clearWorkstationFields(); return; }
+  if (!STATE.currentWorkstation) {
+    clearWorkstationFields();
+    updatePreview();
+    updateConfirmSummary();
+    return;
+  }
   const detail = g('routeDetailsArea'); if (detail) detail.classList.remove('hidden');
   setVal('processRange', gr.工序範圍 || gr.工序 || '');
   setVal('stdCapacity', gr.標準產能 || gr['8H產能'] || gr['8小時標準產能'] || gr['工站8H產能_件'] || '');
@@ -622,18 +632,21 @@ function onWorkstationChange() {
 function clearWorkstationFields() {
   STATE.currentWorkstation = null;
   STATE.currentMachineId = '';
+  STATE.stepDone[1] = false;
   setVal('processRange', '');
   setVal('stdCapacity', '');
   setVal('stdTimeSec', '');
   const ms = g('mainMachineSelect'); if (ms) ms.innerHTML = '';
   const box = g('machineListGrid'); if (box) box.innerHTML = '';
+  updateStepperUI();
 }
 
 function buildMachineSelect(list) {
   const s = g('mainMachineSelect');
   if (!s) return;
   s.innerHTML = '';
-  if (!list.length) { s.add(new Option('無固定機台 / No Fixed Machine', '')); return; }
+  STATE.currentMachineId = '';
+  if (!list.length) { s.add(new Option('無固定機台', '')); return; }
   list.forEach(m => s.add(new Option([m.機台編號, m.區域, m.機台型號 || m.設備名稱].filter(Boolean).join('｜'), m.機台編號 || '')));
   STATE.currentMachineId = list[0].機台編號 || '';
   s.value = STATE.currentMachineId;
@@ -642,7 +655,7 @@ function buildMachineSelect(list) {
 function renderMachineGrid(list) {
   const box = g('machineListGrid');
   if (!box) return;
-  if (!list.length) { box.innerHTML = '<div class="caption" style="padding:8px;">此工站無固定機台 / No dedicated machines</div>'; return; }
+  if (!list.length) { box.innerHTML = '<div class="caption" style="padding:8px;">無固定機台</div>'; return; }
   box.innerHTML = list.map((m, i) => {
     const url = firstPhoto(m, ['機台照片網址','縮圖網址','照片網址','圖片網址','URL']);
     return `<div class="machine-card ripple ${i === 0 ? 'selected' : ''}" data-id="${safeAttr(m.機台編號 || '')}">
@@ -972,10 +985,92 @@ function openPersonScan() { const m = g('personScanModal'); if (m) m.classList.r
 function closePersonScan() { const m = g('personScanModal'); if (m) m.classList.add('hidden'); }
 function togglePersonManual() { const inp = g('personManualInput'); if (inp) { inp.classList.toggle('hidden'); if (!inp.classList.contains('hidden')) inp.focus(); } }
 function personManualConfirm(e) { if (e.key === 'Enter') { const code = clean(e.target.value); const idx = DB.persons.findIndex(p => clean(p.工號) === code || clean(p.姓名) === code); if (idx >= 0) { closePersonScan(); selectPerson(idx); } else roar('⚠️', '找不到人員', code, 'warning'); } }
-function openProductScan() { const m = g('productScanModal'); if (m) m.classList.remove('hidden'); const inp = g('productManualInput'); if (inp) { inp.classList.remove('hidden'); setTimeout(() => inp.focus(), 50); } }
-function closeProductScan() { const m = g('productScanModal'); if (m) m.classList.add('hidden'); }
+const 工件掃碼狀態 = { 串流: null, 定時器: 0, 代數: 0 };
+
+function openProductScan() {
+  const 模態 = g('productScanModal');
+  if (模態) 模態.classList.remove('hidden');
+  const 輸入 = g('productManualInput');
+  if (輸入) { 輸入.classList.remove('hidden'); 輸入.value = ''; }
+  開啟工件掃碼相機();
+}
+
+function closeProductScan() {
+  停止工件掃碼相機();
+  const 模態 = g('productScanModal');
+  if (模態) 模態.classList.add('hidden');
+}
+
+function 停止工件掃碼相機() {
+  工件掃碼狀態.代數++;
+  clearTimeout(工件掃碼狀態.定時器);
+  if (工件掃碼狀態.串流) 工件掃碼狀態.串流.getTracks().forEach(軌道 => 軌道.stop());
+  工件掃碼狀態.串流 = null;
+  const 視訊 = g('productVideo');
+  if (視訊) { 視訊.srcObject = null; 視訊.classList.add('hidden'); }
+}
+
+async function 開啟工件掃碼相機() {
+  停止工件掃碼相機();
+  const 本次 = 工件掃碼狀態.代數;
+  const 提示 = g('productScanStatus');
+  const 視訊 = g('productVideo');
+  if (!視訊 || !navigator.mediaDevices?.getUserMedia || !window.BarcodeDetector) {
+    if (提示) 提示.textContent = '此瀏覽器未提供相機條碼辨識，請輸入產品編號或使用掃碼槍。';
+    return;
+  }
+  try {
+    if (提示) 提示.textContent = '正在開啟相機…';
+    const 偵測器 = new window.BarcodeDetector();
+    const 串流 = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false });
+    if (本次 !== 工件掃碼狀態.代數) { 串流.getTracks().forEach(軌道 => 軌道.stop()); return; }
+    工件掃碼狀態.串流 = 串流;
+    視訊.srcObject = 串流;
+    視訊.classList.remove('hidden');
+    await 視訊.play();
+    if (本次 !== 工件掃碼狀態.代數) return;
+    if (提示) 提示.textContent = '請將產品條碼放入相機畫面。';
+    async function 辨識工件條碼() {
+      if (本次 !== 工件掃碼狀態.代數) return;
+      try {
+        if (視訊.readyState >= 2) {
+          const 結果 = await 偵測器.detect(視訊);
+          if (本次 !== 工件掃碼狀態.代數) return;
+          const 條碼 = 結果[0]?.rawValue;
+          if (條碼) { closeProductScan(); 套用工件條碼(條碼); return; }
+        }
+      } catch (錯誤) {
+        if (本次 !== 工件掃碼狀態.代數) return;
+        if (提示) 提示.textContent = '目前無法辨識，請調整條碼位置，或手動輸入產品編號。';
+      }
+      if (本次 === 工件掃碼狀態.代數) 工件掃碼狀態.定時器 = setTimeout(辨識工件條碼, 180);
+    }
+    辨識工件條碼();
+  } catch (錯誤) {
+    if (本次 !== 工件掃碼狀態.代數) return;
+    停止工件掃碼相機();
+    if (提示) 提示.textContent = '相機無法啟用，請輸入產品編號或使用掃碼槍。';
+  }
+}
+
+function 套用工件條碼(條碼) {
+  const 內容 = clean(條碼);
+  const 工件 = DB.productList.find(項目 => [項目.產品編號, 項目.客戶品號, 項目.品名].some(值 => clean(值) === 內容));
+  if (工件) { closeProductScan(); selectProduct(DB.productList.indexOf(工件)); }
+  else roar('⚠️', '找不到此產品', 內容, 'warning');
+}
+
+window.addEventListener('pagehide', 停止工件掃碼相機);
+document.addEventListener('visibilitychange', () => { if (document.hidden) closeProductScan(); });
 function toggleProductManual() { const inp = g('productManualInput'); if (inp) { inp.classList.toggle('hidden'); if (!inp.classList.contains('hidden')) inp.focus(); } }
-function productManualConfirm(e) { if (e.key === 'Enter') { const code = clean(e.target.value); const prod = DB.productList.find(x => clean(x.產品編號) === code || clean(x.客戶品號) === code || clean(x.品名) === code); if (prod) { closeProductScan(); selectProduct(DB.productList.indexOf(prod)); } else roar('⚠️', '找不到產品', code, 'warning'); } }
+function productManualConfirm(e) {
+  if (e.key !== 'Enter') return;
+  e.preventDefault();
+  e.stopPropagation();
+  scanBuffer = '';
+  clearTimeout(scanTimer);
+  if (clean(e.target.value)) 套用工件條碼(e.target.value);
+}
 function toggleFullscreen() { if (!document.fullscreenElement && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => {}); else if (document.exitFullscreen) document.exitFullscreen().catch(() => {}); }
 function listenFullscreenChange() {}
 
