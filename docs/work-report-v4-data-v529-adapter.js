@@ -1,4 +1,4 @@
-/* 報工作業 V4｜正式主資料庫 v529 對接器 v5.3.0
+/* 報工作業 V4｜正式主資料庫 v529 對接器 v5.4.2
  * 目的：讓 PWA 報工作業直接吃本次整理後的正式資料庫。
  * 主表：02_產品主檔、08_工站途程機台主檔、05_不良代碼主檔。
  * 輔助：04_工站產品關聯、04_工站機台關聯、04_工站產品工時主檔、04_工站人員關聯、06_照片資料庫。
@@ -7,8 +7,8 @@
 (function () {
   'use strict';
 
-  const 版本 = '530';
-  const 標記 = '__報工V4_正式主資料庫v529對接器530__';
+  const 版本 = '542';
+  const 標記 = '__報工V4_正式主資料庫v529對接器542__';
   if (window[標記]) return;
   window[標記] = true;
 
@@ -97,28 +97,30 @@
     return uniq(ids).map(id => {
       const m = machineMaster[norm(id)] || {};
       const linked = (machineRows || []).find(r => norm(first(r, ['機台編號', '主機台', '設備編號'])) === norm(id)) || {};
+      const 既有 = (isArray(row.機台清單) ? row.機台清單 : []).find(r => r && typeof r === 'object' && norm(first(r, ['機台編號', '主機台', '設備編號'])) === norm(id)) || {};
+      const 照片 = first(m, ['縮圖網址', '照片網址', '機台照片網址', '圖片網址', 'URL']) || first(既有, ['縮圖網址', '照片網址', '機台照片網址', '圖片網址', 'URL']);
       return {
         機台編號: id,
         主機台: id,
-        機台名稱: first(m, ['機台名稱', '設備名稱', '名稱']) || first(linked, ['機台名稱', '設備名稱', '名稱']) || ('機台' + id),
-        設備名稱: first(m, ['設備名稱', '機台名稱', '名稱']) || first(linked, ['設備名稱', '機台名稱', '名稱']) || ('機台' + id),
-        區域: first(m, ['區域', '廠區', '位置']) || first(linked, ['區域']) || first(row, ['區域']),
-        機台型號: first(m, ['機台型號', '型號', '規格']) || first(linked, ['機台型號', '型號']),
-        縮圖網址: first(m, ['縮圖網址', '照片網址', '機台照片網址', '圖片網址', 'URL']),
-        照片網址: first(m, ['照片網址', '縮圖網址', '機台照片網址', '圖片網址', 'URL']),
-        機台照片網址: first(m, ['機台照片網址', '縮圖網址', '照片網址', '圖片網址', 'URL'])
+        機台名稱: first(m, ['機台名稱', '設備名稱', '名稱']) || first(既有, ['機台名稱', '設備名稱', '名稱']) || first(linked, ['機台名稱', '設備名稱', '名稱']) || ('機台' + id),
+        設備名稱: first(m, ['設備名稱', '機台名稱', '名稱']) || first(既有, ['設備名稱', '機台名稱', '名稱']) || first(linked, ['設備名稱', '機台名稱', '名稱']) || ('機台' + id),
+        區域: first(m, ['區域', '廠區', '位置']) || first(既有, ['區域']) || first(linked, ['區域']) || first(row, ['區域']),
+        機台型號: first(m, ['機台型號', '型號', '規格']) || first(既有, ['機台型號', '型號']) || first(linked, ['機台型號', '型號']),
+        縮圖網址: 照片,
+        照片網址: 照片,
+        機台照片網址: 照片
       };
     });
   }
-  function routePk(row) { return first(row, ['途程主鍵_PK', '途程主鍵', 'PK', 'routeKey']); }
+  function routePk(row) { return first(row, ['途程主鍵_PK', '途程主鍵', '群組ID', 'PK', 'routeKey']); }
   function routeMatchKey(row) {
     return [
       first(row, ['產品編號', '料號', '品號']),
       first(row, ['客戶品號', '客戶料號']),
       first(row, ['品名', '產品名稱']),
-      first(row, ['順序', '工站順序']),
+      first(row, ['順序', '途程順序', '工站順序']),
       first(row, ['工站名稱', '報工工站名稱']),
-      first(row, ['工序編號_最終', '工序範圍', '工序'])
+      first(row, ['工序範圍', '工序清單', '工序編號_最終', '工序'])
     ].map(keyText).join('|');
   }
   function groupBy(rows, fn) {
@@ -213,15 +215,17 @@
     const seen = Object.create(null);
 
     baseRoutes.forEach(r => {
+      if (/^(否|停用|刪除)$/.test(first(r, ['啟用', '是否啟用', '狀態']))) return;
       r = fixProductIdByMaster(r, productIndex);
       r.客戶品號 = first(r, ['客戶品號', '客戶料號']);
       r.品名 = compact(first(r, ['品名', '產品名稱']));
-      r.工站名稱 = compact(first(r, ['工站名稱', '報工工站名稱', '工站']));
+      r.工站名稱 = compact(first(r, ['報工工站名稱', '工站名稱', '工站']));
       r.報工工站名稱 = r.工站名稱;
-      r.工序編號_最終 = first(r, ['工序編號_最終', '工序範圍', '工序編號', '工序', 'OP']);
+      r.工序編號_最終 = first(r, ['工序範圍', '工序清單', '工序編號_最終', '工序編號', '工序', '工站代碼', 'OP編號', 'OP']);
       r.工序範圍 = r.工序編號_最終;
       r.工序 = r.工序編號_最終;
-      r.順序 = first(r, ['順序', '工站順序']) || '';
+      r.工序清單 = r.工序範圍.split(/[、,，;；]+/).map(clean).filter(Boolean);
+      r.順序 = first(r, ['順序', '途程順序', '工站順序']) || '';
       r.區域 = first(r, ['區域', '廠區', '位置']);
       r.需求人力 = first(r, ['需求人力', '人力', '預設需求人力']);
       r.工序類型 = first(r, ['工序類型', '工站類型']) || inferType(r.工站名稱);
@@ -244,7 +248,8 @@
       const sec = first(r, ['標準工時_秒', '標準工時(秒)']) || first(timeRow, ['標準工時_秒', '標準工時(秒)']) || first(product, ['標準工時_秒', '標準工時(秒)']) || calcStdTime(cap);
       if (sec) r.標準工時_秒 = clean(sec).replace(/,$/, '');
       r.顯示名稱 = [r.工站名稱, r.工序編號_最終, r.機台編號].filter(Boolean).join('｜');
-      const k = [r.產品編號, r.客戶品號, r.品名, r.順序, r.工站名稱, r.工序編號_最終].map(keyText).join('|');
+      // 保留每個正式途程；相同產品的不同工站、OP 或機台組合不能互相覆蓋。
+      const k = pk || JSON.stringify([r.產品編號, r.客戶品號, r.品名, r.順序, r.工站名稱, r.工序範圍, r.機台編號]);
       if (!r.產品編號 || !r.工站名稱 || seen[k]) return;
       seen[k] = true;
       out.push(r);
@@ -303,7 +308,7 @@
       try {
         result[key] = await bridge.readSheet(輔助分頁[key]);
       } catch (e) {
-        console.warn('[報工V4 v530] 輔助分頁讀取失敗：' + 輔助分頁[key], e);
+        console.warn('[報工V4 v542] 輔助分頁讀取失敗：' + 輔助分頁[key], e);
         result[key] = [];
       }
     }));
@@ -343,21 +348,21 @@
       不良原因: (defects.Z || []).length + (defects.Y || []).length,
       對接版本: 版本
     });
-    data.訊息 = 'PWA 已對接正式主資料庫 v529';
+    data.訊息 = 'PWA 已載入正式工站、工序與機台';
     window.HX_WORK_REPORT_DATA_V529 = data.筆數;
-    console.info('[報工V4 v530] 正式主資料庫 v529 已對接', data.筆數);
+    console.info('[報工V4 v542] 正式工站、工序與機台已對接', data.筆數);
     return data;
   }
   function wrapBridge() {
     const bridge = window.V4Bridge;
     if (!bridge || typeof bridge.loadInit !== 'function') return false;
-    if (bridge.__資料庫v529對接530) return true;
+    if (bridge.__資料庫v529對接542) return true;
     const original = bridge.loadInit.bind(bridge);
     bridge.loadInit = async function () {
       const raw = await original.apply(this, arguments);
       return enrich(raw);
     };
-    bridge.__資料庫v529對接530 = true;
+    bridge.__資料庫v529對接542 = true;
     已包裝Bridge = true;
     return true;
   }
@@ -369,12 +374,10 @@
     if (!已要求重載 && typeof window.reloadData === 'function') {
       已要求重載 = true;
       setTimeout(function () {
-        try { window.reloadData(); } catch (e) { console.warn('[報工V4 v530] 重載資料失敗', e); }
+        try { window.reloadData(); } catch (e) { console.warn('[報工V4 v542] 重載資料失敗', e); }
       }, 700);
     }
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js?v=530').catch(function () {});
-    }
+    // Service Worker 由主程式統一註冊，避免此舊檔名另行切回舊版。
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });

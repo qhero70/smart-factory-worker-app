@@ -4,7 +4,7 @@ window.PWA_CONFIG = window.PWA_CONFIG || {};
   設定.GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzRvly1OV-C80bMmd2ww4BM1XAH9WTyz62VFDnUxVGiO15kzHahbeHZc2bNTSwdFCqBwQ/exec';
   設定.APP_NAME = '化新精密｜製一組報工作業V4';
   設定.APP_SHORT_NAME = '化新報工';
-  設定.VERSION = 'v5.4.1-工件工站V2版型';
+  設定.VERSION = 'v5.4.2-V2工站工序機台對應';
   設定.SPREADSHEET_ID = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
   設定.API_TIMEOUT_MS = 20000;
   設定.API_ACTIONS = {
@@ -20,7 +20,7 @@ window.PWA_CONFIG = window.PWA_CONFIG || {};
     document.head.appendChild(s);
   }
   function 啟用報工修復器() {
-    載入JS('hx-data-v529-adapter-533', './work-report-v4-data-v529-adapter.js?v=533');
+    載入JS('hx-data-v529-adapter-542', './work-report-v4-data-v529-adapter.js?v=542');
     載入JS('hx-official-lock-533', './work-report-v4-official-lock-533.js?v=533');
     // 工件與工站直接使用 V2 的群組選擇流程，不再以延遲外掛重建工站。
     載入JS('hx-ui-lock-531', './work-report-v4-ui-lock-531.js?v=541');

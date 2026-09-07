@@ -1,4 +1,4 @@
-/* 報工作業 V4 PWA Bridge v5.1.1｜Safari 語法修復版 */
+/* 報工作業 V4 PWA Bridge v5.4.2｜沿用 V2 的正式工站欄位對應 */
 (function () {
   'use strict';
 
@@ -37,10 +37,57 @@
     });
   }
   function 切機台清單(值) {
-    const 分隔 = new RegExp('[、,，;；/\\s]+');
-    return 唯一清單(文字(值).split(分隔).filter(function (項目) {
-      return /^\d{1,5}(?:\.0)?$/.test(文字(項目));
+    if (Array.isArray(值)) return 唯一清單(值.reduce(function (結果, 項目) {
+      return 結果.concat(切機台清單(項目));
+    }, []));
+    if (值 && typeof 值 === 'object') return 切機台清單(取值(值, ['機台編號', '主機台', '設備編號', 'id']));
+    const 內容 = 文字(值);
+    if (/^\[/.test(內容)) {
+      try { return 切機台清單(JSON.parse(內容)); } catch (錯誤) { /* 沿用文字清單。 */ }
+    }
+    const 標示編號 = Array.from(內容.matchAll(/ID\s*[:：]\s*([^,，)）\s/]+)/gi), function (項目) { return 項目[1]; });
+    return 唯一清單((標示編號.length ? 標示編號 : 內容.split(/[、,，;；/\s]+/)).filter(function (項目) {
+      return /^\d{1,5}(?:\.0)?$/.test(文字(項目)) || 文字(項目) === '雷刻機';
     }));
+  }
+  function 工站工序文字(列) {
+    // 工站順序是排序欄，不能拿來編造 OP1、OP2。
+    return 取值(列, ['工序範圍', '工序清單', '工序編號_最終', '工序編號', '工序', '工站代碼', 'OP編號', 'OP'])
+      .replace(/op\s*(\d+)/gi, 'OP$1').replace(/[、，;；]+/g, ',').replace(/\s*,\s*/g, ',');
+  }
+  function 對齊工站欄位(列) {
+    const 原始 = 列 && 列.__原始;
+    if (!Array.isArray(原始) || !/^ROUTE-/i.test(文字(原始[0])) || 列.__工站欄位已對齊542) return 列;
+    // 與 GAS 的「報工作業70_整理途程_」一致。舊表有重複欄名，必須保留原始欄位位置。
+    return Object.assign({}, 列, {
+      __工站欄位已對齊542: true,
+      群組ID: 文字(原始[0]),
+      途程主鍵_PK: 文字(原始[0]),
+      產品編號: 文字(原始[1]),
+      客戶品號: 文字(原始[2]),
+      品名: 文字(原始[3]),
+      途程順序: 文字(原始[4]),
+      工站順序: 文字(原始[4]),
+      順序: 文字(原始[4]),
+      工序: 文字(原始[5]),
+      工序範圍: 文字(原始[5]),
+      工序編號_最終: 文字(原始[5]),
+      工序清單: 文字(原始[5]).split(/[、,，;；\s]+/).filter(Boolean),
+      工站名稱: 文字(原始[7]),
+      報工工站名稱: 文字(原始[7]),
+      區域: 文字(原始[8]),
+      需求人力: 文字(原始[9]),
+      機台編號: 文字(原始[10]),
+      機台編號清單: 切機台清單(原始[10]),
+      機台清單: 切機台清單(原始[10]),
+      主機台: 切機台清單(原始[10])[0] || '',
+      機台型號清單: 文字(原始[11]).split('、'),
+      啟用: 文字(原始[18]) || '是',
+      標準產能: 文字(原始[22]),
+      產能8H: 文字(原始[22]),
+      '8小時標準產能': 文字(原始[22]),
+      標準工時_秒: 文字(原始[23])
+    });
   }
   function 今天日期() {
     const d = new Date();
@@ -249,27 +296,31 @@
   }
   function 途程機台清單(route, machineIndex, photoIndex) {
     let idList = [];
-    idList = idList.concat(切機台清單(取值(route, ['機台清單', '機台編號清單', '可選機台', '可用機台', '機台列表'])));
-    idList = idList.concat(切機台清單([取值(route, ['機台編號', '主機台', '主機台編號', '設備編號']), 取值(route, ['機台/型號/詳情'])].filter(Boolean).join('、')));
-    return 唯一清單(idList).map(function (id) {
+    ['機台清單', '機台編號清單', '可選機台', '可用機台', '機台列表', '機台編號', '主機台', '主機台編號', '設備編號', '機台/型號/詳情'].forEach(function (欄位) {
+      idList = idList.concat(切機台清單(route[欄位]));
+    });
+    const 內含機台 = Array.isArray(route.機台清單) ? route.機台清單 : [];
+    return 唯一清單(idList).map(function (id, 索引) {
       const m = machineIndex[id] || {};
-      const name = m.機台名稱 || m.設備名稱 || ('機台' + id);
-      const url = m.照片網址 || m.縮圖網址 || m.機台照片網址 || 找照片(photoIndex, '機台', [id, name]) || '';
-      return { 機台編號: id, 主機台: id, 機台名稱: name, 設備名稱: name, 區域: m.區域 || 取值(route, ['區域']) || '', 機台型號: m.機台型號 || m.型號 || '', 照片網址: url, 縮圖網址: url, 機台照片網址: url };
+      const 內含 = 內含機台.find(function (項目) { return 項目 && typeof 項目 === 'object' && 正規編號(取值(項目, ['機台編號', '主機台', '設備編號'])) === id; }) || {};
+      const name = m.機台名稱 || m.設備名稱 || 內含.機台名稱 || 內含.設備名稱 || ('機台' + id);
+      const url = m.照片網址 || m.縮圖網址 || m.機台照片網址 || 內含.照片網址 || 內含.縮圖網址 || 找照片(photoIndex, '機台', [id, name]) || '';
+      return { 機台編號: id, 主機台: id, 機台名稱: name, 設備名稱: name, 區域: m.區域 || 內含.區域 || 取值(route, ['區域']) || '', 機台型號: m.機台型號 || m.型號 || 內含.機台型號 || (route.機台型號清單 || [])[索引] || '', 照片網址: url, 縮圖網址: url, 機台照片網址: url };
     });
   }
   function 正規途程(rows, products, machines, photoIndex) {
     const productIndex = 建產品索引(products);
     const machineIndex = 建機台索引(machines);
-    return (rows || []).map(function (r) {
+    return (rows || []).map(對齊工站欄位).map(function (r) {
+      if (/^(否|停用|刪除)$/.test(取值(r, ['啟用', '狀態']))) return null;
       const pid = 正規編號(取值(r, ['產品編號', '料號', '品號']));
       if (!pid) return null;
       const p = productIndex[pid] || {};
-      let name = 取值(r, ['品名', '產品名稱']) || p.品名 || '';
+      let name = p.品名 || 取值(r, ['品名', '產品名稱']) || '';
       if (!好品名(name, pid)) name = p.品名 || '';
       const station = 取值(r, ['報工工站名稱', '工站名稱', '工站', '工序名稱']);
       if (!station) return null;
-      const proc = 取值(r, ['工序範圍', '工序編號_最終', '工序編號', '工序', 'OP', '作業順序']);
+      const proc = 工站工序文字(r);
       const machinesForRoute = 途程機台清單(r, machineIndex, photoIndex);
       const cust = 取值(r, ['客戶品號', '客戶料號']) || p.客戶品號 || '';
       const productPhoto = 第一網址(取值(r, ['產品照片網址', '產品縮圖網址', '照片網址', '縮圖網址', '圖片網址', '產品圖片', '產品照片', '圖片', '照片', '圖檔'])) || p.產品照片網址 || p.照片網址 || 找照片(photoIndex, '產品', [pid, cust, name]) || '';
@@ -281,6 +332,11 @@
         工站名稱: station,
         工序範圍: proc,
         工序: proc,
+        工序編號_最終: proc,
+        工序清單: proc.split(',').filter(Boolean),
+        順序: 取值(r, ['途程順序', '工站順序', '順序']),
+        標準產能: 取值(r, ['標準產能', '8小時標準產能', '產能8H', '8H產能']) || 取值(p, ['標準產能', '8小時標準產能', '產能8H', '8H產能']),
+        標準工時_秒: 取值(r, ['標準工時_秒', '標準工時(秒)', '標準工時']) || 取值(p, ['標準工時_秒', '標準工時(秒)', '標準工時']),
         主機台: (machinesForRoute[0] && machinesForRoute[0].機台編號) || '',
         機台編號: machinesForRoute.map(function (x) { return x.機台編號; }).join('、'),
         機台編號清單: machinesForRoute.map(function (x) { return x.機台編號; }),
@@ -326,7 +382,7 @@
       people: 取陣列(raw, ['people', '人員', '01_人員主檔']),
       products: 取陣列(raw, ['products', '產品', '02_產品主檔']),
       machines: 取陣列(raw, ['machines', '機台', '03_機台主檔']),
-      routes: 取陣列(raw, ['routes', '報工工站群組', '途程工站群組', '08_工站途程機台主檔']),
+      routes: 取陣列(raw, ['routes', '報工工站群組', '途程工站群組', '08_工站途程機台主檔']).map(對齊工站欄位),
       defects: raw.不良原因 || raw.defects || raw.不良原因主檔 || raw.不良代碼主檔 || raw['05_不良代碼主檔'] || [],
       photos: 取陣列(raw, ['photos', '照片資料庫', '照片', '06_照片資料庫'])
     };
@@ -350,7 +406,8 @@
       people: 合併列(a.people, b.people, ['工號', '員工編號', 'Employee ID']),
       products: 合併列(a.products, b.products, ['產品編號', '料號', '品號']),
       machines: 合併列(a.machines, b.machines, ['機台編號', '設備編號', '主機台']),
-      routes: 合併列(a.routes, b.routes, ['產品編號', '料號', '品號', '工站名稱', '報工工站名稱', '工序範圍', '工序編號_最終']),
+      // 08 主表是一份完整途程快照；不能用產品編號當唯一鍵，否則加工、清洗會互相覆蓋。
+      routes: b.routes.length ? b.routes : a.routes,
       defects: 不良筆數(b.defects) > 0 ? b.defects : a.defects,
       photos: [].concat(a.photos || [], b.photos || [])
     };
@@ -394,14 +451,18 @@
     const end = text.lastIndexOf('}');
     if (start < 0 || end < start) throw new Error('讀不到分頁：' + sheetName);
     const data = JSON.parse(text.slice(start, end + 1));
+    if (!data.table) throw new Error('讀不到分頁：' + sheetName);
     const heads = (data.table.cols || []).map(function (col, i) { return 文字(col.label || col.id || ('欄' + (i + 1))); });
     return (data.table.rows || []).map(function (row) {
       const obj = {};
-      (row.c || []).forEach(function (cell, i) {
-        if (heads[i]) obj[heads[i]] = cell ? (cell.f !== undefined ? cell.f : cell.v) : '';
+      const 原始 = heads.map(function (_, i) {
+        const cell = (row.c || [])[i];
+        return cell ? (cell.f !== undefined ? cell.f : cell.v) : '';
       });
+      原始.forEach(function (值, i) { if (heads[i]) obj[heads[i]] = 值; });
+      if (sheetName === 工作表清單.routes) obj.__原始 = 原始;
       return obj;
-    }).filter(function (obj) { return Object.values(obj).some(function (v) { return 文字(v) !== ''; }); });
+    }).filter(function (obj) { return Object.keys(obj).some(function (k) { return k !== '__原始' && 文字(obj[k]) !== ''; }); });
   }
   function 從GAS回應取列(res) {
     if (Array.isArray(res)) return res;

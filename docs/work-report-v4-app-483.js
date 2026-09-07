@@ -132,7 +132,7 @@ function injectOfficialStyle() {
 
 function registerPWAServiceWorker() {
   if (!('serviceWorker' in navigator)) return;
-  navigator.serviceWorker.register('./sw.js?v=505').catch(() => {});
+  navigator.serviceWorker.register('./sw.js?v=542').catch(() => {});
 }
 
 function reloadData() {
@@ -192,8 +192,9 @@ function normalizeGroup(src) {
   g1.客戶品號 = clean(g1.客戶品號 || g1.客戶料號 || '');
   g1.報工工站名稱 = clean(g1.報工工站名稱 || g1.工站名稱 || g1.工站 || '');
   g1.工站名稱 = g1.報工工站名稱;
-  g1.工序範圍 = clean(g1.工序範圍 || g1.工序 || g1.OP || g1.工序編號_最終 || g1.工序編號 || '');
+  g1.工序範圍 = clean(g1.工序範圍 || (Array.isArray(g1.工序清單) ? g1.工序清單.join(',') : g1.工序清單) || g1.工序 || g1.工序編號_最終 || g1.工序編號 || g1.工站代碼 || g1.OP編號 || g1.OP || '');
   g1.工序 = g1.工序範圍;
+  g1.工序清單 = g1.工序範圍.split(/[、,，;；]+/).map(clean).filter(Boolean);
   const purl = firstPhoto(g1, ['產品縮圖網址','產品照片網址','照片網址','縮圖網址','圖片網址','URL']);
   g1.產品縮圖網址 = purl;
   g1.產品照片網址 = purl;
@@ -206,7 +207,7 @@ function normalizeGroup(src) {
   g1.主機台 = clean(g1.主機台 || (g1.機台清單[0] && g1.機台清單[0].機台編號) || '');
   g1.機台編號清單 = g1.機台清單.map(m => m.機台編號);
   g1.機台編號 = g1.機台編號清單.join('、');
-  g1.顯示名稱 = clean(g1.顯示名稱) || [g1.報工工站名稱, g1.工序範圍, g1.機台編號].filter(Boolean).join('｜');
+  g1.顯示名稱 = 報工工站選項文字(g1);
   return g1;
 }
 
@@ -604,8 +605,14 @@ function buildWorkstationSelect() {
   const s = g('workstationSelect');
   if (!s) return;
   s.innerHTML = '<option value="">── 請選擇報工工站 ──</option>';
-  STATE.productGroupList.forEach((gr, i) => s.add(new Option(gr.顯示名稱 || [gr.報工工站名稱, gr.工序範圍, gr.主機台].filter(Boolean).join('｜'), String(i))));
+  STATE.productGroupList.forEach((gr, i) => s.add(new Option(報工工站選項文字(gr), String(i))));
   clearWorkstationFields();
+}
+
+function 報工工站選項文字(工站) {
+  // 選項、工序明細與主機台共用同一筆途程，不使用舊的 OP1／OP2 顯示文字。
+  const 機台 = (工站.機台清單 || []).map(m => m.機台編號).filter(Boolean).join('、');
+  return [工站.報工工站名稱 || 工站.工站名稱, 工站.工序範圍 || 工站.工序, 機台].filter(Boolean).join('｜');
 }
 
 function onWorkstationChange() {
@@ -890,7 +897,9 @@ function buildReportData() {
     品名: val('productName'),
     報工工站名稱: gr.報工工站名稱 || gr.工站名稱 || '',
     工站名稱: gr.報工工站名稱 || gr.工站名稱 || '',
+    工序: gr.工序範圍 || gr.工序 || '',
     工序範圍: gr.工序範圍 || gr.工序 || '',
+    工序清單: (gr.工序清單 || []).join(','),
     主機台: STATE.currentMachineId || val('mainMachineSelect'),
     機台清單: (gr.機台清單 || []).map(m => m.機台編號).join(','),
     今日共做數: total,

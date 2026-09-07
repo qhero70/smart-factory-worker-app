@@ -1,15 +1,15 @@
 const 快取前綴 = 'huaxin-work-report-v4-cache-';
-const 快取名稱 = 快取前綴 + '541-v2-workpiece';
-const 報工正式入口 = new URL('./work-report-v4-477.html?v=541', self.location.href).href;
+const 快取名稱 = 快取前綴 + '542-v2-workstations';
+const 報工正式入口 = new URL('./work-report-v4-477.html?v=542', self.location.href).href;
 const 預快取清單 = [
-  './work-report-v4-477.html?v=541',
+  './work-report-v4-477.html?v=542',
   './報工V4_工件工站.css?v=541',
   './work-report-v4.webmanifest?v=489',
-  './pwa-config.js?v=541',
-  './gas-bridge.js?v=511',
-  './work-report-v4-app-483.js?v=541',
+  './pwa-config.js?v=542',
+  './gas-bridge.js?v=542',
+  './work-report-v4-app-483.js?v=542',
   './work-report-v4-opening-particles.js?v=490',
-  './work-report-v4-data-v529-adapter.js?v=533',
+  './work-report-v4-data-v529-adapter.js?v=542',
   './work-report-v4-official-lock-533.js?v=533',
   './work-report-v4-photo-stable-539.js?v=539',
   './work-report-v4-ui-lock-531.js?v=541',
