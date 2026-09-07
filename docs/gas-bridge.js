@@ -1,4 +1,4 @@
-/* 報工作業 V4 PWA Bridge v5.4.2｜沿用 V2 的正式工站欄位對應 */
+/* 報工作業 V4 PWA Bridge v5.4.3｜V2 工站、工序及完整機台資源 */
 (function () {
   'use strict';
 
@@ -36,19 +36,74 @@
       return true;
     });
   }
-  function 切機台清單(值) {
-    if (Array.isArray(值)) return 唯一清單(值.reduce(function (結果, 項目) {
-      return 結果.concat(切機台清單(項目));
-    }, []));
-    if (值 && typeof 值 === 'object') return 切機台清單(取值(值, ['機台編號', '主機台', '設備編號', 'id']));
-    const 內容 = 文字(值);
-    if (/^\[/.test(內容)) {
-      try { return 切機台清單(JSON.parse(內容)); } catch (錯誤) { /* 沿用文字清單。 */ }
+  function 正規機台資源(值) {
+    const 原項目 = 值 && typeof 值 === 'object' ? 值 : {};
+    const 原文 = typeof 值 === 'object' ? 取值(原項目, ['機台編號', '主機台', '設備編號', 'ID', 'id']) : 文字(值);
+    if (!原文 || /^(?:無|無固定機台|無機台|null|undefined|[-—－]+)$/i.test(原文)) return null;
+    // 編號與說明分開保存；中文委外廠商、人工資源也都是合法的途程資源。
+    const 組合 = 原文.match(/^(\d+(?:\.0)?)\s*[–—－]\s*(.+)$/) || 原文.match(/^(\d+(?:\.0)?)\s+-\s+(.+)$/) || 原文.match(/^(\d+(?:\.0)?)-([A-Za-z\u3400-\u9fff].*)$/);
+    const 編號 = 正規編號(組合 ? 組合[1] : 原文);
+    return Object.assign({}, 原項目, {
+      機台編號: 編號,
+      主機台: 編號,
+      資源原文: 取值(原項目, ['資源原文']) || 原文,
+      途程資源說明: 取值(原項目, ['途程資源說明']) || (組合 ? 文字(組合[2]) : ''),
+      機台型號: 取值(原項目, ['途程機台型號', '機台型號', '型號', '型式', '機台型式', '設備型號', '規格']),
+      機台名稱: 取值(原項目, ['機台名稱', '設備名稱', '機器名稱', '名稱']),
+      設備名稱: 取值(原項目, ['設備名稱', '機台名稱', '機器名稱', '名稱'])
+    });
+  }
+  function 解析機台資源(值) {
+    const 清單 = new Map();
+    function 加入(項目) {
+      const 資源 = 正規機台資源(項目);
+      if (!資源) return;
+      const 既有 = 清單.get(資源.機台編號);
+      if (!既有) { 清單.set(資源.機台編號, 資源); return; }
+      Object.keys(資源).forEach(function (欄位) {
+        if (既有[欄位] == null || 文字(既有[欄位]) === '') 既有[欄位] = 資源[欄位];
+      });
     }
-    const 標示編號 = Array.from(內容.matchAll(/ID\s*[:：]\s*([^,，)）\s/]+)/gi), function (項目) { return 項目[1]; });
-    return 唯一清單((標示編號.length ? 標示編號 : 內容.split(/[、,，;；/\s]+/)).filter(function (項目) {
-      return /^\d{1,5}(?:\.0)?$/.test(文字(項目)) || 文字(項目) === '雷刻機';
-    }));
+    function 讀入(項目) {
+      if (Array.isArray(項目)) { 項目.forEach(讀入); return; }
+      if (項目 && typeof 項目 === 'object') { 加入(項目); return; }
+      const 原文 = 文字(項目);
+      if (!原文) return;
+      if (/^[\[{]/.test(原文)) {
+        try { 讀入(JSON.parse(原文)); return; } catch (錯誤) { /* 非 JSON 時依原文處理。 */ }
+      }
+      const 明細 = Array.from(原文.matchAll(/[（(]\s*ID\s*[:：]\s*(.*?)\s*[,，]\s*(?:型號|型式)\s*[:：]\s*(.*?)\s*[)）](?=\s*(?:\/|$))/gi));
+      if (明細.length) {
+        明細.forEach(function (欄) { 加入({ 機台編號: 欄[1], 途程機台型號: 欄[2] }); });
+        return;
+      }
+      // 空格和型號內的斜線不是清單分隔符，避免把設備名稱拆散。
+      原文.replace(/(\d)\s*\/\s*(?=\d)/g, '$1、').split(/[、,，;；\r\n]+/).forEach(加入);
+    }
+    讀入(值);
+    return Array.from(清單.values());
+  }
+  function 切機台清單(值) { return 解析機台資源(值).map(function (項目) { return 項目.機台編號; }); }
+  function 機台說明文字(項目) {
+    const 資源 = 正規機台資源(項目);
+    if (!資源) return '';
+    // 途程已明列「1018 – SASANO空氣測試」時，完整保留 V2 的原始描述。
+    if (資源.途程資源說明) return 資源.途程資源說明;
+    const 型號 = 取值(資源, ['途程機台型號', '機台型號', '型號', '型式']);
+    let 名稱 = 取值(資源, ['機台名稱', '設備名稱', '機器名稱', '名稱']);
+    if (名稱 === 資源.機台編號 || 名稱 === '機台' + 資源.機台編號) 名稱 = '';
+    if (!型號) return 名稱;
+    return !名稱 || 型號.includes(名稱) ? 型號 : 型號 + '（' + 名稱 + '）';
+  }
+  function 機台完整文字(項目) {
+    const 資源 = 正規機台資源(項目);
+    if (!資源) return '';
+    const 說明 = 機台說明文字(資源);
+    return 資源.機台編號 + (說明 ? ' – ' + 說明 : '');
+  }
+  function 工站完整文字(工站) {
+    return [取值(工站, ['報工工站名稱', '工站名稱', '工站']), 工站工序文字(工站),
+      解析機台資源(工站.機台清單 || 工站.機台編號清單 || 工站.機台編號).map(機台完整文字).join('、')].filter(Boolean).join('｜');
   }
   function 工站工序文字(列) {
     // 工站順序是排序欄，不能拿來編造 OP1、OP2。
@@ -57,10 +112,14 @@
   }
   function 對齊工站欄位(列) {
     const 原始 = 列 && 列.__原始;
-    if (!Array.isArray(原始) || !/^ROUTE-/i.test(文字(原始[0])) || 列.__工站欄位已對齊542) return 列;
+    if (!Array.isArray(原始) || !/^ROUTE-/i.test(文字(原始[0])) || 列.__工站欄位已對齊543) return 列;
+    const 型號清單 = 文字(原始[11]).split('、');
+    const 資源清單 = 解析機台資源(原始[10]).map(function (項目, 索引) {
+      return Object.assign({}, 項目, { 途程機台型號: 型號清單[索引] || 項目.途程機台型號 || '' });
+    });
     // 與 GAS 的「報工作業70_整理途程_」一致。舊表有重複欄名，必須保留原始欄位位置。
     return Object.assign({}, 列, {
-      __工站欄位已對齊542: true,
+      __工站欄位已對齊543: true,
       群組ID: 文字(原始[0]),
       途程主鍵_PK: 文字(原始[0]),
       產品編號: 文字(原始[1]),
@@ -77,11 +136,11 @@
       報工工站名稱: 文字(原始[7]),
       區域: 文字(原始[8]),
       需求人力: 文字(原始[9]),
-      機台編號: 文字(原始[10]),
-      機台編號清單: 切機台清單(原始[10]),
-      機台清單: 切機台清單(原始[10]),
-      主機台: 切機台清單(原始[10])[0] || '',
-      機台型號清單: 文字(原始[11]).split('、'),
+      機台編號: 資源清單.map(function (項目) { return 項目.機台編號; }).join('、'),
+      機台編號清單: 資源清單.map(function (項目) { return 項目.機台編號; }),
+      機台清單: 資源清單,
+      主機台: (資源清單[0] || {}).機台編號 || '',
+      機台型號清單: 型號清單,
       啟用: 文字(原始[18]) || '是',
       標準產能: 文字(原始[22]),
       產能8H: 文字(原始[22]),
@@ -282,7 +341,7 @@
       const id = 正規編號(取值(m, ['機台編號', '主機台', '設備編號', 'machineId']));
       const name = 取值(m, ['機台名稱', '設備名稱', '名稱', 'machineName']) || ('機台' + id);
       const url = 第一網址(取值(m, ['機台照片網址', '照片網址', '縮圖網址', '圖片網址', '機台圖片', '機台照片', '設備照片', '圖片', '照片', '圖檔', 'URL', 'url', 'Drive連結', 'GoogleDrive連結', '檔案ID'])) || 找照片(photoIndex, '機台', [id, name]);
-      return Object.assign({}, m, { 機台編號: id, 主機台: id, 機台名稱: name, 設備名稱: name, 區域: 取值(m, ['區域', '廠區', '位置']), 機台型號: 取值(m, ['機台型號', '型號', '規格']), 照片網址: url, 縮圖網址: url, 機台照片網址: url });
+      return Object.assign({}, m, { 機台編號: id, 主機台: id, 機台名稱: name, 設備名稱: name, 區域: 取值(m, ['區域', '工站', '位置', '廠區']), 機台型號: 取值(m, ['機台型號', '型號', '型式', '機台型式', '設備型號', '規格']) || 文字((m.__原始 || [])[2]), 照片網址: url, 縮圖網址: url, 機台照片網址: url });
     }).filter(function (m) { return m.機台編號; });
   }
   function 建機台索引(machines) {
@@ -295,17 +354,14 @@
     return map;
   }
   function 途程機台清單(route, machineIndex, photoIndex) {
-    let idList = [];
-    ['機台清單', '機台編號清單', '可選機台', '可用機台', '機台列表', '機台編號', '主機台', '主機台編號', '設備編號', '機台/型號/詳情'].forEach(function (欄位) {
-      idList = idList.concat(切機台清單(route[欄位]));
-    });
-    const 內含機台 = Array.isArray(route.機台清單) ? route.機台清單 : [];
-    return 唯一清單(idList).map(function (id, 索引) {
+    const 欄位 = ['機台清單', '機台編號清單', '可選機台', '可用機台', '機台列表', '機台編號', '主機台', '主機台編號', '設備編號', '機台/型號/詳情'];
+    return 解析機台資源(欄位.map(function (名稱) { return route[名稱]; })).map(function (內含, 索引) {
+      const id = 內含.機台編號;
       const m = machineIndex[id] || {};
-      const 內含 = 內含機台.find(function (項目) { return 項目 && typeof 項目 === 'object' && 正規編號(取值(項目, ['機台編號', '主機台', '設備編號'])) === id; }) || {};
-      const name = m.機台名稱 || m.設備名稱 || 內含.機台名稱 || 內含.設備名稱 || ('機台' + id);
+      const name = m.機台名稱 || m.設備名稱 || 內含.機台名稱 || 內含.設備名稱 || '';
       const url = m.照片網址 || m.縮圖網址 || m.機台照片網址 || 內含.照片網址 || 內含.縮圖網址 || 找照片(photoIndex, '機台', [id, name]) || '';
-      return { 機台編號: id, 主機台: id, 機台名稱: name, 設備名稱: name, 區域: m.區域 || 內含.區域 || 取值(route, ['區域']) || '', 機台型號: m.機台型號 || m.型號 || 內含.機台型號 || (route.機台型號清單 || [])[索引] || '', 照片網址: url, 縮圖網址: url, 機台照片網址: url };
+      const 途程型號 = 內含.途程機台型號 || (route.機台型號清單 || [])[索引] || '';
+      return Object.assign({}, 內含, { 機台編號: id, 主機台: id, 機台名稱: name, 設備名稱: name, 區域: m.區域 || 內含.區域 || 取值(route, ['區域']) || '', 途程機台型號: 途程型號, 機台型號: 途程型號 || 內含.機台型號 || m.機台型號 || m.型號 || '', 照片網址: url, 縮圖網址: url, 機台照片網址: url });
     });
   }
   function 正規途程(rows, products, machines, photoIndex) {
@@ -345,7 +401,7 @@
         產品縮圖網址: productPhoto,
         照片網址: productPhoto,
         縮圖網址: productPhoto,
-        顯示名稱: [station, proc, machinesForRoute.map(function (x) { return x.機台編號; }).join('、')].filter(Boolean).join('｜')
+        顯示名稱: [station, proc, machinesForRoute.map(機台完整文字).join('、')].filter(Boolean).join('｜')
       });
     }).filter(Boolean);
   }
@@ -445,7 +501,8 @@
   }
 
   async function 讀取GViz分頁(sheetName) {
-    const url = 'https://docs.google.com/spreadsheets/d/' + 正式主資料庫ID + '/gviz/tq?tqx=out:json&sheet=' + encodeURIComponent(sheetName) + '&_ts=' + Date.now();
+    // 主檔皆以第一列為表頭；明確指定，避免文字型機台主檔被當成整頁表頭。
+    const url = 'https://docs.google.com/spreadsheets/d/' + 正式主資料庫ID + '/gviz/tq?tqx=out:json&headers=1&sheet=' + encodeURIComponent(sheetName) + '&_ts=' + Date.now();
     const text = await 抓文字(url, { cache: 'no-store' }, 9000);
     const start = text.indexOf('{');
     const end = text.lastIndexOf('}');
@@ -460,7 +517,7 @@
         return cell ? (cell.f !== undefined ? cell.f : cell.v) : '';
       });
       原始.forEach(function (值, i) { if (heads[i]) obj[heads[i]] = 值; });
-      if (sheetName === 工作表清單.routes) obj.__原始 = 原始;
+      if (sheetName === 工作表清單.routes || sheetName === 工作表清單.machines) obj.__原始 = 原始;
       return obj;
     }).filter(function (obj) { return Object.keys(obj).some(function (k) { return k !== '__原始' && 文字(obj[k]) !== ''; }); });
   }
@@ -552,6 +609,8 @@
     return last || { 成功: false, success: false, 訊息: '報工送出失敗' };
   }
 
+  // 三個讀取／顯示層共用同一套規則，避免某一層再次刪除非數字資源或設備描述。
+  window.報工工站資源 = { 版本: '543', 解析清單: 解析機台資源, 正規機台: 正規機台資源, 機台文字: 機台完整文字, 機台說明: 機台說明文字, 工站文字: 工站完整文字 };
   window.V4Bridge = {
     loadInit: loadInit,
     submitReport: submitReport,

@@ -1,6 +1,6 @@
 'use strict';
 
-/* 化新報工 V4｜正式主程式 v5.4.1｜工件工站沿用 V2 版型
+/* 化新報工 V4｜正式主程式 v5.4.3｜V2 工站、工序及完整機台顯示
  * 直接修改正式主檔，不使用外掛修補檔。
  * 對接：pwa-config.js + gas-bridge.js
  * 寫入：09_報工；不良資料由後端同步 09_不良紀錄。
@@ -132,7 +132,7 @@ function injectOfficialStyle() {
 
 function registerPWAServiceWorker() {
   if (!('serviceWorker' in navigator)) return;
-  navigator.serviceWorker.register('./sw.js?v=542').catch(() => {});
+  navigator.serviceWorker.register('./sw.js?v=543').catch(() => {});
 }
 
 function reloadData() {
@@ -182,11 +182,7 @@ function onDataLoaded(data) {
 function normalizeGroup(src) {
   const g0 = src || {};
   const g1 = Object.assign({}, g0);
-  if (typeof g1.機台清單 === 'string') {
-    try { g1.機台清單 = JSON.parse(g1.機台清單); }
-    catch(e) { g1.機台清單 = splitMachineText(g1.機台清單).map(id => ({ 機台編號: id, 設備名稱: '機台' + id })); }
-  }
-  if (!Array.isArray(g1.機台清單)) g1.機台清單 = [];
+  g1.機台清單 = window.報工工站資源.解析清單(g1.機台清單);
   g1.產品編號 = clean(g1.產品編號 || g1.料號 || g1.productCode || '');
   g1.品名 = cleanProductName(g1.品名 || g1.產品名稱 || g1.productName || '');
   g1.客戶品號 = clean(g1.客戶品號 || g1.客戶料號 || '');
@@ -201,8 +197,7 @@ function normalizeGroup(src) {
   g1.照片網址 = purl;
   g1.機台清單 = g1.機台清單.map(m => normalizeMachineForRoute(m)).filter(m => m.機台編號);
   if (!g1.機台清單.length) {
-    splitMachineText([g1.機台編號清單, g1.可用機台, g1.主機台, g1.機台編號].filter(Boolean).join('、'))
-      .forEach(id => g1.機台清單.push(normalizeMachineForRoute({ 機台編號: id, 設備名稱: '機台' + id })));
+    g1.機台清單 = window.報工工站資源.解析清單([g1.機台編號清單, g1.可用機台, g1.主機台, g1.機台編號]).map(normalizeMachineForRoute);
   }
   g1.主機台 = clean(g1.主機台 || (g1.機台清單[0] && g1.機台清單[0].機台編號) || '');
   g1.機台編號清單 = g1.機台清單.map(m => m.機台編號);
@@ -212,7 +207,7 @@ function normalizeGroup(src) {
 }
 
 function normalizeMachineForRoute(m) {
-  m = Object.assign({}, m || {});
+  m = window.報工工站資源.正規機台(m) || {};
   const id = clean(m.機台編號 || m.主機台 || m.設備編號 || m.id || '');
   const found = DB.machines.find(x => clean(x.機台編號 || x.設備編號) === id) || {};
   const url = firstPhoto(m, ['機台照片網址','縮圖網址','照片網址','圖片網址','URL']) || firstPhoto(found, ['機台照片網址','縮圖網址','照片網址','圖片網址','URL']);
@@ -221,6 +216,7 @@ function normalizeMachineForRoute(m) {
     主機台: id,
     設備名稱: clean(m.設備名稱 || m.機台名稱 || m.名稱 || found.設備名稱 || found.機台名稱 || found.名稱 || ('機台' + id)),
     機台名稱: clean(m.機台名稱 || m.設備名稱 || m.名稱 || found.機台名稱 || found.設備名稱 || found.名稱 || ('機台' + id)),
+    機台型號: clean(m.途程機台型號 || m.機台型號 || m.型號 || m.型式 || found.機台型號 || found.型號 || found.型式 || ''),
     縮圖網址: url,
     照片網址: url,
     機台照片網址: url
@@ -228,7 +224,7 @@ function normalizeMachineForRoute(m) {
 }
 
 function splitMachineText(v) {
-  return clean(v).split(/[、,，;；\/\s]+/).map(x => x.replace(/\.0$/, '')).filter(x => /^\d{1,5}$/.test(x));
+  return window.報工工站資源.解析清單(v).map(資源 => 資源.機台編號);
 }
 
 function cleanProductName(v) { return clean(v).replace(/\s+/g, ' '); }
@@ -611,8 +607,7 @@ function buildWorkstationSelect() {
 
 function 報工工站選項文字(工站) {
   // 選項、工序明細與主機台共用同一筆途程，不使用舊的 OP1／OP2 顯示文字。
-  const 機台 = (工站.機台清單 || []).map(m => m.機台編號).filter(Boolean).join('、');
-  return [工站.報工工站名稱 || 工站.工站名稱, 工站.工序範圍 || 工站.工序, 機台].filter(Boolean).join('｜');
+  return window.報工工站資源.工站文字(工站);
 }
 
 function onWorkstationChange() {
@@ -654,7 +649,7 @@ function buildMachineSelect(list) {
   s.innerHTML = '';
   STATE.currentMachineId = '';
   if (!list.length) { s.add(new Option('無固定機台', '')); return; }
-  list.forEach(m => s.add(new Option([m.機台編號, m.區域, m.機台型號 || m.設備名稱].filter(Boolean).join('｜'), m.機台編號 || '')));
+  list.forEach(m => s.add(new Option([window.報工工站資源.機台文字(m), m.區域].filter(Boolean).join('｜'), m.機台編號 || '')));
   STATE.currentMachineId = list[0].機台編號 || '';
   s.value = STATE.currentMachineId;
 }
@@ -668,7 +663,7 @@ function renderMachineGrid(list) {
     return `<div class="machine-card ripple ${i === 0 ? 'selected' : ''}" data-id="${safeAttr(m.機台編號 || '')}">
       ${url ? `<img src="${safeAttr(url)}" onerror="this.outerHTML='<div class=machine-no-img>⚙</div>'">` : '<div class="machine-no-img">⚙</div>'}
       <div class="machine-number">${safeTxt(m.機台編號 || '')}</div>
-      <div class="machine-info">${safeTxt([m.區域, m.機台型號, m.設備名稱 || m.機台名稱].filter(Boolean).join('｜'))}</div>
+      <div class="machine-info">${safeTxt([window.報工工站資源.機台說明(m), m.區域].filter(Boolean).join('｜'))}</div>
     </div>`;
   }).join('');
   bindSafeTap(box, '.machine-card', card => selectMachine(card.dataset.id));

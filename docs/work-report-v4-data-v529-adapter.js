@@ -1,4 +1,4 @@
-/* 報工作業 V4｜正式主資料庫 v529 對接器 v5.4.2
+/* 報工作業 V4｜正式主資料庫 v529 對接器 v5.4.3
  * 目的：讓 PWA 報工作業直接吃本次整理後的正式資料庫。
  * 主表：02_產品主檔、08_工站途程機台主檔、05_不良代碼主檔。
  * 輔助：04_工站產品關聯、04_工站機台關聯、04_工站產品工時主檔、04_工站人員關聯、06_照片資料庫。
@@ -7,8 +7,8 @@
 (function () {
   'use strict';
 
-  const 版本 = '542';
-  const 標記 = '__報工V4_正式主資料庫v529對接器542__';
+  const 版本 = '543';
+  const 標記 = '__報工V4_正式主資料庫v529對接器543__';
   if (window[標記]) return;
   window[標記] = true;
 
@@ -68,24 +68,7 @@
     return Number.isInteger(v) ? String(v) : String(Math.round(v * 100) / 100);
   }
   function splitMachineIds(v) {
-    const out = [];
-    function add(x) {
-      x = clean(x).replace(/,/g, '').replace(/\.0$/, '');
-      if (/^\d{1,5}$/.test(x) || /^雷刻機$/i.test(x)) out.push(x);
-    }
-    if (!v) return out;
-    if (isArray(v)) {
-      v.forEach(x => {
-        if (typeof x === 'object') add(first(x, ['機台編號', '主機台', '設備編號', 'ID', 'id']));
-        else splitMachineIds(x).forEach(add);
-      });
-      return uniq(out);
-    }
-    const s = clean(v);
-    const idMatches = s.match(/ID\s*[:：]\s*([^,，)）\s/]+)/gi) || [];
-    idMatches.forEach(m => add(m.replace(/ID\s*[:：]\s*/i, '')));
-    s.split(/[、，,;；\/\s]+/).forEach(add);
-    return uniq(out);
+    return window.報工工站資源.解析清單(v).map(資源 => 資源.機台編號);
   }
   function machineListFrom(row, machineRows, machineMaster) {
     const ids = [];
@@ -97,19 +80,19 @@
     return uniq(ids).map(id => {
       const m = machineMaster[norm(id)] || {};
       const linked = (machineRows || []).find(r => norm(first(r, ['機台編號', '主機台', '設備編號'])) === norm(id)) || {};
-      const 既有 = (isArray(row.機台清單) ? row.機台清單 : []).find(r => r && typeof r === 'object' && norm(first(r, ['機台編號', '主機台', '設備編號'])) === norm(id)) || {};
+      const 既有 = window.報工工站資源.解析清單(row.機台清單).find(r => norm(r.機台編號) === norm(id)) || {};
       const 照片 = first(m, ['縮圖網址', '照片網址', '機台照片網址', '圖片網址', 'URL']) || first(既有, ['縮圖網址', '照片網址', '機台照片網址', '圖片網址', 'URL']);
-      return {
+      return Object.assign({}, 既有, {
         機台編號: id,
         主機台: id,
         機台名稱: first(m, ['機台名稱', '設備名稱', '名稱']) || first(既有, ['機台名稱', '設備名稱', '名稱']) || first(linked, ['機台名稱', '設備名稱', '名稱']) || ('機台' + id),
         設備名稱: first(m, ['設備名稱', '機台名稱', '名稱']) || first(既有, ['設備名稱', '機台名稱', '名稱']) || first(linked, ['設備名稱', '機台名稱', '名稱']) || ('機台' + id),
         區域: first(m, ['區域', '廠區', '位置']) || first(既有, ['區域']) || first(linked, ['區域']) || first(row, ['區域']),
-        機台型號: first(m, ['機台型號', '型號', '規格']) || first(既有, ['機台型號', '型號']) || first(linked, ['機台型號', '型號']),
+        機台型號: first(既有, ['途程機台型號', '機台型號', '型號', '型式']) || first(m, ['機台型號', '型號', '型式', '規格']) || first(linked, ['機台型號', '型號', '型式']),
         縮圖網址: 照片,
         照片網址: 照片,
         機台照片網址: 照片
-      };
+      });
     });
   }
   function routePk(row) { return first(row, ['途程主鍵_PK', '途程主鍵', '群組ID', 'PK', 'routeKey']); }
@@ -237,7 +220,7 @@
       r.機台清單 = mList;
       r.機台編號清單 = mList.map(m => m.機台編號);
       r.機台編號 = r.機台編號清單.join('、');
-      r.主機台 = first(r, ['主機台']) || (mList[0] && mList[0].機台編號) || '';
+      r.主機台 = splitMachineIds(r.主機台)[0] || (mList[0] && mList[0].機台編號) || '';
       const timeRow = findTimeRow(r, timeRows);
       const product = productIndex.byCode[norm(r.產品編號)] || productIndex.byCustName[norm(r.客戶品號) + '|' + keyText(r.品名)] || {};
       const cap = first(r, ['8小時標準產能', '8H產能', '標準產能', '標準產能8H']) || first(timeRow, ['8小時標準產能', '8H產能', '標準產能', '標準產能8H']) || first(product, ['8小時標準產能', '8H產能', '標準產能']);
@@ -247,7 +230,7 @@
       }
       const sec = first(r, ['標準工時_秒', '標準工時(秒)']) || first(timeRow, ['標準工時_秒', '標準工時(秒)']) || first(product, ['標準工時_秒', '標準工時(秒)']) || calcStdTime(cap);
       if (sec) r.標準工時_秒 = clean(sec).replace(/,$/, '');
-      r.顯示名稱 = [r.工站名稱, r.工序編號_最終, r.機台編號].filter(Boolean).join('｜');
+      r.顯示名稱 = window.報工工站資源.工站文字(r);
       // 保留每個正式途程；相同產品的不同工站、OP 或機台組合不能互相覆蓋。
       const k = pk || JSON.stringify([r.產品編號, r.客戶品號, r.品名, r.順序, r.工站名稱, r.工序範圍, r.機台編號]);
       if (!r.產品編號 || !r.工站名稱 || seen[k]) return;
@@ -308,7 +291,7 @@
       try {
         result[key] = await bridge.readSheet(輔助分頁[key]);
       } catch (e) {
-        console.warn('[報工V4 v542] 輔助分頁讀取失敗：' + 輔助分頁[key], e);
+        console.warn('[報工V4 v543] 輔助分頁讀取失敗：' + 輔助分頁[key], e);
         result[key] = [];
       }
     }));
@@ -350,19 +333,19 @@
     });
     data.訊息 = 'PWA 已載入正式工站、工序與機台';
     window.HX_WORK_REPORT_DATA_V529 = data.筆數;
-    console.info('[報工V4 v542] 正式工站、工序與機台已對接', data.筆數);
+    console.info('[報工V4 v543] 正式工站、工序與機台已對接', data.筆數);
     return data;
   }
   function wrapBridge() {
     const bridge = window.V4Bridge;
-    if (!bridge || typeof bridge.loadInit !== 'function') return false;
-    if (bridge.__資料庫v529對接542) return true;
+    if (!bridge || typeof bridge.loadInit !== 'function' || !window.報工工站資源) return false;
+    if (bridge.__資料庫v529對接543) return true;
     const original = bridge.loadInit.bind(bridge);
     bridge.loadInit = async function () {
       const raw = await original.apply(this, arguments);
       return enrich(raw);
     };
-    bridge.__資料庫v529對接542 = true;
+    bridge.__資料庫v529對接543 = true;
     已包裝Bridge = true;
     return true;
   }
@@ -374,7 +357,7 @@
     if (!已要求重載 && typeof window.reloadData === 'function') {
       已要求重載 = true;
       setTimeout(function () {
-        try { window.reloadData(); } catch (e) { console.warn('[報工V4 v542] 重載資料失敗', e); }
+        try { window.reloadData(); } catch (e) { console.warn('[報工V4 v543] 重載資料失敗', e); }
       }, 700);
     }
     // Service Worker 由主程式統一註冊，避免此舊檔名另行切回舊版。

@@ -3,7 +3,7 @@
   "short_name": "化新報工",
   "description": "化新精密製造部智慧製造報工作業 V4 PWA",
   "id": "/smart-factory-worker-app/work-report-v4-477.html?v=483&fix=locked-baseline",
-  "start_url": "./work-report-v4-477.html?v=542",
+  "start_url": "./work-report-v4-477.html?v=543",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",

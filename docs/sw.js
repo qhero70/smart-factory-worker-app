@@ -1,15 +1,15 @@
 const 快取前綴 = 'huaxin-work-report-v4-cache-';
-const 快取名稱 = 快取前綴 + '542-v2-workstations';
-const 報工正式入口 = new URL('./work-report-v4-477.html?v=542', self.location.href).href;
+const 快取名稱 = 快取前綴 + '543-v2-resource-labels';
+const 報工正式入口 = new URL('./work-report-v4-477.html?v=543', self.location.href).href;
 const 預快取清單 = [
-  './work-report-v4-477.html?v=542',
-  './報工V4_工件工站.css?v=541',
-  './work-report-v4.webmanifest?v=489',
-  './pwa-config.js?v=542',
-  './gas-bridge.js?v=542',
-  './work-report-v4-app-483.js?v=542',
-  './work-report-v4-opening-particles.js?v=490',
-  './work-report-v4-data-v529-adapter.js?v=542',
+  './work-report-v4-477.html?v=543',
+  './報工V4_工件工站.css?v=543',
+  './work-report-v4.webmanifest?v=543',
+  './pwa-config.js?v=543',
+  './gas-bridge.js?v=543',
+  './work-report-v4-app-483.js?v=543',
+  './work-report-v4-opening-particles.js?v=543',
+  './work-report-v4-data-v529-adapter.js?v=543',
   './work-report-v4-official-lock-533.js?v=533',
   './work-report-v4-photo-stable-539.js?v=539',
   './work-report-v4-ui-lock-531.js?v=541',
@@ -52,6 +52,8 @@ self.addEventListener('fetch', event => {
     return;
   }
   if (
+    url.pathname.endsWith('/gas-bridge.js') ||
+    url.pathname.endsWith('/work-report-v4-app-483.js') ||
     url.pathname.endsWith('/pwa-config.js') ||
     url.pathname.endsWith('/work-report-v4-opening-particles.js') ||
     url.pathname.endsWith('/work-report-v4-data-v529-adapter.js') ||
@@ -60,7 +62,16 @@ self.addEventListener('fetch', event => {
     url.pathname.endsWith('/work-report-v4-photo-stable-539.js') ||
     url.pathname.endsWith('/work-report-v4-ui-lock-531.js')
   ) {
-    event.respondWith(fetch(req,{cache:'no-store'}).catch(() => caches.match(req)));
+    event.respondWith((async () => {
+      const cache = await caches.open(快取名稱);
+      try {
+        const res = await fetch(req, {cache:'no-store'});
+        if (res.ok) await cache.put(req, res.clone());
+        return res;
+      } catch (錯誤) {
+        return (await cache.match(req)) || new Response('', {status:503});
+      }
+    })());
     return;
   }
   event.respondWith(caches.match(req).then(cached => {
