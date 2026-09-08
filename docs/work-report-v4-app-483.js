@@ -1,9 +1,9 @@
 'use strict';
 
-/* 化新報工 V4｜正式主程式 v5.4.3｜V2 工站、工序及完整機台顯示
+/* 化新報工 V4｜正式主程式 v5.4.4｜V2 完整工站＋報工收據防重
  * 直接修改正式主檔，不使用外掛修補檔。
  * 對接：pwa-config.js + gas-bridge.js
- * 寫入：09_報工；不良資料由後端同步 09_不良紀錄。
+ * 寫入：0_報工對接pwa V4，報工；不良明細保存在同一列。
  */
 
 let DB = {
@@ -47,6 +47,8 @@ let defectRowIdCounter = 0;
 let topbarTimer = null;
 let scanBuffer = '';
 let scanTimer = null;
+let 報工送出忙碌 = false;
+let 還原報工作業日 = '';
 
 const SHIFT_RULES = {
   '早班': { name: '早班', code: 'DAY', start: '08:00', end: '16:50', overnight: false, breaks: [['10:00','10:10'], ['12:10','12:40'], ['14:40','14:50']] },
@@ -68,6 +70,7 @@ window.addEventListener('load', () => {
   listenScannerGun();
   listenFullscreenChange();
   registerPWAServiceWorker();
+  顯示待收件報工();
 });
 
 document.addEventListener('click', e => {
@@ -132,7 +135,7 @@ function injectOfficialStyle() {
 
 function registerPWAServiceWorker() {
   if (!('serviceWorker' in navigator)) return;
-  navigator.serviceWorker.register('./sw.js?v=543').catch(() => {});
+  navigator.serviceWorker.register('./sw.js?v=544').catch(() => {});
 }
 
 function reloadData() {
@@ -881,7 +884,7 @@ function buildReportData() {
   const defects = STATE.defectRows.filter(r => r.code && Number(r.qty) > 0).map(r => ({ 分類: r.category, 代碼: r.code, 名稱: r.name, 英文名稱: r.enName, 數量: Number(r.qty) || 0 }));
   return {
     來源: 'PWA_V4_OFFICIAL',
-    作業日: formatDate(workDateBase()),
+    作業日: 還原報工作業日 || formatDate(workDateBase()),
     工號: op.工號 || val('personId'),
     姓名: op.姓名 || val('personName'),
     班別: shift,
@@ -945,25 +948,174 @@ function goNextOrSubmit() {
   else submitReport();
 }
 
-async function submitReport() {
-  const data = buildReportData();
-  const err = validateReport(data);
-  if (err) { roar('⚠️', '報工驗證失敗 / Validation Failed', err, 'warning'); return; }
-  if (!confirm('確認送出報工？\n\n' + data.姓名 + '｜' + data.產品編號 + '\n良品：' + data.實際良品數 + '｜不良：' + data.不良數)) return;
+// IndexedDB 保留原報工（含照片）；同瀏覽器多分頁以交易避免建立兩筆待收件。
+// 不背景重送、不將逾時視為失敗；未取得正式收據之前不清除原報工。
+function 報工收件紀錄(動作, 內容) {
+  return new Promise((resolve, reject) => {
+    if (!window.indexedDB) { reject(new Error('瀏覽器無法保存待收件資料，尚未送出報工。')); return; }
+    const 開啟 = indexedDB.open('化新報工V4_收件防重', 1);
+    開啟.onupgradeneeded = () => 開啟.result.createObjectStore('報工');
+    開啟.onerror = () => reject(new Error('無法開啟報工保存空間，尚未送出新報工。'));
+    開啟.onblocked = () => reject(new Error('請先關閉其他舊版報工分頁，再使用目前頁面。'));
+    開啟.onsuccess = () => {
+      const 庫 = 開啟.result;
+      let 結果 = null;
+      const 交易 = 庫.transaction('報工', 動作.startsWith('讀取') ? 'readonly' : 'readwrite');
+      const 表 = 交易.objectStore('報工');
+      const 讀取 = 表.get(動作 === '讀取未寫入' ? '最近未寫入' : '目前');
+      讀取.onsuccess = () => {
+        const 舊 = 讀取.result || null;
+        結果 = 舊;
+        if (動作 === '建立') {
+          if (舊) 結果 = { 紀錄: 舊, 新增: false };
+          else { 表.add(內容, '目前'); 結果 = { 紀錄: 內容, 新增: true }; }
+        } else if (動作 === '完成' && 舊 && 舊.識別碼 === 內容.識別碼) {
+          表.put(內容.收據, '最近收據');
+          表.delete('目前');
+          表.delete('最近未寫入');
+          結果 = null;
+        } else if (動作 === '未寫入' && 舊 && 舊.識別碼 === 內容.識別碼) {
+          表.put(Object.assign({}, 舊, { 退回原因: 內容.訊息 }), '最近未寫入');
+          表.delete('目前');
+          結果 = null;
+        }
+      };
+      交易.oncomplete = () => { 庫.close(); resolve(結果); };
+      交易.onabort = () => { 庫.close(); reject(new Error('無法完整保存或更新報工紀錄，請保留目前頁面及請求識別碼。')); };
+      交易.onerror = () => {}; // 由 onabort 統一處理，不忽略保存失敗。
+    };
+  });
+}
+
+function 報工新識別碼() {
+  if (crypto.randomUUID) return 'V4-' + crypto.randomUUID();
+  const 值 = crypto.getRandomValues(new Uint8Array(16));
+  值[6] = (值[6] & 15) | 64;
+  值[8] = (值[8] & 63) | 128;
+  const 字 = Array.from(值, 位元 => 位元.toString(16).padStart(2, '0')).join('');
+  return 'V4-' + [字.slice(0,8), 字.slice(8,12), 字.slice(12,16), 字.slice(16,20), 字.slice(20)].join('-');
+}
+
+function 顯示收件訊息(訊息, 待確認) {
+  const 區 = g('報工收件區');
+  if (!區) return;
+  區.classList.remove('hidden');
+  g('報工收件文字').textContent = 訊息;
+  g('報工收件動作').classList.toggle('hidden', !待確認);
+  g('報工退回還原').classList.add('hidden');
+}
+
+async function 顯示待收件報工() {
   try {
-    showSubmitOverlay(true);
-    const res = await window.V4Bridge.submitReport(data);
-    showSubmitOverlay(false);
-    if (res && (res.成功 || res.success || res.ok || res.報工編號 || res.reportId)) {
-      roar('✅', '報工完成 / Submitted', res.報工編號 || res.reportId || '已寫入', 'success');
-      resetAfterSubmit();
-    } else {
-      roar('❌', '報工失敗 / Submit Failed', (res && (res.訊息 || res.message)) || '未知錯誤', 'error');
+    const 待收件 = await 報工收件紀錄('讀取');
+    if (!待收件) {
+      const 退回 = await 報工收件紀錄('讀取未寫入');
+      if (退回) {
+        顯示收件訊息('上一筆報工尚未寫入：' + (退回.退回原因 || '') + '\n原資料仍保留於此裝置，可載回表單修改。', false);
+        g('報工退回還原').classList.remove('hidden');
+      }
+      return;
     }
-  } catch (e) { showSubmitOverlay(false); roar('❌', '報工失敗 / Submit Failed', e.message || String(e), 'error'); }
+    const 資料 = 待收件.資料;
+    顯示收件訊息('有一筆尚未確認收件的原報工。\n' + 資料.作業日 + '｜' + 資料.姓名 + '｜' +
+      資料.產品編號 + '｜共做 ' + 資料.今日共做數 + '\n' + 待收件.識別碼 +
+      '\n請先查詢收件；重送只使用已保存的這一筆，不會使用現在表單的新內容。', true);
+  } catch (錯誤) { 顯示收件訊息(錯誤.message, false); }
+}
+
+async function 處理報工回應(待收件, 回應) {
+  if (window.V4Bridge.已有收據(回應, 待收件.識別碼)) {
+    await 報工收件紀錄('完成', { 識別碼: 待收件.識別碼, 收據: 回應 });
+    顯示收件訊息('✅ 已確認寫入「' + 回應.目標分頁 + '」第 ' + 回應.列號 + ' 列\n報工編號：' + 回應.報工編號, false);
+    roar('✅', '報工已收件 / Submitted', 回應.報工編號, 'success');
+    resetAfterSubmit();
+    return true;
+  }
+  if (回應 && 回應.成功 === false && 回應.狀態 === '未寫入') {
+    await 報工收件紀錄('未寫入', { 識別碼: 待收件.識別碼, 訊息: 回應.訊息 });
+    顯示收件訊息('尚未寫入：' + (回應.訊息 || '請檢查報工內容。') + '\n目前表單不會清除。', false);
+    g('報工退回還原').classList.remove('hidden');
+    roar('⚠️', '報工尚未寫入', 回應.訊息 || '請檢查報工內容。', 'warning');
+    return false;
+  }
+  await 顯示待收件報工();
+  roar('⚠️', '收件尚未確認', 回應 && 回應.訊息 || '請稍後查詢原報工，不要另建一筆。', 'warning');
+  return false;
+}
+
+async function submitReport() {
+  if (報工送出忙碌) return;
+  報工送出忙碌 = true;
+  let 待收件 = null;
+  let 已嘗試送出 = false;
+  try {
+    if (await 報工收件紀錄('讀取')) {
+      await 顯示待收件報工();
+      roar('⚠️', '請先確認上一筆收件', '上方可查詢收件，或手動重送同一筆。', 'warning');
+      return;
+    }
+    const 資料 = buildReportData();
+    const 錯誤 = validateReport(資料);
+    if (錯誤) { roar('⚠️', '報工驗證失敗', 錯誤, 'warning'); return; }
+    if (!confirm('確認送出報工？\n\n' + 資料.姓名 + '｜' + 資料.產品編號 + '\n良品：' + 資料.實際良品數 + '｜不良：' + 資料.不良數)) return;
+    showSubmitOverlay(true, '確認後端並保存原報工…');
+    // 後端還未部署時，只發唯讀查詢，不發報工資料、不產生待收件寫入。
+    await window.V4Bridge.確認報工對接();
+    const 識別碼 = 報工新識別碼();
+    資料.請求識別碼 = 識別碼;
+    const 建立 = await 報工收件紀錄('建立', { 識別碼: 識別碼, 資料: 資料, 建立時間: new Date().toISOString() });
+    if (!建立.新增) { await 顯示待收件報工(); return; }
+    待收件 = 建立.紀錄;
+    已嘗試送出 = true;
+    showSubmitOverlay(true, '正在送出原報工，請勿重複點選…');
+    const 回應 = await window.V4Bridge.submitReport(待收件.資料);
+    await 處理報工回應(待收件, 回應);
+  } catch (錯誤) {
+    if (待收件 && 已嘗試送出) {
+      await 顯示待收件報工();
+      roar('⚠️', '收件尚未確認', '原報工已保存，請使用上方查詢收件。', 'warning');
+    } else {
+      顯示收件訊息('尚未送出報工：' + 錯誤.message, false);
+      roar('⚠️', '尚未送出', 錯誤.message, 'warning');
+    }
+  } finally { 報工送出忙碌 = false; showSubmitOverlay(false); }
+}
+
+async function 查詢待收件報工(重送) {
+  if (報工送出忙碌) return;
+  報工送出忙碌 = true;
+  try {
+    const 待收件 = await 報工收件紀錄('讀取');
+    if (!待收件) { 顯示收件訊息('目前沒有待收件報工。', false); return; }
+    showSubmitOverlay(true, '正在查詢原報工收據…');
+    const 查詢 = await window.V4Bridge.查詢報工收據(待收件.識別碼);
+    if (window.V4Bridge.已有收據(查詢, 待收件.識別碼)) {
+      await 處理報工回應(待收件, 查詢);
+      return;
+    }
+    // 只有使用者按「重送原報工」且再確認時，才重送保存的原資料／原 ID。
+    // 查詢的錯誤或「未寫入」不是寫入證據，不能因此刪掉原報工紀錄。
+    if (!重送 || 查詢.狀態 !== '尚未查得') {
+      await 顯示待收件報工();
+      roar('⚠️', '收件尚未確認', 查詢.訊息 || '請稍後查詢。', 'warning');
+      return;
+    }
+    showSubmitOverlay(false);
+    const 資料 = 待收件.資料;
+    if (!confirm('重送保存的原報工（相同識別碼，不會新增重複列）？\n' + 資料.作業日 + '｜' + 資料.姓名 + '｜' + 資料.產品編號 +
+      '\n共做：' + 資料.今日共做數 + '｜不良：' + 資料.不良數 + '\n目前表單中的修改不會包含在這次重送。')) return;
+    showSubmitOverlay(true, '正在以相同識別碼重送原報工…');
+    await window.V4Bridge.確認報工對接();
+    const 回應 = await window.V4Bridge.submitReport(待收件.資料);
+    await 處理報工回應(待收件, 回應);
+  } catch (錯誤) {
+    await 顯示待收件報工();
+    roar('⚠️', '請保留原報工', 錯誤.message, 'warning');
+  } finally { 報工送出忙碌 = false; showSubmitOverlay(false); }
 }
 
 function resetAfterSubmit() {
+  還原報工作業日 = '';
   STATE.operator = null; STATE.productGroupList = []; STATE.currentProductKey = ''; STATE.currentProductGroup = null; STATE.currentWorkstation = null; STATE.currentMachineId = ''; STATE.photos = []; STATE.defectRows = []; STATE.stepDone = [false,false,false,false,false];
   ['personName','personId','productCode','productName','totalQty','ngQty','remarks','workingHours','startTime','endTime','anomalyStart','anomalyEnd','anomalyDuration','processRange','stdCapacity','stdTimeSec'].forEach(id => setVal(id, ''));
   const emp = g('empIdHighlight'); if (emp) emp.textContent = '未輸入 / Not Set';
@@ -971,8 +1123,48 @@ function resetAfterSubmit() {
   clearWorkstationFields(); renderPhotoGrid(); addDefectRow(); buildPersonGrid(); buildProductGrid(); hideSelectedPersonCard(); setDefaultTimes(true); calcQty(); switchStep(0);
 }
 
+async function 還原未寫入報工() {
+  if (報工送出忙碌) return;
+  報工送出忙碌 = true;
+  try {
+    if (await 報工收件紀錄('讀取')) throw new Error('請先確認待收件報工，不可修改結果未確認的原資料。');
+    const 退回 = await 報工收件紀錄('讀取未寫入');
+    if (!退回) return;
+    const 資料 = 退回.資料;
+    const 人員索引 = DB.persons.findIndex(人 => clean(人.工號) === clean(資料.工號));
+    const 產品索引 = DB.productList.findIndex(品 => clean(品.產品編號) === clean(資料.產品編號) &&
+      清理工件顯示名稱(品.品名) === 清理工件顯示名稱(資料.品名));
+    if (人員索引 < 0 || 產品索引 < 0) throw new Error('請等主資料載入完成；若原人員或產品已停用，請交管理者處理。');
+    if (!confirm('載回未寫入的報工，覆蓋目前表單？\n' + 資料.作業日 + '｜' + 資料.姓名 + '｜' + 資料.產品編號)) return;
+    selectPerson(人員索引);
+    selectProduct(產品索引);
+    const 工站索引 = STATE.productGroupList.findIndex(站 => clean(站.報工工站名稱 || 站.工站名稱) === clean(資料.工站名稱) &&
+      clean(站.工序範圍 || 站.工序) === clean(資料.工序範圍));
+    setVal('workstationSelect', 工站索引 < 0 ? '' : String(工站索引));
+    onWorkstationChange();
+    if (g('mainMachineSelect') && Array.from(g('mainMachineSelect').options).some(項 => 項.value === clean(資料.主機台))) selectMachine(clean(資料.主機台));
+    還原報工作業日 = 資料.作業日;
+    buildShiftSelect(資料.班別);
+    const 對應 = { personId:'工號', personName:'姓名', totalQty:'今日共做數', ngQty:'不良數', startTime:'開始時間', endTime:'結束時間',
+      remarks:'備註', overtimeSelect:'是否加班', overtimeType:'加班類型', anomalyType:'異常類型', anomalyStart:'異常開始時間', anomalyEnd:'異常結束時間', anomalyDuration:'異常工時' };
+    Object.keys(對應).forEach(欄 => setVal(欄, 資料[對應[欄]]));
+    STATE.photos = (資料.現場照片清單 || []).map(照 => ({ name: 照.檔案名稱, type: 照.MIME類型, base64: 'data:' + 照.MIME類型 + ';base64,' + 照.Base64, note: 照.備註, source: 照.來源 }));
+    STATE.defectRows = (資料.不良行清單 || []).map(行 => ({ id: ++defectRowIdCounter, category: 行.分類, code: 行.代碼, name: 行.名稱, enName: 行.英文名稱, qty: 行.數量 }));
+    renderPhotoGrid(); renderDefectRows(); calcQty(); calcWorkingHours();
+    STATE.stepDone = [true, 工站索引 >= 0, false, false, false];
+    switchStep(工站索引 < 0 ? 1 : 2);
+    顯示收件訊息('已載回未寫入的原資料。作業日保留為 ' + 資料.作業日 + '，請修正後重新確認送出。', false);
+  } catch (錯誤) { roar('⚠️', '尚未還原', 錯誤.message, 'warning'); }
+  finally { 報工送出忙碌 = false; }
+}
+
 function showLoading(on) { const el = g('loadingScreen'); if (el) el.classList.toggle('hidden', !on); }
-function showSubmitOverlay(on) { const el = g('submitOverlay'); if (el) el.classList.toggle('hidden', !on); }
+function showSubmitOverlay(on, 訊息) {
+  const el = g('submitOverlay');
+  if (el) el.classList.toggle('hidden', !on);
+  if (on && g('submitTitle')) g('submitTitle').textContent = 訊息 || '正在處理報工…';
+  if (on && g('submitSub')) g('submitSub').textContent = '未收到正式收據之前，請勿清除瀏覽器資料或另建一筆。';
+}
 function toast(msg) { const t = g('toast'); if (!t) return; t.textContent = msg; t.classList.remove('hidden'); clearTimeout(t._timer); t._timer = setTimeout(() => t.classList.add('hidden'), 2400); }
 function roar(icon, title, sub, type) { const c = g('roarContainer'); if (!c) { toast(title + ' ' + (sub || '')); return; } const div = document.createElement('div'); div.className = 'roar-notif ' + (type || ''); div.innerHTML = `<div class="roar-icon">${icon || 'ℹ️'}</div><div class="roar-text"><div class="roar-title">${safeTxt(title)}</div><div class="roar-sub">${safeTxt(sub || '')}</div></div><button class="roar-close" type="button">✕</button>`; div.querySelector('button').onclick = () => div.remove(); c.appendChild(div); setTimeout(() => div.remove(), 4200); }
 

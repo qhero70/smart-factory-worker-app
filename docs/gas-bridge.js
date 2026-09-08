@@ -1,11 +1,13 @@
-/* 報工作業 V4 PWA Bridge v5.4.3｜V2 工站、工序及完整機台資源 */
+/* 報工作業 V4 PWA Bridge v5.4.4｜正式分頁收據，不自動重送寫入 */
 (function () {
   'use strict';
 
   const 設定 = window.PWA_CONFIG || {};
   const 正式主資料庫ID = 設定.SPREADSHEET_ID || '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
-  const 正式GAS網址 = (設定.GAS_WEB_APP_URL || 'https://script.google.com/macros/s/AKfycbzRvly1OV-C80bMmd2ww4BM1XAH9WTyz62VFDnUxVGiO15kzHahbeHZc2bNTSwdFCqBwQ/exec').trim();
+  const 正式GAS網址 = (設定.GAS_WEB_APP_URL || 'https://script.google.com/macros/s/AKfycby2ghuwkxTr1kbt2bU9D3U24O55c6GhcabA1IhDC67OEw86pH6MjS3nnBMASnjEmggw/exec').trim();
   const 逾時毫秒 = Number(設定.API_TIMEOUT_MS || 20000);
+  const 收據協定 = 'PWA_V4_RECEIPT_544';
+  const 報工分頁 = '0_報工對接pwa V4，報工';
 
   const 工作表清單 = {
     people: '01_人員主檔',
@@ -160,13 +162,19 @@
       (資料.機台 || 資料.machines || []).length ||
       (資料.報工工站群組 || 資料.routes || 資料.途程工站群組 || []).length);
   }
-  function 逾時(毫秒) {
-    return new Promise(function (_, reject) {
-      setTimeout(function () { reject(new Error('API 逾時 ' + 毫秒 + 'ms')); }, 毫秒);
-    });
-  }
-  function 抓文字(url, options, ms) {
-    return Promise.race([fetch(url, options).then(function (r) { return r.text(); }), 逾時(ms || 15000)]);
+  async function 抓文字(url, options, ms) {
+    const 控制器 = new AbortController();
+    let 已逾時 = false;
+    const 定時器 = setTimeout(function () { 已逾時 = true; 控制器.abort(); }, ms || 15000);
+    try {
+      const 回應 = await fetch(url, Object.assign({}, options, { signal: 控制器.signal }));
+      if (!回應.ok) throw new Error('GAS 連線 HTTP ' + 回應.status);
+      return await 回應.text();
+    } catch (錯誤) {
+      // 停止等待不等於伺服器停止寫入；呼叫端必須查收據，不可換動作重送。
+      if (已逾時) throw new Error('伺服器回覆逾時，寫入結果尚未確認');
+      throw 錯誤;
+    } finally { clearTimeout(定時器); }
   }
   function 建立表單內容(動作, 資料) {
     const payload = Object.assign({
@@ -188,21 +196,26 @@
     params.set('json', json);
     return params.toString();
   }
-  async function apiPost(動作, 資料) {
+  async function apiPost(動作, 資料, 選項) {
     if (!正式GAS網址) throw new Error('尚未設定 GAS_WEB_APP_URL');
     const url = new URL(正式GAS網址);
     url.searchParams.set('action', 動作);
     url.searchParams.set('動作', 動作);
     url.searchParams.set('_ts', Date.now());
     url.searchParams.set('spreadsheetId', 正式主資料庫ID);
+    const 精簡表單 = new URLSearchParams();
+    if (選項 && 選項.單份內容) {
+      精簡表單.set('action', 動作);
+      精簡表單.set('payload', JSON.stringify(資料 || {}));
+    }
     const text = await 抓文字(url.toString(), {
       method: 'POST',
       mode: 'cors',
       credentials: 'omit',
       cache: 'no-store',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
-      body: 建立表單內容(動作, 資料)
-    }, 逾時毫秒);
+      body: 選項 && 選項.單份內容 ? 精簡表單.toString() : 建立表單內容(動作, 資料)
+    }, 選項 && 選項.等待毫秒 || 逾時毫秒);
     try {
       return JSON.parse(text);
     } catch (e) {
@@ -569,7 +582,7 @@
   }
   async function loadInit() {
     if (初始化快取) return 初始化快取;
-    const actions = (設定.API_ACTIONS && 設定.API_ACTIONS.INIT) || ['取得報工作業V4初始資料', 'getWorkReportV4Init', 'init'];
+    const actions = (設定.API_ACTIONS && 設定.API_ACTIONS.INIT) || ['取得報工作業V4初始資料', '取得報工作業v2初始資料'];
     let last = null;
     for (const action of actions) {
       try {
@@ -593,20 +606,36 @@
       throw (last instanceof Error ? last : e);
     }
   }
-  async function submitReport(payload) {
-    const actions = (設定.API_ACTIONS && 設定.API_ACTIONS.SUBMIT) || ['submitWorkReportV4', '寫入報工作業V4'];
-    let last = null;
-    for (const action of actions) {
-      try {
-        const res = await apiPost(action, payload);
-        last = res;
-        if (res && (res.ok === true || res.成功 === true || res.success === true || res.reportId || res.報工編號)) return res;
-      } catch (e) {
-        last = e;
-      }
+  function 正式回應(回應, 識別碼) {
+    return !!(回應 && 回應.協定 === 收據協定 && 回應.主庫ID === 正式主資料庫ID &&
+      回應.目標分頁 === 報工分頁 && (!識別碼 || 回應.請求識別碼 === 識別碼));
+  }
+  function 已有收據(回應, 識別碼) {
+    return 正式回應(回應, 識別碼) && 回應.成功 === true && 回應.狀態 === '已寫入' &&
+      typeof 回應.報工編號 === 'string' && /^PWA4-\d{8}-[0-9a-f-]+$/i.test(回應.報工編號) &&
+      Number.isInteger(回應.列號) && 回應.列號 >= 2;
+  }
+  async function 確認報工對接() {
+    const 回應 = await apiPost('查詢報工V4對接', {}, { 單份內容: true });
+    if (!正式回應(回應) || 回應.成功 !== true || 回應.已就緒 !== true) {
+      throw new Error('後端尚未就緒，尚未送出報工。請將同一部署更新為主路由 v1.9.4。' +
+        (正式回應(回應) && 回應.訊息 ? ' ' + 回應.訊息 : ''));
     }
-    if (last instanceof Error) throw last;
-    return last || { 成功: false, success: false, 訊息: '報工送出失敗' };
+    return 回應;
+  }
+  async function 查詢報工收據(識別碼) {
+    const 回應 = await apiPost('查詢報工V4收件', { 請求識別碼: 識別碼 }, { 單份內容: true });
+    if (!正式回應(回應, 識別碼)) throw new Error('收件查詢回應不符，請保留原請求識別碼。');
+    return 回應;
+  }
+  async function submitReport(payload) {
+    if (!payload || !/^V4-[0-9a-f-]{36}$/i.test(payload.請求識別碼 || '')) throw new Error('缺少原報工識別碼，已阻止送出。');
+    // 一次只送這個動作；任何逾時／網路錯誤都不 fallback 到舊寫入 API。
+    const 回應 = await apiPost('寫入報工V4正式分頁', payload, {
+      單份內容: true, 等待毫秒: Number(設定.SUBMIT_TIMEOUT_MS || 90000)
+    });
+    if (!正式回應(回應, payload.請求識別碼)) throw new Error('尚未取得正式收據，請查詢原報工，勿重新建立一筆。');
+    return 回應;
   }
 
   // 三個讀取／顯示層共用同一套規則，避免某一層再次刪除非數字資源或設備描述。
@@ -614,6 +643,9 @@
   window.V4Bridge = {
     loadInit: loadInit,
     submitReport: submitReport,
+    確認報工對接: 確認報工對接,
+    查詢報工收據: 查詢報工收據,
+    已有收據: 已有收據,
     apiPost: apiPost,
     today: 今天日期,
     SS: 正式主資料庫ID,

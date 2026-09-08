@@ -1,16 +1,16 @@
 const 快取前綴 = 'huaxin-work-report-v4-cache-';
-const 快取名稱 = 快取前綴 + '543-v2-resource-labels';
-const 報工正式入口 = new URL('./work-report-v4-477.html?v=543', self.location.href).href;
+const 快取名稱 = 快取前綴 + '544-report-receipts';
+const 報工正式入口 = new URL('./work-report-v4-477.html?v=544', self.location.href).href;
 const 預快取清單 = [
-  './work-report-v4-477.html?v=543',
+  './work-report-v4-477.html?v=544',
   './報工V4_工件工站.css?v=543',
-  './work-report-v4.webmanifest?v=543',
-  './pwa-config.js?v=543',
-  './gas-bridge.js?v=543',
-  './work-report-v4-app-483.js?v=543',
+  './work-report-v4.webmanifest?v=544',
+  './pwa-config.js?v=544',
+  './gas-bridge.js?v=544',
+  './work-report-v4-app-483.js?v=544',
   './work-report-v4-opening-particles.js?v=543',
   './work-report-v4-data-v529-adapter.js?v=543',
-  './work-report-v4-official-lock-533.js?v=533',
+  './work-report-v4-official-lock-533.js?v=544',
   './work-report-v4-photo-stable-539.js?v=539',
   './work-report-v4-ui-lock-531.js?v=541',
   './work-report-v4-defect-grid-picker-519.js?v=521',
