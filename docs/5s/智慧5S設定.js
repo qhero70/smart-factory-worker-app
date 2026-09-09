@@ -2,8 +2,8 @@ window.智慧5S設定 = Object.freeze({
   系統名稱: '化新精密｜製一｜智慧5S',
   系統短名: '製一｜智慧5S',
   PWA顯示名稱: '製一｜智慧5S',
-  版本: '1.3.7',
-  入口版本碼: '1370',
+  版本: '1.3.8',
+  入口版本碼: '1380',
   登入模式: '每次新工作階段需登入',
   Roar事件通知: true,
   A5標準照片顯示模式: 'PWA離線優先＋中央背景同步',
@@ -40,17 +40,17 @@ window.智慧5S設定 = Object.freeze({
 });
 
 (function(){
-  const id='智慧5S稽核標準0821_v1370';
+  const id='智慧5S稽核標準0821_v1380';
   if(!document.getElementById(id)){
     const s=document.createElement('script');
     s.id=id;
-    s.src='./智慧5S_稽核標準0821_v1310.js?v=1370';
+    s.src='./智慧5S_稽核標準0821_v1310.js?v=1380';
     s.async=false;
     document.head.appendChild(s);
   }
   if('serviceWorker' in navigator){
     window.addEventListener('load',()=>{
-      navigator.serviceWorker.register('./離線服務.js?v=1370',{scope:'./'}).then(reg=>{
+      navigator.serviceWorker.register('./離線服務.js?v=1380',{scope:'./'}).then(reg=>{
         if(reg.waiting)reg.waiting.postMessage('立即啟用新版');
         reg.update().catch(()=>{});
       }).catch(()=>{});
