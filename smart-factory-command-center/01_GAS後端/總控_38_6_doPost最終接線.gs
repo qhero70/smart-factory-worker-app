@@ -1,16 +1,24 @@
 /**
- * 化新精密｜製一 LINE／報工 V4 正式主路由｜v1.9.4（前端 544）
+ * 化新精密｜製一 LINE／報工 V4 正式主路由｜v1.9.5（前端 544／智慧5S 1.3.9）
  * 完整覆蓋「總控_38_6_doPost最終接線」這一檔。
  * 保留原主檔 doPost_舊版備份，以及既有 33／34／37／38／39 等模組。
  * LINE 路由保留；V4 專用寫入「0_報工對接pwa V4，報工」。
+ * 智慧5S PWA 的 appendRow／updateRow／智慧5S專用 POST 優先交由智慧5S安全寫入層處理。
  * 不建立 Bot／Rich Menu，不修改角色權限，不同步寫入舊 09_報工。
  * 完整覆蓋此檔後，將同一個網頁應用程式部署更新為「新版本」。
  * doPost、events、postData 等英文名稱是 GAS／LINE 固定協定欄位。
  */
-var 製一LINE正式接線版本_ = 'v1.9.4';
+var 製一LINE正式接線版本_ = 'v1.9.5';
 
 function doPost(請求) {
   if (!請求) throw new Error('這是 LINE Webhook 入口，不要在編輯器直接執行。');
+
+  // 智慧5S PWA POST 優先接手。此接收器只允許 5S_ 分頁，LINE events 會回傳 null，不影響 LINE Webhook。
+  if (typeof 智慧5S_POST通用接收_ === 'function') {
+    var 智慧5S回應 = 智慧5S_POST通用接收_(請求);
+    if (智慧5S回應 !== null) return 製一LINE正式接線_JSON_(智慧5S回應);
+  }
+
   // 僅接手三個明確的 V4 動作，其餘 POST／LINE 仍沿用原路由。
   var 報工回應 = 報工V4正式分頁_接收_(請求);
   if (報工回應 !== null) return 製一LINE正式接線_JSON_(報工回應);
