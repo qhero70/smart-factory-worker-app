@@ -2,9 +2,9 @@
 
 /**
  * 化新精密｜製一｜智慧5S 離線服務
- * 版本：1.3.8／1380
+ * 版本：1.3.9.1／1391。更新僅處理程式資源，不清除手機資料或舊快取。
  */
-const 快取版本 = '化新精密-製一智慧5S-v1.3.8';
+const 快取版本 = '化新精密-製一智慧5S-v1.3.9.1';
 
 const 應用程式外殼 = Object.freeze([
   './',
@@ -63,7 +63,9 @@ const 應用程式外殼 = Object.freeze([
 ]);
 
 async function 取得快取回應(請求) {
-  return await caches.match(請求) || await caches.match(請求, { ignoreSearch: true });
+  const 本版快取 = await caches.open(快取版本);
+  return await 本版快取.match(請求) || await 本版快取.match(請求, { ignoreSearch: true })
+    || await caches.match(請求) || await caches.match(請求, { ignoreSearch: true });
 }
 
 async function 寫入快取(請求, 回應) {
@@ -117,15 +119,8 @@ self.addEventListener('install', 事件 => {
 });
 
 self.addEventListener('activate', 事件 => {
-  事件.waitUntil(
-    caches.keys()
-      .then(名稱清單 => Promise.all(
-        名稱清單
-          .filter(名稱 => 名稱 !== 快取版本)
-          .map(名稱 => caches.delete(名稱))
-      ))
-      .then(() => self.clients.claim())
-  );
+  // 保留本網站及同來源其他應用的既有快取；不操作 IndexedDB 或 localStorage。
+  事件.waitUntil(self.clients.claim());
 });
 
 self.addEventListener('fetch', 事件 => {
