@@ -8,6 +8,7 @@ const root = path.resolve(__dirname, '..');
 const read = name => fs.readFileSync(path.join(root, name), 'utf8');
 const source = read('smart-factory-command-center/01_GAS後端/智慧5S_正式部署驗收_v1391.gs');
 const backend = read('smart-factory-command-center/01_GAS後端/智慧5S_POST寫入修復_v1390.gs');
+const entry = read('smart-factory-command-center/01_GAS後端/GAS_後端入口.gs');
 const fixture = read('tests/智慧5S同步驗證.cjs');
 const Sheet = vm.runInNewContext(fixture.slice(fixture.indexOf('class 模擬分頁'), fixture.indexOf('function 建立後端')) + '\n模擬分頁;', {斷言:assert});
 function setup() {
@@ -19,6 +20,7 @@ function setup() {
     LockService:{getScriptLock:()=>({waitLock(){},releaseLock(){}})},
     SpreadsheetApp:{openById:id=>{assert.equal(id,db);return {getSheetByName:()=>live};},flush(){}}
   });
+  vm.runInContext(entry,back);
   vm.runInContext(backend,back);
   function invocation() {
     const snapshot = new Sheet([...live.列[0]],structuredClone(live.列.slice(1)));
@@ -33,7 +35,8 @@ function setup() {
           const params = new URL(url).searchParams;
           assert.equal(params.get('api'),'讀取分頁資料');
           assert.equal(params.get('spreadsheetId'),db);
-          result = JSON.stringify({成功:true,headers:live.列[0],rows:live.列.slice(1)});
+          // 讀取必須經過完整正式入口；不可用測試自行拼出的成功資料取代。
+          result = JSON.stringify(back.主檔_API路由(Object.fromEntries(params)));
           if(params.has('callback')) result = (badJSONP?'wrong':params.get('callback'))+'('+result+');';
         } else if(typeof options.payload==='object') {
           result = JSON.stringify({成功:true,已就緒:true,主庫ID:db});
