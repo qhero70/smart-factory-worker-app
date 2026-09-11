@@ -17,6 +17,9 @@ function setup() {
   const db = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
   let serial = 0, badJSONP = false;
   const back = vm.createContext({Date, console,
+    ContentService:{MimeType:{JSON:'application/json',JAVASCRIPT:'application/javascript'},
+      createTextOutput:文字=>({getContent:()=>文字,setMimeType(){return this;}})},
+    智慧5S_iOS_JSONP輸出_(){throw new Error('5S 讀取不得再委派給未驗證的外部輸出函式');},
     LockService:{getScriptLock:()=>({waitLock(){},releaseLock(){}})},
     SpreadsheetApp:{openById:id=>{assert.equal(id,db);return {getSheetByName:()=>live};},flush(){}}
   });
@@ -35,9 +38,9 @@ function setup() {
           const params = new URL(url).searchParams;
           assert.equal(params.get('api'),'讀取分頁資料');
           assert.equal(params.get('spreadsheetId'),db);
-          // 讀取必須經過完整正式入口；不可用測試自行拼出的成功資料取代。
-          result = JSON.stringify(back.主檔_API路由(Object.fromEntries(params)));
-          if(params.has('callback')) result = (badJSONP?'wrong':params.get('callback'))+'('+result+');';
+          // 呼叫完整 doGet 及正式回呼輸出，不由替身拼接 JSONP 成功回覆。
+          result = back.doGet({parameter:Object.fromEntries(params)}).getContent();
+          if(badJSONP && params.has('callback')) result = result.replace(params.get('callback')+'(','wrong(');
         } else if(typeof options.payload==='object') {
           result = JSON.stringify({成功:true,已就緒:true,主庫ID:db});
         } else {

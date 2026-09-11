@@ -2,7 +2,7 @@
  * 化新精密｜NEXUS OS 智慧製造系統
  * 主檔：GAS 後端入口.gs
  *
- * 版本：2026-09-11_智慧5S讀取修復1.3.9.3（保留原報工閉環）
+ * 版本：2026-09-11_智慧5S讀取與回呼修復1.3.9.4（保留原報工閉環）
  *
  * 重點：
  * 1. 只保留一組 doGet / doPost
@@ -127,9 +127,13 @@ try {
   const 頁面 = String(參數.page || 參數.頁面 || '首頁入口').trim();
 
   if (參數.api) {
-  var API結果 = 主檔_API路由(參數);
-  return 智慧5S_iOS_JSONP輸出_(API結果, 參數);
-}
+    var API結果 = 主檔_API路由(參數);
+    var 讀取分頁 = String(參數.分頁名稱 || 參數.sheetName || 參數.工作表名稱 || '').trim();
+    if (String(參數.api).trim() === '讀取分頁資料' && 讀取分頁.indexOf('5S_') === 0) {
+      return 主檔_智慧5S讀取輸出_(API結果, 參數);
+    }
+    return 智慧5S_iOS_JSONP輸出_(API結果, 參數);
+  }
 
   const 檔案名稱 = GAS入口_取得HTML檔名_(頁面);
 
@@ -146,6 +150,37 @@ try {
       .createHtmlOutput('<h2>找不到頁面：' + 頁面 + '</h2><pre>' + 錯誤.message + '</pre>')
       .setTitle('頁面錯誤');
   }
+}
+
+/**
+ * 智慧5S 1.3.9.4：在既有讀取入口完成 JSON／JSONP 輸出。
+ * 回呼名稱是瀏覽器協議，採 ASCII 識別碼；不執行傳入的程式字串。
+ * 一般讀取保留 JSON；有合法回呼時，精確輸出「指定回呼(同一份資料);」。
+ * 資料中的成功／失敗旗標原樣保留，不將後端錯誤包裝成成功。
+ */
+function 主檔_智慧5S讀取輸出_(資料, 參數) {
+  參數 = 參數 || {};
+  var 回呼 = String(參數.callback || 參數.回呼 || '').trim();
+  var 回呼衝突 = 參數.callback && 參數.回呼 &&
+    String(參數.callback).trim() !== String(參數.回呼).trim();
+  if (回呼衝突 || (回呼 && !/^[A-Za-z_$][0-9A-Za-z_$]*$/.test(回呼))) {
+    return ContentService.createTextOutput(JSON.stringify({
+      成功:false,ok:false,success:false,訊息:'智慧5S回呼名稱不合法或不一致'
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+  var 內容;
+  try {
+    // 主檔路由回傳物件；兼容其他既有模組提供的 JSON TextOutput。
+    if (資料 && typeof 資料.getContent === 'function') 資料 = JSON.parse(資料.getContent());
+    if (!資料 || typeof 資料 !== 'object') throw new Error('讀取結果不是資料物件');
+    內容 = JSON.stringify(資料);
+  } catch (錯誤) {
+    內容 = JSON.stringify({成功:false,ok:false,success:false,訊息:'智慧5S讀取結果無法輸出'});
+  }
+  // 保留字串原值，避免舊版瀏覽器把特殊字元當作指令碼換行或標籤。
+  內容 = 內容.replace(/</g,'\\u003c').replace(/\u2028/g,'\\u2028').replace(/\u2029/g,'\\u2029');
+  return ContentService.createTextOutput(回呼 ? 回呼+'('+內容+');' : 內容)
+    .setMimeType(回呼 ? ContentService.MimeType.JAVASCRIPT : ContentService.MimeType.JSON);
 }
 
 function GAS入口_取得HTML檔名_(頁面) {
