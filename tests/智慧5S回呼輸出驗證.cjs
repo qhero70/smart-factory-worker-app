@@ -66,7 +66,8 @@ function 建立環境() {
   斷言.equal(回應.getContent(),'原共用輸出');
   斷言.equal(測試環境.其他輸出次數,1);
 });
-測試('原 PWA 一般網路讀取失敗後，透過真正的 doGet 回呼讀回資料並清理腳本',async()=>{
+for (const 使用保護回呼 of [false,true]) {
+測試('原 PWA 一般網路讀取失敗後，透過真正的 doGet '+(使用保護回呼?'及保護回呼':'直接回呼')+'讀回資料並清理腳本',async()=>{
   const 後端=建立環境();
   let 腳本數=0,清除數=0,一般請求數=0;
   const 手機=虛擬機.createContext({URL,AbortController,setTimeout,clearTimeout,
@@ -83,7 +84,8 @@ function 建立環境() {
       斷言.match(參數.callback,/^smart5s_jsonp_/);
       const 回應=後端.環境.doGet({parameter:參數});
       斷言.equal(回應.格式,'application/javascript');
-      虛擬機.runInContext(回應.getContent(),手機);
+      const 文字=使用保護回呼 ? '/**/typeof '+參數.callback+" === 'function' && "+回應.getContent() : 回應.getContent();
+      虛擬機.runInContext(文字,手機);
     }
   }};
   虛擬機.runInContext(手機程式,手機);
@@ -92,3 +94,4 @@ function 建立環境() {
   斷言.equal(一般請求數,1);斷言.equal(腳本數,1);斷言.equal(清除數,1);
   斷言.equal(Object.keys(手機).filter(鍵=>鍵.startsWith('smart5s_jsonp_')).length,0);
 });
+}

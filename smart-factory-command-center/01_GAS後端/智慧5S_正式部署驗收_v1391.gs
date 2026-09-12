@@ -1,11 +1,15 @@
 /**
- * 化新精密｜智慧5S 正式部署驗收，工具修訂 1.3.9.2
+ * 化新精密｜智慧5S 正式部署驗收，工具修訂 1.3.9.5
  * 完整覆蓋原「智慧5S_正式部署驗收_v1391.gs」。
- * 第一步執行「驗證_智慧5S正式部署_v1391」。
- * 待執行結束，再從函式選單執行「驗證_智慧5S正式讀回_v1391」。
+ * 目前第一階段已通過：只執行「驗證_智慧5S正式讀回_v1391」。
+ * 可沿用工具 1.3.9.2 已通過的同一批次，不用新增驗收列。
+ * 只有從未通過第一階段時，才先執行「驗證_智慧5S正式部署_v1391」。
  * 兩步必須分開執行，避免沿用跨 HTTP 寫入前的試算表讀取快取。
- * 修改的是編輯器內的驗收工具；原第89版部署不必重新部署。
+ * 本次僅修正驗收工具，不改正式入口、不需重新部署。
+ * JSONP 接受直接回呼，以及同一回呼的 typeof 函式存在保護。
+ * 僅解析 JSON，不執行回覆腳本；主鍵、狀態、備註及時間仍逐項核對。
  * 僅使用同一主庫的合成驗收紀錄，不清除手機資料、不發送通知。
+ * 協議參考：https://developers.google.com/apps-script/guides/content#serving_jsonp_in_web_pages
  */
 var 智慧5S驗收本次執行已寫入_ = false;
 
@@ -14,7 +18,7 @@ function 智慧5S驗收設定_() {
     網址:'https://script.google.com/macros/s/AKfycby2ghuwkxTr1kbt2bU9D3U24O55c6GhcabA1IhDC67OEw86pH6MjS3nnBMASnjEmggw/exec',
     主庫ID:'19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8',
     分頁名稱:'5S_連線驗收',欄位:['驗收編號','狀態','備註','更新時間'],
-    收據協定:'SMART5S_RECEIPT_1391',工具修訂:'1.3.9.2',
+    收據協定:'SMART5S_RECEIPT_1391',工具修訂:'1.3.9.5',
     紀錄鍵:'智慧5S_正式驗收_v1391_最近批次'
   };
 }
@@ -148,12 +152,13 @@ function 驗證_智慧5S正式讀回_v1391() {
   var 保存 = PropertiesService.getUserProperties().getProperty(設定.紀錄鍵);
   智慧5S驗收要求_(!!保存,'請先執行第一階段「驗證_智慧5S正式部署_v1391」');
   var 紀錄 = JSON.parse(保存);
-  智慧5S驗收要求_(紀錄.工具修訂===設定.工具修訂 &&
+  // 舊工具的第一階段證據仍有效；只接受已知相同資料協議的版本。
+  智慧5S驗收要求_((紀錄.工具修訂===設定.工具修訂 || 紀錄.工具修訂==='1.3.9.2') &&
     (紀錄.階段==='等待獨立讀回' || 紀錄.階段==='驗收通過') &&
     紀錄.主庫ID===設定.主庫ID && 紀錄.分頁名稱===設定.分頁名稱,
     '本批次第一階段尚未通過或設定不符');
   var 必要 = ['新增','新增重送防重','更新','更新重送','衝突拒收','錯庫拒收','LINE空事件','V4唯讀'];
-  智慧5S驗收要求_(必要.every(function (鍵) { return 紀錄.檢查[鍵]===true; }),
+  智慧5S驗收要求_(紀錄.檢查 && 必要.every(function (鍵) { return 紀錄.檢查[鍵]===true; }),
     '本批次缺少 HTTP 驗收證據');
   var 階段 = '正式主庫獨立讀回';
   try {
@@ -178,14 +183,17 @@ function 驗證_智慧5S正式讀回_v1391() {
     智慧5S驗收核對GET_(設定,紀錄,false);
     紀錄.檢查.GET讀取 = true;
     階段 = '正式 JSONP 讀取';
-    智慧5S驗收核對GET_(設定,紀錄,true);
+    var 回呼驗收 = 智慧5S驗收核對GET_(設定,紀錄,true);
     紀錄.檢查.JSONP讀取 = true;
+    紀錄.JSONP外框 = 回呼驗收.外框;
+    紀錄.讀回工具修訂 = 設定.工具修訂;
     紀錄.階段 = '驗收通過';
     紀錄.完成時間 = new Date().toISOString();
     智慧5S驗收保存_(紀錄);
     var 結果 = {驗收:'通過',寫入版本:紀錄.寫入版本,工具修訂:設定.工具修訂,
       主庫ID:設定.主庫ID,驗收分頁:設定.分頁名稱,驗收編號:紀錄.驗收編號,
       列號:紀錄.列號,檢查:紀錄.檢查,本批驗收主鍵筆數:1,
+      第一階段工具修訂:紀錄.工具修訂,JSONP外框:紀錄.JSONP外框,
       手機56筆:'尚待原手機同步畫面及正式紀錄核對'};
     console.log(JSON.stringify(結果));
     return 結果;
@@ -221,15 +229,15 @@ function 智慧5S驗收核對GET_(設定, 紀錄, 使用JSONP) {
     method:'get',followRedirects:true,muteHttpExceptions:true});
   智慧5S驗收要求_(回應.getResponseCode()===200,'GET 的 HTTP 狀態非 200');
   var 文字 = 回應.getContentText().replace(/^\uFEFF/,'').trim();
-  if (使用JSONP) {
-    var 開頭 = 回呼+'(';
-    var 結尾長度 = 文字.slice(-2)===');' ? 2 : (文字.slice(-1)===')' ? 1 : 0);
-    智慧5S驗收要求_(文字.indexOf(開頭)===0 && 結尾長度>0,'JSONP 未回傳指定回呼');
-    文字 = 文字.slice(開頭.length,-結尾長度);
-  }
   var 回傳;
-  try { 回傳 = JSON.parse(文字); }
-  catch (錯誤) { throw new Error('驗收未通過：GET 未回傳可解析資料'); }
+  var 回呼解析;
+  if (使用JSONP) {
+    回呼解析 = 智慧5S驗收解析JSONP_(文字,回呼);
+    回傳 = 回呼解析.資料;
+  } else {
+    try { 回傳 = JSON.parse(文字); }
+    catch (錯誤) { throw new Error('驗收未通過：GET 未回傳可解析資料'); }
+  }
   var 主體 = 回傳;
   ['結果','result','data'].some(function (鍵) {
     if (回傳 && 回傳[鍵] && typeof 回傳[鍵]==='object' && !Array.isArray(回傳[鍵])) {
@@ -241,6 +249,8 @@ function 智慧5S驗收核對GET_(設定, 紀錄, 使用JSONP) {
     智慧5S驗收要求_(物件 && typeof 物件==='object' &&
       物件.成功!==false && 物件.ok!==false && 物件.success!==false &&
       !物件.error && !物件.錯誤,'GET 回傳失敗');
+    智慧5S驗收要求_(物件.主庫ID===undefined || 物件.主庫ID===設定.主庫ID,
+      'GET 回傳主庫不符');
   });
   var 欄位 = 主體.headers || 主體.欄位 || 主體.表頭 || 主體.columns ||
     回傳.headers || 回傳.欄位 || 回傳.表頭 || 回傳.columns || [];
@@ -257,4 +267,45 @@ function 智慧5S驗收核對GET_(設定, 紀錄, 使用JSONP) {
   var 命中 = 物件列.filter(function (項) { return 項.驗收編號===紀錄.驗收編號; });
   智慧5S驗收要求_(命中.length===1,'GET 未讀回唯一的本批驗收主鍵');
   智慧5S驗收核對內容_(命中[0],紀錄);
+  return {外框:使用JSONP ? 回呼解析.外框 : '一般JSON'};
+}
+
+/**
+ * 嚴格辨識兩種等價的回呼外框，不以任意腳本執行換取驗收成功。
+ * 1. 指定回呼(JSON);
+ * 2. typeof 指定回呼 === 'function' && 指定回呼(JSON);
+ * 可有前導註解／空白；條件與實際呼叫都必須使用同一指定回呼。
+ * 回呼內只能是 JSON；其他條件、第二個指令或錯誤回呼一律拒絕。
+ */
+function 智慧5S驗收解析JSONP_(原文, 回呼) {
+  智慧5S驗收要求_(typeof 回呼==='string' && /^[A-Za-z_$][0-9A-Za-z_$]*$/.test(回呼),
+    'JSONP 驗收回呼名稱不合法');
+  var 文字 = String(原文).replace(/^\uFEFF/,'').trim();
+  var 註解數 = 0;
+  // 不對全文刪註解，以免誤改 JSON 字串；涵蓋 JavaScript 四種行終止符。
+  for (var 次數=0;次數<20;次數++) {
+    var 註解 = /^(?:\/\*[\s\S]*?\*\/|\/\/[^\r\n\u2028\u2029]*(?:\r\n|[\r\n\u2028\u2029]|$))/.exec(文字);
+    if (!註解) break;
+    註解數++;
+    文字 = 文字.slice(註解[0].length).trim();
+  }
+  var 安全回呼 = 回呼.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  var 外框 = '直接回呼';
+  if (/^typeof\b/.test(文字)) {
+    var 保護樣式 = new RegExp('^typeof\\s+'+安全回呼+'\\s*===\\s*([\"\'])function\\1\\s*&&\\s*');
+    var 保護 = 保護樣式.exec(文字);
+    智慧5S驗收要求_(!!保護,'JSONP 回呼保護條件不符或使用其他回呼');
+    外框 = '函式存在保護回呼';
+    文字 = 文字.slice(保護[0].length);
+  }
+  var 開頭 = new RegExp('^'+安全回呼+'\\s*\\(').exec(文字);
+  var 結尾 = /\)\s*;?$/.exec(文字);
+  智慧5S驗收要求_(!!開頭 && !!結尾 && 結尾.index>=開頭[0].length,
+    'JSONP 未回傳指定回呼或含額外指令');
+  var 資料;
+  try { 資料 = JSON.parse(文字.slice(開頭[0].length,結尾.index)); }
+  catch (錯誤) { throw new Error('驗收未通過：JSONP 回呼內不是單一 JSON 資料'); }
+  智慧5S驗收要求_(資料 && typeof 資料==='object' && !Array.isArray(資料),
+    'JSONP 回呼內不是資料物件');
+  return {資料:資料,外框:外框,前導註解數:註解數};
 }
