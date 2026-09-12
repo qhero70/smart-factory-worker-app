@@ -2,8 +2,8 @@ window.智慧5S設定 = Object.freeze({
   系統名稱: '化新精密｜製一｜智慧5S',
   系統短名: '製一｜智慧5S',
   PWA顯示名稱: '製一｜智慧5S',
-  版本: '1.3.8',
-  入口版本碼: '1380',
+  版本: '1.3.9.1',
+  入口版本碼: '1391',
   登入模式: '每次新工作階段需登入',
   Roar事件通知: true,
   A5標準照片顯示模式: 'PWA離線優先＋中央背景同步',
@@ -17,7 +17,7 @@ window.智慧5S設定 = Object.freeze({
   ISO巡檢表版次: 'A/0',
   巡檢存檔編號規則: '5S-REC-{區域}-{機台}-{YYYYMMDD}-{NNN}',
   紅牌列印版型: 'A4半張（A5 148×210mm）',
-  後端網址: 'https://script.google.com/macros/s/AKfycbzRvly1OV-C80bMmd2ww4BM1XAH9WTyz62VFDnUxVGiO15kzHahbeHZc2bNTSwdFCqBwQ/exec',
+  後端網址: 'https://script.google.com/macros/s/AKfycby2ghuwkxTr1kbt2bU9D3U24O55c6GhcabA1IhDC67OEw86pH6MjS3nnBMASnjEmggw/exec',
   試算表識別碼: '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8',
   Google試算表直讀備援: true,
   讀取上限: 5000,
@@ -40,17 +40,17 @@ window.智慧5S設定 = Object.freeze({
 });
 
 (function(){
-  const id='智慧5S稽核標準0821_v1380';
+  const id='智慧5S稽核標準0821_v1391';
   if(!document.getElementById(id)){
     const s=document.createElement('script');
     s.id=id;
-    s.src='./智慧5S_稽核標準0821_v1310.js?v=1380';
+    s.src='./智慧5S_稽核標準0821_v1310.js?v=1391';
     s.async=false;
     document.head.appendChild(s);
   }
   if('serviceWorker' in navigator){
     window.addEventListener('load',()=>{
-      navigator.serviceWorker.register('./離線服務.js?v=1380',{scope:'./'}).then(reg=>{
+      navigator.serviceWorker.register('./離線服務.js?v=1391',{scope:'./'}).then(reg=>{
         if(reg.waiting)reg.waiting.postMessage('立即啟用新版');
         reg.update().catch(()=>{});
       }).catch(()=>{});
