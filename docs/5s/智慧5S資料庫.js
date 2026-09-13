@@ -6,6 +6,7 @@
   const 本機資料庫版本 = 1;
   const 佇列表名稱 = '待同步佇列';
   let 本機資料庫連線 = null;
+  let 同步進行中 = null;
 
   /**
    * 正式 NEXUS OS 舊主檔 API 與智慧5S新 API 雙協議對照。
@@ -186,14 +187,32 @@
         signal: 逾時.控制器.signal
       });
       const 資料 = 解析回應文字(await 回應.text());
+      if (!回應.ok) throw new Error(`後端寫入失敗（${回應.status}）`);
       if (資料 && 資料.ok === false) throw new Error(資料.error || 資料.訊息 || 資料.message || '後端寫入失敗');
       if (資料 && 資料.成功 === false) throw new Error(資料.訊息 || 資料.message || '後端寫入失敗');
+      if (!資料 || 資料.success === false) throw new Error(資料 && (資料.訊息 || 資料.message) || '後端未確認寫入成功');
+      if (動作 === 'appendRow' || 動作 === 'updateRow') 核對寫入收據(資料, 動作, 參數);
       return 資料;
     } catch (錯誤) {
       if (錯誤 && 錯誤.name === 'AbortError') throw new Error('後端寫入逾時');
       throw 錯誤;
     } finally {
       逾時.清除();
+    }
+  }
+
+  function 核對寫入收據(收據, 動作, 參數) {
+    const 欄位 = 參數.headers || 參數.欄位 || [];
+    const 值 = 參數.values || 參數.值 || [];
+    const 物件 = 參數.row || 參數.object || 參數.資料 || {};
+    const 主鍵序 = Array.isArray(欄位) ? 欄位.indexOf(收據.主鍵欄位) : -1;
+    const 主鍵值 = 主鍵序 >= 0 ? 值[主鍵序] : 物件[收據.主鍵欄位];
+    if (收據.成功 !== true || 收據.ok !== true || 收據.success !== true ||
+        收據.協定 !== 'SMART5S_RECEIPT_1391' || 收據.主庫ID !== 設定.試算表識別碼 ||
+        收據.action !== 動作 || 收據.sheet !== 參數.sheet ||
+        !Number.isInteger(收據.rowNumber) || 收據.rowNumber < 2 ||
+        !收據.主鍵欄位 || 主鍵值 == null || String(主鍵值) !== 收據.主鍵值) {
+      throw new Error('後端未提供相符的寫入收據，待同步資料已保留');
     }
   }
 
@@ -338,18 +357,26 @@
   }
 
   async function 送出或排隊(工作) {
+    // 先持久保存，再送出；逾時、錯誤及不完整收據都不會遺失原始工作。
+    const 佇列工作 = await 佇列新增(工作);
     try {
-      const 結果 = await 執行工作(工作);
+      const 結果 = await 執行工作(佇列工作);
+      await 佇列刪除(佇列工作.本機識別碼);
       return { 已同步: true, 已排隊: false, 結果 };
     } catch (錯誤) {
-      const 可排隊 = !navigator.onLine || /離線|Failed to fetch|NetworkError|逾時|Load failed/i.test(String(錯誤.message || 錯誤));
-      if (!可排隊) throw 錯誤;
-      const 佇列工作 = await 佇列新增(工作);
+      await 佇列更新錯誤(佇列工作, 錯誤.message || 錯誤);
       return { 已同步: false, 已排隊: true, 佇列工作, 錯誤 };
     }
   }
 
   async function 同步佇列(進度回呼) {
+    if (同步進行中) return 同步進行中;
+    同步進行中 = 執行佇列同步(進度回呼);
+    try { return await 同步進行中; }
+    finally { 同步進行中 = null; }
+  }
+
+  async function 執行佇列同步(進度回呼) {
     if (!navigator.onLine) return { 成功: 0, 失敗: 0, 剩餘: (await 佇列全部()).length };
     const 全部工作 = await 佇列全部();
     let 成功 = 0;
