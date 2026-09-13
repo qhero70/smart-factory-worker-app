@@ -6,8 +6,30 @@
  * 部署前須核對原入口的既有權限檢查，並執行正式 HTTP 驗收。
  */
 var 智慧5S_POST寫入修復版本_ = '1.3.9.1';
+// 收據協定相容；獨立標示本次主鍵對照修訂，供正式部署唯讀核對。
+var 智慧5S_POST主鍵修訂_ = '1.3.9.2';
 var 智慧5S_POST正式主庫ID_ = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
 var 智慧5S_POST收據協定_ = 'SMART5S_RECEIPT_1391';
+
+/** 更新原部署後手動執行。只查健康狀態，不寫表、不通知、不動手機。 */
+function 驗證智慧5S正式主鍵修訂() {
+  var 網址 = 'https://script.google.com/macros/s/AKfycby2ghuwkxTr1kbt2bU9D3U24O55c6GhcabA1IhDC67OEw86pH6MjS3nnBMASnjEmggw/exec';
+  var 回應 = UrlFetchApp.fetch(網址, {method:'post',contentType:'text/plain;charset=utf-8',
+    payload:JSON.stringify({action:'智慧5S_寫入健康檢查'}),followRedirects:true,muteHttpExceptions:true});
+  if (回應.getResponseCode() !== 200) throw new Error('正式健康檢查 HTTP 未成功');
+  var 健康;
+  try { 健康 = JSON.parse(回應.getContentText()); }
+  catch (錯誤) { throw new Error('正式健康檢查未回傳 JSON'); }
+  if (!健康 || 健康.成功 !== true || 健康.ok !== true || 健康.success !== true ||
+      健康.主庫ID !== 智慧5S_POST正式主庫ID_ || 健康.協定 !== 智慧5S_POST收據協定_ ||
+      健康.主鍵修訂 !== 智慧5S_POST主鍵修訂_) {
+    throw new Error('正式部署尚未確認主鍵修訂 1.3.9.2，請確認更新的是原部署');
+  }
+  var 結果 = {部署主鍵修訂:'通過',主鍵修訂:健康.主鍵修訂,寫入版本:健康.版本,
+    主庫ID:健康.主庫ID,本次正式資料寫入:false,手機56筆:'尚待原手機同步及正式紀錄核對'};
+  console.log(JSON.stringify(結果));
+  return 結果;
+}
 
 function 智慧5S_POST通用接收_(請求) {
   var 參數 = 智慧5S_POST解析參數_(請求);
@@ -22,7 +44,7 @@ function 智慧5S_POST通用接收_(請求) {
   }
   if (動作 === '智慧5S_寫入健康檢查') {
     return {成功:true,ok:true,success:true,協定:智慧5S_POST收據協定_,
-      主庫ID:智慧5S_POST正式主庫ID_,版本:智慧5S_POST寫入修復版本_};
+      主庫ID:智慧5S_POST正式主庫ID_,版本:智慧5S_POST寫入修復版本_,主鍵修訂:智慧5S_POST主鍵修訂_};
   }
   if (動作.indexOf('智慧5S_') !== 0) return null;
   if (typeof 智慧5S_嘗試處理動作_ !== 'function') return 智慧5S_POST失敗_('智慧5S後端擴充模組尚未載入');
@@ -149,9 +171,13 @@ function 智慧5S_POST主鍵欄位_(分頁名稱, 欄位) {
   var 對照 = {
     '5S_巡檢主檔':'巡檢單號','5S_巡檢明細':'明細編號','5S_巡檢存檔索引':'存檔編號',
     '5S_改善單':'改善單號','5S_改善歷程':'歷程編號','5S_全物品盤點':'盤點編號',
-    '5S_紅牌追蹤':'紅牌編號','5S_紅牌列印紀錄':'列印編號','5S_紅牌處置歷程':'歷程編號',
+    '5S_紅牌追蹤':'紅牌編號','5S_紅牌列印紀錄':'列印紀錄編號','5S_紅牌處置歷程':'歷程編號',
     '5S_非必要品處置':'處置單號','5S_照片':'照片編號','5S_通知紀錄':'通知編號',
-    '5S_連線驗收':'驗收編號'
+    '5S_連線驗收':'驗收編號',
+    // 與原 PWA 寫入欄位一致；不可猜第一欄或由請求自行指定主鍵。
+    '5S_標準照片主檔':'標準照片編號','5S_製一組換線標準':'換線標準編號',
+    '5S_標準對照卡':'對照卡編號','5S_責任區主檔':'責任區編號',
+    '5S_導入進度':'區域代碼','5S_稽核週期':'區域代碼'
   };
   var 主鍵 = 對照[分頁名稱] || '';
   return 欄位.indexOf(主鍵) >= 0 ? 主鍵 : '';

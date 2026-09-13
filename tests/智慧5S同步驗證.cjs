@@ -1,4 +1,5 @@
 // 僅使用合成資料及記憶體替身；不連 Google、不讀取手機資料。
+
 const 測試 = require('node:test');
 const 斷言 = require('node:assert/strict');
 const 檔案 = require('node:fs');
@@ -50,12 +51,12 @@ class 模擬分頁 {
   }
 }
 
-function 建立後端() {
-  const 分頁=new 模擬分頁(['巡檢單號','狀態','備註','合計']);
+function 建立後端(分頁名稱='5S_巡檢主檔', 主鍵='巡檢單號') {
+  const 分頁=new 模擬分頁([主鍵,'狀態','備註','合計']);
   let 持鎖=false;
   const 環境=虛擬機.createContext({Date,console,
     LockService:{getScriptLock:()=>({waitLock:()=>{if(持鎖)throw Error('鎖忙碌');持鎖=true;},releaseLock:()=>{持鎖=false;}})},
-    SpreadsheetApp:{openById:編號=>{斷言.equal(編號,正式主庫);return {getSheetByName:名稱=>名稱==='5S_巡檢主檔'?分頁:null};},flush:()=>{}}
+    SpreadsheetApp:{openById:編號=>{斷言.equal(編號,正式主庫);return {getSheetByName:名稱=>名稱===分頁名稱?分頁:null};},flush:()=>{}}
   });
   虛擬機.runInContext(後端文字,環境);
   return {分頁,環境,接收:請求=>環境.智慧5S_POST通用接收_(請求)};
@@ -216,4 +217,41 @@ const 回應=資料=>({ok:true,status:200,text:async()=>JSON.stringify(資料)})
   虛擬機.runInContext(程式,環境);
   await new Promise(完成=>事件.activate({waitUntil:程序=>程序.then(完成)}));
   斷言.equal(接管,1);斷言.equal((await 環境.取得快取回應('設定.js')).版本,'本版');
+});
+
+
+const 修正分頁 = [
+  ['5S_標準照片主檔','標準照片編號'],['5S_製一組換線標準','換線標準編號'],
+  ['5S_標準對照卡','對照卡編號'],['5S_責任區主檔','責任區編號'],
+  ['5S_導入進度','區域代碼'],['5S_稽核週期','區域代碼'],
+  ['5S_紅牌列印紀錄','列印紀錄編號']
+];
+for (const [名稱,主鍵] of 修正分頁) {
+  測試(名稱+'：舊佇列新增、重送與主鍵更新保持唯一', async()=>{
+    const 後端=建立後端(名稱,主鍵);
+    const 舊工作={...工作(1),分頁名稱:名稱,欄位:[主鍵,'狀態','備註'],值:['合成-001','待處理','原資料']};
+    const 儲存=建立本機儲存([舊工作]);
+    const 前端=建立前端(儲存,async(網址,選項)=>回應(後端.接收({postData:{contents:選項.body}})));
+    斷言.deepEqual(複製(await 前端.同步佇列()),{成功:1,失敗:0,剩餘:0});
+    const 參數={action:'appendRow',sheet:名稱,headers:舊工作.欄位,values:舊工作.值};
+    const 重送=後端.接收(參數);
+    斷言.equal(重送.重複請求,true);斷言.equal(重送.主鍵欄位,主鍵);
+    斷言.equal(後端.接收({...參數,values:['合成-001','衝突','原資料']}).成功,false);
+    後端.分頁.getRange(2,4).setValues([['=SUM(1,2)']]);
+    const 更新=後端.接收({action:'updateRow',sheet:名稱,rowNumber:999999,headers:[主鍵,'狀態'],values:['合成-001','已更新']});
+    斷言.equal(更新.成功,true);斷言.equal(更新.rowNumber,2);
+    斷言.equal(後端.分頁.getLastRow(),2);斷言.equal(後端.分頁.列[1][2],'原資料');
+    斷言.equal(後端.分頁.公式['2:4'],'=SUM(1,2)');
+  });
+}
+測試('主鍵修訂仍拒絕未知分頁、錯列印欄位及重複區域主鍵',()=>{
+  const 未知=建立後端('5S_未知','自訂主鍵');
+  斷言.equal(未知.接收({action:'appendRow',sheet:'5S_未知',headers:['自訂主鍵'],values:['A']}).成功,false);
+  const 列印=建立後端('5S_紅牌列印紀錄','列印編號');
+  斷言.equal(列印.接收({action:'appendRow',sheet:'5S_紅牌列印紀錄',headers:['列印編號'],values:['A']}).成功,false);
+  const 區域=建立後端('5S_稽核週期','區域代碼');
+  區域.分頁.列.push(['A5','原狀態'],['A5','另一列']);
+  斷言.equal(區域.接收({action:'updateRow',sheet:'5S_稽核週期',headers:['區域代碼','狀態'],values:['A5','新狀態']}).成功,false);
+  斷言.equal(區域.分頁.寫入次數,0);
+  斷言.equal(區域.接收({action:'智慧5S_寫入健康檢查'}).主鍵修訂,'1.3.9.2');
 });
