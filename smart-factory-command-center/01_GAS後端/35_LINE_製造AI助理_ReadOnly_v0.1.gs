@@ -46,6 +46,7 @@ function LINE製造AI助理35_處理單一事件_(ev) {
   var text = LINE製造AI助理35_文字_(ev.message.text);
   var replyToken = ev.replyToken;
   var lineUserId = LINE製造AI助理35_文字_(ev.source && ev.source.userId);
+  var sourceType = LINE製造AI助理35_文字_(ev.source && ev.source.type);
   if (!text || !replyToken) return null;
 
   var isHelp = /^(製造AI|AI助理|製造助理|製造AI助理|AI製造助理)$/i.test(text);
@@ -53,6 +54,11 @@ function LINE製造AI助理35_處理單一事件_(ev) {
   var partNo = LINE製造AI助理35_解析料號_(text);
 
   if (!isHelp && !(hasIntent && partNo)) return null;
+
+  if (sourceType !== 'user') {
+    LINE製造AI助理35_回覆_(replyToken, '🔐 製造資料查詢請在 Bot 一對一聊天室操作。');
+    return { 已處理: true, success: false, errorCode: 'PRIVATE_CHAT_REQUIRED' };
+  }
 
   var 身份檢查 = LINE製造AI助理35_驗證查詢權限_(lineUserId);
   if (!身份檢查.允許) {
@@ -68,6 +74,7 @@ function LINE製造AI助理35_處理單一事件_(ev) {
       '我會透過 Manufacturing Agent Gateway 查詢正式來源。\n' +
       '查不到的資料會顯示「目前查無資料」，不會自行補數字。'
     );
+    LINE製造AI助理35_寫稽核_(身份檢查.身份, text, 'HELP', '已回覆', '');
     return { 已處理: true, success: true, intent: 'HELP' };
   }
 
@@ -105,6 +112,13 @@ function LINE製造AI助理35_處理單一事件_(ev) {
   }
 
   LINE製造AI助理35_回覆_(replyToken, LINE製造AI助理35_格式化製造狀態_(partNo, result));
+  LINE製造AI助理35_寫稽核_(
+    身份檢查.身份,
+    text,
+    '製造AI',
+    result && result.success ? '已回覆' : '查無資料',
+    'partNo=' + partNo + '｜' + (result && result.errorCode ? result.errorCode : 'OK')
+  );
   return {
     已處理: true,
     success: !!(result && result.success),
@@ -175,6 +189,9 @@ function LINE製造AI助理35_格式化製造狀態_(partNo, result) {
     '機台：' + LINE製造AI助理35_值_(current.machineId),
     '最後報工：' + LINE製造AI助理35_值_(current.lastReportedAt),
     '',
+    '【標準途程（不是即時位置）】',
+    LINE製造AI助理35_途程摘要_(d.routing),
+    '',
     '【品質】',
     '不良數：' + LINE製造AI助理35_值_(quality.defectQty),
     'AI Vision：' + LINE製造AI助理35_來源文字_(sources.vision),
@@ -215,6 +232,27 @@ function LINE製造AI助理35_值_(v) {
 function LINE製造AI助理35_百分比_(v) {
   if (v === null || v === undefined || String(v).trim() === '') return '目前查無資料';
   return String(v) + '%';
+}
+
+function LINE製造AI助理35_途程摘要_(routing) {
+  if (!Array.isArray(routing) || !routing.length) return '目前查無資料';
+  return routing.slice(0, 8).map(function(r, i) {
+    var seq = LINE製造AI助理35_值_(r && r.sequence);
+    var processId = LINE製造AI助理35_值_(r && r.processId);
+    var stationId = LINE製造AI助理35_值_(r && r.stationId);
+    var machineList = LINE製造AI助理35_值_(r && r.machineList);
+    return (i + 1) + '. 順序 ' + seq + '｜' + processId + '｜工站 ' + stationId + '｜機台 ' + machineList;
+  }).join('\n');
+}
+
+function LINE製造AI助理35_寫稽核_(身份, text, 分類, 結果, 備註) {
+  try {
+    if (typeof LINE指令中心37_寫入紀錄_ === 'function') {
+      LINE指令中心37_寫入紀錄_(身份 || {}, text || '', 分類 || '製造AI', 結果 || '', 備註 || '');
+    }
+  } catch (err) {
+    if (typeof console !== 'undefined' && console.warn) console.warn('製造AI助理稽核紀錄失敗：' + String(err && err.message || err));
+  }
 }
 
 function LINE製造AI助理35_回覆_(replyToken, text) {
