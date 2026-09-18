@@ -193,31 +193,93 @@ function 製造AI閘道_getProductionProgress_(partNo, queryDate) {
 function 製造AI閘道_getRouting_(partNo) {
   if (!partNo) return 製造AI閘道_缺參數_('partNo');
   try {
-    var table = 製造AI閘道_讀表_(製造AI閘道_工作表_.工站途程);
-    var rows = 製造AI閘道_篩選精確_(table, ['產品編號'], partNo);
+    var rows = 製造AI閘道_讀工站途程標準化_().filter(function(r) {
+      return 製造AI閘道_文字_(r.partNo) === 製造AI閘道_文字_(partNo);
+    });
     if (!rows.length) return 製造AI閘道_無資料_(製造AI閘道_工作表_.工站途程);
 
-    var data = rows.map(function(r) {
-      return {
-        routeId: 製造AI閘道_取_(r, ['途程編號', '途程ID', 'routeId']),
-        partNo: 製造AI閘道_取_(r, ['產品編號']),
-        customerPartNo: 製造AI閘道_取_(r, ['客戶品號']),
-        partName: 製造AI閘道_取_(r, ['品名']),
-        sequence: 製造AI閘道_取_(r, ['順序', '工站順序', '序號']),
-        processId: 製造AI閘道_取_(r, ['工序', '綁定工序', '工序範圍']),
-        processName: 製造AI閘道_取_(r, ['工序名稱', '工站名稱', '作業內容']),
-        stationId: 製造AI閘道_取_(r, ['工站名稱', '工站', '區域']),
-        machineId: 製造AI閘道_取_(r, ['主機台', '機台', '機台編號']),
-        machineList: 製造AI閘道_取_(r, ['機台清單', '機台列表']),
-        capacity8H: 製造AI閘道_取數_(r, ['8H產能', '產能8H']),
-        standardTime: 製造AI閘道_取數_(r, ['標準工時']),
-        enabled: 製造AI閘道_取_(r, ['啟用'])
-      };
-    });
-    return 製造AI閘道_成功_({ partNo: partNo, routing: data }, 製造AI閘道_工作表_.工站途程);
+    return 製造AI閘道_成功_({ partNo: partNo, routing: rows }, 製造AI閘道_工作表_.工站途程);
   } catch (err) {
     return 製造AI閘道_錯誤_(製造AI閘道_工作表_.工站途程, 'ADAPTER_ERROR', err);
   }
+}
+
+/**
+ * 08_工站途程機台主檔目前正式資料列比標題列多一個 routeId 欄位，
+ * 例如 A=ROUTE-00088、B=A916000000。若直接依標題列轉物件，partNo 會錯位。
+ * 本 Adapter 依已核對的正式欄位位置讀取，不修改來源 Sheet。
+ */
+function 製造AI閘道_讀工站途程標準化_() {
+  var sh = 製造AI閘道_主庫_().getSheetByName(製造AI閘道_工作表_.工站途程);
+  if (!sh) throw new Error('找不到工作表：' + 製造AI閘道_工作表_.工站途程);
+
+  var lastRow = sh.getLastRow();
+  var lastCol = Math.min(sh.getLastColumn(), 24);
+  if (lastRow < 2 || lastCol < 2) return [];
+
+  var values = sh.getRange(2, 1, lastRow - 1, lastCol).getDisplayValues();
+  return values.filter(function(raw) {
+    return raw.some(function(v) { return 製造AI閘道_文字_(v) !== ''; });
+  }).map(function(raw) {
+    var routeId = 製造AI閘道_文字_(raw[0]);
+    var isShiftedFormalRow = /^ROUTE-/i.test(routeId);
+
+    if (isShiftedFormalRow) {
+      return {
+        routeId: routeId || null,
+        partNo: 製造AI閘道_空轉Null_(raw[1]),
+        customerPartNo: 製造AI閘道_空轉Null_(raw[2]),
+        partName: 製造AI閘道_空轉Null_(raw[3]),
+        sequence: 製造AI閘道_數值或文字_(raw[4]),
+        processId: 製造AI閘道_空轉Null_(raw[5]),
+        processName: 製造AI閘道_空轉Null_(raw[7]),
+        stationId: 製造AI閘道_空轉Null_(raw[8]),
+        machineId: null,
+        machineList: 製造AI閘道_空轉Null_(raw[21] || raw[10]),
+        capacity8H: 製造AI閘道_數值或Null_(raw[22]),
+        standardTime: 製造AI閘道_數值或Null_(raw[23]),
+        enabled: 製造AI閘道_空轉Null_(raw[18]),
+        sourceRowShape: 'SHIFTED_WITH_ROUTE_ID'
+      };
+    }
+
+    // 相容未錯位舊資料列；保守使用原標題定義，不猜 routeId。
+    return {
+      routeId: null,
+      partNo: 製造AI閘道_空轉Null_(raw[0]),
+      customerPartNo: 製造AI閘道_空轉Null_(raw[1]),
+      partName: 製造AI閘道_空轉Null_(raw[2]),
+      sequence: 製造AI閘道_數值或文字_(raw[3]),
+      processId: null,
+      processName: 製造AI閘道_空轉Null_(raw[4]),
+      stationId: 製造AI閘道_空轉Null_(raw[4]),
+      machineId: 製造AI閘道_空轉Null_(raw[5]),
+      machineList: 製造AI閘道_空轉Null_(raw[7]),
+      capacity8H: 製造AI閘道_數值或Null_(raw[9]),
+      standardTime: 製造AI閘道_數值或Null_(raw[8]),
+      enabled: 製造AI閘道_空轉Null_(raw[10]),
+      sourceRowShape: 'HEADER_ALIGNED'
+    };
+  });
+}
+
+function 製造AI閘道_空轉Null_(v) {
+  var s = 製造AI閘道_文字_(v);
+  return s === '' ? null : s;
+}
+
+function 製造AI閘道_數值或Null_(v) {
+  var s = 製造AI閘道_文字_(v);
+  if (s === '') return null;
+  var n = Number(String(s).replace(/,/g, '').trim());
+  return isFinite(n) ? n : null;
+}
+
+function 製造AI閘道_數值或文字_(v) {
+  var s = 製造AI閘道_文字_(v);
+  if (s === '') return null;
+  var n = Number(String(s).replace(/,/g, '').trim());
+  return isFinite(n) ? n : s;
 }
 
 function 製造AI閘道_getMachineStatus_(machineId) {
