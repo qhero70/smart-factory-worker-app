@@ -5,6 +5,7 @@ on:
     paths:
       - 'smart-factory-command-center/01_GAS後端/總控_38_6_doPost最終接線.gs'
       - 'smart-factory-command-center/01_GAS後端/35_LINE_製造AI助理_ReadOnly_v0.1.gs'
+      - 'smart-factory-command-center/01_GAS後端/41_LINE_製造AI助理_啟用閘門_v0.1.gs'
       - 'smart-factory-command-center/08_測試與驗收/35_LINE_製造AI助理_v0.1_驗收.gs'
       - 'gas/製造AI中央閘道_v0.1.gs'
       - '.github/workflows/line-manufacturing-ai-agent.yml'
@@ -24,12 +25,13 @@ jobs:
         run: |
           test -f 'smart-factory-command-center/01_GAS後端/總控_38_6_doPost最終接線.gs'
           test -f 'smart-factory-command-center/01_GAS後端/35_LINE_製造AI助理_ReadOnly_v0.1.gs'
+          test -f 'smart-factory-command-center/01_GAS後端/41_LINE_製造AI助理_啟用閘門_v0.1.gs'
           test -f 'smart-factory-command-center/08_測試與驗收/35_LINE_製造AI助理_v0.1_驗收.gs'
           test -f 'gas/製造AI中央閘道_v0.1.gs'
 
       - name: GAS JavaScript 語法檢查
         run: |
-          for file in             'smart-factory-command-center/01_GAS後端/總控_38_6_doPost最終接線.gs'             'smart-factory-command-center/01_GAS後端/35_LINE_製造AI助理_ReadOnly_v0.1.gs'             'smart-factory-command-center/08_測試與驗收/35_LINE_製造AI助理_v0.1_驗收.gs'             'gas/製造AI中央閘道_v0.1.gs'
+          for file in             'smart-factory-command-center/01_GAS後端/總控_38_6_doPost最終接線.gs'             'smart-factory-command-center/01_GAS後端/35_LINE_製造AI助理_ReadOnly_v0.1.gs'             'smart-factory-command-center/01_GAS後端/41_LINE_製造AI助理_啟用閘門_v0.1.gs'             'smart-factory-command-center/08_測試與驗收/35_LINE_製造AI助理_v0.1_驗收.gs'             'gas/製造AI中央閘道_v0.1.gs'
           do
             echo "Checking $file"
             node --check < "$file"
@@ -42,6 +44,8 @@ jobs:
           grep -q 'Read Only' 'smart-factory-command-center/01_GAS後端/35_LINE_製造AI助理_ReadOnly_v0.1.gs'
           grep -q 'fail-closed' 'smart-factory-command-center/01_GAS後端/35_LINE_製造AI助理_ReadOnly_v0.1.gs'
           grep -q '驗收35_LINE製造AI助理_全部' 'smart-factory-command-center/08_測試與驗收/35_LINE_製造AI助理_v0.1_驗收.gs'
+          grep -q '驗收並啟用41_LINE製造AI助理' 'smart-factory-command-center/01_GAS後端/41_LINE_製造AI助理_啟用閘門_v0.1.gs'
+          grep -q "啟用: '否'" 'smart-factory-command-center/01_GAS後端/41_LINE_製造AI助理_啟用閘門_v0.1.gs'
 
       - name: 禁止正式寫入動作滲入 AI 助理
         run: |
