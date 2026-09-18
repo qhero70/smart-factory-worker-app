@@ -22,6 +22,10 @@ function doPost(e) {
   const action = String((p && (p.action || p['動作'])) || '').trim();
 
   if (p && p.events && Array.isArray(p.events)) {
+    if (typeof LINE製造AI助理35_嘗試處理Webhook_ === 'function') {
+      var 製造AI助理結果 = LINE製造AI助理35_嘗試處理Webhook_(p);
+      if (製造AI助理結果 && 製造AI助理結果.已處理) return 主程式_安全輸出JSON_(製造AI助理結果);
+    }
     if (typeof LINE主管戰情日期快選_嘗試處理Webhook_ === 'function') {
       var 日期快選結果 = LINE主管戰情日期快選_嘗試處理Webhook_(p);
       if (日期快選結果 && 日期快選結果.已處理) return 主程式_安全輸出JSON_(日期快選結果);
