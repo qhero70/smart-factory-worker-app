@@ -8,7 +8,7 @@
  * 完整覆蓋此檔後，將同一個網頁應用程式部署更新為「新版本」。
  * doPost、events、postData 等英文名稱是 GAS／LINE 固定協定欄位。
  */
-var 製一LINE正式接線版本_ = 'v1.9.5';
+var 製一LINE正式接線版本_ = 'v1.9.6_LINE製造AI助理_ReadOnly';
 
 function doPost(請求) {
   if (!請求) throw new Error('這是 LINE Webhook 入口，不要在編輯器直接執行。');
@@ -99,6 +99,8 @@ function 製一LINE正式接線_分派_(內容) {
       ? LINE角色分流34_嘗試處理Webhook_ : null],
     ['指令中心與我的狀態', typeof LINE指令中心37_嘗試處理Webhook_ === 'function'
       ? LINE指令中心37_嘗試處理Webhook_ : null],
+    ['製造AI助理', typeof LINE製造AI助理35_嘗試處理Webhook_ === 'function'
+      ? LINE製造AI助理35_嘗試處理Webhook_ : null],
     ['身份權限', typeof LINE身份權限_嘗試處理Webhook_ === 'function'
       ? LINE身份權限_嘗試處理Webhook_ : null],
     ['主管快捷戰情', typeof LINE主管快捷戰情68_嘗試處理Webhook_ === 'function'
