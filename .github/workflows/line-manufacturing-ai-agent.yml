@@ -1,0 +1,49 @@
+name: LINE 製造 AI 助理 PR 驗收
+
+on:
+  pull_request:
+    paths:
+      - 'gas/00_主程式_doPost_正式版_v30.gs'
+      - 'gas/35_LINE製造AI助理_ReadOnly_v0.1.gs'
+      - 'gas/35_LINE製造AI助理_驗收測試_v0.1.gs'
+      - 'gas/製造AI中央閘道_v0.1.gs'
+      - '.github/workflows/line-manufacturing-ai-agent.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: 檢查必要檔案
+        run: |
+          test -f 'gas/00_主程式_doPost_正式版_v30.gs'
+          test -f 'gas/35_LINE製造AI助理_ReadOnly_v0.1.gs'
+          test -f 'gas/35_LINE製造AI助理_驗收測試_v0.1.gs'
+          test -f 'gas/製造AI中央閘道_v0.1.gs'
+
+      - name: GAS JavaScript 語法檢查
+        run: |
+          for file in             'gas/00_主程式_doPost_正式版_v30.gs'             'gas/35_LINE製造AI助理_ReadOnly_v0.1.gs'             'gas/35_LINE製造AI助理_驗收測試_v0.1.gs'             'gas/製造AI中央閘道_v0.1.gs'
+          do
+            echo "Checking $file"
+            node --check < "$file"
+          done
+
+      - name: 安全邊界檢查
+        run: |
+          grep -q 'LINE製造AI助理35_嘗試處理Webhook_' 'gas/00_主程式_doPost_正式版_v30.gs'
+          grep -q 'getManufacturingStatus' 'gas/製造AI中央閘道_v0.1.gs'
+          grep -q 'Read Only' 'gas/35_LINE製造AI助理_ReadOnly_v0.1.gs'
+          grep -q 'fail-closed' 'gas/35_LINE製造AI助理_ReadOnly_v0.1.gs'
+          grep -q '驗收35_LINE製造AI助理_全部' 'gas/35_LINE製造AI助理_驗收測試_v0.1.gs'
+
+      - name: 禁止正式寫入動作滲入 AI 助理
+        run: |
+          ! grep -nE '寫入報工|confirmIncomingReceipt|HOLD|正式放行|appendRow\(' 'gas/35_LINE製造AI助理_ReadOnly_v0.1.gs'
+          echo 'LINE 製造 AI 助理 Read Only 邊界檢查通過'
