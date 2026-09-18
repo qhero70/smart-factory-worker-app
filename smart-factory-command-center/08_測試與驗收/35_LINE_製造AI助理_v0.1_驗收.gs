@@ -44,6 +44,8 @@ function 驗收35_LINE製造AI助理_A916000000_唯讀() {
 
   var reply = LINE製造AI助理35_格式化製造狀態_(partNo, result);
   if (reply.indexOf(partNo) < 0) errors.push('LINE 回覆未包含料號');
+  if (reply.indexOf('標準途程（不是即時位置）') < 0) errors.push('LINE 回覆未清楚區分標準途程與即時位置');
+  if (reply.indexOf('ROUTE-00088') >= 0 || reply.indexOf('ROUTE-00089') >= 0) errors.push('LINE 回覆不應直接把 routeId 當成現場位置');
   if (reply.indexOf('目前查無資料') < 0 && reply.indexOf('NO_DATA') < 0) {
     errors.push('LINE 回覆未呈現資料缺口');
   }
@@ -66,7 +68,8 @@ function 驗收35_LINE製造AI助理_料號解析() {
     { text: 'A916000000 今天做到哪裡？', expected: 'A916000000' },
     { text: '查 A916000000 生產進度', expected: 'A916000000' },
     { text: 'manufacturing status', expected: '' },
-    { text: '今天做到哪裡', expected: '' }
+    { text: '今天做到哪裡', expected: '' },
+    { text: '製造AI', expected: '' }
   ];
   var rows = cases.map(function(c) {
     var actual = LINE製造AI助理35_解析料號_(c.text);
