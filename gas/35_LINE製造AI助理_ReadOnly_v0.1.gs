@@ -10,7 +10,7 @@
  */
 
 var LINE製造AI助理35_版本_ = '0.1.0';
-var LINE製造AI助理35_料號規則_ = /\b([A-Za-z][A-Za-z0-9_-]{5,19})\b/;
+var LINE製造AI助理35_料號規則_ = /\b(?=[A-Za-z0-9_-]*\d)([A-Za-z][A-Za-z0-9_-]{5,19})\b/;
 
 function LINE製造AI助理35_嘗試處理Webhook_(payload) {
   var events = Array.isArray(payload && payload.events) ? payload.events : [];
@@ -121,19 +121,23 @@ function LINE製造AI助理35_解析料號_(text) {
 function LINE製造AI助理35_驗證查詢權限_(lineUserId) {
   if (!lineUserId) return { 允許: false, 訊息: '⛔ 無法確認 LINE 使用者身份。' };
 
-  // 若既有身份權限模組存在，優先沿用；沒有時不在此模組另造第二套權限。
-  if (typeof LINE身份權限33_取得身份_ === 'function') {
-    var 身份 = LINE身份權限33_取得身份_(lineUserId);
-    if (!身份) return { 允許: false, 訊息: '⛔ 尚未綁定身份，請先完成 LINE 身份綁定。' };
-
-    if (typeof LINE角色分流34_是否主管選單_ === 'function') {
-      if (!LINE角色分流34_是否主管選單_(身份)) {
-        return { 允許: false, 訊息: '⛔ 製造 AI 助理目前先開放主管／工程師唯讀查詢。' };
-      }
-    }
+  // 正式查詢採 fail-closed：身份/角色模組缺失時不自行放行，也不另造第二套權限。
+  if (typeof LINE身份權限33_取得身份_ !== 'function') {
+    return { 允許: false, 訊息: '⛔ 身份權限模組目前不可用，已停止製造資料查詢。' };
   }
 
-  return { 允許: true };
+  var 身份 = LINE身份權限33_取得身份_(lineUserId);
+  if (!身份) return { 允許: false, 訊息: '⛔ 尚未綁定身份，請先完成 LINE 身份綁定。' };
+
+  if (typeof LINE角色分流34_是否主管選單_ !== 'function') {
+    return { 允許: false, 訊息: '⛔ 角色權限模組目前不可用，已停止製造資料查詢。' };
+  }
+
+  if (!LINE角色分流34_是否主管選單_(身份)) {
+    return { 允許: false, 訊息: '⛔ 製造 AI 助理目前先開放主管／工程師唯讀查詢。' };
+  }
+
+  return { 允許: true, 身份: 身份 };
 }
 
 function LINE製造AI助理35_格式化製造狀態_(partNo, result) {
