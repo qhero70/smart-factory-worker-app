@@ -177,6 +177,8 @@ function 驗收35_LINE製造AI助理_全部() {
  */
 function 診斷35_Gateway函式名稱() {
   var names = [];
+  var result;
+
   try {
     names = Object.getOwnPropertyNames(globalThis || {})
       .filter(function(name) {
@@ -190,17 +192,21 @@ function 診斷35_Gateway函式名稱() {
         }
       })
       .sort();
+
+    result = {
+      success: true,
+      count: names.length,
+      functions: names
+    };
   } catch (err) {
-    return {
+    result = {
       success: false,
       error: String(err && err.message ? err.message : err),
       functions: []
     };
   }
 
-  return {
-    success: true,
-    count: names.length,
-    functions: names
-  };
+  console.log(JSON.stringify(result, null, 2));
+  Logger.log(JSON.stringify(result, null, 2));
+  return result;
 }
