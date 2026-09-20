@@ -16,9 +16,9 @@
 2. `smart-factory-command-center/01_GAS後端/35_LINE_製造AI助理_ReadOnly_v0.1.gs`
 3. `smart-factory-command-center/01_GAS後端/41_LINE_製造AI助理_啟用閘門_v0.1.gs`
 4. `smart-factory-command-center/08_測試與驗收/35_LINE_製造AI助理_v0.1_驗收.gs`
-5. `smart-factory-command-center/01_GAS後端/總控_38_6_doPost最終接線.gs`
+5. `smart-factory-command-center/01_GAS後端/智慧製造中央作戰指揮中心.gs`
 
-第 5 檔是既有正式主路由，請「更新原檔」，不要建立第二個 doPost。
+第 5 檔是目前既有正式主後端；GitHub main 已在此檔接入 `LINE製造AI助理35_嘗試處理Webhook_` 與 `製造AI閘道_嘗試處理動作_`。Apps Script 請更新原檔，不要建立第二個 doPost。
 
 ---
 
@@ -30,7 +30,7 @@
 - `35_LINE_製造AI助理_ReadOnly_v0.1.gs`
 - `41_LINE_製造AI助理_啟用閘門_v0.1.gs`
 - `35_LINE_製造AI助理_v0.1_驗收.gs`
-- 原有 `總控_38_6_doPost最終接線.gs` 更新成 GitHub main 最新內容
+- 原有 `智慧製造中央作戰指揮中心.gs` 更新成 GitHub main 最新內容
 
 不要刪除既有：
 - 33_LINE 身份權限
