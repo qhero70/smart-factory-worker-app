@@ -9,6 +9,12 @@
  */
 
 function 驗收35_LINE製造AI助理_取得Gateway_(partNo) {
+  if (typeof 製造AI中央閘道_嘗試處理API_ === 'function') {
+    return 製造AI中央閘道_嘗試處理API_({
+      action: 'manufacturing.getStatus',
+      partNo: partNo
+    });
+  }
   if (typeof 製造AI閘道_getManufacturingStatus_ === 'function') {
     return 製造AI閘道_getManufacturingStatus_(partNo, null);
   }
