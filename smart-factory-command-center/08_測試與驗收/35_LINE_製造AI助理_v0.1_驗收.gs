@@ -163,7 +163,7 @@ function 驗收35_LINE製造AI助理_全部() {
   var a = 驗收35_LINE製造AI助理_A916000000_唯讀();
   var b = 驗收35_LINE製造AI助理_料號解析();
 
-  return {
+  var result = {
     success: !!(a.success && b.success),
     service: '35_LINE_MANUFACTURING_AI_ASSISTANT',
     version: typeof LINE製造AI助理35_版本_ !== 'undefined'
@@ -174,6 +174,10 @@ function 驗收35_LINE製造AI助理_全部() {
       partNoParser: b
     }
   };
+
+  console.log(JSON.stringify(result, null, 2));
+  Logger.log(JSON.stringify(result, null, 2));
+  return result;
 }
 
 
