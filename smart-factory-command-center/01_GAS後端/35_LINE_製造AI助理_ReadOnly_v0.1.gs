@@ -91,7 +91,12 @@ function LINE製造AI助理35_處理單一事件_(ev) {
 
   var result;
   try {
-    if (typeof 製造AI閘道_getManufacturingStatus_ === 'function') {
+    if (typeof 製造AI中央閘道_嘗試處理API_ === 'function') {
+      result = 製造AI中央閘道_嘗試處理API_({
+        action: 'manufacturing.getStatus',
+        partNo: partNo
+      });
+    } else if (typeof 製造AI閘道_getManufacturingStatus_ === 'function') {
       result = 製造AI閘道_getManufacturingStatus_(partNo, null);
     } else if (typeof 製造AI閘道_嘗試處理動作_ === 'function') {
       result = 製造AI閘道_嘗試處理動作_({
@@ -341,8 +346,16 @@ function LINE製造AI助理35_文字_(v) {
 }
 
 function 測試35_LINE製造AI助理_格式_A916000000() {
-  var r = typeof 製造AI閘道_getManufacturingStatus_ === 'function'
-    ? 製造AI閘道_getManufacturingStatus_('A916000000', null)
-    : null;
+  var r = null;
+
+  if (typeof 製造AI中央閘道_嘗試處理API_ === 'function') {
+    r = 製造AI中央閘道_嘗試處理API_({
+      action: 'manufacturing.getStatus',
+      partNo: 'A916000000'
+    });
+  } else if (typeof 製造AI閘道_getManufacturingStatus_ === 'function') {
+    r = 製造AI閘道_getManufacturingStatus_('A916000000', null);
+  }
+
   return LINE製造AI助理35_格式化製造狀態_('A916000000', r);
 }
