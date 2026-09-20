@@ -10,26 +10,31 @@
 
 function 驗收35_LINE製造AI助理_取得Gateway_(partNo) {
   if (typeof 製造AI中央閘道_嘗試處理API_ === 'function') {
-    return 製造AI中央閘道_嘗試處理API_({
-      action: 'manufacturing.getStatus',
-      partNo: partNo
-    });
+    return 製造AI中央閘道_嘗試處理API_(
+      'manufacturing.getStatus',
+      { partNo: partNo }
+    );
   }
+
   if (typeof 製造AI閘道_getManufacturingStatus_ === 'function') {
     return 製造AI閘道_getManufacturingStatus_(partNo, null);
   }
+
   if (typeof 製造AI閘道_嘗試處理動作_ === 'function') {
     return 製造AI閘道_嘗試處理動作_({
       action: 'getManufacturingStatus',
       partNo: partNo
     });
   }
+
   if (typeof 製造AI中央閘道_getManufacturingStatus === 'function') {
     return 製造AI中央閘道_getManufacturingStatus(partNo);
   }
+
   if (typeof getManufacturingStatus === 'function') {
     return getManufacturingStatus(partNo);
   }
+
   throw new Error('找不到 Manufacturing Agent Gateway 查詢函式');
 }
 
