@@ -1,15 +1,20 @@
 /**
- * 化新精密｜35_LINE 製造 AI 助理 Read Only v0.1
+ * 化新精密｜35_LINE 製造 AI 助理 Read Only v0.1.1
  *
- * 目的：
+ * 相容：
+ * - HS Manufacturing Agent Gateway v0.1.0 / v0.1.1
+ * - routing = { operations, operationCount }
+ * - sourceStatus = product / plan / workReport / workOrder / routing / quality / vision
+ *
+ * 原則：
  * - 沿用既有唯一 LINE Bot，不建立第二個 Bot。
  * - 主管/工程師可用自然語言查詢製造狀態。
- * - 只呼叫 Manufacturing Agent Gateway Tool，不直接讀零散欄位。
+ * - 只呼叫 Manufacturing Agent Gateway Tool。
  * - 缺資料回 NO_DATA／目前查無資料，不猜測。
- * - 本版不執行收料、報工、HOLD、NG、放行等正式寫入。
+ * - 不執行收料、報工、HOLD、NG、放行等正式寫入。
  */
 
-var LINE製造AI助理35_版本_ = '0.1.0';
+var LINE製造AI助理35_版本_ = '0.1.1';
 var LINE製造AI助理35_料號規則_ = /\b(?=[A-Za-z0-9_-]*\d)([A-Za-z][A-Za-z0-9_-]{5,19})\b/;
 
 function LINE製造AI助理35_嘗試處理Webhook_(payload) {
@@ -67,7 +72,8 @@ function LINE製造AI助理35_處理單一事件_(ev) {
   }
 
   if (isHelp && !partNo) {
-    LINE製造AI助理35_回覆_(replyToken,
+    LINE製造AI助理35_回覆_(
+      replyToken,
       '🤖 製造 AI 助理（唯讀）\n' +
       '可以直接問：\n' +
       '「A916000000 今天做到哪裡？」\n\n' +
@@ -92,11 +98,13 @@ function LINE製造AI助理35_處理單一事件_(ev) {
         action: 'getManufacturingStatus',
         partNo: partNo
       });
+    } else if (typeof 製造AI中央閘道_getManufacturingStatus === 'function') {
+      result = 製造AI中央閘道_getManufacturingStatus(partNo);
     } else {
       result = {
         success: false,
         data: null,
-        source: 'MANUFACTURING_AGENT_GATEWAY',
+        source: 'HS_MANUFACTURING_AGENT_GATEWAY',
         message: 'Manufacturing Agent Gateway 尚未載入',
         errorCode: 'GATEWAY_UNAVAILABLE'
       };
@@ -105,13 +113,15 @@ function LINE製造AI助理35_處理單一事件_(ev) {
     result = {
       success: false,
       data: null,
-      source: 'MANUFACTURING_AGENT_GATEWAY',
+      source: 'HS_MANUFACTURING_AGENT_GATEWAY',
       message: String(err && err.message ? err.message : err),
       errorCode: 'INTERNAL_ERROR'
     };
   }
 
-  LINE製造AI助理35_回覆_(replyToken, LINE製造AI助理35_格式化製造狀態_(partNo, result));
+  var reply = LINE製造AI助理35_格式化製造狀態_(partNo, result);
+  LINE製造AI助理35_回覆_(replyToken, reply);
+
   LINE製造AI助理35_寫稽核_(
     身份檢查.身份,
     text,
@@ -119,6 +129,7 @@ function LINE製造AI助理35_處理單一事件_(ev) {
     result && result.success ? '已回覆' : '查無資料',
     'partNo=' + partNo + '｜' + (result && result.errorCode ? result.errorCode : 'OK')
   );
+
   return {
     已處理: true,
     success: !!(result && result.success),
@@ -135,7 +146,6 @@ function LINE製造AI助理35_解析料號_(text) {
 function LINE製造AI助理35_驗證查詢權限_(lineUserId) {
   if (!lineUserId) return { 允許: false, 訊息: '⛔ 無法確認 LINE 使用者身份。' };
 
-  // 正式查詢採 fail-closed：身份/角色模組缺失時不自行放行，也不另造第二套權限。
   if (typeof LINE身份權限33_取得身份_ !== 'function') {
     return { 允許: false, 訊息: '⛔ 身份權限模組目前不可用，已停止製造資料查詢。' };
   }
@@ -158,19 +168,23 @@ function LINE製造AI助理35_格式化製造狀態_(partNo, result) {
   var d = result && result.data ? result.data : null;
 
   if (!d) {
-    return '🤖 製造 AI 助理\n' +
-      '料號：' + partNo + '\n' +
-      '狀態：目前查無資料\n' +
-      '來源：' + LINE製造AI助理35_文字_(result && result.source || 'MANUFACTURING_AGENT_GATEWAY') + '\n' +
-      '代碼：' + LINE製造AI助理35_文字_(result && result.errorCode || 'NO_DATA');
+    return [
+      '🤖 製造 AI 助理',
+      '料號：' + partNo,
+      '狀態：目前查無資料',
+      '來源：' + LINE製造AI助理35_文字_(result && result.source || 'HS_MANUFACTURING_AGENT_GATEWAY'),
+      '代碼：' + LINE製造AI助理35_文字_(result && result.errorCode || 'NO_DATA')
+    ].join('\n');
   }
 
   var product = d.product || {};
+  var plan = d.plan || {};
   var production = d.production || {};
   var current = d.current || {};
   var quality = d.quality || {};
   var vision = d.vision || {};
-  var sources = d.sources || {};
+  var sourceStatus = d.sourceStatus || d.sources || {};
+  var completeness = d.dataCompleteness || {};
 
   var lines = [
     '🤖 製造 AI 助理｜' + partNo,
@@ -178,50 +192,110 @@ function LINE製造AI助理35_格式化製造狀態_(partNo, result) {
     '品名：' + LINE製造AI助理35_值_(product.partName),
     '',
     '【生產】',
-    '計畫數：' + LINE製造AI助理35_值_(production.planQty),
+    '計畫數：' + LINE製造AI助理35_值_(production.planQty != null ? production.planQty : plan.planQty),
     '已報工：' + LINE製造AI助理35_值_(production.reportedQty),
+    '良品：' + LINE製造AI助理35_值_(production.goodQty),
+    '不良：' + LINE製造AI助理35_值_(production.defectQty),
     '剩餘：' + LINE製造AI助理35_值_(production.remainingQty),
     '完成率：' + LINE製造AI助理35_百分比_(production.completionRate),
     '',
     '【目前位置】',
     '工序：' + LINE製造AI助理35_值_(current.processId),
-    '工站：' + LINE製造AI助理35_值_(current.stationId),
-    '機台：' + LINE製造AI助理35_值_(current.machineId),
-    '最後報工：' + LINE製造AI助理35_值_(current.lastReportedAt),
+    '工站：' + LINE製造AI助理35_值_(current.stationName || current.stationId),
+    '機台：' + LINE製造AI助理35_機台文字_(current),
+    '最後報工：' + LINE製造AI助理35_值_(production.lastReportedAt || current.lastReportedAt),
     '',
     '【標準途程（不是即時位置）】',
     LINE製造AI助理35_途程摘要_(d.routing),
     '',
     '【品質】',
     '不良數：' + LINE製造AI助理35_值_(quality.defectQty),
-    'AI Vision：' + LINE製造AI助理35_來源文字_(sources.vision),
+    'AI Vision：' + LINE製造AI助理35_來源文字_(sourceStatus.vision),
     '',
-    '資料狀態：' + LINE製造AI助理35_整體來源摘要_(sources),
-    '更新：' + LINE製造AI助理35_值_(d.lastUpdatedAt)
+    '資料狀態：' + LINE製造AI助理35_值_(d.dataStatus),
+    '完整度：' + LINE製造AI助理35_完整度文字_(completeness),
+    '來源：' + LINE製造AI助理35_整體來源摘要_(sourceStatus),
+    '更新：' + LINE製造AI助理35_值_(d.lastUpdatedAt || result.retrievedAt)
   ];
+
+  if (Array.isArray(result.warnings) && result.warnings.length) {
+    lines.push('', '⚠️ 資料警示：' + result.warnings.length + ' 項');
+  }
 
   return lines.join('\n').slice(0, 4900);
 }
 
-function LINE製造AI助理35_整體來源摘要_(sources) {
-  var keys = ['product', 'plan', 'progress', 'routing', 'machine', 'quality', 'vision'];
+function LINE製造AI助理35_途程摘要_(routing) {
+  var ops = [];
+
+  if (Array.isArray(routing)) {
+    ops = routing;
+  } else if (routing && Array.isArray(routing.operations)) {
+    ops = routing.operations;
+  }
+
+  if (!ops.length) return '目前查無資料';
+
+  return ops.slice(0, 8).map(function(r, i) {
+    var seq = LINE製造AI助理35_值_(r && r.sequence);
+    var processId = LINE製造AI助理35_值_(r && r.processId);
+    var station = LINE製造AI助理35_值_(r && (r.stationName || r.stationId));
+
+    var machineIds = [];
+    if (r && Array.isArray(r.machineIds)) machineIds = r.machineIds;
+    else if (r && r.machineId) machineIds = [r.machineId];
+    else if (r && r.machineList) machineIds = String(r.machineList).split(/[,、\s]+/).filter(Boolean);
+
+    var machineText = machineIds.length ? machineIds.join('/') : '目前查無資料';
+
+    return (i + 1) + '. 順序 ' + seq +
+      '｜' + processId +
+      '｜工站 ' + station +
+      '｜機台 ' + machineText;
+  }).join('\n');
+}
+
+function LINE製造AI助理35_機台文字_(current) {
+  if (!current) return '目前查無資料';
+  if (current.machineId) return String(current.machineId);
+  if (Array.isArray(current.machineIds) && current.machineIds.length) return current.machineIds.join('/');
+  return '目前查無資料';
+}
+
+function LINE製造AI助理35_整體來源摘要_(sourceStatus) {
+  var keys = ['product', 'plan', 'workReport', 'workOrder', 'routing', 'quality', 'vision'];
   var labels = {
     product: '產品',
     plan: '計畫',
-    progress: '報工',
+    workReport: '報工',
+    workOrder: '工單',
     routing: '途程',
-    machine: '機台',
     quality: '品質',
     vision: 'Vision'
   };
+
   return keys.map(function(k) {
-    var s = sources && sources[k] ? sources[k] : null;
+    var s = sourceStatus && sourceStatus[k] ? sourceStatus[k] : null;
     return labels[k] + ':' + (s && s.success ? 'OK' : 'NO_DATA');
   }).join('｜');
 }
 
 function LINE製造AI助理35_來源文字_(s) {
   return s && s.success ? '有資料' : '目前查無資料';
+}
+
+function LINE製造AI助理35_完整度文字_(c) {
+  if (!c) return '目前查無資料';
+  var available = c.availableSourceCount;
+  var total = c.totalSourceCount;
+  var rate = c.rate;
+
+  if (available == null && total == null && rate == null) return '目前查無資料';
+
+  var text = '';
+  if (available != null && total != null) text += available + '/' + total;
+  if (rate != null) text += (text ? '（' : '') + rate + '%' + (text ? '）' : '');
+  return text || '目前查無資料';
 }
 
 function LINE製造AI助理35_值_(v) {
@@ -234,32 +308,31 @@ function LINE製造AI助理35_百分比_(v) {
   return String(v) + '%';
 }
 
-function LINE製造AI助理35_途程摘要_(routing) {
-  if (!Array.isArray(routing) || !routing.length) return '目前查無資料';
-  return routing.slice(0, 8).map(function(r, i) {
-    var seq = LINE製造AI助理35_值_(r && r.sequence);
-    var processId = LINE製造AI助理35_值_(r && r.processId);
-    var stationId = LINE製造AI助理35_值_(r && r.stationId);
-    var machineList = LINE製造AI助理35_值_(r && r.machineList);
-    return (i + 1) + '. 順序 ' + seq + '｜' + processId + '｜工站 ' + stationId + '｜機台 ' + machineList;
-  }).join('\n');
-}
-
 function LINE製造AI助理35_寫稽核_(身份, text, 分類, 結果, 備註) {
   try {
     if (typeof LINE指令中心37_寫入紀錄_ === 'function') {
       LINE指令中心37_寫入紀錄_(身份 || {}, text || '', 分類 || '製造AI', 結果 || '', 備註 || '');
     }
   } catch (err) {
-    if (typeof console !== 'undefined' && console.warn) console.warn('製造AI助理稽核紀錄失敗：' + String(err && err.message || err));
+    if (typeof console !== 'undefined' && console.warn) {
+      console.warn('製造AI助理稽核紀錄失敗：' + String(err && err.message || err));
+    }
   }
 }
 
 function LINE製造AI助理35_回覆_(replyToken, text) {
   if (!replyToken) return;
-  if (typeof LINE身份權限33_回覆_ === 'function') return LINE身份權限33_回覆_(replyToken, String(text || '').slice(0, 4900));
-  if (typeof LINE主管戰情直連_送出回覆_ === 'function') return LINE主管戰情直連_送出回覆_(replyToken, String(text || '').slice(0, 4900));
-  if (typeof 回覆LINE_ === 'function') return 回覆LINE_(replyToken, String(text || '').slice(0, 4900));
+
+  if (typeof LINE身份權限33_回覆_ === 'function') {
+    return LINE身份權限33_回覆_(replyToken, String(text || '').slice(0, 4900));
+  }
+  if (typeof LINE主管戰情直連_送出回覆_ === 'function') {
+    return LINE主管戰情直連_送出回覆_(replyToken, String(text || '').slice(0, 4900));
+  }
+  if (typeof 回覆LINE_ === 'function') {
+    return 回覆LINE_(replyToken, String(text || '').slice(0, 4900));
+  }
+
   throw new Error('找不到既有 LINE 回覆函式');
 }
 
