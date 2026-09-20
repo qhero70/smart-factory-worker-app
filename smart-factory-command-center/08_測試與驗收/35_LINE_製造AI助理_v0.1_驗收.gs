@@ -169,3 +169,38 @@ function 驗收35_LINE製造AI助理_全部() {
     }
   };
 }
+
+
+/**
+ * 診斷目前 Apps Script 內實際可見的製造 AI / Gateway 函式名稱。
+ * 唯讀，不寫 Sheet、不發 LINE。
+ */
+function 診斷35_Gateway函式名稱() {
+  var names = [];
+  try {
+    names = Object.getOwnPropertyNames(globalThis || {})
+      .filter(function(name) {
+        return /(製造AI|Manufacturing|Gateway|getManufacturingStatus)/i.test(String(name || ''));
+      })
+      .filter(function(name) {
+        try {
+          return typeof globalThis[name] === 'function';
+        } catch (err) {
+          return false;
+        }
+      })
+      .sort();
+  } catch (err) {
+    return {
+      success: false,
+      error: String(err && err.message ? err.message : err),
+      functions: []
+    };
+  }
+
+  return {
+    success: true,
+    count: names.length,
+    functions: names
+  };
+}
