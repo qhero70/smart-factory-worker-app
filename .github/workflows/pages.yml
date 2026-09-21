@@ -1,4 +1,4 @@
-name: Pages Deploy
+name: Pages Validate
 
 on:
   push:
@@ -80,26 +80,3 @@ jobs:
 
       - name: 驗證智慧5S同步與回呼
         run: node --test tests/*.cjs
-
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
-      - name: Disable Jekyll
-        run: touch docs/.nojekyll
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: docs
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
