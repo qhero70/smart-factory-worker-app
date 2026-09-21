@@ -1,0 +1,4977 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1A73E8">
+<!-- PWA：僅新增安裝與離線能力，不更動原 UI / UX 與功能 -->
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAIAAADdvvtQAAACvUlEQVR42u3cwU3DQBBAUbyyaCFSENVwop5QRlqimBwihRYQBxogccDYnpl97wqH2P6ZXYKdYX+4PMBfNacAASEgBISAQEAICAEhIBAQAkJACAgEhIAQEAICASEgBISAEBAICAEhIAQEAkJACIjKxoCv6XzcuTDXPL19hHo9Q5CvdxFN0pi2D0g6qTPaMiDpFMioqaeGrc5nU4+GMi1h0im2nDX1GEUp90DU0Eq+LVjtbDf1aCh6QOop3JA9ELEDMn5qDyETiMABGT/lh5AJhIAQEAKyAepxG2QCISAEhIAQEAgIASEgBASTxvgvMdrXCawp/qf5TT0O3xKGgLAH2mpD0PkyZwIhIAQEAkJACAgBwV0yfQ7k8x4TCAFBooA6fzox/uGPTiKWMASEgBAQCAgBISAEBFM8WBiaBwvVU/zwLWEICHugORsCN5qZQAgIAYGAEBACQkAwzYOFmEAICAEtwoOF9kAaMoFAQAgIASEgEBACQkBk58HC0DxYqJ7ih28JQ0DYA83ZELjRzARCQAgIBISAEBACgmkeLMQEQkBYwhZxPu46WblOr88/XJ6XTwH9Q0O10/l6f7z9o8gZWcLi1vOr3xGQelI2JKAE9URuSEA56gnbkIAQUB/jJ+YQEhACQkAICAGBgBBQcXP+ORrtH6sCQkDdDKGA93UIKE1DMe8KElCOhsLeUyagBA11ekeip3Dub+haIjd+FORajK5fgb/tLWH4Mx4B2QaVtOhVMIGIHZAhVHj8mEBkCMgQqjp+1ptAGipZz6pLmIbq1WMPRKqADKF653nYHy7rH2H5r/zpIZ0tlzCjqMxZbV0drXqKLGGWszJvxe0DklHqKR4lIDElXfojBkQiPkhEQAgIASEgEBACQkAICASEgBAQAgIBISAEhIBAQAgIASEgBAQCQkAICAGBgBAQ0X0Dxja5o2cmUB4AAAAASUVORK5CYII=">
+<link rel="apple-touch-icon" sizes="180x180" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAACiUlEQVR42u3dQU4CQRCGUZkQr2CCx/FIeAyv5HFM4ArGhVs0ZEIQu+pv3lsaF0z7UU1m6LjZ7Q8PcM5iCRAH4kAciANxIA7EgTgQB+IAcSAOxIE4EAfiQByIA3EgDhAH4kAciANxIA562zZ5HR9vT/4Yp55fj+WvYVN7kFoTnSspi0MW/RMpiEMWKYksyggyePXGTQ5ZxI2QRRlGSGUcyghdVTfBqIvD2Mhd20UZ+rCt0CkOYyN9eJgcDI/D2JhgeJgciIMmcdhT5thZTA7EgTgQB+JAHIgDcSAOprdt+8o6nAcco+0N5UUZLta2wkTbyvrUvavRYnIgDsSBOBAH4gBxIA7+JuAmmPtdJgfiuMxdnXxpe7FbS4ZtBXEgDsSBOBAH4mASjibUczRBGXkXa1shcFtZn7oe1ZociANxIA7EgTgQB4iDizmagMnBNHE4mmBb0YfJgTgQB+JAHJYAcSAObsfRhHqOJigj72JtKwRuK+tT16NakwNxIA7EgTgQB+IAcXAxRxMwOZgmDkcTbCv32MfX++OPP8DLp88c/M7i9Ic9ExFHWRb9E/GBtL6MK35THIjD2Og6PMSBOBLGRrfhIQ7EgTgQB+IId90dzz73ScWBOEKGR6vHK+JAHAnDo9tTWY/sx/WxcuvT9zkkciYR3wQjo4YRnzkcJhjvP9bcB1LEQZ847Czpe4rJQVEchkf02DA5qIvD8MgdGyMmhz5y19a2Qmkchkfoqi7TXIkybm6z2x9GXpV/CBr0NlsmvjZlhE0OIyToTVUWh0T6z9riOFTSef/tEgcNuQmGOBAH4kAciANxIA7EgTgQB4gDcSAOxIE4EAfiQByIA3GAOBAH4kAciIMevgE+LbBWTiElLgAAAABJRU5ErkJggg==">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="換刀表精靈">
+
+<title>換刀表生成精靈 · 手機版</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style id="dynamic-page-style">@page { size: A4 portrait; margin: 0; }</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+/* =================================================================
+   Google 品牌色系
+   ================================================================= */
+:root {
+    --g-blue:   #1A73E8;
+    --g-blue-l: #4285F4;
+    --g-red:    #EA4335;
+    --g-yellow: #FBBC05;
+    --g-green:  #34A853;
+    --ghost:    #F8F9FA;
+    --ghost-2:  #F1F3F4;
+    --ink:      #202124;
+    --ink-2:    #5F6368;
+    --line:     #DADCE0;
+    --white:    #FFFFFF;
+}
+
+* { -webkit-tap-highlight-color: transparent; }
+
+html, body {
+    font-family: 'Roboto', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--ghost);
+    color: var(--ink);
+    -webkit-text-size-adjust: 100%;
+    overscroll-behavior: none;
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* =================================================================
+   應用程式主框架（手機優先）
+   ================================================================= */
+#app {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    height: 100vh;
+    overflow: hidden;
+    background: var(--ghost);
+}
+@supports (height: 100dvh) { #app { height: 100dvh; } }
+
+/* ---------- Google 四色橫條 ---------- */
+.g-bar {
+    height: 5px;
+    width: 100%;
+    flex: none;
+    background: linear-gradient(90deg,
+        #4285F4 0 25%,
+        #EA4335 25% 50%,
+        #FBBC05 50% 75%,
+        #34A853 75% 100%);
+}
+
+/* =================================================================
+   左側：對話面板
+   ================================================================= */
+#sidebar {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    background: var(--ghost);
+}
+
+/* ---------- 頂部標題列 ---------- */
+#app-header {
+    flex: none;
+    background: var(--white);
+    border-bottom: 1px solid var(--line);
+    box-shadow: 0 1px 2px rgba(60,64,67,.06);
+    z-index: 10;
+}
+.header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px 8px;
+    gap: 10px;
+}
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 900;
+    font-size: 1.05rem;
+    letter-spacing: .3px;
+    color: var(--ink);
+    min-width: 0;
+}
+.brand .logo-dot {
+    width: 26px; height: 26px;
+    border-radius: 8px;
+    display: grid; place-items: center;
+    font-size: 15px;
+    background: linear-gradient(135deg, var(--g-blue), var(--g-blue-l));
+    color: #fff;
+    flex: none;
+    box-shadow: 0 2px 6px rgba(26,115,232,.35);
+    cursor: pointer;
+    transition: transform .14s ease, box-shadow .14s;
+    background-size: cover;
+    background-position: center;
+}
+.brand .logo-dot:active { transform: scale(.9); }
+.brand .logo-dot:hover { box-shadow: 0 0 0 3px rgba(26,115,232,.18); }
+.header-actions { display: flex; align-items: center; gap: 8px; flex: none; }
+
+.icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    height: 38px;
+    padding: 0 12px;
+    border-radius: 10px;
+    background: var(--ghost-2);
+    color: var(--ink);
+    font-weight: 700;
+    font-size: .8rem;
+    border: none;
+    transition: transform .12s ease, background .15s;
+}
+.icon-btn:active { transform: scale(.94); background: #E4E6E8; }
+
+.badge-count {
+    background: var(--g-blue);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 999px;
+    line-height: 1.2;
+}
+
+/* ---------- 格式切換分段控制 ---------- */
+#mode-switch-bar {
+    display: flex;
+    gap: 4px;
+    margin: 0 16px 12px;
+    padding: 4px;
+    background: var(--ghost-2);
+    border-radius: 12px;
+}
+.mode-btn {
+    flex: 1;
+    padding: 9px 6px;
+    border-radius: 9px;
+    font-size: .82rem;
+    font-weight: 700;
+    border: none;
+    background: transparent;
+    color: var(--ink-2);
+    transition: all .18s cubic-bezier(.2,.8,.3,1);
+    cursor: pointer;
+}
+.mode-btn.active {
+    background: var(--white);
+    color: var(--g-blue);
+    box-shadow: 0 1px 3px rgba(60,64,67,.22);
+}
+
+/* =================================================================
+   對話歷史
+   ================================================================= */
+#chat-history {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 16px 14px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: var(--ghost);
+}
+
+.chat-msg { animation: slideIn .28s cubic-bezier(.25,.8,.35,1) both; }
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.bubble-bot {
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: 4px 18px 18px 18px;
+    padding: 12px 14px;
+    font-size: .9rem;
+    line-height: 1.55;
+    color: var(--ink);
+    white-space: pre-wrap;
+    word-break: break-word;
+    box-shadow: 0 1px 2px rgba(60,64,67,.08);
+    max-width: 100%;
+}
+.bubble-user {
+    background: var(--g-blue);
+    color: #fff;
+    border-radius: 18px 4px 18px 18px;
+    padding: 12px 14px;
+    font-size: .9rem;
+    line-height: 1.5;
+    font-weight: 500;
+    word-break: break-word;
+    box-shadow: 0 2px 8px rgba(26,115,232,.28);
+    max-width: 84%;
+}
+.avatar-bot {
+    width: 30px; height: 30px;
+    border-radius: 9px;
+    background: linear-gradient(135deg, var(--g-blue), var(--g-blue-l));
+    color: #fff;
+    display: grid; place-items: center;
+    font-size: 14px;
+    flex: none;
+    box-shadow: 0 2px 6px rgba(26,115,232,.3);
+    cursor: pointer;
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
+    transition: transform .14s ease;
+}
+.avatar-bot:active { transform: scale(.9); }
+
+/* =================================================================
+   輸入區（固定在底部）
+   ================================================================= */
+#input-area {
+    flex: none;
+    background: var(--white);
+    border-top: 1px solid var(--line);
+    padding: 12px 14px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    box-shadow: 0 -6px 20px rgba(60,64,67,.08);
+    z-index: 15;
+    max-height: 46vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+#input-container { display: flex; flex-direction: column; gap: 10px; }
+
+/* ---------- 按鈕系統 ---------- */
+.btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 15px 16px;
+    border-radius: 14px;
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: inherit;
+    border: none;
+    cursor: pointer;
+    transition: transform .12s ease, filter .15s ease, box-shadow .15s;
+    line-height: 1.25;
+    letter-spacing: .2px;
+}
+.btn:active { transform: scale(.972); filter: brightness(.95); }
+
+.btn-green  { background: var(--g-green);  color: #fff; box-shadow: 0 3px 12px rgba(52,168,83,.32); }
+.btn-blue   { background: var(--g-blue);   color: #fff; box-shadow: 0 3px 12px rgba(26,115,232,.32); }
+.btn-red    { background: var(--g-red);    color: #fff; box-shadow: 0 3px 12px rgba(234,67,53,.30); }
+.btn-slate  { background: #3C4043;         color: #fff; box-shadow: 0 3px 12px rgba(60,64,67,.28); }
+.btn-skip {
+    background: #FEF7E0;
+    color: #B06000;
+    border: 1.5px dashed var(--g-yellow);
+    font-weight: 700;
+    font-size: .88rem;
+    padding: 12px 16px;
+}
+.btn-ghost {
+    background: var(--ghost-2);
+    color: var(--ink-2);
+    font-weight: 700;
+    font-size: .88rem;
+    padding: 12px 16px;
+}
+.btn-file {
+    background: #E8F0FE;
+    color: var(--g-blue);
+    border: 1.5px solid #C6DAFC;
+    font-weight: 700;
+}
+
+/* ---------- 輸入元件 ---------- */
+.input-row { display: flex; gap: 8px; align-items: stretch; }
+.input-field {
+    flex: 1;
+    min-width: 0;
+    padding: 14px 15px;
+    border-radius: 14px;
+    border: 1.5px solid var(--line);
+    background: var(--ghost);
+    font-size: 16px !important;
+    font-family: inherit;
+    color: var(--ink);
+    transition: border-color .15s, box-shadow .15s, background .15s;
+}
+.input-field::placeholder { color: #9AA0A6; }
+.input-field:focus {
+    outline: none;
+    background: var(--white);
+    border-color: var(--g-blue);
+    box-shadow: 0 0 0 3px rgba(26,115,232,.13);
+}
+.btn-send {
+    flex: none;
+    padding: 0 22px;
+    border-radius: 14px;
+    background: var(--g-blue);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+    transition: transform .12s, filter .15s;
+    box-shadow: 0 3px 10px rgba(26,115,232,.3);
+}
+.btn-send:active { transform: scale(.95); filter: brightness(.94); }
+
+.textarea-field {
+    width: 100%;
+    padding: 14px 15px;
+    border-radius: 14px;
+    border: 1.5px solid var(--line);
+    background: var(--ghost);
+    font-size: 16px !important;
+    font-family: inherit;
+    line-height: 1.5;
+    color: var(--ink);
+    resize: vertical;
+    min-height: 110px;
+    transition: border-color .15s, box-shadow .15s, background .15s;
+}
+.textarea-field:focus {
+    outline: none;
+    background: var(--white);
+    border-color: var(--g-blue);
+    box-shadow: 0 0 0 3px rgba(26,115,232,.13);
+}
+
+/* =================================================================
+   右側：預覽面板
+   ================================================================= */
+#preview-container {
+    display: none;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    background: #E8EAED;
+    padding: 12px 10px 30px;
+    align-items: center;
+}
+#print-btn-container {
+    width: 100%;
+    max-width: 420mm;
+    display: flex;
+    justify-content: flex-end;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    padding-bottom: 10px;
+}
+.btn-print {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 14px 20px;
+    border-radius: 14px;
+    background: var(--g-blue);
+    color: #fff;
+    font-weight: 700;
+    font-size: .95rem;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(26,115,232,.35);
+    transition: transform .12s, filter .15s;
+}
+.btn-print:active { transform: scale(.97); filter: brightness(.95); }
+
+#edit-hint {
+    width: 100%;
+    max-width: 420mm;
+    margin: 0 auto 10px;
+    text-align: center;
+    font-size: .74rem;
+    color: var(--ink-2);
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 8px 12px;
+    line-height: 1.5;
+    box-shadow: 0 1px 3px rgba(60,64,67,.08);
+    flex: none;
+}
+#edit-hint b { color: var(--g-blue); }
+
+#a4-wrapper, #a3-wrapper {
+    transform-origin: top center;
+    transition: transform .25s ease;
+}
+
+/* =================================================================
+   可編輯欄位
+   ================================================================= */
+.ed-cell {
+    outline: none;
+    border-radius: 3px;
+    min-height: 1em;
+    min-width: 6px;
+    transition: box-shadow .15s ease, background .15s ease;
+    cursor: text;
+}
+.ed-cell:hover { box-shadow: inset 0 0 0 2px rgba(26,115,232,.30); }
+.ed-cell:focus {
+    box-shadow: inset 0 0 0 2px var(--g-blue);
+    background: rgba(26,115,232,.06);
+}
+.ed-cell:empty::before {
+    content: '點擊輸入';
+    color: #C2C6CA;
+    font-weight: 400;
+    font-size: .62em;
+    letter-spacing: 0;
+    pointer-events: none;
+}
+.a3-img-label.ed-cell:empty::before,
+.tool-img-empty + .ed-cell:empty::before { font-size: .55em; }
+
+/* 圖片插槽 */
+.tool-img-container, .a3-img-slot { cursor: pointer; }
+.tool-img-empty {
+    color: #C2C6CA;
+    font-size: 1.1rem;
+    border: 1px dashed var(--line);
+    border-radius: 6px;
+}
+.a3-img-slot:empty::after {
+    content: '＋';
+    color: #C9CDD1;
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+/* QR 點擊提示 */
+[data-qr] { cursor: pointer; }
+
+/* =================================================================
+   底部導航列（手機）
+   ================================================================= */
+#mobile-nav {
+    flex: none;
+    display: flex;
+    background: var(--white);
+    border-top: 1px solid var(--line);
+    box-shadow: 0 -2px 14px rgba(60,64,67,.1);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    z-index: 30;
+}
+.nav-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 9px 4px 8px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #80868B;
+    font-family: inherit;
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .3px;
+    position: relative;
+    transition: color .16s;
+}
+.nav-btn .nav-icon {
+    font-size: 1.28rem;
+    line-height: 1;
+    transition: transform .18s cubic-bezier(.2,.9,.3,1.4);
+}
+.nav-btn.active { color: var(--g-blue); }
+.nav-btn.active .nav-icon { transform: translateY(-2px) scale(1.08); }
+.nav-btn.active::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 34px; height: 3px;
+    border-radius: 0 0 4px 4px;
+    background: var(--g-blue);
+}
+.nav-btn:active { background: rgba(26,115,232,.06); }
+.nav-btn .nav-dot {
+    position: absolute;
+    top: 7px; right: calc(50% - 20px);
+    min-width: 16px; height: 16px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: var(--g-red);
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    display: grid; place-items: center;
+    line-height: 1;
+}
+
+/* =================================================================
+   手機檢視切換（< 768px）
+   ================================================================= */
+@media (max-width: 767px) {
+    body.mobile-view-chat #sidebar { display: flex; }
+    body.mobile-view-chat #preview-container { display: none; }
+    body.mobile-view-preview #sidebar { display: none; }
+    body.mobile-view-preview #preview-container { display: flex; }
+    #preview-container { padding: 12px 8px 30px; }
+}
+
+/* =================================================================
+   桌面版（>= 768px）
+   ================================================================= */
+@media (min-width: 768px) {
+    #app { flex-direction: row; }
+    #sidebar {
+        width: 440px;
+        flex: none;
+        border-right: 1px solid var(--line);
+        box-shadow: 2px 0 16px rgba(60,64,67,.07);
+    }
+    #preview-container { display: flex; padding: 24px 32px 40px; }
+    #mobile-nav { display: none; }
+    #input-area { max-height: none; }
+    #chat-history { padding: 20px 18px 24px; gap: 14px; }
+    .brand { font-size: 1.12rem; }
+    .btn { padding: 14px 18px; font-size: .96rem; }
+    .btn-print { width: auto; }
+}
+
+/* =================================================================
+   A4 表格（第一類）
+   ================================================================= */
+.a4-preview {
+    width: 210mm;
+    height: 297mm;
+    background: #fff;
+    box-shadow: 0 10px 30px rgba(60,64,67,.22);
+    margin: 0 auto;
+    position: relative;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.a3-preview {
+    width: 420mm;
+    height: 297mm;
+    background: #fff;
+    box-shadow: 0 10px 30px rgba(60,64,67,.22);
+    margin: 0 auto;
+    position: relative;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.border-heavy { border: 4px solid #000; }
+.top-accent { border-top: 12px solid #4b6a4a; }
+
+.excel-table { border-collapse: collapse; width: 100%; }
+.excel-table th, .excel-table td {
+    border: 2px solid #000;
+    padding: 3px 6px;
+    text-align: center;
+    vertical-align: middle;
+    word-break: break-all;
+}
+.excel-table th {
+    background-color: #c5e0b4;
+    font-weight: 700;
+    font-size: 1.05rem;
+}
+
+.tool-row { height: 65px; max-height: 65px; }
+.tool-img-container {
+    width: 60px; height: 55px;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; margin: 0 auto;
+}
+.tool-img-container img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+/* =================================================================
+   A3 表格（第二類）
+   ================================================================= */
+.a3-table {
+    border-collapse: collapse;
+    width: 100%;
+    table-layout: fixed;
+}
+.a3-table th, .a3-table td {
+    border: 1.5px solid #000;
+    padding: 2px 4px;
+    text-align: center;
+    vertical-align: middle;
+    word-break: break-all;
+    font-size: 0.72rem;
+    line-height: 1.15;
+}
+.a3-table th {
+    background-color: #d9e2c9;
+    font-weight: 700;
+    font-size: 0.78rem;
+    padding: 4px 3px;
+}
+.a3-table td .cell-main { font-weight: 700; font-size: 0.78rem; }
+.a3-table td .cell-sub {
+    font-weight: 500;
+    font-size: 0.65rem;
+    color: #222;
+    margin-top: 1px;
+}
+
+.a3-img-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-auto-rows: 1fr;
+    width: 100%;
+    height: 100%;
+    border-left: 1.5px solid #000;
+    border-right: 1.5px solid #000;
+    border-bottom: 1.5px solid #000;
+}
+.a3-img-cell {
+    border: 1px solid #000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 2px;
+    overflow: hidden;
+    min-height: 0;
+}
+.a3-img-cell .a3-img-label {
+    font-weight: 700;
+    font-size: 0.72rem;
+    line-height: 1;
+    margin-bottom: 1px;
+    background: #d9e2c9;
+    width: 100%;
+    text-align: center;
+    padding: 2px 0;
+    border-bottom: 1px solid #000;
+}
+.a3-img-cell .a3-img-box {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    min-height: 0;
+}
+.a3-img-cell .a3-img-box img { max-width: 95%; max-height: 95%; object-fit: contain; }
+
+.a3-bottom-info-table { border-collapse: collapse; width: 100%; height: 100%; }
+.a3-bottom-info-table td {
+    border: 1px solid #000;
+    padding: 2px 6px;
+    font-size: 0.78rem;
+    line-height: 1.2;
+}
+.a3-bottom-info-table .lbl {
+    background: #f2f2f2;
+    font-weight: 700;
+    text-align: center;
+    width: 32%;
+    white-space: nowrap;
+}
+.a3-bottom-info-table .val { font-weight: 700; text-align: left; }
+
+.a3-reminder-box {
+    border: 1.5px solid #000;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.a3-reminder-title {
+    background: #d9e2c9;
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.82rem;
+    padding: 3px 0;
+    border-bottom: 1.5px solid #000;
+    letter-spacing: 1px;
+}
+.a3-reminder-body {
+    flex: 1;
+    padding: 4px 6px;
+    font-size: 0.72rem;
+    line-height: 1.35;
+    white-space: pre-line;
+    text-align: left;
+    overflow: hidden;
+    font-weight: 500;
+}
+
+.a3-500-box {
+    border: 1.5px solid #000;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #fbe4f0;
+}
+.a3-500-title {
+    background: #e7a9d0;
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.82rem;
+    padding: 3px 0;
+    border-bottom: 1.5px solid #000;
+    color: #6a1149;
+}
+.a3-500-body {
+    flex: 1;
+    padding: 4px 6px;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+}
+.a3-500-body .big { font-weight: 900; font-size: 0.95rem; }
+.a3-500-body .mid { font-weight: 700; font-size: 0.78rem; }
+
+.a3-machine-box {
+    border: 1.5px solid #000;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.a3-machine-title {
+    background: #d9e2c9;
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.82rem;
+    padding: 3px 0;
+    border-bottom: 1.5px solid #000;
+}
+.a3-machine-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+.a3-machine-tips {
+    flex: 1;
+    padding: 3px 5px;
+    font-size: 0.65rem;
+    line-height: 1.3;
+    white-space: pre-line;
+    text-align: left;
+    border-bottom: 1px solid #000;
+    overflow: hidden;
+    font-weight: 500;
+}
+.a3-machine-qr {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3px;
+    background: #f5f5f5;
+}
+
+/* =================================================================
+   彈窗：我的刀具表
+   ================================================================= */
+#table-manager {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    background: rgba(32,33,36,.55);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+}
+#table-manager.show { display: flex; }
+
+.tm-panel {
+    background: var(--white);
+    width: 100%;
+    max-width: 520px;
+    max-height: 88vh;
+    border-radius: 22px 22px 0 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 -8px 40px rgba(0,0,0,.3);
+    animation: sheetUp .28s cubic-bezier(.2,.9,.3,1) both;
+}
+@keyframes sheetUp {
+    from { transform: translateY(40px); opacity: .6; }
+    to   { transform: translateY(0); opacity: 1; }
+}
+.tm-handle {
+    width: 42px; height: 4px;
+    border-radius: 999px;
+    background: var(--line);
+    margin: 10px auto 0;
+    flex: none;
+}
+.tm-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 18px 12px;
+    flex: none;
+}
+.tm-head h2 {
+    font-size: 1.1rem;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--ink);
+}
+.tm-close {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    border: none;
+    background: var(--ghost-2);
+    color: var(--ink-2);
+    font-size: 1.35rem;
+    line-height: 1;
+    display: grid; place-items: center;
+    cursor: pointer;
+}
+.tm-close:active { background: #E4E6E8; }
+.tm-body {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 14px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    background: var(--ghost);
+}
+.tm-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--white);
+    border: 1.5px solid var(--line);
+    border-radius: 15px;
+    padding: 11px 12px;
+    transition: border-color .15s, box-shadow .15s;
+}
+.tm-item.current {
+    border-color: var(--g-blue);
+    box-shadow: 0 0 0 3px rgba(26,115,232,.12);
+}
+.tm-tag {
+    width: 40px; height: 40px;
+    border-radius: 11px;
+    display: grid; place-items: center;
+    font-size: 10px;
+    font-weight: 900;
+    flex: none;
+    letter-spacing: .5px;
+}
+.tm-tag.a4 { background: #E8F0FE; color: var(--g-blue); }
+.tm-tag.a3 { background: #F3E8FD; color: #8430CE; }
+.tm-info { flex: 1; min-width: 0; }
+.tm-name {
+    font-weight: 700;
+    font-size: .88rem;
+    color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.tm-meta { font-size: .7rem; color: var(--ink-2); margin-top: 2px; }
+.tm-meta .live { color: var(--g-blue); font-weight: 700; }
+.tm-btn {
+    flex: none;
+    padding: 8px 12px;
+    border-radius: 9px;
+    font-size: .74rem;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform .12s;
+}
+.tm-btn:active { transform: scale(.94); }
+.tm-btn.load { background: var(--g-blue); color: #fff; }
+.tm-btn.del { background: #FCE8E6; color: var(--g-red); }
+.tm-footer {
+    flex: none;
+    padding: 11px 16px calc(13px + env(safe-area-inset-bottom, 0px));
+    background: var(--white);
+    border-top: 1px solid var(--line);
+}
+.tm-note {
+    font-size: .68rem;
+    color: var(--ink-2);
+    line-height: 1.6;
+    margin-top: 9px;
+    text-align: center;
+}
+.tm-new {
+    width: 100%;
+    padding: 15px;
+    border-radius: 15px;
+    background: var(--g-green);
+    color: #fff;
+    font-weight: 800;
+    font-size: .96rem;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 3px 12px rgba(52,168,83,.3);
+    transition: transform .12s;
+    font-family: inherit;
+}
+.tm-new:active { transform: scale(.97); }
+
+@media (min-width: 768px) {
+    #table-manager { align-items: center; }
+    .tm-panel { border-radius: 22px; max-height: 82vh; }
+}
+
+/* =================================================================
+   彈窗：頭像選擇
+   ================================================================= */
+#avatar-picker {
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    background: rgba(32,33,36,.55);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+}
+#avatar-picker.show { display: flex; }
+
+.ap-panel {
+    background: var(--white);
+    width: 100%;
+    max-width: 480px;
+    border-radius: 22px 22px 0 0;
+    padding: 10px 18px calc(20px + env(safe-area-inset-bottom, 0px));
+    box-shadow: 0 -8px 40px rgba(0,0,0,.3);
+    animation: sheetUp .28s cubic-bezier(.2,.9,.3,1) both;
+    max-height: 88vh;
+    overflow-y: auto;
+}
+.ap-handle {
+    width: 42px; height: 4px;
+    border-radius: 999px;
+    background: var(--line);
+    margin: 0 auto 10px;
+}
+.ap-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+.ap-head h3 { font-size: 1.05rem; font-weight: 900; }
+.ap-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 9px;
+    margin-bottom: 14px;
+}
+.ap-emoji {
+    aspect-ratio: 1;
+    border-radius: 13px;
+    border: 1.5px solid var(--line);
+    background: var(--ghost);
+    font-size: 1.35rem;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: transform .13s, border-color .15s, background .15s;
+    font-family: inherit;
+    padding: 0;
+}
+.ap-emoji:active { transform: scale(.9); }
+.ap-emoji.active {
+    border-color: var(--g-blue);
+    background: #E8F0FE;
+    box-shadow: 0 0 0 3px rgba(26,115,232,.14);
+}
+.ap-upload {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 14px;
+    border-radius: 14px;
+    background: #E8F0FE;
+    color: var(--g-blue);
+    font-weight: 800;
+    font-size: .92rem;
+    cursor: pointer;
+    border: 1.5px solid #C6DAFC;
+    margin-bottom: 9px;
+    transition: transform .12s;
+}
+.ap-upload:active { transform: scale(.97); }
+.ap-reset {
+    width: 100%;
+    padding: 13px;
+    border-radius: 14px;
+    background: var(--ghost-2);
+    color: var(--ink-2);
+    font-weight: 700;
+    font-size: .88rem;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform .12s;
+}
+.ap-reset:active { transform: scale(.97); }
+
+@media (min-width: 768px) {
+    #avatar-picker { align-items: center; }
+    .ap-panel { border-radius: 22px; }
+}
+
+/* =================================================================
+   ★★★ 頂覽（Welcome / 總覽首頁） ★★★
+   ================================================================= */
+#welcome-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    background: linear-gradient(180deg, #E8F0FE 0%, #F8F9FA 26%, #FFFFFF 100%);
+}
+#welcome-screen.show { display: flex; }
+
+.ws-scroll {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+.ws-inner {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 26px 18px calc(38px + env(safe-area-inset-bottom, 0px));
+}
+
+.ws-hero { text-align: center; padding: 4px 0 6px; }
+.ws-logo {
+    width: 78px; height: 78px;
+    border-radius: 25px;
+    margin: 0 auto 15px;
+    display: grid; place-items: center;
+    font-size: 38px;
+    background: linear-gradient(135deg, var(--g-blue), var(--g-blue-l));
+    color: #fff;
+    box-shadow: 0 12px 30px rgba(26,115,232,.38);
+    animation: wsPop .5s cubic-bezier(.2,1.2,.4,1) both;
+}
+@keyframes wsPop {
+    from { transform: scale(.6); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+}
+.ws-badge {
+    display: inline-block;
+    background: #fff;
+    border: 1px solid #C6DAFC;
+    color: var(--g-blue);
+    font-size: .68rem;
+    font-weight: 800;
+    letter-spacing: .6px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    margin-bottom: 13px;
+    box-shadow: 0 1px 4px rgba(26,115,232,.12);
+}
+.ws-title {
+    font-size: 2rem;
+    font-weight: 900;
+    letter-spacing: 1.5px;
+    line-height: 1.24;
+    color: var(--ink);
+    margin: 0;
+}
+.ws-title em { font-style: normal; color: var(--g-blue); }
+.ws-sub {
+    margin-top: 10px;
+    font-size: .84rem;
+    line-height: 1.85;
+    color: var(--ink-2);
+}
+.ws-sub b { color: var(--ink); }
+
+.ws-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 20px 0 24px;
+}
+.ws-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    padding: 16px 18px;
+    border-radius: 16px;
+    font-size: 1rem;
+    font-weight: 800;
+    font-family: inherit;
+    letter-spacing: .4px;
+    border: none;
+    cursor: pointer;
+    transition: transform .12s ease, filter .15s ease, box-shadow .15s;
+}
+.ws-btn:active { transform: scale(.972); filter: brightness(.95); }
+.ws-btn.primary {
+    background: linear-gradient(135deg, var(--g-blue), var(--g-blue-l));
+    color: #fff;
+    box-shadow: 0 6px 20px rgba(26,115,232,.38);
+}
+.ws-btn.green {
+    background: var(--g-green);
+    color: #fff;
+    box-shadow: 0 5px 16px rgba(52,168,83,.32);
+}
+.ws-btn.outline {
+    background: #fff;
+    color: var(--g-blue);
+    border: 1.6px solid #C6DAFC;
+    box-shadow: 0 2px 8px rgba(26,115,232,.10);
+}
+.ws-btn.plain {
+    background: var(--ghost-2);
+    color: var(--ink-2);
+}
+
+.ws-sec-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.02rem;
+    font-weight: 900;
+    color: var(--ink);
+    margin: 26px 0 12px;
+    letter-spacing: .3px;
+}
+.ws-sec-title::before {
+    content: '';
+    width: 4px; height: 17px;
+    border-radius: 3px;
+    background: linear-gradient(180deg, var(--g-blue), var(--g-blue-l));
+}
+
+.ws-features {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+.ws-card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 15px;
+    padding: 13px 12px;
+    box-shadow: 0 1px 3px rgba(60,64,67,.07);
+    transition: transform .15s, box-shadow .15s;
+}
+.ws-card:active { transform: scale(.98); }
+.ws-card .ic { font-size: 1.45rem; line-height: 1; }
+.ws-card h4 {
+    font-size: .84rem;
+    font-weight: 800;
+    margin: 7px 0 4px;
+    color: var(--ink);
+}
+.ws-card p {
+    font-size: .71rem;
+    line-height: 1.6;
+    color: var(--ink-2);
+    margin: 0;
+}
+
+.ws-steps { display: flex; flex-direction: column; gap: 9px; }
+.ws-step {
+    display: flex;
+    gap: 12px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 15px;
+    padding: 13px 13px;
+    box-shadow: 0 1px 3px rgba(60,64,67,.06);
+}
+.ws-step .num {
+    width: 29px; height: 29px;
+    border-radius: 50%;
+    background: #E8F0FE;
+    color: var(--g-blue);
+    font-weight: 900;
+    font-size: .82rem;
+    display: grid; place-items: center;
+    flex: none;
+}
+.ws-step h5 {
+    font-size: .85rem;
+    font-weight: 800;
+    margin: 3px 0 4px;
+    color: var(--ink);
+}
+.ws-step p {
+    font-size: .73rem;
+    line-height: 1.68;
+    color: var(--ink-2);
+    margin: 0;
+}
+
+.ws-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+.ws-compare-card {
+    border-radius: 15px;
+    padding: 13px 12px;
+    border: 1.5px solid var(--line);
+    background: #fff;
+}
+.ws-compare-card.a4 { border-color: #C6DAFC; background: #F5F9FF; }
+.ws-compare-card.a3 { border-color: #E0C7F5; background: #FAF5FF; }
+.ws-compare-card h4 {
+    font-size: .86rem;
+    font-weight: 900;
+    margin-bottom: 7px;
+}
+.ws-compare-card.a4 h4 { color: var(--g-blue); }
+.ws-compare-card.a3 h4 { color: #8430CE; }
+.ws-compare-card ul {
+    margin: 0; padding-left: 16px;
+}
+.ws-compare-card li {
+    font-size: .7rem;
+    line-height: 1.72;
+    color: var(--ink-2);
+}
+
+.ws-foot {
+    margin-top: 28px;
+    text-align: center;
+    font-size: .68rem;
+    line-height: 1.9;
+    color: #9AA0A6;
+    border-top: 1px dashed var(--line);
+    padding-top: 16px;
+}
+.ws-foot b { color: var(--ink-2); }
+
+/* =================================================================
+   ★★★ 使用說明書（Manual） ★★★
+   ================================================================= */
+#manual-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 110;
+    display: none;
+    background: var(--ghost);
+    overflow: hidden;
+}
+#manual-screen.show { display: flex; }
+
+.ms-panel {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    background: var(--ghost);
+    overflow: hidden;
+}
+.ms-head {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    padding-top: calc(12px + env(safe-area-inset-top, 0px));
+    background: #fff;
+    border-bottom: 1px solid var(--line);
+    box-shadow: 0 1px 3px rgba(60,64,67,.07);
+    z-index: 5;
+}
+.ms-back {
+    width: 38px; height: 38px;
+    border-radius: 11px;
+    background: var(--ghost-2);
+    border: none;
+    font-size: 1.15rem;
+    line-height: 1;
+    display: grid; place-items: center;
+    cursor: pointer;
+    flex: none;
+    color: var(--ink);
+    transition: transform .12s, background .15s;
+}
+.ms-back:active { transform: scale(.92); background: #E4E6E8; }
+.ms-head h2 {
+    flex: 1;
+    font-size: 1.02rem;
+    font-weight: 900;
+    letter-spacing: .5px;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+.ms-head .ms-tag {
+    font-size: .62rem;
+    font-weight: 800;
+    color: var(--g-blue);
+    background: #E8F0FE;
+    border-radius: 999px;
+    padding: 3px 8px;
+    letter-spacing: .4px;
+}
+
+#ms-scroll {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 14px 14px calc(40px + env(safe-area-inset-bottom, 0px));
+    position: relative;
+    scroll-behavior: smooth;
+}
+
+.ms-toc {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 14px 13px;
+    margin-bottom: 13px;
+    box-shadow: 0 1px 3px rgba(60,64,67,.07);
+}
+.ms-toc h3 {
+    font-size: .9rem;
+    font-weight: 900;
+    color: var(--ink);
+    margin-bottom: 9px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+.ms-toc a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 9px;
+    border-radius: 9px;
+    font-size: .78rem;
+    font-weight: 600;
+    color: var(--ink-2);
+    text-decoration: none;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+}
+.ms-toc a:active { background: var(--ghost-2); color: var(--g-blue); }
+.ms-toc a span.k {
+    color: var(--g-blue);
+    font-weight: 900;
+    font-size: .74rem;
+    flex: none;
+    min-width: 20px;
+}
+
+.ms-sec {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 15px 14px 8px;
+    margin-bottom: 13px;
+    box-shadow: 0 1px 3px rgba(60,64,67,.06);
+    scroll-margin-top: 10px;
+}
+.ms-sec > h3 {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: .98rem;
+    font-weight: 900;
+    color: var(--ink);
+    margin: 0 0 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed var(--line);
+    letter-spacing: .3px;
+}
+.ms-sec > h3 .n {
+    width: 25px; height: 25px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--g-blue), var(--g-blue-l));
+    color: #fff;
+    font-size: .72rem;
+    font-weight: 900;
+    display: grid; place-items: center;
+    flex: none;
+    box-shadow: 0 2px 6px rgba(26,115,232,.28);
+}
+.ms-sec h4 {
+    font-size: .85rem;
+    font-weight: 800;
+    color: var(--ink);
+    margin: 14px 0 7px;
+    padding-left: 9px;
+    border-left: 3px solid var(--g-yellow);
+    line-height: 1.4;
+}
+.ms-sec h5 {
+    font-size: .78rem;
+    font-weight: 800;
+    color: var(--g-blue);
+    margin: 11px 0 5px;
+}
+.ms-sec p {
+    font-size: .78rem;
+    line-height: 1.82;
+    color: var(--ink-2);
+    margin: 0 0 9px;
+}
+.ms-sec p b, .ms-sec li b { color: var(--ink); font-weight: 800; }
+.ms-sec ul, .ms-sec ol {
+    margin: 0 0 10px;
+    padding-left: 19px;
+}
+.ms-sec li {
+    font-size: .78rem;
+    line-height: 1.82;
+    color: var(--ink-2);
+    margin-bottom: 4px;
+}
+.ms-sec li::marker { color: var(--g-blue); font-weight: 800; }
+
+.ms-code {
+    background: #F1F3F4;
+    border: 1px solid #E4E6E8;
+    border-radius: 10px;
+    padding: 9px 11px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: .71rem;
+    line-height: 1.72;
+    color: #202124;
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin-bottom: 11px;
+}
+
+.ms-tip, .ms-warn, .ms-ok, .ms-info {
+    border-radius: 0 11px 11px 0;
+    padding: 10px 12px;
+    font-size: .75rem;
+    line-height: 1.78;
+    margin-bottom: 11px;
+}
+.ms-tip  { background: #FEF7E0; border-left: 4px solid var(--g-yellow); color: #7A4B00; }
+.ms-warn { background: #FCE8E6; border-left: 4px solid var(--g-red);    color: #8B1A12; }
+.ms-ok   { background: #E6F4EA; border-left: 4px solid var(--g-green);  color: #0F5B2A; }
+.ms-info { background: #E8F0FE; border-left: 4px solid var(--g-blue);   color: #10428A; }
+.ms-tip b, .ms-warn b, .ms-ok b, .ms-info b { font-weight: 800; }
+
+.ms-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 12px;
+    font-size: .72rem;
+}
+.ms-table th, .ms-table td {
+    border: 1px solid var(--line);
+    padding: 6px 7px;
+    text-align: left;
+    vertical-align: top;
+    line-height: 1.65;
+    color: var(--ink-2);
+    word-break: break-word;
+}
+.ms-table th {
+    background: var(--ghost-2);
+    font-weight: 800;
+    color: var(--ink);
+    white-space: nowrap;
+}
+.ms-table td b { color: var(--ink); }
+
+.ms-kbd {
+    display: inline-block;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-bottom-width: 2px;
+    border-radius: 6px;
+    padding: 1px 7px;
+    font-size: .7rem;
+    font-weight: 800;
+    color: var(--ink);
+    font-family: ui-monospace, Menlo, monospace;
+    margin: 0 2px;
+}
+
+.ms-faq {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 11px 12px;
+    margin-bottom: 9px;
+    background: #FCFCFD;
+}
+.ms-faq .q {
+    font-size: .78rem;
+    font-weight: 800;
+    color: var(--ink);
+    line-height: 1.6;
+    margin-bottom: 6px;
+    display: flex;
+    gap: 7px;
+}
+.ms-faq .q::before {
+    content: 'Q';
+    width: 18px; height: 18px;
+    border-radius: 6px;
+    background: var(--g-blue);
+    color: #fff;
+    font-size: .62rem;
+    font-weight: 900;
+    display: grid; place-items: center;
+    flex: none;
+    margin-top: 2px;
+}
+.ms-faq .a {
+    font-size: .75rem;
+    line-height: 1.8;
+    color: var(--ink-2);
+    padding-left: 25px;
+    white-space: pre-line;
+}
+.ms-faq .a b { color: var(--ink); }
+
+.ms-end {
+    text-align: center;
+    font-size: .7rem;
+    line-height: 1.9;
+    color: #9AA0A6;
+    padding: 18px 0 6px;
+    border-top: 1px dashed var(--line);
+    margin-top: 18px;
+}
+.ms-end b { color: var(--ink-2); }
+
+.ms-bottom-bar {
+    flex: none;
+    display: flex;
+    gap: 9px;
+    padding: 10px 14px calc(12px + env(safe-area-inset-bottom, 0px));
+    background: #fff;
+    border-top: 1px solid var(--line);
+    box-shadow: 0 -3px 14px rgba(60,64,67,.09);
+}
+.ms-bottom-bar button {
+    flex: 1;
+    padding: 13px;
+    border-radius: 13px;
+    font-size: .86rem;
+    font-weight: 800;
+    font-family: inherit;
+    border: none;
+    cursor: pointer;
+    transition: transform .12s;
+}
+.ms-bottom-bar button:active { transform: scale(.97); }
+.ms-bottom-bar .b1 { background: var(--g-blue); color: #fff; }
+.ms-bottom-bar .b2 { background: var(--ghost-2); color: var(--ink-2); }
+
+/* 桌面版：說明書與頂覽變成浮動卡片 */
+@media (min-width: 768px) {
+    #welcome-screen { background: linear-gradient(180deg,#E8F0FE 0%,#F1F6FE 40%,#FFFFFF 100%); }
+    .ws-inner { padding-top: 46px; }
+    .ws-actions { flex-direction: row; flex-wrap: wrap; }
+    .ws-btn { flex: 1 1 190px; }
+    .ws-features { grid-template-columns: repeat(4, 1fr); }
+    .ws-title { font-size: 2.5rem; }
+
+    #manual-screen {
+        background: rgba(32,33,36,.55);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        align-items: center;
+        justify-content: center;
+    }
+    .ms-panel {
+        width: 800px;
+        max-width: 92vw;
+        height: 88vh;
+        border-radius: 22px;
+        box-shadow: 0 24px 70px rgba(0,0,0,.38);
+    }
+    .ms-head { border-radius: 22px 22px 0 0; padding-top: 12px; }
+    .ms-bottom-bar { border-radius: 0 0 22px 22px; }
+}
+
+/* =================================================================
+   列印
+   ================================================================= */
+@media print {
+    html, body {
+        margin: 0 !important; padding: 0 !important;
+        overflow: hidden !important;
+        background: #fff !important;
+        display: block !important;
+        width: 100% !important; height: 100% !important;
+    }
+    #sidebar, #mobile-nav, #print-btn-container, #table-manager,
+    #avatar-picker, #edit-hint, #welcome-screen, #manual-screen { display: none !important; }
+    #app { display: block !important; height: auto !important; }
+    #preview-container {
+        display: block !important;
+        position: static !important;
+        margin: 0 !important; padding: 0 !important;
+        overflow: visible !important;
+        background: #fff !important;
+        width: 100% !important; height: auto !important;
+    }
+    #a4-wrapper, #a3-wrapper {
+        transform: none !important;
+        margin: 0 !important; padding: 0 !important;
+    }
+    .a4-preview {
+        box-shadow: none !important;
+        margin: 0 !important;
+        width: 210mm !important; height: 296mm !important;
+        page-break-after: avoid !important; break-after: avoid !important;
+        page-break-inside: avoid !important; break-inside: avoid !important;
+        overflow: hidden !important;
+    }
+    .a3-preview {
+        box-shadow: none !important;
+        margin: 0 !important;
+        width: 420mm !important; height: 296mm !important;
+        page-break-after: avoid !important; break-after: avoid !important;
+        page-break-inside: avoid !important; break-inside: avoid !important;
+        overflow: hidden !important;
+    }
+    .ed-cell { box-shadow: none !important; background: transparent !important; }
+    .ed-cell:empty::before { content: '' !important; }
+    .a3-img-slot:empty::after { content: '' !important; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
+</style>
+</head>
+<body class="mobile-view-chat">
+
+<!-- ============================================================
+     ★★★ 頂覽（Welcome / 總覽首頁） ★★★
+     ============================================================ -->
+<div id="welcome-screen">
+    <div class="g-bar"></div>
+
+    <div class="ws-scroll">
+        <div class="ws-inner">
+
+            <!-- 主視覺 -->
+            <div class="ws-hero">
+                <div class="ws-logo">🛠️</div>
+                <div class="ws-badge">版本 v2.0 ・ 手機 / 平板 / 電腦 皆可使用</div>
+                <h1 class="ws-title">智慧刀具表 <em>製作</em></h1>
+                <p class="ws-sub">
+                    用「對話」取代「打字排版」。<br>
+                    只要照著精靈的提問逐項回答，系統就會自動幫您<br>
+                    排版出<b>可以直接列印</b>的專業刀具表。
+                </p>
+            </div>
+
+            <!-- 主按鍵區 -->
+            <div class="ws-actions">
+                <button class="ws-btn primary" onclick="startFromWelcome()">🚀 開始製作刀具表</button>
+                <button class="ws-btn outline" onclick="openManual()">📖 使用說明書</button>
+                <button class="ws-btn green" onclick="goPreviewFromWelcome()">📄 直接看預覽報表</button>
+                <button class="ws-btn plain" onclick="openTableManager()">📁 我的刀具表</button>
+            </div>
+
+            <!-- 功能特色 -->
+            <div class="ws-sec-title">✨ 六大核心功能</div>
+            <div class="ws-features">
+                <div class="ws-card">
+                    <div class="ic">💬</div>
+                    <h4>對話式輸入</h4>
+                    <p>一問一答，不用學 Excel，不會漏填欄位。</p>
+                </div>
+                <div class="ws-card">
+                    <div class="ic">✏️</div>
+                    <h4>所見即所得</h4>
+                    <p>預覽區任何欄位都能直接點擊修改，改完立即生效。</p>
+                </div>
+                <div class="ws-card">
+                    <div class="ic">🖨️</div>
+                    <h4>一鍵列印</h4>
+                    <p>自動套好 A4 / A3 版面，直接列印或存成 PDF。</p>
+                </div>
+                <div class="ws-card">
+                    <div class="ic">🖼️</div>
+                    <h4>刀具圖片牆</h4>
+                    <p>可上傳刀具照片，系統自動壓縮並排版。</p>
+                </div>
+                <div class="ws-card">
+                    <div class="ic">📁</div>
+                    <h4>10 張暫存</h4>
+                    <p>資料自動存在本機，隨時切換、載入、刪除。</p>
+                </div>
+                <div class="ws-card">
+                    <div class="ic">🔒</div>
+                    <h4>資料不外傳</h4>
+                    <p>全部保存在您的瀏覽器，不上雲端、不需登入。</p>
+                </div>
+            </div>
+
+            <!-- 兩種格式比較 -->
+            <div class="ws-sec-title">📐 兩種表格格式</div>
+            <div class="ws-compare">
+                <div class="ws-compare-card a4">
+                    <h4>第一類 · A4 直式</h4>
+                    <ul>
+                        <li>車床 N/C 規格</li>
+                        <li>刀具列固定 8 列</li>
+                        <li>含夾頭壓力設定欄</li>
+                        <li>右下角 QR Code 區</li>
+                        <li>適合單件、少量刀具</li>
+                    </ul>
+                </div>
+                <div class="ws-compare-card a3">
+                    <h4>第二類 · A3 橫式</h4>
+                    <ul>
+                        <li>銑床 M/C 規格</li>
+                        <li>刀具列最少 10 列</li>
+                        <li>右側 5 欄刀具圖片牆</li>
+                        <li>貼心提醒 / #500 / 機台技巧</li>
+                        <li>雙 QR Code、雙品名區</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 操作流程 -->
+            <div class="ws-sec-title">🧭 操作流程四步驟</div>
+            <div class="ws-steps">
+                <div class="ws-step">
+                    <div class="num">1</div>
+                    <div>
+                        <h5>選擇表格格式</h5>
+                        <p>在上方切換「車床N/C規格（A4）」或「銑床M/C規格（A3）」。切換後系統會從頭引導您填寫。</p>
+                    </div>
+                </div>
+                <div class="ws-step">
+                    <div class="num">2</div>
+                    <div>
+                        <h5>回答精靈提問</h5>
+                        <p>基本資料 → 刀具資料（可一直新增）→ QR Code 內容。選填欄位可一鍵略過，不會被強迫填寫。</p>
+                    </div>
+                </div>
+                <div class="ws-step">
+                    <div class="num">3</div>
+                    <div>
+                        <h5>在預覽區微調</h5>
+                        <p>切到「預覽報表」頁籤，任何文字欄位、表格內容、圖片、QR Code 都能直接點擊修改。</p>
+                    </div>
+                </div>
+                <div class="ws-step">
+                    <div class="num">4</div>
+                    <div>
+                        <h5>列印或存成 PDF</h5>
+                        <p>按「列印 / 存為 PDF」按鈕，紙張尺寸已自動設定好，直接輸出即可交給現場使用。</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ws-foot">
+                <b>智慧刀具表製作系統</b><br>
+                本機儲存 · 免登入 · 免安裝 · 完全離線可用<br>
+                建議使用 Chrome / Edge / Safari 最新版本
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     ★★★ 使用說明書（Manual） ★★★
+     ============================================================ -->
+<div id="manual-screen">
+    <div class="ms-panel">
+
+        <div class="ms-head">
+            <button class="ms-back" onclick="closeManual()" title="返回">←</button>
+            <h2>📖 使用說明書 <span class="ms-tag">完整版</span></h2>
+        </div>
+
+        <div id="ms-scroll">
+
+            <!-- ======= 目錄 ======= -->
+            <div class="ms-toc">
+                <h3>📑 目錄（點擊可快速跳轉）</h3>
+                <a onclick="jumpTo('sec1')"><span class="k">01</span>系統總覽與適用對象</a>
+                <a onclick="jumpTo('sec2')"><span class="k">02</span>介面導覽（手機版 / 電腦版）</a>
+                <a onclick="jumpTo('sec3')"><span class="k">03</span>快速開始：三步驟完成第一張表</a>
+                <a onclick="jumpTo('sec4')"><span class="k">04</span>第一類 A4（車床 N/C）完整操作流程</a>
+                <a onclick="jumpTo('sec5')"><span class="k">05</span>第二類 A3（銑床 M/C）完整操作流程</a>
+                <a onclick="jumpTo('sec6')"><span class="k">06</span>預覽區「所見即所得」編輯功能</a>
+                <a onclick="jumpTo('sec7')"><span class="k">07</span>圖片上傳與自動壓縮機制</a>
+                <a onclick="jumpTo('sec8')"><span class="k">08</span>QR Code 設定方法</a>
+                <a onclick="jumpTo('sec9')"><span class="k">09</span>我的刀具表（本機暫存管理）</a>
+                <a onclick="jumpTo('sec10')"><span class="k">10</span>列印與匯出 PDF 完整設定</a>
+                <a onclick="jumpTo('sec11')"><span class="k">11</span>精靈頭像更換</a>
+                <a onclick="jumpTo('sec12')"><span class="k">12</span>常見問題 FAQ（20 問）</a>
+                <a onclick="jumpTo('sec13')"><span class="k">13</span>注意事項與資料保存</a>
+                <a onclick="jumpTo('sec14')"><span class="k">14</span>快速鍵與效率小技巧</a>
+            </div>
+
+            <!-- ======= 01 ======= -->
+            <div class="ms-sec" id="sec1">
+                <h3><span class="n">01</span>系統總覽與適用對象</h3>
+
+                <h4>1-1 這套系統是什麼？</h4>
+                <p>
+                    這是一套<b>「對話式刀具表產生器」</b>。傳統上，您必須打開 Excel、找到正確的範本、
+                    一格一格輸入資料、調整欄寬、設定列印範圍，最後還常常因為格式跑掉而重做。
+                </p>
+                <p>
+                    本系統把這整個流程反過來：<b>由程式主動問您問題，您只要回答</b>。
+                    每回答一題，系統就即時把答案填進已經排版好的表格中。
+                    等到所有問題回答完，一張可以直接列印的刀具表也就完成了。
+                </p>
+
+                <h4>1-2 適用對象</h4>
+                <ul>
+                    <li><b>CNC 車床 / 銑床現場主管</b>：需要快速產出換刀表交給作業員。</li>
+                    <li><b>製程 / 生技工程師</b>：需要建立標準化的刀具清單文件。</li>
+                    <li><b>打樣 / 試作單位</b>：臨時需要一份刀具配置表，但不想開 Excel。</li>
+                    <li><b>不熟悉 Excel 排版的人</b>：只要會打字、會點按鈕就能完成。</li>
+                </ul>
+
+                <h4>1-3 支援的兩種表格格式</h4>
+                <table class="ms-table">
+                    <tr>
+                        <th>項目</th>
+                        <th>第一類（A4 直式）</th>
+                        <th>第二類（A3 橫式）</th>
+                    </tr>
+                    <tr>
+                        <td><b>對應機型</b></td>
+                        <td>車床 N/C 規格</td>
+                        <td>銑床 M/C 規格</td>
+                    </tr>
+                    <tr>
+                        <td><b>紙張</b></td>
+                        <td>A4 直式（210 × 297 mm）</td>
+                        <td>A3 橫式（420 × 297 mm）</td>
+                    </tr>
+                    <tr>
+                        <td><b>刀具列數</b></td>
+                        <td>固定 8 列（不足自動留空）</td>
+                        <td>最少 10 列，可自動增加</td>
+                    </tr>
+                    <tr>
+                        <td><b>刀具圖片</b></td>
+                        <td>顯示於「備註」欄右側小圖</td>
+                        <td>獨立 5 欄圖片牆，可放大量圖</td>
+                    </tr>
+                    <tr>
+                        <td><b>特有欄位</b></td>
+                        <td>夾頭壓力設定</td>
+                        <td>貼心提醒 / #500 切換 / 機台技巧 / 雙品名</td>
+                    </tr>
+                    <tr>
+                        <td><b>QR Code</b></td>
+                        <td>1 組（右下角）</td>
+                        <td>2 組（日報表 + 機台資料）</td>
+                    </tr>
+                </table>
+
+                <div class="ms-info">
+                    💡 <b>該選哪一種？</b><br>
+                    刀具數量在 8 把以內、以車床加工為主 → 選 <b>第一類 A4</b>。<br>
+                    刀具數量多、需要放刀具照片牆、銑床加工 → 選 <b>第二類 A3</b>。
+                </div>
+
+                <h4>1-4 系統運作方式</h4>
+                <ul>
+                    <li><b>完全不需安裝</b>：只要有瀏覽器就能開（建議 Chrome、Edge、Safari 最新版）。</li>
+                    <li><b>完全不需登入</b>：沒有帳號、沒有密碼。</li>
+                    <li><b>完全本機儲存</b>：資料存在您這台裝置的瀏覽器裡（localStorage），不會上傳到任何伺服器。</li>
+                    <li><b>可離線使用</b>：頁面載入完成後，即使斷網也能繼續操作與列印。</li>
+                </ul>
+
+                <div class="ms-warn">
+                    ⚠️ <b>重要觀念</b>：因為資料是存在「這台裝置的這個瀏覽器」裡，
+                    所以換一台電腦、換一個瀏覽器、或清除瀏覽器資料，都會看不到原本的表格。
+                    重要表格請務必<b>列印或存成 PDF</b> 備份。
+                </div>
+            </div>
+
+            <!-- ======= 02 ======= -->
+            <div class="ms-sec" id="sec2">
+                <h3><span class="n">02</span>介面導覽（手機版 / 電腦版）</h3>
+
+                <h4>2-1 手機版（畫面寬度小於 768px）</h4>
+                <p>手機版採用<b>三個頁籤</b>的切換方式，由畫面最下方的導航列控制：</p>
+                <table class="ms-table">
+                    <tr>
+                        <th>頁籤</th>
+                        <th>圖示</th>
+                        <th>功能說明</th>
+                    </tr>
+                    <tr>
+                        <td><b>對話輸入</b></td>
+                        <td>💬</td>
+                        <td>與精靈對話、回答問題、建立刀具資料。這是主要的作業畫面。</td>
+                    </tr>
+                    <tr>
+                        <td><b>預覽報表</b></td>
+                        <td>📄</td>
+                        <td>查看已排版的表格。可直接點擊任何欄位編輯，也可按列印。</td>
+                    </tr>
+                    <tr>
+                        <td><b>我的表格</b></td>
+                        <td>📁</td>
+                        <td>管理本機暫存的刀具表（最多 10 張）。圖示右上角紅點會顯示目前張數。</td>
+                    </tr>
+                </table>
+
+                <div class="ms-tip">
+                    💡 在手機上，預覽區會自動<b>等比縮小</b>以符合螢幕寬度，
+                    讓您能一眼看到整張表的樣子。實際列印時會以 100% 原尺寸輸出，不用擔心縮放問題。
+                </div>
+
+                <h4>2-2 上方標題列</h4>
+                <ul>
+                    <li><b>🤖 精靈頭像（左側）</b>：點擊可開啟頭像選擇視窗，更換成其他表情符號或上傳自己的圖片。</li>
+                    <li><b>📁 我的表格按鈕（右側）</b>：後方的數字（例：3/10）代表目前已暫存 3 張、上限 10 張。</li>
+                    <li><b>❓ 說明按鈕（右側）</b>：隨時開啟本說明書，不會中斷您正在填寫的資料。</li>
+                </ul>
+
+                <h4>2-3 格式切換列</h4>
+                <p>位於標題列下方，兩個按鈕：</p>
+                <ul>
+                    <li><b>「車床N/C規格」</b>：切換到第一類 A4 格式。</li>
+                    <li><b>「銑床M/C規格」</b>：切換到第二類 A3 格式。</li>
+                </ul>
+                <p>
+                    被選取的那一個會變成<b>白底藍字</b>。切換格式時，系統會：
+                </p>
+                <ol>
+                    <li>先把目前正在編輯的表格自動存檔。</li>
+                    <li>保留「製表日期」與「製表者」兩欄。</li>
+                    <li>其餘欄位清空，並重新啟動對話流程。</li>
+                </ol>
+
+                <h4>2-4 對話區</h4>
+                <ul>
+                    <li><b>白色泡泡（左側）</b>：精靈的提問或提示訊息。</li>
+                    <li><b>藍色泡泡（右側）</b>：您剛才輸入的答案。</li>
+                    <li>每一則訊息都會有輕微的滑入動畫，新的訊息會自動捲到最下方。</li>
+                </ul>
+
+                <h4>2-5 底部輸入區</h4>
+                <p>依照題目類型，會出現不同的輸入介面：</p>
+                <table class="ms-table">
+                    <tr>
+                        <th>題型</th>
+                        <th>出現的介面</th>
+                    </tr>
+                    <tr>
+                        <td><b>文字題</b></td>
+                        <td>文字輸入框 + 「發送」按鈕。電腦版按 <span class="ms-kbd">Enter</span> 也可以送出。</td>
+                    </tr>
+                    <tr>
+                        <td><b>日期題</b></td>
+                        <td>日期選擇器，預設帶入今天日期，可直接修改。</td>
+                    </tr>
+                    <tr>
+                        <td><b>多行題</b></td>
+                        <td>大文字框 + 「發送」+「套用預設」按鈕（可一鍵帶入建議內容）。</td>
+                    </tr>
+                    <tr>
+                        <td><b>圖片題</b></td>
+                        <td>「📸 選擇圖片或拍照」+「無圖，直接略過」兩個按鈕。</td>
+                    </tr>
+                    <tr>
+                        <td><b>選填題</b></td>
+                        <td>除了原本的輸入框，下方會多一顆「選填，略過此欄位」按鈕。</td>
+                    </tr>
+                    <tr>
+                        <td><b>動作題</b></td>
+                        <td>出現綠色大按鈕，例如「🚀 新增第一把刀具」。</td>
+                    </tr>
+                </table>
+
+                <h4>2-6 電腦版（畫面寬度 768px 以上）</h4>
+                <p>電腦版採<b>左右分割畫面</b>，不需要切換頁籤：</p>
+                <ul>
+                    <li><b>左側（固定 440px）</b>：對話面板，包含標題列、格式切換、對話歷史、輸入區。</li>
+                    <li><b>右側（自動填滿）</b>：預覽面板，即時顯示排版結果。</li>
+                </ul>
+                <p>
+                    也就是說，您在左邊打字，右邊立刻就會看到結果，<b>邊填邊看</b>，效率最高。
+                    底部導航列在電腦版會自動隱藏。
+                </p>
+            </div>
+
+            <!-- ======= 03 ======= -->
+            <div class="ms-sec" id="sec3">
+                <h3><span class="n">03</span>快速開始：三步驟完成第一張表</h3>
+
+                <h4>步驟一：選擇格式</h4>
+                <p>
+                    在頂覽首頁按「🚀 開始製作刀具表」進入系統後，
+                    先在上方切換列選擇 <b>車床N/C規格</b> 或 <b>銑床M/C規格</b>。
+                    選錯了也沒關係，隨時可以重新切換，系統會重新開始引導。
+                </p>
+
+                <h4>步驟二：回答精靈的問題</h4>
+                <p>
+                    精靈會從「基本資料」開始問起，一路問到「刀具資料」，
+                    最後再問「QR Code 內容」。您只需要：
+                </p>
+                <ol>
+                    <li>在輸入框打字。</li>
+                    <li>按「發送」（或電腦上按 Enter）。</li>
+                    <li>看到「選填，略過此欄位」時，若沒有資料就按下去跳過。</li>
+                    <li>刀具資料會一把一把建立，每把填完都會問您「是否繼續新增」。</li>
+                </ol>
+
+                <h4>步驟三：預覽、微調、列印</h4>
+                <p>
+                    所有問題回答完畢後，系統會顯示「🎉 恭喜！建立完成，已自動暫存」。
+                    手機版會自動在約 1 秒後切換到「預覽報表」頁籤。
+                </p>
+                <p>在預覽區您可以：</p>
+                <ul>
+                    <li>點擊任何文字欄位直接修改（詳見第 06 章）。</li>
+                    <li>點擊刀具圖片更換圖片。</li>
+                    <li>點擊 QR Code 修改內容。</li>
+                    <li>確認無誤後，按右上角「列印 / 存為 PDF」按鈕輸出。</li>
+                </ul>
+
+                <div class="ms-ok">
+                    ✅ <b>整個過程最快大約 3 分鐘</b>就能完成一張標準刀具表。
+                    第二次之後，因為基本資料可以沿用，速度會更快。
+                </div>
+            </div>
+
+            <!-- ======= 04 ======= -->
+            <div class="ms-sec" id="sec4">
+                <h3><span class="n">04</span>第一類 A4（車床 N/C）完整操作流程</h3>
+
+                <p>當您選擇「車床N/C規格」後，精靈會依序詢問以下欄位。<b>標註「選填」者，可以直接按略過按鈕跳過。</b></p>
+
+                <h4>4-1 基本資料階段（共 10 題 + 1 個動作）</h4>
+                <table class="ms-table">
+                    <tr>
+                        <th>順序</th>
+                        <th>欄位</th>
+                        <th>說明與範例</th>
+                        <th>必填</th>
+                    </tr>
+                    <tr>
+                        <td>1</td>
+                        <td><b>主題</b></td>
+                        <td>表單最上方的大標題。例：<code>SLIDER OP110</code></td>
+                        <td>✔</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td><b>副標題</b></td>
+                        <td>主題右側的小字，通常放加工程式編號。例：<code>加工程式O6370</code></td>
+                        <td>選填</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td><b>製表日期</b></td>
+                        <td>預設帶入今天，可自行修改。存檔時會以 <code>YYYY/MM/DD</code> 顯示。</td>
+                        <td>✔</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td><b>製表者 / 代碼</b></td>
+                        <td>填姓名或工號皆可。例：<code>王小明</code> 或 <code>A1234</code></td>
+                        <td>✔</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td><b>夾頭壓力設定</b></td>
+                        <td>顯示於表格中段的藍色大字。例：<code>15KG</code>、<code>18~20KG</code></td>
+                        <td>✔</td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td><b>品名</b></td>
+                        <td>零件名稱。例：<code>SLIDER</code></td>
+                        <td>✔</td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td><b>品號</b></td>
+                        <td>零件料號。例：<code>Z907100000</code></td>
+                        <td>✔</td>
+                    </tr>
+                    <tr>
+                        <td>8</td>
+                        <td><b>客戶編號</b></td>
+                        <td>客戶端的圖號或編號。例：<code>1A8310-14250</code></td>
+                        <td>選填</td>
+                    </tr>
+                    <tr>
+                        <td>9</td>
+                        <td><b>加工時間</b></td>
+                        <td>單件加工時間。例：<code>3'00"</code>、<code>1分30秒</code></td>
+                        <td>選填</td>
+                    </tr>
+                    <tr>
+                        <td>10</td>
+                        <td><b>每日數量</b></td>
+                        <td>每日目標產量。例：<code>120 PCS</code></td>
+                        <td>選填</td>
+                    </tr>
+                    <tr>
+                        <td>11</td>
+                        <td><b>開始建立刀具</b></td>
+                        <td>出現綠色按鈕，按下去就進入刀具填寫階段。</td>
+                        <td>—</td>
+                    </tr>
+                </table>
+
+                <h4>4-2 刀具資料階段（每把刀 7 題）</h4>
+                <table class="ms-table">
+                    <tr>
+                        <th>順序</th>
+                        <th>欄位</th>
+                        <th>說明與範例</th>
+                        <th>必填</th>
+                    </tr>
+                    <tr>
+                        <td>1</td>
+                        <td><b>刀序</b></td>
+                        <td>顯示於表格第一欄（灰底）。例：<code>N1</code>、<code>N2</code>、<code>N10</code></td>
+                        <td>✔</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td><b>刀具形式</b></td>
+                        <td>例：<code>外徑粗車</code>、<code>內孔精車</code>、<code>切槽</code></td>
+                        <td>✔</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td><b>刀號</b></td>
+                        <td>例：<code>T01</code>、<code>T0202</code></td>
+                        <td>✔</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td><b>H 值</b></td>
+                        <td>刀長補正號碼。例：<code>01</code></td>
+                        <td>選填</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td><b>刀長</b></td>
+                        <td>量測到的刀長數值。例：<code>125.35</code></td>
+                        <td>選填</td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td><b>備註</b></td>
+                        <td>可多行輸入，支援換行。例：<code>#S21=Use times</code></td>
+                        <td>選填</td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td><b>導入圖示</b></td>
+                        <td>點「📸 選擇圖片或拍照」上傳刀具照片；沒有圖就按「無圖，直接略過」。</td>
+                        <td>選填</td>
+                    </tr>
+                </table>
+
+                <p>
+                    每填完一把刀，精靈會顯示「✅ 第 N 把刀具已加入！」並詢問：
+                </p>
+                <ul>
+                    <li><b>「➕ 是的，繼續新增」</b>：立刻開始下一把刀的問答。</li>
+                    <li><b>「🛑 否，結束設定」</b>：結束刀具階段，進入最後的 QR Code 步驟。</li>
+                </ul>
+
+                <div class="ms-info">
+                    💡 <b>關於 8 列的限制</b>：A4 表格固定顯示 8 列。
+                    如果您填超過 8 把刀，資料仍然會存在（可以在「我的表格」看到），
+                    但列印時只會顯示前 8 把。超過 8 把刀的場合，建議改用第二類 A3 格式。
+                </div>
+
+                <h4>4-3 最後階段：QR Code</h4>
+                <p>
+                    精靈會問您「請輸入要產生的 QR Code 內容」。
+                    可以填：
+                </p>
+                <ul>
+                    <li>雲端資料夾網址（例如加工圖面、程式碼存放區）。</li>
+                    <li>公司內部系統的查詢連結。</li>
+                    <li>任何一段文字備註。</li>
+                    <li>若不需要，直接按「不需要 QR Code，直接完成」。</li>
+                </ul>
+
+                <h4>4-4 第一類表格的版面結構</h4>
+                <table class="ms-table">
+                    <tr>
+                        <th>區塊</th>
+                        <th>內容</th>
+                    </tr>
+                    <tr>
+                        <td><b>頂部標題區</b></td>
+                        <td>主題（大字）+ 副標題（小字），白底黑框，頂部有深綠色裝飾條。</td>
+                    </tr>
+                    <tr>
+                        <td><b>刀具表格</b></td>
+                        <td>6 欄 × 8 列：刀序、刀具形式、刀號、H值、刀長、備註/導入圖示。</td>
+                    </tr>
+                    <tr>
+                        <td><b>夾頭壓力區</b></td>
+                        <td>整條橫幅，藍色大字顯示壓力設定值。</td>
+                    </tr>
+                    <tr>
+                        <td><b>左下資訊區</b></td>
+                        <td>品名、品號、客戶編號、加工時間、每日數量（灰底標籤 + 白底內容）。</td>
+                    </tr>
+                    <tr>
+                        <td><b>右下 QR 區</b></td>
+                        <td>QR Code 圖 + 「QR Code 掃描區」提示文字。</td>
+                    </tr>
+                    <tr>
+                        <td><b>底部簽核列</b></td>
+                        <td>左：製表日期　右：製表者/代碼。</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- ======= 05 ======= -->
+            <div class="ms-sec" id="sec5">
+                <h3><span class="n">05</span>第二類 A3（銑床 M/C）完整操作流程</h3>
+
+                <h4>5-1 基本資料階段（共 19 題 + 1 個動作）</h4>
+                <table class="ms-table">
+                    <tr>
+                        <th>順序</th>
+                        <th>欄位</th>
+                        <th>說明與範例</th>
+                        <th>必填</th>
+                    </tr>
+                    <tr>
+                        <td>1</td>
+                        <td><b>主標題</b></td>
+                        <td>顯示於 A3 最上方綠底橫幅。例：<code>BOX OP110</code></td>
+                        <td>✔</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td><b>副標題</b></td>
+                        <td>主標題右側小字。例：<code>加工程式O0001盘絲和刀具O0009</code></td>
+                        <td>選填</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td><b>製表日期</b></td>
+                        <td>預設今天，可修改。</td>
+                        <td>✔</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td><b>製表者 / 代碼</b></td>
+                        <td>姓名或工號。</td>
+                        <td>✔</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td><b>品名（第一組）</b></td>
+                        <td>例：<code>BOX (L)</code></td>
+                        <td>✔</td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td><b>品號（第一組）</b></td>
+                        <td>例：<code>Z907100000</code></td>
+                        <td>✔</td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td><b>客戶編號（第一組）</b></td>
+                        <td>例：<code>1A8310-14250</code></td>
+                        <td>選填</td>
+                    </tr>
+                    <tr>
+                        <td>8</td>
+                        <td><b>品名（第二組）</b></td>
+                        <td>例：<code>BOX (R)</code>，沒有第二組可略過。</td>
+                        <td>選填</td>
+                    </tr>
+                    <tr>
+                        <td>9</td>
+                        <td><b>品號（第二組）</b></td>
+                        <td>例：<code>Z907000000</code></td>
+                        <td>選填</td>
+                    </tr>
+                    <tr>
+                        <td>10</td>
+                        <td><b>客戶編號（第二組）</b></td>
+                        <td>例：<code>1A8310-14240</code></td>
+                        <td>選填</td>
+                    </tr>
+                    <tr>
+                        <td>11</td>
+                        <td><b>加工時間</b></td>
+                        <td>例：<code>3'00"</code></td>
+                        <td>選填</td>
+                    </tr>
+                    <tr>
+                        <td>12</td>
+                        <td><b>每日數量</b></td>
+                        <td>例：<code>120 PCS</code></td>
+                        <td>選填</td>
+                    </tr>
+                    <tr>
+                        <td>13</td>
+                        <td><b>刀具相關貼心提醒</b></td>
+                        <td>多行文字框。留空會自動套用系統預設的 4 條刀長補正提醒。</td>
+                        <td>選填</td>
+                    </tr>
+                    <tr>
+                        <td>14</td>
+                        <td><b>#500 設定值 1</b></td>
+                        <td>預設 <code>#500=1.</code></td>
+                        <td>選填</td>
+                    </tr>
+                    <tr>
+                        <td>15</td>
+                        <td><b>#500 說明 2</b></td>
+                        <td>預設 <code>(#500=1.)(ONLY L SIDE)</code></td>
+                        <td>選填</td>
+                    </tr>
+                    <tr>
+                        <td>16</td>
+                        <td><b>#500 說明 3</b></td>
+                        <td>預設 <code>(#500=2.)(ONLY R SIDE)</code></td>
+                        <td>選填</td>
+                    </tr>
+                    <tr>
+                        <td>17</td>
+                        <td><b>#500 說明 4</b></td>
+                        <td>預設 <code>(#500=3.)(L SIDE + R SIDE)</code></td>
+                        <td>選填</td>
+                    </tr>
+                    <tr>
+                        <td>18</td>
+                        <td><b>機台操作小技巧</b></td>
+                        <td>多行文字框。留空會套用系統預設的 10 條巨集指令說明。</td>
+                        <td>選填</td>
+                    </tr>
+                    <tr>
+                        <td>19</td>
+                        <td><b>開始建立刀具</b></td>
+                        <td>綠色按鈕，進入刀具階段。</td>
+                        <td>—</td>
+                    </tr>
+                </table>
+
+                <h4>5-2 刀具資料階段（每把刀 8 題）</h4>
+                <table class="ms-table">
+                    <tr>
+                        <th>順序</th>
+                        <th>欄位</th>
+                        <th>說明與範例</th>
+                        <th>必填</th>
+                    </tr>
+                    <tr>
+                        <td>1</td>
+                        <td><b>刀序</b></td>
+                        <td>例：<code>N10</code>、<code>N20</code></td>
+                        <td>✔</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td><b>刀具形式（主標題）</b></td>
+                        <td>粗體大字。例：<code>D63-MILL</code></td>
+                        <td>✔</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td><b>刀具形式描述（副標題）</b></td>
+                        <td>小字說明。例：<code>铣大面.平底度5條</code></td>
+                        <td>選填</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td><b>刀號</b></td>
+                        <td>例：<code>T01</code></td>
+                        <td>✔</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td><b>H 值</b></td>
+                        <td>例：<code>01</code></td>
+                        <td>選填</td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td><b>刀長</b></td>
+                        <td>例：<code>99.95</code></td>
+                        <td>選填</td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td><b>備註（可多行）</b></td>
+                        <td>例：<code>#S21=Use times</code> 換行 <code>TOOL LIFE=200</code></td>
+                        <td>選填</td>
+                    </tr>
+                    <tr>
+                        <td>8</td>
+                        <td><b>導入圖示</b></td>
+                        <td>上傳刀具照片，會自動排入右側圖片牆。</td>
+                        <td>選填</td>
+                    </tr>
+                </table>
+
+                <h4>5-3 A3 表格的版面結構（四大區塊）</h4>
+                <table class="ms-table">
+                    <tr>
+                        <th>區塊</th>
+                        <th>位置</th>
+                        <th>內容</th>
+                    </tr>
+                    <tr>
+                        <td><b>刀具資料表</b></td>
+                        <td>左上（寬 56%）</td>
+                        <td>刀序 / 刀具形式（含副標題）/ 刀號 / H值 / 刀長 / 備註</td>
+                    </tr>
+                    <tr>
+                        <td><b>刀具圖片牆</b></td>
+                        <td>右上（寬 44%）</td>
+                        <td>5 欄 × 自動列數，每格上方顯示刀序、下方顯示圖片</td>
+                    </tr>
+                    <tr>
+                        <td><b>左下資訊區</b></td>
+                        <td>左下（寬 30%）</td>
+                        <td>品名×2 / 品號×2 / 客戶編號×2 / 加工時間 / 每日數量 + 日報表 QR Code</td>
+                    </tr>
+                    <tr>
+                        <td><b>貼心提醒區</b></td>
+                        <td>中下（寬 28%）</td>
+                        <td>刀具相關貼心提醒（多行文字）</td>
+                    </tr>
+                    <tr>
+                        <td><b>#500 切換區</b></td>
+                        <td>中下（寬 22%）</td>
+                        <td>粉紅色底，顯示 #500 四行設定說明</td>
+                    </tr>
+                    <tr>
+                        <td><b>機台技巧區</b></td>
+                        <td>右下（寬 20%）</td>
+                        <td>機台操作小技巧 + 機台資料 QR Code</td>
+                    </tr>
+                    <tr>
+                        <td><b>底部簽核列</b></td>
+                        <td>最下方</td>
+                        <td>左：製表日期　右：製表者/代碼</td>
+                    </tr>
+                </table>
+
+                <div class="ms-tip">
+                    💡 <b>圖片牆的排列邏輯</b>：圖片牆固定 5 欄。
+                    如果您有 12 把刀，就會自動排成 3 列（15 格），不足的格子留白。
+                    每格上方的刀序標籤和左側表格是<b>連動</b>的，改一邊另一邊也會跟著改。
+                </div>
+            </div>
+
+            <!-- ======= 06 ======= -->
+            <div class="ms-sec" id="sec6">
+                <h3><span class="n">06</span>預覽區「所見即所得」編輯功能</h3>
+
+                <p>
+                    這是本系統最方便的功能之一。<b>預覽畫面上看到的每一個欄位，幾乎都可以直接點擊修改</b>，
+                    改完之後系統會自動存檔，不需要回到對話區重新回答。
+                </p>
+
+                <h4>6-1 如何編輯文字欄位</h4>
+                <ol>
+                    <li>點擊要修改的文字（例如標題、品名、製表者）。</li>
+                    <li>欄位邊緣會出現<b>藍色外框</b>，游標開始閃爍，代表進入編輯狀態。</li>
+                    <li>直接打字修改（會自動取代原本的內容，或依游標位置插入）。</li>
+                    <li>修改完成後，按 <span class="ms-kbd">Enter</span> 或點擊畫面其他空白處，即完成儲存。</li>
+                    <li>想放棄修改，按 <span class="ms-kbd">Esc</span> 即可。</li>
+                </ol>
+
+                <div class="ms-tip">
+                    💡 空白欄位會顯示淡淡的「<b>點擊輸入</b>」提示文字，列印時這些提示文字不會被印出來。
+                </div>
+
+                <h4>6-2 可以編輯的區域一覽</h4>
+                <table class="ms-table">
+                    <tr>
+                        <th>表格</th>
+                        <th>可編輯項目</th>
+                    </tr>
+                    <tr>
+                        <td><b>第一類 A4</b></td>
+                        <td>
+                            主題、副標題、夾頭壓力、品名、品號、客戶編號、加工時間、每日數量、製表日期、製表者、
+                            刀具表格 8 列 × 6 欄（刀序、刀具形式、刀號、H值、刀長、備註）、刀具圖片、QR Code
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><b>第二類 A3</b></td>
+                        <td>
+                            主標題、副標題、品名×2、品號×2、客戶編號×2、加工時間、每日數量、
+                            貼心提醒全文、#500 四行、機台操作小技巧全文、製表日期、製表者、
+                            刀具表格 × 6 欄、圖片牆刀序標籤、刀具圖片、兩組 QR Code
+                        </td>
+                    </tr>
+                </table>
+
+                <h4>6-3 編輯表格內容的注意事項</h4>
+                <ul>
+                    <li>表格中的每一格都是<b>獨立可編輯</b>的，點擊即可修改。</li>
+                    <li>「刀具形式」在 A3 是兩行結構（主標題 + 副標題），兩行都能分別編輯。</li>
+                    <li>「備註」欄支援多行輸入，直接按 Enter 就會換行。</li>
+                    <li>修改後游標移開，資料會立即寫回本機暫存。</li>
+                </ul>
+
+                <h4>6-4 編輯後的存檔時機</h4>
+                <p>系統會在以下時機自動存檔：</p>
+                <ul>
+                    <li>每個欄位編輯完成（游標離開該欄位）時。</li>
+                    <li>更換圖片或修改 QR Code 之後。</li>
+                    <li>按下「列印」按鈕之前。</li>
+                    <li>關閉或重新整理頁面之前。</li>
+                </ul>
+
+                <div class="ms-ok">
+                    ✅ 您不需要手動按「儲存」，系統會自動處理。
+                    但畫面上不會有「已儲存」的提示，這是正常的。
+                </div>
+            </div>
+
+            <!-- ======= 07 ======= -->
+            <div class="ms-sec" id="sec7">
+                <h3><span class="n">07</span>圖片上傳與自動壓縮機制</h3>
+
+                <h4>7-1 兩種上傳圖片的時機</h4>
+                <ol>
+                    <li><b>對話過程中</b>：精靈問到「請選擇導入圖示」時，按「📸 選擇圖片或拍照」上傳。</li>
+                    <li><b>預覽區修改時</b>：直接點擊表格中的圖片格子（或顯示「＋」的空格）即可上傳或更換。</li>
+                </ol>
+
+                <h4>7-2 自動壓縮機制（非常重要）</h4>
+                <p>
+                    為了避免手機記憶體不足、也為了讓本機儲存空間夠用，
+                    系統會在上傳圖片時<b>自動進行壓縮處理</b>：
+                </p>
+                <table class="ms-table">
+                    <tr>
+                        <th>處理項目</th>
+                        <th>設定值</th>
+                    </tr>
+                    <tr>
+                        <td><b>最大邊長</b></td>
+                        <td>220 像素（等比例縮放，長邊不超過 220px）</td>
+                    </tr>
+                    <tr>
+                        <td><b>輸出格式</b></td>
+                        <td>JPEG</td>
+                    </tr>
+                    <tr>
+                        <td><b>壓縮品質</b></td>
+                        <td>0.7（兼顧清晰度與檔案大小）</td>
+                    </tr>
+                    <tr>
+                        <td><b>背景處理</b></td>
+                        <td>自動填白底（避免透明 PNG 變成黑底）</td>
+                    </tr>
+                </table>
+
+                <div class="ms-info">
+                    💡 <b>建議的圖片來源</b>：<br>
+                    · 手機直接拍攝刀具（近距離、光線充足）。<br>
+                    · 刀具型錄截圖。<br>
+                    · 白底或淺色底的圖片，列印效果最好。
+                </div>
+
+                <h4>7-3 更換圖片</h4>
+                <p>
+                    在預覽區，只要<b>再點一次</b>已經有圖片的格子，就會跳出檔案選擇視窗，
+                    選新圖後會直接覆蓋舊圖，不需要先刪除。
+                </p>
+
+                <h4>7-4 為什麼要壓縮？</h4>
+                <ul>
+                    <li>手機拍的原始照片動輒 3～8 MB，不壓縮會讓瀏覽器儲存空間瞬間爆掉。</li>
+                    <li>刀具表上的圖片只是示意，220px 已足夠列印出清晰的小圖。</li>
+                    <li>壓縮後每張圖約 10～25 KB，一張刀具表放 20 張圖也才 500 KB 左右。</li>
+                </ul>
+
+                <div class="ms-warn">
+                    ⚠️ 如果上傳後跳出「本機儲存空間不足」的警告，
+                    表示您的暫存表格太多了，請到「我的表格」刪除不需要的舊表。
+                </div>
+            </div>
+
+            <!-- ======= 08 ======= -->
+            <div class="ms-sec" id="sec8">
+                <h3><span class="n">08</span>QR Code 設定方法</h3>
+
+                <h4>8-1 三種設定時機</h4>
+                <ol>
+                    <li><b>對話最後一題</b>：精靈詢問「請輸入要產生的 QR Code 內容」。</li>
+                    <li><b>預覽區點擊 QR 圖案</b>：跳出輸入視窗，可隨時修改。</li>
+                    <li><b>第一類 A4</b> 的 QR 區若尚未設定，會顯示「點擊設定 QR Code」提示，點一下就能設定。</li>
+                </ol>
+
+                <h4>8-2 各表格的 QR Code 數量</h4>
+                <table class="ms-table">
+                    <tr>
+                        <th>格式</th>
+                        <th>QR 數量</th>
+                        <th>位置與用途</th>
+                    </tr>
+                    <tr>
+                        <td><b>第一類 A4</b></td>
+                        <td>1 組</td>
+                        <td>右下角。常用於連到雲端圖面或加工程式。</td>
+                    </tr>
+                    <tr>
+                        <td><b>第二類 A3</b></td>
+                        <td>2 組</td>
+                        <td>① 左下角「每日工作日报表」QR　② 右下角「機台資料」QR</td>
+                    </tr>
+                </table>
+
+                <h4>8-3 QR Code 可以放什麼內容</h4>
+                <ul>
+                    <li>雲端硬碟資料夾連結（Google Drive、OneDrive 等）。</li>
+                    <li>公司內部系統的查詢頁面網址。</li>
+                    <li>加工程式的下載連結。</li>
+                    <li>機台保養手冊連結（A3 的機台資料 QR）。</li>
+                    <li>純文字，例如機台編號、資產編號。</li>
+                </ul>
+
+                <h4>8-4 修改與清空</h4>
+                <ul>
+                    <li>點擊 QR 圖案 → 跳出輸入框 → 輸入新內容 → 確定。</li>
+                    <li>若要<b>清空</b> QR Code，把輸入框內容全部刪除後按確定即可。</li>
+                    <li>清空後，A3 的機台資料 QR 會自動改為顯示 <code>MACHINE-DATA</code> 這個預設字串。</li>
+                </ul>
+
+                <div class="ms-tip">
+                    💡 <b>容錯等級說明</b>：第一類使用 H 級（最高容錯，即使 QR 有部分污損仍可讀取），
+                    第二類使用 M 級（標準容錯），在列印品質與掃描成功率之間取得平衡。
+                </div>
+            </div>
+
+            <!-- ======= 09 ======= -->
+            <div class="ms-sec" id="sec9">
+                <h3><span class="n">09</span>我的刀具表（本機暫存管理）</h3>
+
+                <h4>9-1 開啟方式</h4>
+                <ul>
+                    <li>手機版：點擊底部導航列的「📁 我的表格」。</li>
+                    <li>任何裝置：點擊右上角的「📁 3/10」按鈕。</li>
+                </ul>
+
+                <h4>9-2 清單顯示資訊</h4>
+                <p>每一筆暫存表格會顯示：</p>
+                <table class="ms-table">
+                    <tr>
+                        <th>元素</th>
+                        <th>說明</th>
+                    </tr>
+                    <tr>
+                        <td><b>格式標籤</b></td>
+                        <td>藍色「A4」或紫色「A3」，一眼看出是哪一種格式。</td>
+                    </tr>
+                    <tr>
+                        <td><b>表格名稱</b></td>
+                        <td>自動取自主題（或主標題）+ 品號。若尚未填寫則顯示「未命名刀具表」。</td>
+                    </tr>
+                    <tr>
+                        <td><b>資訊列</b></td>
+                        <td>刀具數量、最後更新時間。正在編輯的那一張會標示「編輯中」。</td>
+                    </tr>
+                    <tr>
+                        <td><b>載入按鈕</b></td>
+                        <td>藍色。點擊後會把該張表格載入到編輯區。</td>
+                    </tr>
+                    <tr>
+                        <td><b>刪除按鈕</b></td>
+                        <td>紅色。點擊後會跳出確認視窗，確認後才會刪除。</td>
+                    </tr>
+                </table>
+
+                <h4>9-3 新增表格</h4>
+                <p>
+                    點擊面板最上方的綠色「＋ 新增刀具表」按鈕，
+                    系統會先自動儲存目前編輯中的表格，然後建立一張全新的空白表。
+                </p>
+                <p>新表格會沿用目前的格式（A4 或 A3），並自動帶入今天的日期。</p>
+
+                <h4>9-4 載入表格</h4>
+                <p>載入時系統會：</p>
+                <ol>
+                    <li>先把目前編輯中的表格存檔。</li>
+                    <li>切換成該張表格的格式（A4 ↔ A3 會自動切換）。</li>
+                    <li>把資料完整還原到預覽區。</li>
+                    <li>對話區顯示：「📂 已載入刀具表「XXX」，目前共 N 把刀具」。</li>
+                    <li>提供兩個選項：「➕ 繼續新增刀具」或「✏️ 重新填寫基本資料」。</li>
+                </ol>
+
+                <h4>9-5 刪除表格</h4>
+                <p>
+                    點擊紅色「刪除」按鈕後，會跳出確認視窗顯示表格名稱。
+                    確認刪除後：
+                </p>
+                <ul>
+                    <li>如果刪除的是<b>目前正在編輯</b>的那一張，系統會自動開一張全新的空白表。</li>
+                    <li>如果刪除的是<b>其他張</b>，目前編輯中的表格不受影響。</li>
+                </ul>
+
+                <div class="ms-warn">
+                    ⚠️ <b>刪除後無法復原！</b>系統沒有垃圾桶功能。
+                    重要表格請先列印或存成 PDF 再刪除。
+                </div>
+
+                <h4>9-6 張數上限</h4>
+                <p>
+                    本機最多暫存 <b>10 張</b>刀具表。達到上限後，
+                    「新增刀具表」按鈕會提示您先刪除不需要的表格。
+                </p>
+
+                <h4>9-7 資料保存位置</h4>
+                <p>
+                    資料儲存在瀏覽器的 <b>localStorage</b> 中，相當於這台裝置的這個瀏覽器專屬的小倉庫。
+                    以下情況會導致資料遺失：
+                </p>
+                <ul>
+                    <li>清除瀏覽器快取與網站資料。</li>
+                    <li>使用「無痕模式 / 私密瀏覽」結束視窗。</li>
+                    <li>更換瀏覽器（Chrome 存的資料，Edge 看不到）。</li>
+                    <li>更換裝置或電腦。</li>
+                    <li>作業系統重灌。</li>
+                </ul>
+            </div>
+
+            <!-- ======= 10 ======= -->
+            <div class="ms-sec" id="sec10">
+                <h3><span class="n">10</span>列印與匯出 PDF 完整設定</h3>
+
+                <h4>10-1 基本操作</h4>
+                <p>
+                    在預覽區右上角（電腦版）或頁面上方（手機版）有一顆藍色按鈕：
+                </p>
+                <ul>
+                    <li>A4 格式時顯示「<b>列印 / 存為 PDF（A4 單頁）</b>」。</li>
+                    <li>A3 格式時顯示「<b>列印 / 存為 PDF（A3 橫向單頁）</b>」。</li>
+                </ul>
+                <p>點下去就會開啟瀏覽器的列印視窗。</p>
+
+                <h4>10-2 列印設定（很重要，請照著做）</h4>
+                <table class="ms-table">
+                    <tr>
+                        <th>設定項目</th>
+                        <th>建議值</th>
+                        <th>說明</th>
+                    </tr>
+                    <tr>
+                        <td><b>目的地</b></td>
+                        <td>您的印表機 / 另存為 PDF</td>
+                        <td>要存電子檔就選「另存為 PDF」。</td>
+                    </tr>
+                    <tr>
+                        <td><b>紙張尺寸</b></td>
+                        <td>A4 或 A3（依表格格式）</td>
+                        <td>系統已自動指定，通常不需手動改。</td>
+                    </tr>
+                    <tr>
+                        <td><b>方向</b></td>
+                        <td>A4 = 直向；A3 = 橫向</td>
+                        <td>系統已自動設定。</td>
+                    </tr>
+                    <tr>
+                        <td><b>邊界</b></td>
+                        <td><b>無 / 0</b></td>
+                        <td>設成「預設」會把表格縮小，務必改成「無」。</td>
+                    </tr>
+                    <tr>
+                        <td><b>縮放</b></td>
+                        <td><b>100%（預設）</b></td>
+                        <td>不要選「符合頁面大小」。</td>
+                    </tr>
+                    <tr>
+                        <td><b>背景圖形</b></td>
+                        <td><b>勾選</b></td>
+                        <td>不勾的話綠色標題底、灰底標籤都會印不出來。</td>
+                    </tr>
+                    <tr>
+                        <td><b>頁首與頁尾</b></td>
+                        <td><b>取消勾選</b></td>
+                        <td>否則會印出網址與日期。</td>
+                    </tr>
+                </table>
+
+                <h4>10-3 手機列印的差異</h4>
+                <ul>
+                    <li><b>iOS（Safari）</b>：點列印後選擇「選項」→ 關閉「頁首與頁尾」→ 選「儲存為 PDF」。</li>
+                    <li><b>Android（Chrome）</b>：點列印後展開「更多設定」→ 紙張尺寸選 A4/A3 →
+                        邊界選「無」→ 勾選「背景圖形」→ 儲存為 PDF 或直接列印。</li>
+                    <li>手機直連印表機時，請確認印表機已放入正確尺寸的紙張。</li>
+                </ul>
+
+                <h4>10-4 為什麼一定要「單頁」？</h4>
+                <p>
+                    本系統的表格是<b>固定尺寸、固定版面</b>設計的，
+                    所有內容都經過精密計算以剛好塞進一頁。
+                    如果列印時被縮放或加上邊界，可能會導致內容被裁切或擠到第二頁。
+                    因此請務必依照 10-2 的建議設定。
+                </p>
+
+                <div class="ms-ok">
+                    ✅ <b>存成 PDF 的好處</b>：<br>
+                    · 版面絕對不會跑掉。<br>
+                    · 可直接用 LINE、Email 傳給同事。<br>
+                    · 永久保存，不受瀏覽器資料清除影響。<br>
+                    · 日後要列印直接印 PDF 即可。
+                </div>
+            </div>
+
+            <!-- ======= 11 ======= -->
+            <div class="ms-sec" id="sec11">
+                <h3><span class="n">11</span>精靈頭像更換</h3>
+
+                <h4>11-1 開啟方式</h4>
+                <ul>
+                    <li>點擊左上角的精靈圖示（預設是 🤖）。</li>
+                    <li>或點擊對話訊息左側的任何一個小頭像。</li>
+                </ul>
+
+                <h4>11-2 可以選擇的頭像</h4>
+                <p>系統內建 20 種表情符號，包含：</p>
+                <div class="ms-code">🤖 🦾 ⚙️ 🔧 🛠️ 👷 👨‍🔧 🧑‍🏭 🏭 📋
+🎯 🚀 🐱 🐶 🦊 🐼 🐯 🌟 💡 🔥</div>
+
+                <h4>11-3 上傳自訂圖片</h4>
+                <p>
+                    點擊「📷 上傳自訂圖片」，選擇您想要的圖片。
+                    系統會自動壓縮成最大邊長 180px、JPEG 品質 0.85。
+                    適合放公司 Logo 或部門圖示。
+                </p>
+
+                <h4>11-4 恢復預設</h4>
+                <p>點擊「↺ 恢復預設 🤖」即可還原成原始的機器人圖示。</p>
+
+                <div class="ms-info">
+                    💡 頭像設定是<b>全系統共用</b>的，換一次之後所有對話訊息都會跟著換，
+                    而且會記住您的選擇，下次打開還是一樣的頭像。
+                </div>
+            </div>
+
+            <!-- ======= 12 ======= -->
+            <div class="ms-sec" id="sec12">
+                <h3><span class="n">12</span>常見問題 FAQ（20 問）</h3>
+
+                <div class="ms-faq">
+                    <div class="q">填到一半關掉網頁，資料會不見嗎？</div>
+                    <div class="a">不會。系統會在每一題回答後、每次欄位編輯後自動存檔。
+                    重新打開網頁時，會自動載入您上次編輯的那一張表格。
+                    但為了保險起見，重要表格仍建議存成 PDF。</div>
+                </div>
+
+                <div class="ms-faq">
+                    <div class="q">為什麼我填了 10 把刀，列印出來只有 8 把？</div>
+                    <div class="a">第一類 A4 格式固定顯示 8 列，這是版面限制。
+                    資料本身有被保存（在「我的表格」可以看到刀具數量是 10），
+                    只是列印時只顯示前 8 把。<b>超過 8 把請改用第二類 A3 格式。</b></div>
+                </div>
+
+                <div class="ms-faq">
+                    <div class="q">選填欄位沒填，列印出來會是空白嗎？</div>
+                    <div class="a">是的，會是空白。空白欄位在畫面上會顯示淡灰色的「點擊輸入」提示，
+                    但列印時這些提示不會印出來，所以是乾淨的空白格。</div>
+                </div>
+
+                <div class="ms-faq">
+                    <div class="q">切換格式之後，原本填的資料去哪了？</div>
+                    <div class="a">切換格式前系統會<b>自動存檔</b>。
+                    原本的表格會保留在「我的表格」清單裡，您可以隨時載入回來。
+                    只有「製表日期」與「製表者」會被帶到新格式中。</div>
+                </div>
+
+                <div class="ms-faq">
+                    <div class="q">為什麼 QR Code 掃不出來？</div>
+                    <div class="a">請確認：<br>
+                    ① 列印時有勾選「背景圖形」，否則 QR 會印不出來。<br>
+                    ② QR Code 內容不要太長（建議 300 字元以內）。<br>
+                    ③ 列印品質不要太差，建議 300dpi 以上。<br>
+                    ④ 不要用「符合頁面大小」縮放列印。</div>
+                </div>
+
+                <div class="ms-faq">
+                    <div class="q">圖片上傳後變模糊了？</div>
+                    <div class="a">這是正常的，系統會將圖片壓縮到最大邊長 220px 以節省空間。
+                    刀具表上的圖片是示意用途，220px 印出來已經足夠清楚。
+                    若需要更高解析度，建議另外附上原始照片。</div>
+                </div>
+
+                <div class="ms-faq">
+                    <div class="q">可以在預覽區直接改資料嗎？</div>
+                    <div class="a">可以！這是本系統的核心功能。
+                    點擊任何文字欄位就會進入編輯狀態，改完按 Enter 或點空白處即完成。
+                    表格內容、圖片、QR Code 都能改。</div>
+                </div>
+
+                <div class="ms-faq">
+                    <div class="q">為什麼我改了預覽區，對話區的紀錄沒有跟著變？</div>
+                    <div class="a">對話紀錄是「歷史紀錄」，記錄的是您當時的回答。
+                    預覽區的修改會直接更新到最終資料，但不會改寫歷史訊息。
+                    這是刻意設計的，避免歷史紀錄錯亂。</div>
+                </div>
+
+                <div class="ms-faq">
+                    <div class="q">出現「本機儲存空間不足」怎麼辦？</div>
+                    <div class="a">表示瀏覽器能給的空間滿了。解決方式：<br>
+                    ① 到「我的表格」刪除不需要的舊表格。<br>
+                    ② 減少刀具圖片數量（圖片最佔空間）。<br>
+                    ③ 把重要表格存成 PDF 後刪除。</div>
+                </div>
+
+                <div class="ms-faq">
+                    <div class="q">換電腦之後，我的表格還在嗎？</div>
+                    <div class="a">不在。資料是存在原本那台裝置的瀏覽器裡，
+                    不會跟著帳號同步。換裝置請事先把表格存成 PDF 帶過去。</div>
+                </div>
+
+                <div class="ms-faq">
+                    <div class="q">可以用無痕模式操作嗎？</div>
+                    <div class="a">可以操作，但<b>不建議</b>。
+                    無痕模式關閉視窗後資料會全部消失，無法保存。</div>
+                </div>
+
+                <div class="ms-faq">
+                    <div class="q">列印出來字被切掉了？</div>
+                    <div class="a">請檢查列印設定：<br>
+                    ① 邊界是否設為「無」。<br>
+                    ② 縮放是否為 100%。<br>
+                    ③ 紙張尺寸是否正確（A4 選 A4，A3 選 A3）。<br>
+                    ④ 紙張方向是否正確（A3 需為橫向）。</div>
+                </div>
+
+                <div class="ms-faq">
+                    <div class="q">可以同時編輯兩張表格嗎？</div>
+                    <div class="a">不行。系統一次只能編輯一張。
+                    切換時會自動存檔，所以不用擔心資料遺失。
+                    要同時處理兩張，建議開兩個瀏覽器分頁。</div>
+                </div>
+
+                <div class="ms-faq">
+                    <div class="q">#500 的四行說明可以改成別的嗎？</div>
+                    <div class="a">可以。在對話中回答時直接輸入您的內容，
+                    或在預覽區點擊該欄位直接修改。
+                    若在對話中直接按「略過」，系統會套用預設的 L/R SIDE 說明。</div>
+                </div>
+
+                <div class="ms-faq">
+                    <div class="q">「貼心提醒」和「機台操作小技巧」可以留空嗎？</div>
+                    <div class="a">可以留空，但系統會自動填入預設內容（刀長補正提醒 4 條、巨集指令 10 條）。
+                    若您想留<b>完全空白</b>，請在對話中輸入一個空白字元，
+                    或填寫後到預覽區把它刪光。</div>
+                </div>
+
+                <div class="ms-faq">
+                    <div class="q">可以匯出成 Excel 檔嗎？</div>
+                    <div class="a">目前不支援直接匯出 Excel。
+                    建議使用「列印 → 另存為 PDF」，或直接列印紙本。
+                    若一定要 Excel，可將 PDF 匯入 Excel 做後續處理。</div>
+                </div>
+
+                <div class="ms-faq">
+                    <div class="q">刀具圖片可以放幾張？</div>
+                    <div class="a">技術上沒有限制，但實務上建議：<br>
+                    · A4：最多 8 張（因為只有 8 列）。<br>
+                    · A3：建議 20 張以內（圖片牆會變太高，可能超出頁面）。</div>
+                </div>
+
+                <div class="ms-faq">
+                    <div class="q">如果我不小心按到「重新填寫基本資料」怎麼辦？</div>
+                    <div class="a">系統在重新填寫前會先自動存檔，所以舊資料還在。
+                    請到「我的表格」找到剛才那張，重新載入即可。</div>
+                </div>
+
+                <div class="ms-faq">
+                    <div class="q">為什麼 A3 的機台資料 QR 一直顯示 MACHINE-DATA？</div>
+                    <div class="a">因為您沒有設定「機台專屬」的 QR 內容。
+                    系統會自動沿用主 QR Code 的內容；若主 QR 也是空的，
+                    就會顯示預設字串 MACHINE-DATA。
+                    點擊該 QR 圖案即可單獨設定。</div>
+                </div>
+
+                <div class="ms-faq">
+                    <div class="q">這套系統需要網路嗎？</div>
+                    <div class="a">第一次開啟需要網路（載入字型與程式庫）。
+                    載入完成後，即使斷網也能繼續操作、編輯、列印。
+                    但建議還是保持連線以獲得最佳體驗。</div>
+                </div>
+            </div>
+
+            <!-- ======= 13 ======= -->
+            <div class="ms-sec" id="sec13">
+                <h3><span class="n">13</span>注意事項與資料保存</h3>
+
+                <h4>13-1 資料保存的黃金原則</h4>
+                <div class="ms-warn">
+                    ⚠️ <b>本機暫存不是永久保存。</b><br>
+                    請養成「完成一張就存一份 PDF」的習慣，
+                    這是最安全、最不會出錯的做法。
+                </div>
+
+                <h4>13-2 可能導致資料遺失的操作</h4>
+                <ul>
+                    <li>清除瀏覽器的「Cookie 與其他網站資料」。</li>
+                    <li>使用無痕 / 私密瀏覽模式。</li>
+                    <li>使用系統清理工具（如 CCleaner）清理瀏覽器資料。</li>
+                    <li>更換瀏覽器或裝置。</li>
+                    <li>作業系統更新或重設。</li>
+                </ul>
+
+                <h4>13-3 建議的作業流程</h4>
+                <ol>
+                    <li>建立刀具表 → 完成所有欄位。</li>
+                    <li>預覽區確認無誤。</li>
+                    <li><b>立刻列印或存成 PDF。</b></li>
+                    <li>存檔後，可依需求決定是否保留在本機暫存中。</li>
+                </ol>
+
+                <h4>13-4 列印品質建議</h4>
+                <ul>
+                    <li>建議使用雷射印表機，文字邊緣較銳利。</li>
+                    <li>解析度建議 300 dpi 以上，QR Code 才掃得順。</li>
+                    <li>A3 表格務必使用 A3 紙張，不要用 A4 縮印。</li>
+                    <li>若需護貝或張貼現場，建議加印一份備份。</li>
+                </ul>
+
+                <h4>13-5 瀏覽器相容性</h4>
+                <table class="ms-table">
+                    <tr>
+                        <th>瀏覽器</th>
+                        <th>建議版本</th>
+                        <th>相容性</th>
+                    </tr>
+                    <tr><td>Google Chrome</td><td>最新版</td><td>★★★★★ 最佳</td></tr>
+                    <tr><td>Microsoft Edge</td><td>最新版</td><td>★★★★★ 最佳</td></tr>
+                    <tr><td>Safari（iOS / macOS）</td><td>最新版</td><td>★★★★☆ 良好</td></tr>
+                    <tr><td>Firefox</td><td>最新版</td><td>★★★★☆ 良好</td></tr>
+                    <tr><td>舊版 IE</td><td>—</td><td>✕ 不支援</td></tr>
+                </table>
+            </div>
+
+            <!-- ======= 14 ======= -->
+            <div class="ms-sec" id="sec14">
+                <h3><span class="n">14</span>快速鍵與效率小技巧</h3>
+
+                <h4>14-1 鍵盤快速鍵</h4>
+                <table class="ms-table">
+                    <tr>
+                        <th>按鍵</th>
+                        <th>作用</th>
+                    </tr>
+                    <tr>
+                        <td><span class="ms-kbd">Enter</span></td>
+                        <td>在文字輸入框時送出答案；在預覽區單行欄位時完成編輯。</td>
+                    </tr>
+                    <tr>
+                        <td><span class="ms-kbd">Esc</span></td>
+                        <td>在預覽區編輯時，取消本次編輯並離開該欄位。</td>
+                    </tr>
+                    <tr>
+                        <td><span class="ms-kbd">Tab</span></td>
+                        <td>在預覽區可依序跳到下一個可編輯欄位（方便連續修改）。</td>
+                    </tr>
+                </table>
+
+                <h4>14-2 效率小技巧</h4>
+                <ol>
+                    <li><b>先準備好資料再開始</b>：把刀序、刀號、H值、刀長先寫在紙上或記事本，
+                        再來回答精靈問題，速度會快很多。</li>
+                    <li><b>善用「選填，略過此欄位」</b>：不重要的欄位不要卡住，先跳過，
+                        之後在預覽區補填也可以。</li>
+                    <li><b>多行欄位用「套用預設」</b>：貼心提醒與機台技巧都有預設範本，
+                        按一下就能帶入，再微調即可。</li>
+                    <li><b>圖片先拍好</b>：把所有刀具照片先拍好存在相簿，
+                        填寫時連續上傳，不用中斷。</li>
+                    <li><b>用「我的表格」做範本</b>：建立一張常用刀具表後，
+                        載入它、修改品名品號，就能快速產生新的一張。</li>
+                    <li><b>電腦版左右分割最方便</b>：左邊回答、右邊即時看結果，不用切來切去。</li>
+                    <li><b>完成立刻存 PDF</b>：這是保護心血最有效的方法。</li>
+                    <li><b>善用預覽區直接編輯</b>：填錯不用重跑流程，直接點該欄位改就好。</li>
+                </ol>
+
+                <h4>14-3 常見填寫範例</h4>
+                <h5>第一類 A4 範例</h5>
+                <div class="ms-code">主題：SLIDER OP110
+副標題：加工程式O6370
+製表者：王小明
+夾頭壓力：15KG
+品名：SLIDER
+品號：Z907100000
+客戶編號：1A8310-14250
+加工時間：3'00"
+每日數量：120 PCS
+
+刀具 N1：
+  刀序：N1
+  刀具形式：外徑粗車
+  刀號：T01
+  H值：01
+  刀長：125.35
+  備註：#S21=Use times</div>
+
+                <h5>第二類 A3 範例</h5>
+                <div class="ms-code">主標題：BOX OP110
+副標題：加工程式O0001盘絲和刀具O0009
+製表者：A1234
+品名：BOX (L)
+品號：Z907100000
+客戶編號：1A8310-14250
+品名2：BOX (R)
+品號2：Z907000000
+客戶編號2：1A8310-14240
+
+刀具 N10：
+  刀序：N10
+  刀具形式：D63-MILL
+  刀具形式描述：铣大面.平底度5條
+  刀號：T01
+  H值：01
+  刀長：99.95
+  備註：TOOL LIFE=200</div>
+
+                <div class="ms-ok">
+                    ✅ 以上就是完整的操作說明。
+                    建議第一次使用時，先照著第 03 章的「三步驟」走一遍，
+                    實際操作過一次，之後就能非常順手。
+                </div>
+            </div>
+
+            <div class="ms-end">
+                <b>智慧刀具表製作系統 ・ 使用說明書 v2.0</b><br>
+                本說明書內容涵蓋全部功能與操作細節<br>
+                如有未盡事宜，請依現場實際作業規範為準
+            </div>
+
+        </div>
+
+        <div class="ms-bottom-bar">
+            <button class="b1" onclick="closeManualAndStart()">🚀 開始製作刀具表</button>
+            <button class="b2" onclick="closeManual()">關閉說明書</button>
+        </div>
+
+    </div>
+</div>
+
+<div id="app">
+
+    <!-- ============================================================
+         左側 / 手機主畫面：對話面板
+         ============================================================ -->
+    <aside id="sidebar">
+
+        <div class="g-bar"></div>
+
+        <!-- 標題列 -->
+        <header id="app-header">
+            <div class="header-row">
+                <div class="brand">
+                    <span class="logo-dot" id="brand-avatar" title="點擊更換頭像" onclick="openAvatarPicker()">🤖</span>
+                    <span>換刀表精靈</span>
+                </div>
+                <div class="header-actions">
+                    <button class="icon-btn" onclick="openManual()" title="使用說明書">❓</button>
+                    <button class="icon-btn" onclick="openTableManager()" title="我的刀具表">
+                        📁 <span id="table-count-badge" class="badge-count">0/10</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 格式切換 -->
+            <div id="mode-switch-bar">
+                <button id="mode-btn-1" class="mode-btn active" onclick="changeFormat(1)">1:《車床N/C .A4規格》</button>
+                <button id="mode-btn-2" class="mode-btn" onclick="changeFormat(2)">2：《銑床M/C.A3規格》</button>
+            </div>
+        </header>
+
+        <!-- 對話歷史 -->
+        <div id="chat-history" class="no-scrollbar"></div>
+
+        <!-- 底部輸入區 -->
+        <div id="input-area">
+            <div id="input-container"></div>
+        </div>
+
+    </aside>
+
+    <!-- ============================================================
+         右側：預覽面板
+         ============================================================ -->
+    <main id="preview-container" class="no-scrollbar">
+
+        <div id="print-btn-container">
+            <button class="btn-print" onclick="doPrint()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                </svg>
+                <span id="print-btn-label">列印 / 存為 PDF（A4 單頁）</span>
+            </button>
+        </div>
+
+        <div id="edit-hint">
+            💡 <b>點擊表單任何欄位即可直接編輯</b>　·　刀具圖片可點擊更換　·　QR Code 可點擊修改
+        </div>
+
+        <!-- ============ 第一類 A4 ============ -->
+        <div id="a4-wrapper" style="padding-bottom:24px;">
+            <div class="a4-preview top-accent border-heavy p-0 font-sans" id="a4-document">
+
+                <div class="text-center py-4 border-b-4 border-black bg-white flex flex-col justify-center h-[100px] shrink-0">
+                    <h1 class="text-[2.5rem] font-black tracking-widest m-0 leading-none">
+                        <span id="out-title"></span>
+                        <span id="out-subtitle" class="text-2xl font-bold ml-4"></span>
+                    </h1>
+                </div>
+
+                <table class="excel-table table-fixed">
+                    <thead>
+                        <tr>
+                            <th class="w-[8%]">刀序</th>
+                            <th class="w-[18%]">刀具形式</th>
+                            <th class="w-[12%]">刀號</th>
+                            <th class="w-[10%]">H值</th>
+                            <th class="w-[12%]">刀長</th>
+                            <th class="w-[40%]">備註 / 導入圖示</th>
+                        </tr>
+                    </thead>
+                    <tbody id="out-tool-body"></tbody>
+                </table>
+
+                <div class="w-full border-b-4 border-black border-x-4 border-t-0 text-center py-1 font-bold text-xl shrink-0 bg-white">
+                    夾頭壓力設定<br>
+                    <span id="out-pressure" class="text-2xl text-blue-800 tracking-wider"></span>
+                </div>
+
+                <div class="flex-1 flex border-x-4 border-b-4 border-black bg-white min-h-0">
+                    <div class="w-[60%] flex flex-col">
+                        <table class="excel-table h-full text-left" style="border:none;">
+                            <tr style="border-top:none;">
+                                <td class="w-[35%] font-bold bg-[#f2f2f2] text-center text-lg border-l-0" style="border-top:none;">品名</td>
+                                <td class="w-[65%] pl-4 font-bold text-lg" style="border-top:none;"><span id="out-part-name"></span></td>
+                            </tr>
+                            <tr>
+                                <td class="font-bold bg-[#f2f2f2] text-center text-lg border-l-0">品號</td>
+                                <td class="pl-4 font-bold text-lg"><span id="out-part-no"></span></td>
+                            </tr>
+                            <tr>
+                                <td class="font-bold bg-[#f2f2f2] text-center text-lg border-l-0">客戶編號</td>
+                                <td class="pl-4 font-bold text-lg"><span id="out-customer-no"></span></td>
+                            </tr>
+                            <tr>
+                                <td class="font-bold bg-[#f2f2f2] text-center text-lg border-l-0">加工時間</td>
+                                <td class="pl-4 font-bold text-lg"><span id="out-process-time"></span></td>
+                            </tr>
+                            <tr>
+                                <td class="font-bold bg-[#f2f2f2] text-center text-lg border-b-0 border-l-0">每日數量</td>
+                                <td class="pl-4 font-bold text-lg border-b-0"><span id="out-daily-qty"></span></td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div class="w-[40%] flex flex-col items-center justify-center relative p-2 bg-white border-l-4 border-black">
+                        <div id="out-qrcode" class="mb-1 p-2 bg-white border border-gray-200"></div>
+                        <div class="text-[0.7rem] font-bold text-gray-500 mt-1 text-center" id="qr-hint">QR Code 掃描區</div>
+                    </div>
+                </div>
+
+                <div class="w-full flex justify-between p-1 bg-white font-bold text-sm shrink-0 border-x-4 border-b-4 border-black">
+                    <div class="w-1/2 flex items-center px-2">
+                        製表日期：<span id="out-date" class="ml-2 font-normal"></span>
+                    </div>
+                    <div class="w-1/2 flex items-center justify-end px-2">
+                        製表者/代碼：<span id="out-creator" class="ml-2 font-normal"></span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ============ 第二類 A3 ============ -->
+        <div id="a3-wrapper" class="hidden" style="padding-bottom:24px;">
+            <div class="a3-preview" id="a3-document">
+
+                <div class="text-center py-2 bg-[#d9e2c9] border-b-[3px] border-black shrink-0 flex items-center justify-center gap-4 px-2">
+                    <span id="out3-headerTitle" class="text-[1.8rem] font-black tracking-wider leading-none"></span>
+                    <span id="out3-headerSubtitle" class="text-base font-bold leading-tight text-gray-800"></span>
+                </div>
+
+                <div class="flex shrink-0" style="height:168mm;">
+                    <div class="w-[56%] flex flex-col" style="border-left:3px solid #000; border-bottom:3px solid #000;">
+                        <table class="a3-table" style="height:100%;">
+                            <colgroup>
+                                <col style="width:9%">
+                                <col style="width:20%">
+                                <col style="width:9%">
+                                <col style="width:8%">
+                                <col style="width:12%">
+                                <col style="width:42%">
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th>刀 序</th>
+                                    <th>刀具形式</th>
+                                    <th>刀 號</th>
+                                    <th>H值</th>
+                                    <th>刀 長</th>
+                                    <th>備 註</th>
+                                </tr>
+                            </thead>
+                            <tbody id="out3-tool-body"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="w-[44%] flex flex-col" style="border-right:3px solid #000; border-bottom:3px solid #000;">
+                        <div id="out3-img-grid" class="a3-img-grid" style="border-top:none; border-left:none; border-right:none;"></div>
+                    </div>
+                </div>
+
+                <div class="flex-1 flex border-l-[3px] border-r-[3px] border-b-[3px] border-black min-h-0" style="border-top:none;">
+
+                    <div class="w-[30%] flex flex-col border-r-[1.5px] border-black min-h-0">
+                        <div class="flex-1 min-h-0">
+                            <table class="a3-bottom-info-table" style="height:100%;">
+                                <colgroup>
+                                    <col style="width:34%">
+                                    <col style="width:66%">
+                                </colgroup>
+                                <tbody>
+                                    <tr><td class="lbl">品 名</td><td class="val" id="out3-productName"></td></tr>
+                                    <tr><td class="lbl">品 號</td><td class="val" id="out3-productNo"></td></tr>
+                                    <tr><td class="lbl">客戶編號</td><td class="val" id="out3-customerNo"></td></tr>
+                                    <tr><td class="lbl">品 名</td><td class="val" id="out3-productName2"></td></tr>
+                                    <tr><td class="lbl">品 號</td><td class="val" id="out3-productNo2"></td></tr>
+                                    <tr><td class="lbl">客戶編號</td><td class="val" id="out3-customerNo2"></td></tr>
+                                    <tr><td class="lbl">加工時間</td><td class="val" id="out3-processTime"></td></tr>
+                                    <tr><td class="lbl">每日數量</td><td class="val" id="out3-dailyQty"></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="shrink-0 border-t-[1.5px] border-black bg-white">
+                            <div class="text-[0.62rem] font-bold text-center py-0.5 bg-[#f2f2f2] border-b border-black">
+                                每日工作日报表 Daily working day report
+                            </div>
+                            <div class="flex items-center justify-center p-1 gap-1">
+                                <div id="out3-qrcode" class="bg-white"></div>
+                                <div class="text-[0.55rem] leading-tight text-gray-600 font-medium">
+                                    QR Code<br>掃描區
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="w-[28%] border-r-[1.5px] border-black min-h-0">
+                        <div class="a3-reminder-box" style="border:none;">
+                            <div class="a3-reminder-title">刀具相關 貼心提醒</div>
+                            <div class="a3-reminder-body" id="out3-reminderText"></div>
+                        </div>
+                    </div>
+
+                    <div class="w-[22%] border-r-[1.5px] border-black min-h-0">
+                        <div class="a3-500-box" style="border:none;">
+                            <div class="a3-500-title">程式內 #500 可快速切換<br>L SIDE OR R SIDE</div>
+                            <div class="a3-500-body">
+                                <div class="big" id="out3-programSide1">#500=1.</div>
+                                <div class="mid" id="out3-programSide2"></div>
+                                <div class="mid" id="out3-programSide3"></div>
+                                <div class="mid" id="out3-programSide4"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="w-[20%] min-h-0">
+                        <div class="a3-machine-box" style="border:none;">
+                            <div class="a3-machine-title">機台操作小技巧</div>
+                            <div class="a3-machine-body">
+                                <div class="a3-machine-tips" id="out3-machineTips"></div>
+                                <div class="a3-machine-qr">
+                                    <div class="text-[0.65rem] font-bold mb-0.5">機台資料</div>
+                                    <div id="out3-machine-qrcode" class="bg-white border border-gray-300"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="w-full flex justify-between px-2 py-0.5 bg-white font-bold text-[0.72rem] shrink-0 border-l-[3px] border-r-[3px] border-b-[3px] border-black">
+                    <div class="flex items-center">
+                        製表日期：<span id="out3-date" class="ml-1 font-normal"></span>
+                    </div>
+                    <div class="flex items-center">
+                        製表者/代碼：<span id="out3-creator" class="ml-1 font-normal"></span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ============================================================
+         底部導航列
+         ============================================================ -->
+    <nav id="mobile-nav">
+        <button id="nav-chat" class="nav-btn active" onclick="switchTab('chat')">
+            <span class="nav-icon">💬</span>
+            <span>對話輸入</span>
+        </button>
+        <button id="nav-preview" class="nav-btn" onclick="switchTab('preview')">
+            <span class="nav-icon">📄</span>
+            <span>預覽報表</span>
+        </button>
+        <button class="nav-btn" onclick="openTableManager()">
+            <span class="nav-icon">📁</span>
+            <span>我的表格</span>
+            <span id="nav-table-dot" class="nav-dot" style="display:none;">0</span>
+        </button>
+        <button class="nav-btn" onclick="openManual()">
+            <span class="nav-icon">📖</span>
+            <span>使用說明</span>
+        </button>
+    </nav>
+
+</div>
+
+<!-- ============================================================
+     彈窗：我的刀具表
+     ============================================================ -->
+<div id="table-manager" onclick="if(event.target===this) closeTableManager()">
+    <div class="tm-panel">
+        <div class="tm-handle"></div>
+        <div class="tm-head">
+            <h2>📁 我的刀具表 <span id="tm-count" style="font-size:.75rem;font-weight:500;color:#5F6368;"></span></h2>
+            <button class="tm-close" onclick="closeTableManager()">&times;</button>
+        </div>
+        <div class="tm-footer" style="border-top:none;padding-top:0;">
+            <button class="tm-new" onclick="createNewTable()">＋ 新增刀具表</button>
+        </div>
+        <div id="tm-list" class="tm-body"></div>
+        <div class="tm-footer">
+            <div class="tm-note">
+                💾 表格自動暫存於本機瀏覽器，最多 <b>10 張</b><br>
+                清除瀏覽器資料會一併清除暫存
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     彈窗：頭像選擇
+     ============================================================ -->
+<div id="avatar-picker" onclick="if(event.target===this) closeAvatarPicker()">
+    <div class="ap-panel">
+        <div class="ap-handle"></div>
+        <div class="ap-head">
+            <h3>🎨 更換精靈頭像</h3>
+            <button class="tm-close" onclick="closeAvatarPicker()">&times;</button>
+        </div>
+        <div class="ap-grid" id="ap-grid"></div>
+        <label class="ap-upload">
+            📷 上傳自訂圖片
+            <input type="file" accept="image/*" id="ap-file" hidden>
+        </label>
+        <button class="ap-reset" onclick="resetAvatar()">↺ 恢復預設 🤖</button>
+    </div>
+</div>
+
+<script>
+/* ============================================================
+   全域資料
+   ============================================================ */
+const STORAGE_KEY = 'cnc_tool_tables_v2';
+const AVATAR_KEY  = 'cnc_bot_avatar_v1';
+const MAX_TABLES = 10;
+
+function makeEmptyAppData(type) {
+    return {
+        type: type || 1,
+        title: '', subtitle: '', pressure: '', partName: '', partNo: '',
+        customerNo: '', processTime: '', dailyQty: '', date: '', creator: '',
+        qrContent: '', tools: [],
+        headerTitle: '', headerSubtitle: '',
+        productName: '', productNo: '', customerNo1: '',
+        productName2: '', productNo2: '', customerNo2: '',
+        processTime2: '', dailyQty2: '',
+        reminderText: '',
+        programSide1: '', programSide2: '', programSide3: '', programSide4: '',
+        machineTips: '',
+        machineQrContent: '',
+        tools2: []
+    };
+}
+
+let appData = makeEmptyAppData(1);
+let currentTool = {};
+let currentStepIndex = 0;
+let isToolLoop = false;
+let toolStepIndex = 0;
+let qrcodeInstance = null;
+let qrcodeInstance3 = null;
+let machineQrcodeInstance = null;
+
+let store = { currentId: null, tables: [] };
+
+/* ---------- 頭像 ---------- */
+let botAvatar = '🤖';
+const AVATAR_EMOJIS = ['🤖','🦾','⚙️','🔧','🛠️','👷','👨‍🔧','🧑‍🏭','🏭','📋','🎯','🚀','🐱','🐶','🦊','🐼','🐯','🌟','💡','🔥'];
+
+const chatHistory = document.getElementById('chat-history');
+const inputContainer = document.getElementById('input-container');
+
+/* ============================================================
+   預設文字（第二類）
+   ============================================================ */
+const DEFAULT_REMINDER = `1.正刀長G43,刀長數字越大.孔深就越淺
+2.正刀長G43,刀長數字越小.孔深就越深
+3.補正值H，負向（-）越深，正向（+）越淺
+4.刀片：有分R0.2 ，R0.4，R0.8`;
+
+const DEFAULT_MACHINE_TIPS = `#10=刀長補正
+#10+ロロロ=刀長磨耗
+#11=刀徑補正
+#11+ロロロ=刀長形狀
+#12=刀鼻R補正
+#12+ロロロ=刀長磨耗
+#13=刀寬補正
+#13+ロロロ=刀長形狀
+N2000 刀具壽命設定&比對
+N3000 刀具壽命斷線程式
+N9999 每把刀 / 加工後驗斷
+S85X=主軸同步攻牙
+OXX88=刀庫總模式
+OXX99=刀庫總結模式`;
+
+/* ============================================================
+   流程定義
+   ============================================================ */
+const flowType1 = [
+    { id: 'title', type: 'text', q: '歡迎使用【第一類1: 《車床N/C.A4規格》】！\n請輸入表單【主題：品名/工序】\n(例: SLIDER OP110)', placeholder: 'SLIDER OP110' },
+    { id: 'subtitle', type: 'text', q: '請輸入【副標題主頁程式0xxxx/加工程式 / Oxxx】', placeholder: '加工程式O6370', optional: true },
+    { id: 'date', type: 'date', q: '請確認【製表日期】' },
+    { id: 'creator', type: 'text', q: '請輸入【製表者】', placeholder: '姓名 ' },
+    { id: 'pressure', type: 'text', q: '請輸入【夾頭壓力設定】', placeholder: '15KG' },
+    { id: 'partName', type: 'text', q: '接著是零件資訊。\n請輸入【品名】', placeholder: '零件名稱' },
+    { id: 'partNo', type: 'text', q: '請輸入【品號】', placeholder: '零件編號' },
+    { id: 'customerNo', type: 'text', q: '請輸入【客戶編號】', placeholder: '客戶編號', optional: true },
+    { id: 'processTime', type: 'text', q: '請輸入【加工時間】', placeholder: "3'00\"", optional: true },
+    { id: 'dailyQty', type: 'text', q: '請輸入【每日數量】', placeholder: '120 PCS', optional: true },
+    { id: 'start_tools', type: 'action', q: '✅ 基本資料設定完成！\n接下來我們逐一建立【刀具資料】。', btnText: '新增第一把刀具' }
+];
+
+const toolFlowType1 = [
+    { id: 't_seq', type: 'text', q: '請輸入【刀序】(例: N10)', placeholder: 'N1' },
+    { id: 't_type', type: 'text', q: '請輸入【刀具形式】', placeholder: '外徑粗車' },
+    { id: 't_no', type: 'text', q: '請輸入【刀號】(例: T01)', placeholder: 'T01' },
+    { id: 't_h', type: 'text', q: '請輸入【H值】', placeholder: '01', optional: true },
+    { id: 't_len', type: 'text', q: '請輸入【刀長】', placeholder: '長度數值', optional: true },
+    { id: 't_remark', type: 'text', q: '請輸入【刀具壽命#】', placeholder: '備註事項...', optional: true },
+    { id: 't_image', type: 'file', q: '請選擇【導入圖示】\n(選取圖片，無圖請點略過)' }
+];
+
+const flowType2 = [
+    { id: 'headerTitle', type: 'text', q: '歡迎使用【第二類 2：《銑床M/C.A3規格》】！\n請輸入【主題品名/工序】\n(例: BOX OP110)', placeholder: 'BOX OP110' },
+    { id: 'headerSubtitle', type: 'text', q: '請輸入【副標題主頁程式0xxxx/加工程式 / Oxxx】】\n(例: 加工程式O0001和刀具O0009)', placeholder: '加工程式O0001盘絲和刀具O0009', optional: true },
+    { id: 'date', type: 'date', q: '請確認【製表日期】' },
+    { id: 'creator', type: 'text', q: '請輸入【製表者】', placeholder: '姓名 ' },
+    { id: 'productName', type: 'text', q: '請輸入【品名】(左側第一組)', placeholder: 'BOX (L)' },
+    { id: 'productNo', type: 'text', q: '請輸入【品號】', placeholder: 'Z907100000' },
+    { id: 'customerNo1', type: 'text', q: '請輸入【客戶編號】', placeholder: '1A8310-14250', optional: true },
+    { id: 'productName2', type: 'text', q: '請輸入【品名2】(第二組)', placeholder: 'BOX (R)', optional: true },
+    { id: 'productNo2', type: 'text', q: '請輸入【品號2】', placeholder: 'Z907000000', optional: true },
+    { id: 'customerNo2', type: 'text', q: '請輸入【客戶編號2】', placeholder: '1A8310-14240', optional: true },
+    { id: 'processTime2', type: 'text', q: '請輸入【加工時間】', placeholder: "3'00\"", optional: true },
+    { id: 'dailyQty2', type: 'text', q: '請輸入【每日數量】', placeholder: '120 PCS', optional: true },
+    { id: 'reminderText', type: 'textarea', q: '請輸入【刀具相關貼心提醒】\n(可留空使用預設內容)', placeholder: '機台要是有送給製二組...', optional: true, defaultValue: DEFAULT_REMINDER },
+    { id: 'programSide1', type: 'text', q: '請輸入【#500 設定值1】(例: #500=1.)', placeholder: '#500=1.', optional: true, defaultValue: '#500=1.' },
+    { id: 'programSide2', type: 'text', q: '請輸入【#500 說明2】', placeholder: '(#500=1.)(ONLY L SIDE)', optional: true, defaultValue: '(#500=1.)(ONLY L SIDE)' },
+    { id: 'programSide3', type: 'text', q: '請輸入【#500 說明3】', placeholder: '(#500=2.)(ONLY R SIDE)', optional: true, defaultValue: '(#500=2.)(ONLY R SIDE)' },
+    { id: 'programSide4', type: 'text', q: '請輸入【#500 說明4】', placeholder: '(#500=3.)(L SIDE + R SIDE)', optional: true, defaultValue: '(#500=3.)(L SIDE + R SIDE)' },
+    { id: 'machineTips', type: 'textarea', q: '請輸入【機台操作小技巧】\n(每行一條，可留空使用預設內容)', placeholder: '#10=刀長補正...', optional: true, defaultValue: DEFAULT_MACHINE_TIPS },
+    { id: 'start_tools', type: 'action', q: '✅ 第二類基本資料設定完成！\n接下來逐一建立【刀具資料】。', btnText: '新增第一把刀具' }
+];
+
+const toolFlowType2 = [
+    { id: 't_seq', type: 'text', q: '請輸入【刀序】(例: N10)', placeholder: 'N10' },
+    { id: 't_type', type: 'text', q: '請輸入【刀具形式】(主標題)', placeholder: 'D63-MILL' },
+    { id: 't_typeDesc', type: 'text', q: '請輸入【刀具形式描述】(副標題)', placeholder: '铣大面.平底度5條', optional: true },
+    { id: 't_no', type: 'text', q: '請輸入【刀號】(例: T01)', placeholder: 'T01' },
+    { id: 't_h', type: 'text', q: '請輸入【H值】', placeholder: '01', optional: true },
+    { id: 't_len', type: 'text', q: '請輸入【刀長】', placeholder: '99.95', optional: true },
+    { id: 't_remark', type: 'textarea', q: '請輸入【備註】(可多行)', placeholder: '#S21=Use times\nTOOL LIFE=200', optional: true },
+    { id: 't_image', type: 'file', q: '請選擇【導入圖示】\n(選取圖片，無圖請點略過)' }
+];
+
+/* ============================================================
+   工具函式
+   ============================================================ */
+function getFlow() { return appData.type === 2 ? flowType2 : flowType1; }
+function getToolFlow() { return appData.type === 2 ? toolFlowType2 : toolFlowType1; }
+
+function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => (
+        { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+    ));
+}
+
+function hasMeaningfulData() {
+    if (appData.type === 2) {
+        return !!(appData.headerTitle || appData.productName || appData.productNo
+            || (appData.tools2 && appData.tools2.length));
+    }
+    return !!(appData.title || appData.partName || appData.partNo
+        || (appData.tools && appData.tools.length));
+}
+
+/* ============================================================
+   ★ 頂覽 / 說明書 控制
+   ============================================================ */
+function showWelcome() {
+    document.getElementById('welcome-screen').classList.add('show');
+}
+function hideWelcome() {
+    document.getElementById('welcome-screen').classList.remove('show');
+}
+
+function startFromWelcome() {
+    hideWelcome();
+    switchTab('chat');
+    setTimeout(adjustPreviewScale, 120);
+    setTimeout(() => {
+        const el = inputContainer.querySelector('input.input-field, textarea.textarea-field');
+        if (el) { try { el.focus(); } catch (e) {} }
+    }, 320);
+}
+
+function goPreviewFromWelcome() {
+    hideWelcome();
+    switchTab('preview');
+    setTimeout(adjustPreviewScale, 150);
+    setTimeout(adjustPreviewScale, 420);
+}
+
+function openManual() {
+    document.getElementById('manual-screen').classList.add('show');
+    const sc = document.getElementById('ms-scroll');
+    if (sc) sc.scrollTop = 0;
+}
+
+function closeManual() {
+    document.getElementById('manual-screen').classList.remove('show');
+}
+
+function closeManualAndStart() {
+    closeManual();
+    hideWelcome();
+    switchTab('chat');
+    setTimeout(adjustPreviewScale, 150);
+    setTimeout(() => {
+        const el = inputContainer.querySelector('input.input-field, textarea.textarea-field');
+        if (el) { try { el.focus(); } catch (e) {} }
+    }, 360);
+}
+
+function jumpTo(id) {
+    const el = document.getElementById(id);
+    const box = document.getElementById('ms-scroll');
+    if (!el || !box) return;
+    const top = el.offsetTop - 10;
+    try {
+        box.scrollTo({ top: top, behavior: 'smooth' });
+    } catch (e) {
+        box.scrollTop = top;
+    }
+}
+
+/* ============================================================
+   頭像管理
+   ============================================================ */
+function loadAvatar() {
+    try {
+        const v = localStorage.getItem(AVATAR_KEY);
+        if (v) botAvatar = v;
+    } catch (e) {}
+}
+
+function saveAvatar() {
+    try { localStorage.setItem(AVATAR_KEY, botAvatar); } catch (e) {}
+}
+
+function isImageAvatar(v) { return /^data:image\//.test(v); }
+
+function avatarBotHTML() {
+    if (isImageAvatar(botAvatar)) {
+        return `<span style="display:block;width:100%;height:100%;background-image:url('${botAvatar}');background-size:cover;background-position:center;"></span>`;
+    }
+    return botAvatar;
+}
+
+function refreshAvatars() {
+    const b = document.getElementById('brand-avatar');
+    if (b) {
+        if (isImageAvatar(botAvatar)) {
+            b.textContent = '';
+            b.style.backgroundImage = `url('${botAvatar}')`;
+            b.style.backgroundSize = 'cover';
+            b.style.backgroundPosition = 'center';
+        } else {
+            b.textContent = botAvatar;
+            b.style.backgroundImage = '';
+        }
+    }
+    document.querySelectorAll('.avatar-bot').forEach(el => {
+        el.innerHTML = avatarBotHTML();
+        el.onclick = openAvatarPicker;
+        el.title = '點擊更換頭像';
+    });
+}
+
+function openAvatarPicker() {
+    const grid = document.getElementById('ap-grid');
+    grid.innerHTML = AVATAR_EMOJIS.map(e =>
+        `<button class="ap-emoji ${botAvatar === e ? 'active' : ''}" data-emoji="${e}">${e}</button>`
+    ).join('');
+    grid.querySelectorAll('.ap-emoji').forEach(btn => {
+        btn.onclick = () => setAvatar(btn.dataset.emoji);
+    });
+    document.getElementById('avatar-picker').classList.add('show');
+}
+
+function closeAvatarPicker() {
+    document.getElementById('avatar-picker').classList.remove('show');
+}
+
+function setAvatar(v) {
+    botAvatar = v;
+    saveAvatar();
+    refreshAvatars();
+    closeAvatarPicker();
+}
+
+function resetAvatar() {
+    setAvatar('🤖');
+}
+
+/* ============================================================
+   本機暫存
+   ============================================================ */
+function loadStore() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+            const parsed = JSON.parse(raw);
+            if (parsed && Array.isArray(parsed.tables)) store = parsed;
+        }
+    } catch (e) { console.warn('讀取暫存失敗', e); }
+    if (!store.tables) store = { currentId: null, tables: [] };
+    store.tables.forEach(t => {
+        if (t.data && typeof t.data.type === 'undefined') t.data.type = 1;
+        if (t.data && !t.data.tools2) t.data.tools2 = [];
+        if (t.data && !t.data.tools) t.data.tools = [];
+    });
+}
+
+function persist() {
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+        return true;
+    } catch (e) {
+        console.error(e);
+        alert('⚠️ 本機儲存空間不足，表格暫存失敗。\n建議刪除不需要的舊表格，或減少刀具圖片。');
+        return false;
+    }
+}
+
+function saveCurrent(keepIfEmpty) {
+    let t = store.tables.find(x => x.id === store.currentId);
+
+    if (!hasMeaningfulData()) {
+        if (keepIfEmpty) return;
+        if (t) {
+            store.tables = store.tables.filter(x => x.id !== t.id);
+            store.currentId = null;
+            persist();
+            renderTableList();
+        }
+        return;
+    }
+
+    if (!t) {
+        if (store.tables.length >= MAX_TABLES) return;
+        t = {
+            id: 'T' + Date.now() + Math.random().toString(36).slice(2, 6),
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+            name: '未命名刀具表',
+            data: null
+        };
+        store.tables.push(t);
+        store.currentId = t.id;
+    }
+
+    t.updatedAt = Date.now();
+    const typeTag = appData.type === 2 ? '【A3】' : '【A4】';
+    if (appData.type === 2) {
+        t.name = appData.headerTitle
+            ? typeTag + appData.headerTitle + (appData.productNo ? ' · ' + appData.productNo : '')
+            : typeTag + '未命名刀具表';
+    } else {
+        t.name = appData.title
+            ? typeTag + appData.title + (appData.partNo ? ' · ' + appData.partNo : '')
+            : typeTag + '未命名刀具表';
+    }
+    t.data = JSON.parse(JSON.stringify(appData));
+    persist();
+    renderTableList();
+}
+
+/* ============================================================
+   模式切換
+   ============================================================ */
+function changeFormat(type) {
+    if (appData.type === type) return;
+    saveCurrent();
+
+    const prev = appData;
+    appData = makeEmptyAppData(type);
+
+    appData.date = prev.date || new Date().toISOString().split('T')[0];
+    appData.creator = prev.creator || '';
+
+    document.getElementById('mode-btn-1').classList.toggle('active', type === 1);
+    document.getElementById('mode-btn-2').classList.toggle('active', type === 2);
+
+    document.getElementById('a4-wrapper').classList.toggle('hidden', type !== 1);
+    document.getElementById('a3-wrapper').classList.toggle('hidden', type !== 2);
+
+    document.getElementById('print-btn-label').textContent = type === 2
+        ? '列印 / 存為 PDF（A3 橫向單頁）'
+        : '列印 / 存為 PDF（A4 單頁）';
+    document.getElementById('dynamic-page-style').textContent = type === 2
+        ? '@page { size: A3 landscape; margin: 0; }'
+        : '@page { size: A4 portrait; margin: 0; }';
+
+    updateA4Preview();
+    updateA3Preview();
+    restartChat();
+    addBotMessage(type === 2
+        ? '🔄 已切換為【第二類 A3 格式】\n我們從頭開始建立。'
+        : '🔄 已切換為【第一類 A4 格式】\n我們從頭開始建立。');
+    setTimeout(adjustPreviewScale, 60);
+}
+
+function doPrint() {
+    saveCurrent();
+    setTimeout(() => window.print(), 80);
+}
+
+/* ============================================================
+   表格管理 UI
+   ============================================================ */
+function openTableManager() {
+    renderTableList();
+    document.getElementById('table-manager').classList.add('show');
+}
+function closeTableManager() {
+    document.getElementById('table-manager').classList.remove('show');
+}
+
+function renderTableList() {
+    const list = document.getElementById('tm-list');
+    const badge = document.getElementById('table-count-badge');
+    const dot = document.getElementById('nav-table-dot');
+
+    if (badge) badge.textContent = `${store.tables.length}/${MAX_TABLES}`;
+    if (dot) {
+        if (store.tables.length > 0) { dot.style.display = 'grid'; dot.textContent = store.tables.length; }
+        else { dot.style.display = 'none'; }
+    }
+    const tmCount = document.getElementById('tm-count');
+    if (tmCount) tmCount.textContent = `(${store.tables.length}/${MAX_TABLES})`;
+
+    if (!list) return;
+
+    if (store.tables.length === 0) {
+        list.innerHTML = `<div style="text-align:center;color:#9AA0A6;padding:40px 16px;font-size:.85rem;line-height:1.8;">
+            尚無暫存表格<br>
+            <span style="font-size:.75rem;">按上方「＋ 新增刀具表」開始建立</span>
+        </div>`;
+        return;
+    }
+
+    list.innerHTML = store.tables.map(t => {
+        const isCur = t.id === store.currentId;
+        const d = new Date(t.updatedAt || t.createdAt || Date.now());
+        const time = `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+        const typeTag = (t.data && t.data.type === 2) ? 'A3' : 'A4';
+        let count = 0;
+        if (t.data) {
+            count = (t.data.type === 2)
+                ? (Array.isArray(t.data.tools2) ? t.data.tools2.length : 0)
+                : (Array.isArray(t.data.tools) ? t.data.tools.length : 0);
+        }
+        return `
+        <div class="tm-item ${isCur ? 'current' : ''}">
+            <div class="tm-tag ${typeTag === 'A3' ? 'a3' : 'a4'}">${typeTag}</div>
+            <div class="tm-info">
+                <div class="tm-name">${esc(t.name || '未命名刀具表')}</div>
+                <div class="tm-meta">
+                    ${count} 把刀具 · ${time}
+                    ${isCur ? '· <span class="live">編輯中</span>' : ''}
+                </div>
+            </div>
+            <button class="tm-btn load" onclick="loadTable('${t.id}')">載入</button>
+            <button class="tm-btn del" onclick="deleteTable('${t.id}')">刪除</button>
+        </div>`;
+    }).join('');
+}
+
+function createNewTable() {
+    saveCurrent();
+
+    if (store.tables.length >= MAX_TABLES) {
+        alert(`已達 ${MAX_TABLES} 張表格上限！\n請先刪除不需要的表格，再新增。`);
+        return;
+    }
+
+    const type = appData.type;
+    const t = {
+        id: 'T' + Date.now() + Math.random().toString(36).slice(2, 6),
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        name: '未命名刀具表',
+        data: null
+    };
+    store.tables.push(t);
+    store.currentId = t.id;
+    persist();
+
+    appData = makeEmptyAppData(type);
+    appData.date = new Date().toISOString().split('T')[0];
+
+    renderTableList();
+    closeTableManager();
+    restartChat();
+    addBotMessage('🆕 已建立新的刀具表\n我們從頭開始吧！');
+}
+
+function loadTable(id) {
+    saveCurrent();
+
+    const t = store.tables.find(x => x.id === id);
+    if (!t) return;
+
+    store.currentId = id;
+    persist();
+
+    const type = (t.data && t.data.type === 2) ? 2 : 1;
+    appData = makeEmptyAppData(type);
+    if (t.data) {
+        Object.assign(appData, JSON.parse(JSON.stringify(t.data)));
+        if (!Array.isArray(appData.tools)) appData.tools = [];
+        if (!Array.isArray(appData.tools2)) appData.tools2 = [];
+    }
+
+    document.getElementById('mode-btn-1').classList.toggle('active', type === 1);
+    document.getElementById('mode-btn-2').classList.toggle('active', type === 2);
+    document.getElementById('a4-wrapper').classList.toggle('hidden', type !== 1);
+    document.getElementById('a3-wrapper').classList.toggle('hidden', type !== 2);
+    document.getElementById('print-btn-label').textContent = type === 2
+        ? '列印 / 存為 PDF（A3 橫向單頁）'
+        : '列印 / 存為 PDF（A4 單頁）';
+    document.getElementById('dynamic-page-style').textContent = type === 2
+        ? '@page { size: A3 landscape; margin: 0; }'
+        : '@page { size: A4 portrait; margin: 0; }';
+
+    updateA4Preview();
+    updateA3Preview();
+    closeTableManager();
+    restoreChatView();
+    switchTab('chat');
+    setTimeout(adjustPreviewScale, 60);
+}
+
+function deleteTable(id) {
+    const t = store.tables.find(x => x.id === id);
+    if (!t) return;
+    if (!confirm(`確定要刪除「${t.name || '未命名刀具表'}」嗎？\n刪除後無法復原。`)) return;
+
+    store.tables = store.tables.filter(x => x.id !== id);
+
+    if (store.currentId === id) {
+        store.currentId = null;
+        const type = appData.type;
+        appData = makeEmptyAppData(type);
+        appData.date = new Date().toISOString().split('T')[0];
+        persist();
+        renderTableList();
+        updateA4Preview();
+        updateA3Preview();
+        restartChat();
+        addBotMessage('🗑 目前編輯的表格已刪除\n已為您開啟空白表格。');
+    } else {
+        persist();
+        renderTableList();
+    }
+}
+
+/* ============================================================
+   手機 / 桌面 檢視切換
+   ============================================================ */
+function switchTab(tabName) {
+    const navChat = document.getElementById('nav-chat');
+    const navPreview = document.getElementById('nav-preview');
+
+    if (window.innerWidth < 768) {
+        document.body.classList.toggle('mobile-view-chat', tabName === 'chat');
+        document.body.classList.toggle('mobile-view-preview', tabName === 'preview');
+    }
+
+    navChat.classList.toggle('active', tabName === 'chat');
+    navPreview.classList.toggle('active', tabName === 'preview');
+
+    if (tabName === 'chat') scrollToBottom();
+    else adjustPreviewScale();
+}
+
+function adjustPreviewScale() {
+    const container = document.getElementById('preview-container');
+    if (!container) return;
+
+    const isMobile = window.innerWidth < 768;
+    const wrapper = appData.type === 2
+        ? document.getElementById('a3-wrapper')
+        : document.getElementById('a4-wrapper');
+    if (!wrapper) return;
+
+    if (container.clientWidth > 0 && isMobile) {
+        const padding = 20;
+        const targetWidth = container.clientWidth - padding;
+
+        let a4WidthPx, a4HeightPx;
+        if (appData.type === 2) {
+            a4WidthPx = 1587; a4HeightPx = 1123;
+        } else {
+            a4WidthPx = 794; a4HeightPx = 1123;
+        }
+        const scale = Math.min(1, targetWidth / a4WidthPx);
+        wrapper.style.transform = `scale(${scale})`;
+        wrapper.style.marginBottom = `-${a4HeightPx * (1 - scale)}px`;
+    } else {
+        wrapper.style.transform = 'none';
+        wrapper.style.marginBottom = '0';
+    }
+}
+
+window.addEventListener('resize', () => {
+    if (window.innerWidth >= 768) {
+        document.body.classList.remove('mobile-view-chat', 'mobile-view-preview');
+        const w4 = document.getElementById('a4-wrapper');
+        const w3 = document.getElementById('a3-wrapper');
+        w4.style.transform = 'none'; w4.style.marginBottom = '0';
+        w3.style.transform = 'none'; w3.style.marginBottom = '0';
+    } else {
+        if (!document.body.classList.contains('mobile-view-preview')) {
+            switchTab('chat');
+        }
+    }
+    adjustPreviewScale();
+});
+
+/* ============================================================
+   對話渲染
+   ============================================================ */
+function addBotMessage(text) {
+    const msgHtml = `
+        <div class="chat-msg flex gap-2.5 w-full">
+            <div class="avatar-bot" onclick="openAvatarPicker()" title="點擊更換頭像">${avatarBotHTML()}</div>
+            <div class="bubble-bot">${text}</div>
+        </div>`;
+    chatHistory.insertAdjacentHTML('beforeend', msgHtml);
+    scrollToBottom();
+}
+
+function addUserMessage(text, isImage = false) {
+    let content = text;
+    if (isImage) {
+        content = `<img src="${text}" style="max-height:110px;border-radius:8px;display:block;">`;
+    } else if (!text) {
+        content = '<span style="opacity:.72;font-style:italic;">（略過）</span>';
+    }
+    const msgHtml = `
+        <div class="chat-msg flex gap-2.5 justify-end w-full">
+            <div class="bubble-user">${content}</div>
+        </div>`;
+    chatHistory.insertAdjacentHTML('beforeend', msgHtml);
+    scrollToBottom();
+}
+
+function scrollToBottom() {
+    setTimeout(() => { chatHistory.scrollTop = chatHistory.scrollHeight; }, 60);
+}
+
+/* ============================================================
+   輸入控制
+   ============================================================ */
+function renderInput() {
+    inputContainer.innerHTML = '';
+
+    const flow = getFlow();
+    const toolFlow = getToolFlow();
+
+    let currentStepObj;
+    if (!isToolLoop) {
+        if (currentStepIndex >= flow.length) { renderFinalStep(); return; }
+        currentStepObj = flow[currentStepIndex];
+    } else {
+        if (toolStepIndex >= toolFlow.length) { promptAddAnotherTool(); return; }
+        currentStepObj = toolFlow[toolStepIndex];
+    }
+
+    addBotMessage(currentStepObj.q);
+
+    if (currentStepObj.type === 'action') {
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-green';
+        btn.textContent = '🚀 ' + currentStepObj.btnText;
+        btn.onclick = () => {
+            addUserMessage('開始建立刀具資料');
+            isToolLoop = true; toolStepIndex = 0; currentTool = {}; renderInput();
+        };
+        inputContainer.appendChild(btn);
+    }
+    else if (currentStepObj.type === 'file') {
+        const fileLabel = document.createElement('label');
+        fileLabel.className = 'btn btn-file';
+        fileLabel.innerHTML = '<span>📸 選擇圖片或拍照</span><input type="file" accept="image/*" class="hidden" id="img-upload">';
+
+        const skipBtn = document.createElement('button');
+        skipBtn.textContent = '無圖，直接略過';
+        skipBtn.className = 'btn btn-skip';
+
+        inputContainer.appendChild(fileLabel);
+        inputContainer.appendChild(skipBtn);
+
+        const fileInput = fileLabel.querySelector('#img-upload');
+        fileInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            fileLabel.querySelector('span').textContent = '⏳ 圖片處理中...';
+            compressImage(file).then(dataUrl => {
+                handleSubmission(dataUrl, true);
+            }).catch(() => {
+                alert('圖片讀取失敗，請換一張試試。');
+                fileLabel.querySelector('span').textContent = '📸 選擇圖片或拍照';
+            });
+        };
+        skipBtn.onclick = () => handleSubmission('', false);
+    }
+    else if (currentStepObj.type === 'textarea') {
+        const ta = document.createElement('textarea');
+        ta.rows = 5;
+        ta.className = 'textarea-field';
+        ta.placeholder = currentStepObj.placeholder || '請輸入...';
+        if (currentStepObj.defaultValue) ta.value = currentStepObj.defaultValue;
+
+        const btnRow = document.createElement('div');
+        btnRow.style.display = 'flex';
+        btnRow.style.gap = '8px';
+
+        const sendBtn = document.createElement('button');
+        sendBtn.textContent = '發送';
+        sendBtn.className = 'btn btn-blue';
+        sendBtn.style.flex = '1';
+
+        const resetBtn = document.createElement('button');
+        resetBtn.textContent = '套用預設';
+        resetBtn.className = 'btn btn-ghost';
+        resetBtn.style.flex = 'none';
+        resetBtn.style.width = 'auto';
+        resetBtn.style.padding = '12px 16px';
+        resetBtn.onclick = () => {
+            if (currentStepObj.defaultValue) ta.value = currentStepObj.defaultValue;
+        };
+
+        sendBtn.onclick = () => handleSubmission(ta.value);
+
+        btnRow.appendChild(sendBtn);
+        btnRow.appendChild(resetBtn);
+
+        inputContainer.appendChild(ta);
+        inputContainer.appendChild(btnRow);
+
+        if (currentStepObj.optional) {
+            const skipBtn = document.createElement('button');
+            skipBtn.textContent = '選填，略過此欄位';
+            skipBtn.className = 'btn btn-skip';
+            skipBtn.onclick = () => handleSubmission('');
+            inputContainer.appendChild(skipBtn);
+        }
+    }
+    else {
+        const inputWrap = document.createElement('div');
+        inputWrap.className = 'input-row';
+
+        const inputEl = document.createElement('input');
+        inputEl.type = currentStepObj.type;
+        inputEl.className = 'input-field';
+        inputEl.placeholder = currentStepObj.placeholder || '請輸入...';
+
+        if (currentStepObj.type === 'date') {
+            inputEl.value = appData.date || new Date().toISOString().split('T')[0];
+        }
+        if (currentStepObj.defaultValue && currentStepObj.optional) {
+            inputEl.placeholder = currentStepObj.defaultValue;
+        }
+
+        const sendBtn = document.createElement('button');
+        sendBtn.textContent = '發送';
+        sendBtn.className = 'btn-send';
+
+        const submitData = () => {
+            if (inputEl.value.trim() === '' && !currentStepObj.optional) {
+                alert('此為必填欄位喔！'); return;
+            }
+            handleSubmission(inputEl.value);
+        };
+
+        sendBtn.onclick = submitData;
+        inputEl.onkeypress = (e) => { if (e.key === 'Enter') submitData(); };
+
+        inputWrap.appendChild(inputEl);
+        inputWrap.appendChild(sendBtn);
+        inputContainer.appendChild(inputWrap);
+
+        if (currentStepObj.optional) {
+            const skipBtn = document.createElement('button');
+            skipBtn.textContent = '選填，略過此欄位';
+            skipBtn.className = 'btn btn-skip';
+            skipBtn.onclick = () => handleSubmission('');
+            inputContainer.appendChild(skipBtn);
+        }
+
+        if (window.innerWidth > 768) {
+            setTimeout(() => inputEl.focus(), 100);
+        }
+    }
+}
+
+/* ============================================================
+   圖片壓縮
+   ============================================================ */
+function compressImage(file, maxSize = 220, quality = 0.7) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = reject;
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onerror = reject;
+            img.onload = () => {
+                const w = img.naturalWidth || img.width;
+                const h = img.naturalHeight || img.height;
+                const scale = Math.min(1, maxSize / Math.max(w, h));
+                const canvas = document.createElement('canvas');
+                canvas.width = Math.max(1, Math.round(w * scale));
+                canvas.height = Math.max(1, Math.round(h * scale));
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                resolve(canvas.toDataURL('image/jpeg', quality));
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+/* ============================================================
+   資料處理
+   ============================================================ */
+function handleSubmission(val, isImage = false) {
+    addUserMessage(val, isImage);
+
+    const flow = getFlow();
+    const toolFlow = getToolFlow();
+
+    if (!isToolLoop) {
+        const stepId = flow[currentStepIndex].id;
+        if (stepId === 'start_tools') return;
+
+        if (val === '' && flow[currentStepIndex].defaultValue) {
+            val = flow[currentStepIndex].defaultValue;
+        }
+        appData[stepId] = val;
+        currentStepIndex++;
+    } else {
+        const stepId = toolFlow[toolStepIndex].id;
+        currentTool[stepId] = val;
+        toolStepIndex++;
+        if (toolStepIndex === toolFlow.length) {
+            if (appData.type === 2) {
+                appData.tools2.push({ ...currentTool });
+            } else {
+                appData.tools.push({ ...currentTool });
+            }
+            currentTool = {};
+        }
+    }
+
+    updateA4Preview();
+    updateA3Preview();
+    saveCurrent();
+    renderInput();
+}
+
+function promptAddAnotherTool() {
+    const count = (appData.type === 2) ? appData.tools2.length : appData.tools.length;
+    addBotMessage(`✅ 第 ${count} 把刀具已加入！\n請問是否還要新增下一把刀具？`);
+
+    const btnYes = document.createElement('button');
+    btnYes.textContent = '➕ 是的，繼續新增';
+    btnYes.className = 'btn btn-green';
+    btnYes.onclick = () => { addUserMessage('繼續新增'); toolStepIndex = 0; renderInput(); };
+
+    const btnNo = document.createElement('button');
+    btnNo.textContent = '🛑 否，結束設定';
+    btnNo.className = 'btn btn-slate';
+    btnNo.onclick = () => { addUserMessage('結束新增'); isToolLoop = false; currentStepIndex = getFlow().length; renderInput(); };
+
+    inputContainer.appendChild(btnYes);
+    inputContainer.appendChild(btnNo);
+}
+
+function renderFinalStep() {
+    addBotMessage('🏁 最後一步！\n請輸入要產生的【QR Code 內容】\n(例：雲端資料夾網址，不需要請點略過)');
+
+    const inputEl = document.createElement('input');
+    inputEl.type = 'text';
+    inputEl.className = 'input-field';
+    inputEl.placeholder = 'https://...';
+
+    const sendBtn = document.createElement('button');
+    sendBtn.textContent = '🎉 完成並產生表單';
+    sendBtn.className = 'btn btn-green';
+
+    const skipBtn = document.createElement('button');
+    skipBtn.textContent = '不需要 QR Code，直接完成';
+    skipBtn.className = 'btn btn-ghost';
+
+    const finishProcess = (val) => {
+        appData.qrContent = val;
+        addUserMessage(val || '無');
+        updateA4Preview();
+        updateA3Preview();
+        saveCurrent();
+        inputContainer.innerHTML = '';
+        addBotMessage(`🎉 恭喜！\n「${appData.type === 2 ? (appData.headerTitle || '刀具表') : (appData.title || '刀具表')}」建立完成，已自動暫存。`);
+
+        if (window.innerWidth < 768) {
+            setTimeout(() => switchTab('preview'), 1100);
+        }
+    };
+
+    sendBtn.onclick = () => finishProcess(inputEl.value);
+    skipBtn.onclick = () => finishProcess('');
+
+    inputContainer.appendChild(inputEl);
+    inputContainer.appendChild(sendBtn);
+    inputContainer.appendChild(skipBtn);
+}
+
+/* ============================================================
+   載入既有表格後的對話狀態
+   ============================================================ */
+function restoreChatView() {
+    chatHistory.innerHTML = '';
+    inputContainer.innerHTML = '';
+    currentStepIndex = getFlow().length;
+    isToolLoop = false;
+    toolStepIndex = 0;
+    currentTool = {};
+
+    const count = (appData.type === 2) ? appData.tools2.length : appData.tools.length;
+    const name = (appData.type === 2) ? (appData.headerTitle || '未命名') : (appData.title || '未命名');
+    addBotMessage(`📂 已載入刀具表「${name}」\n目前共 ${count} 把刀具。\n您可以繼續新增刀具，或重新填寫基本資料。`);
+    showResumeOptions();
+}
+
+function showResumeOptions() {
+    inputContainer.innerHTML = '';
+
+    const b1 = document.createElement('button');
+    b1.textContent = '➕ 繼續新增刀具';
+    b1.className = 'btn btn-green';
+    b1.onclick = () => {
+        addUserMessage('繼續新增刀具');
+        isToolLoop = true; toolStepIndex = 0; currentTool = {};
+        inputContainer.innerHTML = '';
+        renderInput();
+    };
+
+    const b2 = document.createElement('button');
+    b2.textContent = '✏️ 重新填寫基本資料';
+    b2.className = 'btn btn-slate';
+    b2.onclick = () => {
+        addUserMessage('重新填寫基本資料');
+        restartChat();
+    };
+
+    inputContainer.appendChild(b1);
+    inputContainer.appendChild(b2);
+}
+
+function restartChat() {
+    chatHistory.innerHTML = '';
+    inputContainer.innerHTML = '';
+    currentStepIndex = 0;
+    isToolLoop = false;
+    toolStepIndex = 0;
+    currentTool = {};
+    updateA4Preview();
+    updateA3Preview();
+    renderInput();
+    switchTab('chat');
+}
+
+/* ============================================================
+   ★ 預覽可編輯功能
+   ============================================================ */
+const EDIT_MAP = {
+    'out-title': 'title',
+    'out-subtitle': 'subtitle',
+    'out-pressure': 'pressure',
+    'out-part-name': 'partName',
+    'out-part-no': 'partNo',
+    'out-customer-no': 'customerNo',
+    'out-process-time': 'processTime',
+    'out-daily-qty': 'dailyQty',
+    'out-date': 'date',
+    'out-creator': 'creator',
+    'out3-headerTitle': 'headerTitle',
+    'out3-headerSubtitle': 'headerSubtitle',
+    'out3-productName': 'productName',
+    'out3-productNo': 'productNo',
+    'out3-customerNo': 'customerNo1',
+    'out3-productName2': 'productName2',
+    'out3-productNo2': 'productNo2',
+    'out3-customerNo2': 'customerNo2',
+    'out3-processTime': 'processTime2',
+    'out3-dailyQty': 'dailyQty2',
+    'out3-reminderText': 'reminderText',
+    'out3-programSide1': 'programSide1',
+    'out3-programSide2': 'programSide2',
+    'out3-programSide3': 'programSide3',
+    'out3-programSide4': 'programSide4',
+    'out3-machineTips': 'machineTips',
+    'out3-date': 'date',
+    'out3-creator': 'creator'
+};
+
+const MULTILINE_FIELDS = new Set(['reminderText', 'machineTips']);
+
+function initEditablePreview() {
+    Object.keys(EDIT_MAP).forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const field = EDIT_MAP[id];
+        el.setAttribute('contenteditable', 'true');
+        el.setAttribute('spellcheck', 'false');
+        el.dataset.edit = field;
+        el.classList.add('ed-cell');
+        if (MULTILINE_FIELDS.has(field)) el.dataset.multiline = '1';
+
+        el.addEventListener('blur', onEditableBlur);
+        el.addEventListener('keydown', ev => {
+            if (ev.key === 'Enter' && el.dataset.multiline !== '1') {
+                ev.preventDefault();
+                el.blur();
+            }
+            if (ev.key === 'Escape') el.blur();
+        });
+        el.addEventListener('paste', ev => {
+            ev.preventDefault();
+            const txt = (ev.clipboardData || window.clipboardData).getData('text/plain');
+            document.execCommand('insertText', false, txt);
+        });
+    });
+
+    /* QR 區塊點擊編輯 */
+    const qrMain = document.getElementById('out-qrcode');
+    const qr3 = document.getElementById('out3-qrcode');
+    const qrM = document.getElementById('out3-machine-qrcode');
+    if (qrMain) qrMain.dataset.qr = 'main';
+    if (qr3) qr3.dataset.qr = 'main';
+    if (qrM) qrM.dataset.qr = 'machine';
+
+    /* 全域點擊：圖片插槽 / QR */
+    document.getElementById('preview-container').addEventListener('click', e => {
+        const slot = e.target.closest('[data-imgrow]');
+        if (slot) {
+            pickImageForTool(parseInt(slot.dataset.imgrow, 10));
+            return;
+        }
+        const qr = e.target.closest('[data-qr]');
+        if (qr) {
+            editQrContent(qr.dataset.qr);
+        }
+    });
+
+    /* 刀具表格：失焦儲存 */
+    ['out-tool-body', 'out3-tool-body', 'out3-img-grid'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('focusout', onToolCellBlur);
+    });
+}
+
+function onEditableBlur(e) {
+    const el = e.currentTarget;
+    const field = el.dataset.edit;
+    if (!field) return;
+
+    let v = el.innerText.replace(/\u00a0/g, ' ');
+    if (el.dataset.multiline === '1') {
+        v = v.replace(/\r/g, '')
+             .replace(/[ \t]+$/gm, '')
+             .replace(/\n{3,}/g, '\n\n')
+             .replace(/^\n+|\n+$/g, '');
+    } else {
+        v = v.replace(/\s*\n+\s*/g, ' ').replace(/\s{2,}/g, ' ').trim();
+    }
+
+    el.textContent = v;
+
+    if (field === 'date') {
+        const normalized = v.replace(/\//g, '-');
+        appData.date = normalized;
+        const show = normalized.replace(/-/g, '/');
+        const d1 = document.getElementById('out-date');
+        const d2 = document.getElementById('out3-date');
+        if (d1) d1.textContent = show;
+        if (d2) d2.textContent = show;
+    } else {
+        appData[field] = v;
+    }
+
+    saveCurrent(true);
+}
+
+function onToolCellBlur(e) {
+    const el = e.target.closest('[data-tool]');
+    if (!el) return;
+
+    const arrName = el.dataset.tool === 'a3' ? 'tools2' : 'tools';
+    const arr = appData[arrName];
+    if (!arr) return;
+
+    const row = parseInt(el.dataset.row, 10);
+    const key = el.dataset.key;
+    const multiline = el.dataset.multiline === '1';
+
+    let v = el.innerText.replace(/\u00a0/g, ' ');
+    if (multiline) {
+        v = v.replace(/\r/g, '').replace(/[ \t]+$/gm, '').replace(/^\n+|\n+$/g, '');
+    } else {
+        v = v.replace(/\s*\n+\s*/g, ' ').trim();
+    }
+    el.textContent = v;
+
+    while (arr.length <= row) arr.push({});
+    if (!arr[row]) arr[row] = {};
+    arr[row][key] = v;
+
+    saveCurrent(true);
+}
+
+function pickImageForTool(rowIdx) {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = async () => {
+        const f = input.files[0];
+        if (!f) return;
+        try {
+            const dataUrl = await compressImage(f);
+            const arrName = appData.type === 2 ? 'tools2' : 'tools';
+            const arr = appData[arrName];
+            while (arr.length <= rowIdx) arr.push({});
+            if (!arr[rowIdx]) arr[rowIdx] = {};
+            arr[rowIdx].t_image = dataUrl;
+            saveCurrent(true);
+            updateA4Preview();
+            updateA3Preview();
+        } catch (err) {
+            alert('圖片讀取失敗，請換一張試試。');
+        }
+    };
+    input.click();
+}
+
+function editQrContent(which) {
+    const cur = (which === 'machine')
+        ? (appData.machineQrContent || appData.qrContent || '')
+        : (appData.qrContent || '');
+    const v = prompt('請輸入 QR Code 內容（網址或文字）\n留空則不顯示 QR Code：', cur);
+    if (v === null) return;
+
+    if (which === 'machine') appData.machineQrContent = v.trim();
+    else appData.qrContent = v.trim();
+
+    saveCurrent(true);
+    updateA4Preview();
+    updateA3Preview();
+}
+
+/* ============================================================
+   A4 預覽更新（第一類）
+   ============================================================ */
+function updateA4Preview() {
+    document.getElementById('out-title').textContent = appData.title || '';
+    document.getElementById('out-subtitle').textContent = appData.subtitle || '';
+    document.getElementById('out-pressure').textContent = appData.pressure || '';
+    document.getElementById('out-part-name').textContent = appData.partName || '';
+    document.getElementById('out-part-no').textContent = appData.partNo || '';
+    document.getElementById('out-customer-no').textContent = appData.customerNo || '';
+    document.getElementById('out-process-time').textContent = appData.processTime || '';
+    document.getElementById('out-daily-qty').textContent = appData.dailyQty || '';
+
+    const displayDate = appData.date ? appData.date.replace(/-/g, '/') : '';
+    document.getElementById('out-date').textContent = displayDate;
+    document.getElementById('out-creator').textContent = appData.creator || '';
+
+    const tbody = document.getElementById('out-tool-body');
+    tbody.innerHTML = '';
+    const TOTAL_ROWS = 8;
+    const tools = appData.tools || [];
+
+    for (let i = 0; i < TOTAL_ROWS; i++) {
+        const tool = tools[i] || {};
+        const tr = document.createElement('tr');
+        tr.className = 'tool-row';
+
+        const imgHtml = tool.t_image
+            ? `<div class="tool-img-container" data-imgrow="${i}" title="點擊更換圖片"><img src="${tool.t_image}"></div>`
+            : `<div class="tool-img-container tool-img-empty" data-imgrow="${i}" title="點擊上傳圖片">＋</div>`;
+
+        tr.innerHTML = `
+            <td class="font-bold text-lg bg-[#f2f2f2]">
+                <div class="ed-cell" contenteditable="true" spellcheck="false"
+                     data-tool="a4" data-row="${i}" data-key="t_seq">${esc(tool.t_seq || '')}</div>
+            </td>
+            <td class="font-bold text-lg">
+                <div class="ed-cell" contenteditable="true" spellcheck="false"
+                     data-tool="a4" data-row="${i}" data-key="t_type">${esc(tool.t_type || '')}</div>
+            </td>
+            <td class="font-bold text-lg">
+                <div class="ed-cell" contenteditable="true" spellcheck="false"
+                     data-tool="a4" data-row="${i}" data-key="t_no">${esc(tool.t_no || '')}</div>
+            </td>
+            <td class="font-medium text-lg">
+                <div class="ed-cell" contenteditable="true" spellcheck="false"
+                     data-tool="a4" data-row="${i}" data-key="t_h">${esc(tool.t_h || '')}</div>
+            </td>
+            <td class="font-medium text-lg">
+                <div class="ed-cell" contenteditable="true" spellcheck="false"
+                     data-tool="a4" data-row="${i}" data-key="t_len">${esc(tool.t_len || '')}</div>
+            </td>
+            <td class="text-left p-1">
+                <div class="flex justify-between items-center w-full h-full">
+                    <div class="ed-cell font-medium text-sm pl-2 leading-tight" contenteditable="true" spellcheck="false"
+                         data-tool="a4" data-row="${i}" data-key="t_remark" data-multiline="1"
+                         style="flex:1;min-height:1.2em;white-space:pre-line;">${esc(tool.t_remark || '')}</div>
+                    <div class="shrink-0 pr-1">${imgHtml}</div>
+                </div>
+            </td>`;
+        tbody.appendChild(tr);
+    }
+
+    const qrContainer = document.getElementById('out-qrcode');
+    const qrHint = document.getElementById('qr-hint');
+
+    if (appData.qrContent) {
+        qrHint.style.display = 'none';
+        qrContainer.innerHTML = '';
+        qrcodeInstance = new QRCode(qrContainer, {
+            text: appData.qrContent, width: 110, height: 110,
+            colorDark: '#000000', colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.H
+        });
+    } else {
+        qrContainer.innerHTML = '';
+        qrHint.style.display = 'block';
+        qrHint.textContent = '點擊設定 QR Code';
+    }
+}
+
+/* ============================================================
+   A3 預覽更新（第二類）
+   ============================================================ */
+function updateA3Preview() {
+    document.getElementById('out3-headerTitle').textContent = appData.headerTitle || '';
+    document.getElementById('out3-headerSubtitle').textContent = appData.headerSubtitle || '';
+
+    document.getElementById('out3-productName').textContent = appData.productName || '';
+    document.getElementById('out3-productNo').textContent = appData.productNo || '';
+    document.getElementById('out3-customerNo').textContent = appData.customerNo1 || '';
+    document.getElementById('out3-productName2').textContent = appData.productName2 || '';
+    document.getElementById('out3-productNo2').textContent = appData.productNo2 || '';
+    document.getElementById('out3-customerNo2').textContent = appData.customerNo2 || '';
+    document.getElementById('out3-processTime').textContent = appData.processTime2 || '';
+    document.getElementById('out3-dailyQty').textContent = appData.dailyQty2 || '';
+
+    document.getElementById('out3-reminderText').textContent = appData.reminderText || DEFAULT_REMINDER;
+
+    document.getElementById('out3-programSide1').textContent = appData.programSide1 || '#500=1.';
+    document.getElementById('out3-programSide2').textContent = appData.programSide2 || '(#500=1.)(ONLY L SIDE)';
+    document.getElementById('out3-programSide3').textContent = appData.programSide3 || '(#500=2.)(ONLY R SIDE)';
+    document.getElementById('out3-programSide4').textContent = appData.programSide4 || '(#500=3.)(L SIDE + R SIDE)';
+
+    document.getElementById('out3-machineTips').textContent = appData.machineTips || DEFAULT_MACHINE_TIPS;
+
+    const displayDate = appData.date ? appData.date.replace(/-/g, '/') : '';
+    document.getElementById('out3-date').textContent = displayDate;
+    document.getElementById('out3-creator').textContent = appData.creator || '';
+
+    const tbody = document.getElementById('out3-tool-body');
+    tbody.innerHTML = '';
+    const tools = appData.tools2 || [];
+
+    const totalRows = Math.max(10, tools.length);
+    for (let i = 0; i < totalRows; i++) {
+        const tool = tools[i] || {};
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>
+                <div class="cell-main ed-cell" contenteditable="true" spellcheck="false"
+                     data-tool="a3" data-row="${i}" data-key="t_seq">${esc(tool.t_seq || '')}</div>
+            </td>
+            <td>
+                <div class="cell-main ed-cell" contenteditable="true" spellcheck="false"
+                     data-tool="a3" data-row="${i}" data-key="t_type">${esc(tool.t_type || '')}</div>
+                <div class="cell-sub ed-cell" contenteditable="true" spellcheck="false"
+                     data-tool="a3" data-row="${i}" data-key="t_typeDesc">${esc(tool.t_typeDesc || '')}</div>
+            </td>
+            <td>
+                <div class="cell-main ed-cell" contenteditable="true" spellcheck="false"
+                     data-tool="a3" data-row="${i}" data-key="t_no">${esc(tool.t_no || '')}</div>
+            </td>
+            <td>
+                <div class="cell-main ed-cell" contenteditable="true" spellcheck="false"
+                     data-tool="a3" data-row="${i}" data-key="t_h">${esc(tool.t_h || '')}</div>
+            </td>
+            <td>
+                <div class="cell-main ed-cell" contenteditable="true" spellcheck="false"
+                     data-tool="a3" data-row="${i}" data-key="t_len">${esc(tool.t_len || '')}</div>
+            </td>
+            <td style="text-align:left; padding:2px 4px;">
+                <div class="cell-sub ed-cell" contenteditable="true" spellcheck="false"
+                     data-tool="a3" data-row="${i}" data-key="t_remark" data-multiline="1"
+                     style="white-space:pre-line;min-height:1em;">${esc(tool.t_remark || '')}</div>
+            </td>`;
+        tbody.appendChild(tr);
+    }
+
+    const grid = document.getElementById('out3-img-grid');
+    grid.innerHTML = '';
+
+    const gridRows = Math.max(2, Math.ceil(tools.length / 5));
+    const gridTotal = gridRows * 5;
+
+    for (let i = 0; i < gridTotal; i++) {
+        const tool = tools[i] || {};
+        const cell = document.createElement('div');
+        cell.className = 'a3-img-cell';
+
+        const imgHtml = tool.t_image ? `<img src="${tool.t_image}">` : '';
+
+        cell.innerHTML = `
+            <div class="a3-img-label ed-cell" contenteditable="true" spellcheck="false"
+                 data-tool="a3" data-row="${i}" data-key="t_seq">${esc(tool.t_seq || '')}</div>
+            <div class="a3-img-box a3-img-slot" data-imgrow="${i}" title="點擊上傳/更換圖片">${imgHtml}</div>`;
+        grid.appendChild(cell);
+    }
+
+    const qrContainer = document.getElementById('out3-qrcode');
+    qrContainer.innerHTML = '';
+    if (appData.qrContent) {
+        qrcodeInstance3 = new QRCode(qrContainer, {
+            text: appData.qrContent, width: 75, height: 75,
+            colorDark: '#000000', colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.M
+        });
+    } else {
+        qrContainer.innerHTML = '<div style="width:75px;height:75px;display:flex;align-items:center;justify-content:center;font-size:9px;color:#999;border:1px dashed #ccc;">點擊設定</div>';
+    }
+
+    const mQrContainer = document.getElementById('out3-machine-qrcode');
+    mQrContainer.innerHTML = '';
+    const machineQrText = appData.machineQrContent || appData.qrContent || 'MACHINE-DATA';
+    machineQrcodeInstance = new QRCode(mQrContainer, {
+        text: machineQrText, width: 60, height: 60,
+        colorDark: '#000000', colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+    });
+}
+
+/* ============================================================
+   初始化
+   ============================================================ */
+window.addEventListener('beforeunload', () => { saveCurrent(); });
+
+window.onload = () => {
+    loadStore();
+    loadAvatar();
+    renderTableList();
+    initEditablePreview();
+    refreshAvatars();
+
+    /* 頭像上傳 */
+    const apFile = document.getElementById('ap-file');
+    apFile.onchange = async function () {
+        const f = this.files[0];
+        if (!f) return;
+        try {
+            const d = await compressImage(f, 180, 0.85);
+            setAvatar(d);
+        } catch (e) {
+            alert('圖片讀取失敗，請換一張試試。');
+        }
+        this.value = '';
+    };
+
+    /* 說明書：Esc 關閉 */
+    document.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Escape') {
+            const ms = document.getElementById('manual-screen');
+            if (ms && ms.classList.contains('show')) closeManual();
+        }
+    });
+
+    if (store.currentId) {
+        const t = store.tables.find(x => x.id === store.currentId);
+        if (t && t.data) {
+            const type = (t.data.type === 2) ? 2 : 1;
+            appData = makeEmptyAppData(type);
+            Object.assign(appData, JSON.parse(JSON.stringify(t.data)));
+            if (!Array.isArray(appData.tools)) appData.tools = [];
+            if (!Array.isArray(appData.tools2)) appData.tools2 = [];
+
+            document.getElementById('mode-btn-1').classList.toggle('active', type === 1);
+            document.getElementById('mode-btn-2').classList.toggle('active', type === 2);
+            document.getElementById('a4-wrapper').classList.toggle('hidden', type !== 1);
+            document.getElementById('a3-wrapper').classList.toggle('hidden', type !== 2);
+            document.getElementById('print-btn-label').textContent = type === 2
+                ? '列印 / 存為 PDF（A3 橫向單頁）'
+                : '列印 / 存為 PDF（A4 單頁）';
+            document.getElementById('dynamic-page-style').textContent = type === 2
+                ? '@page { size: A3 landscape; margin: 0; }'
+                : '@page { size: A4 portrait; margin: 0; }';
+
+            updateA4Preview();
+            updateA3Preview();
+            restoreChatView();
+            if (window.innerWidth < 768) switchTab('chat');
+            setTimeout(adjustPreviewScale, 80);
+
+            /* 每次開啟頁面先顯示頂覽（單一工作階段只顯示一次） */
+            if (!sessionStorage.getItem('cnc_welcome_shown')) {
+                sessionStorage.setItem('cnc_welcome_shown', '1');
+                setTimeout(showWelcome, 260);
+            }
+            return;
+        }
+    }
+
+    store.currentId = null;
+    appData.date = new Date().toISOString().split('T')[0];
+    updateA4Preview();
+    updateA3Preview();
+    renderInput();
+    if (window.innerWidth < 768) switchTab('chat');
+    setTimeout(adjustPreviewScale, 80);
+
+    /* 首次進入顯示頂覽 */
+    if (!sessionStorage.getItem('cnc_welcome_shown')) {
+        sessionStorage.setItem('cnc_welcome_shown', '1');
+        setTimeout(showWelcome, 260);
+    }
+};
+</script>
+
+<script>
+/* PWA Service Worker 註冊：不介入原本應用程式邏輯 */
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js').catch((錯誤) => {
+            console.warn('PWA 離線服務註冊失敗：', 錯誤);
+        });
+    });
+}
+</script>
+</body>
+</html>
