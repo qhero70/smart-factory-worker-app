@@ -1,0 +1,50 @@
+name: 換刀表精靈 PWA Pages 部署
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: github-pages-tool-change-pwa
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: 讀取 Git 倉庫
+        uses: actions/checkout@v4
+
+      - name: 驗證換刀表精靈 PWA 檔案
+        run: |
+          test -s docs/tool-change-pwa/index.html
+          test -s docs/tool-change-pwa/manifest.webmanifest
+          test -s docs/tool-change-pwa/service-worker.js
+          grep -q '換刀表生成精靈' docs/tool-change-pwa/index.html
+          grep -q 'manifest.webmanifest' docs/tool-change-pwa/index.html
+          grep -q 'service-worker.js' docs/tool-change-pwa/index.html
+
+      - name: 設定 GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: 關閉 Jekyll
+        run: touch docs/.nojekyll
+
+      - name: 上傳 Pages 成品
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+      - name: 部署 GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
