@@ -965,7 +965,46 @@ html, body {
     transition: transform .12s;
     font-family: inherit;
 }
+
 .tm-new:active { transform: scale(.97); }
+
+.tm-cloud-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 9px;
+    margin-top: 9px;
+}
+.tm-cloud-btn {
+    min-height: 46px;
+    border-radius: 13px;
+    border: 1.5px solid var(--line);
+    background: var(--white);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: .82rem;
+    font-weight: 800;
+    cursor: pointer;
+    padding: 10px 8px;
+    transition: transform .12s, background .12s;
+}
+.tm-cloud-btn:active { transform: scale(.97); background: var(--ghost-2); }
+.tm-cloud-btn.save {
+    grid-column: 1 / -1;
+    background: #E8F0FE;
+    color: #1558B0;
+    border-color: #AECBFA;
+}
+.tm-cloud-btn.folder {
+    color: #188038;
+    border-color: #CEEAD6;
+    background: #E6F4EA;
+}
+.tm-cloud-btn.import {
+    color: #8430CE;
+    border-color: #E2C7F4;
+    background: #F3E8FD;
+}
+
 
 @media (min-width: 768px) {
     #table-manager { align-items: center; }
@@ -1826,7 +1865,7 @@ html, body {
 
             <div class="ws-foot">
                 <b>智慧刀具表製作系統</b><br>
-                本機儲存 · 免登入 · 免安裝 · 完全離線可用<br>
+                本機自動暫存 · Google Drive 備份 · 免安裝 · 離線可用<br>
                 建議使用 Chrome / Edge / Safari 最新版本
             </div>
 
@@ -1938,7 +1977,7 @@ html, body {
                 <ul>
                     <li><b>完全不需安裝</b>：只要有瀏覽器就能開（建議 Chrome、Edge、Safari 最新版）。</li>
                     <li><b>完全不需登入</b>：沒有帳號、沒有密碼。</li>
-                    <li><b>完全本機儲存</b>：資料存在您這台裝置的瀏覽器裡（localStorage），不會上傳到任何伺服器。</li>
+                    <li><b>本機自動暫存</b>：平時資料存在這台裝置的瀏覽器（localStorage）；只有您主動按「儲存目前刀具表到 Google Drive」時，才會產生雲端備份檔。</li>
                     <li><b>可離線使用</b>：頁面載入完成後，即使斷網也能繼續操作與列印。</li>
                 </ul>
 
@@ -3511,12 +3550,18 @@ html, body {
         </div>
         <div class="tm-footer" style="border-top:none;padding-top:0;">
             <button class="tm-new" onclick="createNewTable()">＋ 新增刀具表</button>
+            <div class="tm-cloud-grid">
+                <button class="tm-cloud-btn save" onclick="saveCurrentToGoogleDrive()">☁️ 儲存目前刀具表到 Google Drive</button>
+                <button class="tm-cloud-btn import" onclick="chooseGoogleDriveBackup()">📥 匯入雲端備份</button>
+                <button class="tm-cloud-btn folder" onclick="openGoogleDriveFolder()">📂 開啟雲端資料夾</button>
+            </div>
+            <input id="google-drive-import-file" type="file" accept=".json,application/json" hidden onchange="importGoogleDriveBackup(event)">
         </div>
         <div id="tm-list" class="tm-body"></div>
         <div class="tm-footer">
             <div class="tm-note">
-                💾 表格自動暫存於本機瀏覽器，最多 <b>10 張</b><br>
-                清除瀏覽器資料會一併清除暫存
+                💾 本機自動暫存最多 <b>10 張</b>，也可另外備份到 Google Drive<br>
+                雲端備份檔可跨手機 / 平板 / 電腦匯入還原
             </div>
         </div>
     </div>
@@ -3929,6 +3974,154 @@ function changeFormat(type) {
 function doPrint() {
     saveCurrent();
     setTimeout(() => window.print(), 80);
+}
+
+/* ============================================================
+   Google Drive 雲端備份
+   ============================================================ */
+const GOOGLE_DRIVE_FOLDER_URL = 'https://drive.google.com/drive/folders/14SPCeOwlEMsmii1Yu89jeOWSNCvyDJaj';
+const CLOUD_BACKUP_VERSION = '1.0';
+
+function getSafeBackupName(name) {
+    const cleaned = String(name || '未命名刀具表')
+        .replace(/[\\/:*?"<>|]/g, '_')
+        .replace(/\s+/g, ' ')
+        .trim();
+    return cleaned || '未命名刀具表';
+}
+
+function getBackupTimestamp(date) {
+    const d = date || new Date();
+    const pad = n => String(n).padStart(2, '0');
+    return d.getFullYear()
+        + pad(d.getMonth() + 1)
+        + pad(d.getDate())
+        + '_'
+        + pad(d.getHours())
+        + pad(d.getMinutes())
+        + pad(d.getSeconds());
+}
+
+function buildCloudBackup(table) {
+    return {
+        backupType: '刀具表精靈',
+        backupVersion: CLOUD_BACKUP_VERSION,
+        exportedAt: new Date().toISOString(),
+        source: location.href,
+        table: {
+            id: table.id,
+            name: table.name || '未命名刀具表',
+            createdAt: table.createdAt || Date.now(),
+            updatedAt: table.updatedAt || Date.now(),
+            data: JSON.parse(JSON.stringify(table.data || appData))
+        }
+    };
+}
+
+async function saveCurrentToGoogleDrive() {
+    saveCurrent(true);
+
+    if (!hasMeaningfulData()) {
+        alert('目前刀具表還沒有資料，請先建立內容再進行雲端備份。');
+        return;
+    }
+
+    const table = store.tables.find(x => x.id === store.currentId);
+    if (!table) {
+        alert('找不到目前刀具表，請先完成至少一個欄位。');
+        return;
+    }
+
+    const backup = buildCloudBackup(table);
+    const fileName = getSafeBackupName(table.name) + '_' + getBackupTimestamp() + '.json';
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json;charset=utf-8' });
+    const file = new File([blob], fileName, { type: 'application/json' });
+
+    try {
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+                title: '刀具表 Google Drive 備份',
+                text: '請選擇 Google Drive，並儲存到指定的刀具表雲端資料夾。',
+                files: [file]
+            });
+            return;
+        }
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1500);
+
+        alert('已產生刀具表雲端備份檔。\n請將下載的 JSON 檔上傳到 Google Drive 資料夾。');
+        openGoogleDriveFolder();
+    } catch (error) {
+        if (error && error.name === 'AbortError') return;
+        console.error('Google Drive 備份失敗', error);
+        alert('雲端備份沒有完成，請再試一次。');
+    }
+}
+
+function openGoogleDriveFolder() {
+    window.open(GOOGLE_DRIVE_FOLDER_URL, '_blank', 'noopener,noreferrer');
+}
+
+function chooseGoogleDriveBackup() {
+    const input = document.getElementById('google-drive-import-file');
+    if (input) {
+        input.value = '';
+        input.click();
+    }
+}
+
+async function importGoogleDriveBackup(event) {
+    const input = event && event.target;
+    const file = input && input.files && input.files[0];
+    if (!file) return;
+
+    try {
+        const text = await file.text();
+        const parsed = JSON.parse(text);
+        const sourceTable = parsed && parsed.table ? parsed.table : parsed;
+
+        if (!sourceTable || !sourceTable.data || ![1, 2].includes(Number(sourceTable.data.type || 1))) {
+            throw new Error('備份格式不正確');
+        }
+
+        saveCurrent();
+
+        if (store.tables.length >= MAX_TABLES) {
+            alert('本機已達 10 張表格上限。\n請先刪除一張不需要的刀具表，再匯入雲端備份。');
+            return;
+        }
+
+        const newId = 'T' + Date.now() + Math.random().toString(36).slice(2, 6);
+        const imported = {
+            id: newId,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+            name: sourceTable.name || 'Google Drive 匯入刀具表',
+            data: JSON.parse(JSON.stringify(sourceTable.data))
+        };
+
+        if (!Array.isArray(imported.data.tools)) imported.data.tools = [];
+        if (!Array.isArray(imported.data.tools2)) imported.data.tools2 = [];
+        imported.data.type = Number(imported.data.type) === 2 ? 2 : 1;
+
+        store.tables.push(imported);
+        persist();
+        renderTableList();
+        loadTable(newId);
+        alert('✅ Google Drive 刀具表備份已匯入完成。');
+    } catch (error) {
+        console.error('匯入 Google Drive 備份失敗', error);
+        alert('無法匯入這個檔案。\n請確認它是由「刀具表精靈」產生的 JSON 備份檔。');
+    } finally {
+        if (input) input.value = '';
+    }
 }
 
 /* ============================================================
