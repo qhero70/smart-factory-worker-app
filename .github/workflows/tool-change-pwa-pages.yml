@@ -1,9 +1,6 @@
-name: 換刀表精靈 PWA Pages 部署
+name: 換刀表精靈 PWA Pages 緊急部署
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 concurrency:
