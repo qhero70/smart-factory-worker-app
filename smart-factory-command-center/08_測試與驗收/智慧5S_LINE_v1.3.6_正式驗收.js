@@ -2,7 +2,7 @@
 'use strict';
 
 /**
- * 化新精密｜製一｜智慧5S LINE v1.3.6／Rich Menu v1.8.6 正式驗收
+ * 化新精密｜製一｜智慧5S LINE v1.3.6／Rich Menu v1.8.8 正式驗收
  *
  * 僅在本機記憶體檢查程式、入口版本與圖片，不連線、不推播、不修改正式資料。
  */
@@ -98,21 +98,35 @@ function 取得PNG資訊(檔案) {
   斷言.ok(!/[?&]v=(?:102|103|105)(?:&|$)/.test(網址));
 });
 
-驗收('Rich Menu', '主管與員工選單各有六區且各有一個智慧5S直達入口', () => {
+驗收('Rich Menu', '主管六格改為製造生產／製造工具，一般員工保留智慧5S直達入口', () => {
   const 上下文 = 載入(快捷選單程式, {
     PropertiesService: { getScriptProperties: () => ({ getProperty: () => '' }) },
-    ScriptApp: { getService: () => ({ getUrl: () => '' }) },
     LINE智慧5S入口39_取得網址_: () => 'https://qhero70.github.io/smart-factory-worker-app/5s/?來源=LINEBOT_RICHMENU&v=1360'
   });
-  const 清單 = [上下文.RichMenu38_取得主管設定_(), 上下文.RichMenu38_取得員工設定_()];
-  清單.forEach(選單 => {
+
+  const 主管 = 上下文.RichMenu38_取得主管設定_();
+  const 員工 = 上下文.RichMenu38_取得員工設定_();
+
+  [主管, 員工].forEach(選單 => {
     斷言.deepEqual([選單.size.width, 選單.size.height], [1200, 810]);
     斷言.equal(選單.areas.length, 6);
-    const 入口 = 選單.areas.filter(區 => 區.action && 區.action.label === '智慧5S');
-    斷言.equal(入口.length, 1);
-    斷言.equal(入口[0].action.type, 'uri');
-    斷言.match(入口[0].action.uri, /[?&]v=1360(?:&|$)/);
   });
+
+  const 製造生產 = 主管.areas[3].action;
+  斷言.equal(製造生產.label, '製造生產');
+  斷言.equal(製造生產.type, 'uri');
+  斷言.match(製造生產.uri, /\/exec(?:\?|$)/);
+  斷言.ok(!/\/dev(?:\?|$)/.test(製造生產.uri));
+
+  const 製造工具 = 主管.areas[5].action;
+  斷言.equal(製造工具.label, '製造工具');
+  斷言.equal(製造工具.type, 'message');
+  斷言.equal(製造工具.text, '製造工具');
+
+  const 員工5S = 員工.areas.filter(區 => 區.action && 區.action.label === '智慧5S');
+  斷言.equal(員工5S.length, 1);
+  斷言.equal(員工5S[0].action.type, 'uri');
+  斷言.match(員工5S[0].action.uri, /[?&]v=1360(?:&|$)/);
 });
 
 驗收('群組訊息', '排名與橋接會把舊 v=103／105 正規化為 v=1360', () => {
@@ -141,17 +155,19 @@ function 取得PNG資訊(檔案) {
 });
 
 驗收('圖片', '主管與員工正式圖皆為 1200×810 PNG 且小於 1MB', () => {
-  ['richmenu-supervisor-v186.png', 'richmenu-worker-v186.png'].forEach(檔名 => {
+  ['richmenu-supervisor-v188.png', 'richmenu-worker-v186.png'].forEach(檔名 => {
     const 資訊 = 取得PNG資訊(路徑工具.join(圖片目錄, 檔名));
     斷言.deepEqual([資訊.寬, 資訊.高], [1200, 810], 檔名);
     斷言.ok(資訊.位元組 < 1024 * 1024, `${檔名} 超過 1MB`);
   });
 });
 
-驗收('設定', 'Rich Menu 設定檔為 v1.8.6且兩種角色都有智慧5S', () => {
+驗收('設定', 'Rich Menu 設定檔為 v1.8.8，主管使用製造工具、一般員工保留智慧5S', () => {
   const 設定 = JSON.parse(讀取(設定檔));
-  斷言.match(設定.版本, /^v1\.8\.6/);
-  斷言.equal(設定.主管入口六宮格.filter(區 => 區.功能 === '智慧5S').length, 1);
+  斷言.match(設定.版本, /^v1\.8\.8/);
+  斷言.equal(設定.主管入口六宮格.filter(區 => 區.功能 === '製造生產').length, 1);
+  斷言.equal(設定.主管入口六宮格.filter(區 => 區.功能 === '製造工具').length, 1);
+  斷言.equal(設定.主管入口六宮格.filter(區 => 區.功能 === '智慧5S').length, 0);
   斷言.equal(設定.一般員工入口六宮格.filter(區 => 區.功能 === '智慧5S').length, 1);
 });
 
