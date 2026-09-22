@@ -295,107 +295,18 @@ function RichMenu38_組合查詢網址_(baseUrl, key, value) {
 }
 
 function 驗收38_LINE製造工具中心_v188() {
-  const errors = [];
-  const boss = RichMenu38_取得主管設定_();
-  const worker = RichMenu38_取得員工設定_();
-  const bossCheck = RichMenu38_檢查設定_(boss);
-  const workerCheck = RichMenu38_檢查設定_(worker);
-  const production = boss.areas[3] && boss.areas[3].action ? boss.areas[3].action : {};
-  const tools = boss.areas[5] && boss.areas[5].action ? boss.areas[5].action : {};
-  const productionUrl = String(production.uri || '');
-
-  if (!bossCheck.成功) errors.push('主管選單規格失敗：' + bossCheck.訊息);
-  if (!workerCheck.成功) errors.push('員工選單規格失敗：' + workerCheck.訊息);
-  if (production.label !== '製造生產' || production.type !== 'uri') errors.push('主管左下不是製造生產正式 URI');
-  if (/\/dev(?:\?|$)/i.test(productionUrl)) errors.push('製造生產仍使用 /dev');
-  if (productionUrl.indexOf('/exec') < 0) errors.push('製造生產不是正式 /exec');
-  if (tools.type !== 'message' || tools.text !== '製造工具') errors.push('主管右下未串接製造工具');
-  if (typeof LINE製造工具75_嘗試處理Webhook_ !== 'function') errors.push('找不到 75_LINE 製造工具模組');
-
-  const result = {
-    success: errors.length === 0,
-    version: RichMenu38_版本,
-    supervisor: {
-      layout: ['主管戰情', '今日戰情', '指令中心', '製造生產', '我的狀態', '製造工具'],
-      productionAction: production,
-      toolAction: tools
-    },
-    worker: { check: workerCheck },
-    officialWebApp: RichMenu38_取得WebAppURL_(),
-    productionUrl: productionUrl,
-    tool75: typeof LINE製造工具75_嘗試處理Webhook_ === 'function',
-    token: !!RichMenu38_取得Token_(),
-    errors: errors
-  };
-
-  console.log(JSON.stringify(result, null, 2));
-  return result;
+  console.warn('相容入口：v1.8.8 驗收已轉接至 v1.9.0 正式驗收。');
+  return 驗收38_LINE主管新圖_v190();
 }
 
 function 驗收38_LINE主管新圖_v189() {
-  const errors = [];
-  const boss = RichMenu38_取得主管設定_();
-  const worker = RichMenu38_取得員工設定_();
-  const production = boss.areas[3] && boss.areas[3].action ? boss.areas[3].action : {};
-  const tool = boss.areas[5] && boss.areas[5].action ? boss.areas[5].action : {};
-  const imageUrl = RichMenu38_主管圖片網址_();
-
-  if (boss.areas.length !== 6) errors.push('主管六格數量不正確');
-  if (worker.areas.length !== 6) errors.push('員工六格數量不正確');
-  if (production.type !== 'uri' || production.label !== '製造生產') errors.push('製造生產動作不正確');
-  if (/\/dev(?:\?|$)/i.test(String(production.uri || ''))) errors.push('製造生產仍使用 /dev');
-  if (String(production.uri || '').indexOf('/exec') < 0) errors.push('製造生產不是正式 /exec');
-  if (tool.type !== 'message' || tool.text !== '製造工具') errors.push('製造工具沒有串接 75_LINE');
-  if (!/richmenu-supervisor-v189\.png(?:\?|$)/i.test(imageUrl)) errors.push('主管圖片不是 v189');
-
-  const result = {
-    success: errors.length === 0,
-    version: RichMenu38_版本,
-    imageUrl: imageUrl,
-    supervisor: {
-      layout: ['主管戰情', '今日戰情', '指令中心', '製造生產', '我的狀態', '製造工具'],
-      productionAction: production,
-      toolAction: tool
-    },
-    worker: { check: RichMenu38_檢查設定_(worker) },
-    tool75: typeof LINE製造工具75_嘗試處理Webhook_ === 'function',
-    token: !!RichMenu38_取得Token_(),
-    errors: errors
-  };
-
-  console.log(JSON.stringify(result, null, 2));
-  return result;
+  console.warn('相容入口：v1.8.9 驗收已轉接至 v1.9.0 正式驗收。');
+  return 驗收38_LINE主管新圖_v190();
 }
 
 function 上線38_LINE主管新圖_v189並同步() {
-  初始化38_LINE指令中心RichMenu快捷按鈕優化();
-  const spec = 測試38_LINE快捷RichMenu_本機規格();
-  if (!spec.成功) throw new Error('Rich Menu 規格未通過：' + spec.訊息);
-
-  const before = 驗收38_LINE主管新圖_v189();
-  if (!before.success) throw new Error('v189 上線前驗收未通過：' + JSON.stringify(before));
-
-  const boss = 建立38_LINE主管快捷RichMenu();
-  const sync = RichMenu38_批次同步已綁定使用者_();
-
-  const props = PropertiesService.getScriptProperties();
-  const managerId = String(props.getProperty('LINE_RICH_MENU_主管入口_ID') || '').trim();
-  if (!managerId || managerId !== String(boss.richMenuId || '').trim()) {
-    throw new Error('主管 Rich Menu ID 更新後回讀不一致');
-  }
-
-  const result = {
-    success: true,
-    version: RichMenu38_版本,
-    supervisorRichMenuId: managerId,
-    imageUrl: RichMenu38_主管圖片網址_(),
-    sync: sync,
-    flexToolReady: typeof LINE製造工具75_嘗試處理Webhook_ === 'function'
-  };
-
-  RichMenu38_寫入紀錄_('主管入口', managerId, 'v1.8.9 新圖建立並同步角色', '完成', RichMenu38_主管圖片網址_(), '製造工具維持串接75_LINE Flex');
-  console.log(JSON.stringify(result, null, 2));
-  return result;
+  console.warn('相容入口：v1.8.9 上線函數已轉接至 v1.9.0 正式上線。');
+  return 上線38_LINE主管新圖_v190並同步();
 }
 
 function 驗收38_LINE主管新圖_v190() {
