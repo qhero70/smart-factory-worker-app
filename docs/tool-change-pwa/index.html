@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#1A73E8">
 <!-- PWA：僅新增安裝與離線能力，不更動原 UI / UX 與功能 -->
 <link rel="manifest" href="./manifest.webmanifest">
@@ -1952,7 +1952,7 @@ html, body {
                     </tr>
                     <tr>
                         <td><b>刀具圖片</b></td>
-                        <td>顯示於「備註」欄右側小圖</td>
+                        <td>顯示於「刀具壽命」欄右側小圖</td>
                         <td>獨立 5 欄圖片牆，可放大量圖</td>
                     </tr>
                     <tr>
@@ -2190,13 +2190,13 @@ html, body {
                     </tr>
                     <tr>
                         <td>7</td>
-                        <td><b>品號</b></td>
+                        <td><b>客戶品號</b></td>
                         <td>零件料號。例：<code>Z907100000</code></td>
                         <td>✔</td>
                     </tr>
                     <tr>
                         <td>8</td>
-                        <td><b>客戶編號</b></td>
+                        <td><b>產品編號</b></td>
                         <td>客戶端的圖號或編號。例：<code>1A8310-14250</code></td>
                         <td>選填</td>
                     </tr>
@@ -2220,7 +2220,7 @@ html, body {
                     </tr>
                 </table>
 
-                <h4>4-2 刀具資料階段（每把刀 7 題）</h4>
+                <h4>4-2 刀具資料階段（每把刀含 G補正 X/Z 與刀具壽命）</h4>
                 <table class="ms-table">
                     <tr>
                         <th>順序</th>
@@ -2260,8 +2260,20 @@ html, body {
                     </tr>
                     <tr>
                         <td>6</td>
-                        <td><b>備註</b></td>
-                        <td>可多行輸入，支援換行。例：<code>#S21=Use times</code></td>
+                        <td><b>G補正 X軸</b></td>
+                        <td>每一個 N工序都可獨立填寫 X 軸補正值。例：<code>X-0.02</code></td>
+                        <td>選填</td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td><b>G補正 Z軸</b></td>
+                        <td>每一個 N工序都可獨立填寫 Z 軸補正值。例：<code>Z+0.03</code></td>
+                        <td>選填</td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td><b>刀具壽命</b></td>
+                        <td>填寫格式：<code>#xxx=數量</code>，例如 <code>#500=30</code></td>
                         <td>選填</td>
                     </tr>
                     <tr>
@@ -2318,7 +2330,7 @@ html, body {
                     </tr>
                     <tr>
                         <td><b>左下資訊區</b></td>
-                        <td>品名、品號、客戶編號、加工時間、每日數量（灰底標籤 + 白底內容）。</td>
+                        <td>品名、客戶品號、產品編號、加工時間、每日數量（灰底標籤 + 白底內容）。</td>
                     </tr>
                     <tr>
                         <td><b>右下 QR 區</b></td>
@@ -2375,13 +2387,13 @@ html, body {
                     </tr>
                     <tr>
                         <td>6</td>
-                        <td><b>品號（第一組）</b></td>
+                        <td><b>客戶品號（第一組）</b></td>
                         <td>例：<code>Z907100000</code></td>
                         <td>✔</td>
                     </tr>
                     <tr>
                         <td>7</td>
-                        <td><b>客戶編號（第一組）</b></td>
+                        <td><b>產品編號（第一組）</b></td>
                         <td>例：<code>1A8310-14250</code></td>
                         <td>選填</td>
                     </tr>
@@ -2393,13 +2405,13 @@ html, body {
                     </tr>
                     <tr>
                         <td>9</td>
-                        <td><b>品號（第二組）</b></td>
+                        <td><b>客戶品號（第二組）</b></td>
                         <td>例：<code>Z907000000</code></td>
                         <td>選填</td>
                     </tr>
                     <tr>
                         <td>10</td>
-                        <td><b>客戶編號（第二組）</b></td>
+                        <td><b>產品編號（第二組）</b></td>
                         <td>例：<code>1A8310-14240</code></td>
                         <td>選填</td>
                     </tr>
@@ -2537,7 +2549,7 @@ html, body {
                     <tr>
                         <td><b>左下資訊區</b></td>
                         <td>左下（寬 30%）</td>
-                        <td>品名×2 / 品號×2 / 客戶編號×2 / 加工時間 / 每日數量 + 日報表 QR Code</td>
+                        <td>品名×2 / 客戶品號×2 / 產品編號×2 / 加工時間 / 每日數量 + 日報表 QR Code</td>
                     </tr>
                     <tr>
                         <td><b>貼心提醒區</b></td>
@@ -2599,14 +2611,14 @@ html, body {
                     <tr>
                         <td><b>第一類 A4</b></td>
                         <td>
-                            主題、副標題、夾頭壓力、品名、品號、客戶編號、加工時間、每日數量、製表日期、製表者、
+                            主題、副標題、夾頭壓力、品名、客戶品號、產品編號、加工時間、每日數量、製表日期、製表者、
                             刀具表格 8 列 × 6 欄（刀序、刀具形式、刀號、H值、刀長、備註）、刀具圖片、QR Code
                         </td>
                     </tr>
                     <tr>
                         <td><b>第二類 A3</b></td>
                         <td>
-                            主標題、副標題、品名×2、品號×2、客戶編號×2、加工時間、每日數量、
+                            主標題、副標題、品名×2、客戶品號×2、產品編號×2、加工時間、每日數量、
                             貼心提醒全文、#500 四行、機台操作小技巧全文、製表日期、製表者、
                             刀具表格 × 6 欄、圖片牆刀序標籤、刀具圖片、兩組 QR Code
                         </td>
@@ -2775,7 +2787,7 @@ html, body {
                     </tr>
                     <tr>
                         <td><b>表格名稱</b></td>
-                        <td>自動取自主題（或主標題）+ 品號。若尚未填寫則顯示「未命名刀具表」。</td>
+                        <td>自動取自主題（或主標題）+ 客戶品號。若尚未填寫則顯示「未命名刀具表」。</td>
                     </tr>
                     <tr>
                         <td><b>資訊列</b></td>
@@ -3190,7 +3202,7 @@ html, body {
                     <li><b>圖片先拍好</b>：把所有刀具照片先拍好存在相簿，
                         填寫時連續上傳，不用中斷。</li>
                     <li><b>用「我的表格」做範本</b>：建立一張常用刀具表後，
-                        載入它、修改品名品號，就能快速產生新的一張。</li>
+                        載入它、修改品名客戶品號，就能快速產生新的一張。</li>
                     <li><b>電腦版左右分割最方便</b>：左邊回答、右邊即時看結果，不用切來切去。</li>
                     <li><b>完成立刻存 PDF</b>：這是保護心血最有效的方法。</li>
                     <li><b>善用預覽區直接編輯</b>：填錯不用重跑流程，直接點該欄位改就好。</li>
@@ -3203,8 +3215,8 @@ html, body {
 製表者：王小明
 夾頭壓力：15KG
 品名：SLIDER
-品號：Z907100000
-客戶編號：1A8310-14250
+客戶品號：Z907100000
+產品編號：1A8310-14250
 加工時間：3'00"
 每日數量：120 PCS
 
@@ -3221,11 +3233,11 @@ html, body {
 副標題：加工程式O0001盘絲和刀具O0009
 製表者：A1234
 品名：BOX (L)
-品號：Z907100000
-客戶編號：1A8310-14250
+客戶品號：Z907100000
+產品編號：1A8310-14250
 品名2：BOX (R)
-品號2：Z907000000
-客戶編號2：1A8310-14240
+客戶品號2：Z907000000
+產品編號2：1A8310-14240
 
 刀具 N10：
   刀序：N10
@@ -3332,12 +3344,14 @@ html, body {
                 <table class="excel-table table-fixed">
                     <thead>
                         <tr>
-                            <th class="w-[8%]">刀序</th>
-                            <th class="w-[18%]">刀具形式</th>
-                            <th class="w-[12%]">刀號</th>
-                            <th class="w-[10%]">H值</th>
-                            <th class="w-[12%]">刀長</th>
-                            <th class="w-[40%]">備註 / 導入圖示</th>
+                            <th style="width:7%">N工序</th>
+                            <th style="width:16%">刀具形式</th>
+                            <th style="width:9%">刀號</th>
+                            <th style="width:7%">H值</th>
+                            <th style="width:9%">刀長</th>
+                            <th style="width:10%">G補正<br>X軸</th>
+                            <th style="width:10%">G補正<br>Z軸</th>
+                            <th style="width:32%">刀具壽命 / 導入圖示</th>
                         </tr>
                     </thead>
                     <tbody id="out-tool-body"></tbody>
@@ -3356,11 +3370,11 @@ html, body {
                                 <td class="w-[65%] pl-4 font-bold text-lg" style="border-top:none;"><span id="out-part-name"></span></td>
                             </tr>
                             <tr>
-                                <td class="font-bold bg-[#f2f2f2] text-center text-lg border-l-0">品號</td>
+                                <td class="font-bold bg-[#f2f2f2] text-center text-lg border-l-0">客戶品號</td>
                                 <td class="pl-4 font-bold text-lg"><span id="out-part-no"></span></td>
                             </tr>
                             <tr>
-                                <td class="font-bold bg-[#f2f2f2] text-center text-lg border-l-0">客戶編號</td>
+                                <td class="font-bold bg-[#f2f2f2] text-center text-lg border-l-0">產品編號</td>
                                 <td class="pl-4 font-bold text-lg"><span id="out-customer-no"></span></td>
                             </tr>
                             <tr>
@@ -3405,21 +3419,25 @@ html, body {
                     <div class="w-[56%] flex flex-col" style="border-left:3px solid #000; border-bottom:3px solid #000;">
                         <table class="a3-table" style="height:100%;">
                             <colgroup>
-                                <col style="width:9%">
-                                <col style="width:20%">
-                                <col style="width:9%">
+                                <col style="width:7%">
+                                <col style="width:17%">
                                 <col style="width:8%">
-                                <col style="width:12%">
-                                <col style="width:42%">
+                                <col style="width:7%">
+                                <col style="width:10%">
+                                <col style="width:10%">
+                                <col style="width:10%">
+                                <col style="width:31%">
                             </colgroup>
                             <thead>
                                 <tr>
-                                    <th>刀 序</th>
+                                    <th>N工序</th>
                                     <th>刀具形式</th>
-                                    <th>刀 號</th>
+                                    <th>刀號</th>
                                     <th>H值</th>
-                                    <th>刀 長</th>
-                                    <th>備 註</th>
+                                    <th>刀長</th>
+                                    <th>G補正<br>X軸</th>
+                                    <th>G補正<br>Z軸</th>
+                                    <th>刀具壽命</th>
                                 </tr>
                             </thead>
                             <tbody id="out3-tool-body"></tbody>
@@ -3443,10 +3461,10 @@ html, body {
                                 <tbody>
                                     <tr><td class="lbl">品 名</td><td class="val" id="out3-productName"></td></tr>
                                     <tr><td class="lbl">品 號</td><td class="val" id="out3-productNo"></td></tr>
-                                    <tr><td class="lbl">客戶編號</td><td class="val" id="out3-customerNo"></td></tr>
+                                    <tr><td class="lbl">產品編號</td><td class="val" id="out3-customerNo"></td></tr>
                                     <tr><td class="lbl">品 名</td><td class="val" id="out3-productName2"></td></tr>
                                     <tr><td class="lbl">品 號</td><td class="val" id="out3-productNo2"></td></tr>
-                                    <tr><td class="lbl">客戶編號</td><td class="val" id="out3-customerNo2"></td></tr>
+                                    <tr><td class="lbl">產品編號</td><td class="val" id="out3-customerNo2"></td></tr>
                                     <tr><td class="lbl">加工時間</td><td class="val" id="out3-processTime"></td></tr>
                                     <tr><td class="lbl">每日數量</td><td class="val" id="out3-dailyQty"></td></tr>
                                 </tbody>
@@ -3663,20 +3681,22 @@ const flowType1 = [
     { id: 'creator', type: 'text', q: '請輸入【製表者】', placeholder: '姓名 ' },
     { id: 'pressure', type: 'text', q: '請輸入【夾頭壓力設定】', placeholder: '15KG' },
     { id: 'partName', type: 'text', q: '接著是零件資訊。\n請輸入【品名】', placeholder: '零件名稱' },
-    { id: 'partNo', type: 'text', q: '請輸入【品號】', placeholder: '零件編號' },
-    { id: 'customerNo', type: 'text', q: '請輸入【客戶編號】', placeholder: '客戶編號', optional: true },
+    { id: 'partNo', type: 'text', q: '請輸入【客戶品號】', placeholder: '零件編號' },
+    { id: 'customerNo', type: 'text', q: '請輸入【產品編號】', placeholder: '產品編號', optional: true },
     { id: 'processTime', type: 'text', q: '請輸入【加工時間】', placeholder: "3'00\"", optional: true },
     { id: 'dailyQty', type: 'text', q: '請輸入【每日數量】', placeholder: '120 PCS', optional: true },
     { id: 'start_tools', type: 'action', q: '✅ 基本資料設定完成！\n接下來我們逐一建立【刀具資料】。', btnText: '新增第一把刀具' }
 ];
 
 const toolFlowType1 = [
-    { id: 't_seq', type: 'text', q: '請輸入【刀序】(例: N10)', placeholder: 'N1' },
+    { id: 't_seq', type: 'text', q: '請輸入【刀序 / N工序】(例: N10)', placeholder: 'N10' },
     { id: 't_type', type: 'text', q: '請輸入【刀具形式】', placeholder: '外徑粗車' },
     { id: 't_no', type: 'text', q: '請輸入【刀號】(例: T01)', placeholder: 'T01' },
     { id: 't_h', type: 'text', q: '請輸入【H值】', placeholder: '01', optional: true },
     { id: 't_len', type: 'text', q: '請輸入【刀長】', placeholder: '長度數值', optional: true },
-    { id: 't_remark', type: 'text', q: '請輸入【刀具壽命#】', placeholder: '備註事項...', optional: true },
+    { id: 't_gx', type: 'text', q: '請輸入此 N工序的【G補正 X軸】', placeholder: '例：X-0.02', optional: true },
+    { id: 't_gz', type: 'text', q: '請輸入此 N工序的【G補正 Z軸】', placeholder: '例：Z+0.03', optional: true },
+    { id: 't_remark', type: 'text', q: '請輸入【刀具壽命】\n格式：#xxx=數量', placeholder: '#500=30', optional: true },
     { id: 't_image', type: 'file', q: '請選擇【導入圖示】\n(選取圖片，無圖請點略過)' }
 ];
 
@@ -3686,11 +3706,11 @@ const flowType2 = [
     { id: 'date', type: 'date', q: '請確認【製表日期】' },
     { id: 'creator', type: 'text', q: '請輸入【製表者】', placeholder: '姓名 ' },
     { id: 'productName', type: 'text', q: '請輸入【品名】(左側第一組)', placeholder: 'BOX (L)' },
-    { id: 'productNo', type: 'text', q: '請輸入【品號】', placeholder: 'Z907100000' },
-    { id: 'customerNo1', type: 'text', q: '請輸入【客戶編號】', placeholder: '1A8310-14250', optional: true },
+    { id: 'productNo', type: 'text', q: '請輸入【客戶品號】', placeholder: 'Z907100000' },
+    { id: 'customerNo1', type: 'text', q: '請輸入【產品編號】', placeholder: '1A8310-14250', optional: true },
     { id: 'productName2', type: 'text', q: '請輸入【品名2】(第二組)', placeholder: 'BOX (R)', optional: true },
-    { id: 'productNo2', type: 'text', q: '請輸入【品號2】', placeholder: 'Z907000000', optional: true },
-    { id: 'customerNo2', type: 'text', q: '請輸入【客戶編號2】', placeholder: '1A8310-14240', optional: true },
+    { id: 'productNo2', type: 'text', q: '請輸入【客戶品號2】', placeholder: 'Z907000000', optional: true },
+    { id: 'customerNo2', type: 'text', q: '請輸入【產品編號2】', placeholder: '1A8310-14240', optional: true },
     { id: 'processTime2', type: 'text', q: '請輸入【加工時間】', placeholder: "3'00\"", optional: true },
     { id: 'dailyQty2', type: 'text', q: '請輸入【每日數量】', placeholder: '120 PCS', optional: true },
     { id: 'reminderText', type: 'textarea', q: '請輸入【刀具相關貼心提醒】\n(可留空使用預設內容)', placeholder: '機台要是有送給製二組...', optional: true, defaultValue: DEFAULT_REMINDER },
@@ -3703,13 +3723,15 @@ const flowType2 = [
 ];
 
 const toolFlowType2 = [
-    { id: 't_seq', type: 'text', q: '請輸入【刀序】(例: N10)', placeholder: 'N10' },
+    { id: 't_seq', type: 'text', q: '請輸入【刀序 / N工序】(例: N10)', placeholder: 'N10' },
     { id: 't_type', type: 'text', q: '請輸入【刀具形式】(主標題)', placeholder: 'D63-MILL' },
-    { id: 't_typeDesc', type: 'text', q: '請輸入【刀具形式描述】(副標題)', placeholder: '铣大面.平底度5條', optional: true },
+    { id: 't_typeDesc', type: 'text', q: '請輸入【刀具形式描述】(副標題)', placeholder: '銑大面.平底度5條', optional: true },
     { id: 't_no', type: 'text', q: '請輸入【刀號】(例: T01)', placeholder: 'T01' },
     { id: 't_h', type: 'text', q: '請輸入【H值】', placeholder: '01', optional: true },
     { id: 't_len', type: 'text', q: '請輸入【刀長】', placeholder: '99.95', optional: true },
-    { id: 't_remark', type: 'textarea', q: '請輸入【備註】(可多行)', placeholder: '#S21=Use times\nTOOL LIFE=200', optional: true },
+    { id: 't_gx', type: 'text', q: '請輸入此 N工序的【G補正 X軸】', placeholder: '例：X-0.02', optional: true },
+    { id: 't_gz', type: 'text', q: '請輸入此 N工序的【G補正 Z軸】', placeholder: '例：Z+0.03', optional: true },
+    { id: 't_remark', type: 'text', q: '請輸入【刀具壽命】\n格式：#xxx=數量', placeholder: '#500=30', optional: true },
     { id: 't_image', type: 'file', q: '請選擇【導入圖示】\n(選取圖片，無圖請點略過)' }
 ];
 
@@ -4933,10 +4955,18 @@ function updateA4Preview() {
                 <div class="ed-cell" contenteditable="true" spellcheck="false"
                      data-tool="a4" data-row="${i}" data-key="t_len">${esc(tool.t_len || '')}</div>
             </td>
+            <td class="font-medium text-base">
+                <div class="ed-cell" contenteditable="true" spellcheck="false"
+                     data-tool="a4" data-row="${i}" data-key="t_gx">${esc(tool.t_gx || '')}</div>
+            </td>
+            <td class="font-medium text-base">
+                <div class="ed-cell" contenteditable="true" spellcheck="false"
+                     data-tool="a4" data-row="${i}" data-key="t_gz">${esc(tool.t_gz || '')}</div>
+            </td>
             <td class="text-left p-1">
                 <div class="flex justify-between items-center w-full h-full">
                     <div class="ed-cell font-medium text-sm pl-2 leading-tight" contenteditable="true" spellcheck="false"
-                         data-tool="a4" data-row="${i}" data-key="t_remark" data-multiline="1"
+                         data-tool="a4" data-row="${i}" data-key="t_remark"
                          style="flex:1;min-height:1.2em;white-space:pre-line;">${esc(tool.t_remark || '')}</div>
                     <div class="shrink-0 pr-1">${imgHtml}</div>
                 </div>
@@ -5022,9 +5052,17 @@ function updateA3Preview() {
                 <div class="cell-main ed-cell" contenteditable="true" spellcheck="false"
                      data-tool="a3" data-row="${i}" data-key="t_len">${esc(tool.t_len || '')}</div>
             </td>
+            <td>
+                <div class="cell-main ed-cell" contenteditable="true" spellcheck="false"
+                     data-tool="a3" data-row="${i}" data-key="t_gx">${esc(tool.t_gx || '')}</div>
+            </td>
+            <td>
+                <div class="cell-main ed-cell" contenteditable="true" spellcheck="false"
+                     data-tool="a3" data-row="${i}" data-key="t_gz">${esc(tool.t_gz || '')}</div>
+            </td>
             <td style="text-align:left; padding:2px 4px;">
                 <div class="cell-sub ed-cell" contenteditable="true" spellcheck="false"
-                     data-tool="a3" data-row="${i}" data-key="t_remark" data-multiline="1"
+                     data-tool="a3" data-row="${i}" data-key="t_remark"
                      style="white-space:pre-line;min-height:1em;">${esc(tool.t_remark || '')}</div>
             </td>`;
         tbody.appendChild(tr);
