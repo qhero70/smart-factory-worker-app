@@ -1,0 +1,46 @@
+name: 產生主管RichMenu v1.9.0
+
+on:
+  push:
+    paths:
+      - 'scripts/產生LINE主管RichMenu_v190.py'
+      - 'docs/line/richmenu-supervisor-v189.png'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 取回專案
+        uses: actions/checkout@v4
+
+      - name: 安裝中文字型與Pillow
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-noto-cjk
+          python -m pip install --upgrade pip
+          python -m pip install pillow
+
+      - name: 產生高對比主管六格圖
+        run: |
+          python 'scripts/產生LINE主管RichMenu_v190.py'
+          test -s 'docs/line/richmenu-supervisor-v190.png'
+          SIZE=$(stat -c%s 'docs/line/richmenu-supervisor-v190.png')
+          test "$SIZE" -lt 1048576
+
+      - name: 提交產生圖片
+        run: |
+          if git diff --quiet -- 'docs/line/richmenu-supervisor-v190.png'; then
+            echo '圖片沒有變更'
+            exit 0
+          fi
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add 'docs/line/richmenu-supervisor-v190.png'
+          git commit -m 'chore(line): 產生主管 Rich Menu v1.9.0 高對比圖片'
+          git push
