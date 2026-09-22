@@ -1,5 +1,5 @@
 /**
- * 化新精密｜製一 LINE／報工 V4 正式主路由｜v1.9.6（LINE 製造AI助理 Read Only／前端 544／智慧5S 1.3.9）
+ * 化新精密｜製一 LINE／報工 V4 正式主路由｜v1.9.7（製造工具最高優先直通 75_LINE／LINE 製造AI助理 Read Only／前端 544／智慧5S 1.3.9）
  * 完整覆蓋「總控_38_6_doPost最終接線」這一檔。
  * 保留原主檔 doPost_舊版備份，以及既有 33／34／37／38／39 等模組。
  * LINE 路由保留；V4 專用寫入「0_報工對接pwa V4，報工」。
@@ -8,7 +8,7 @@
  * 完整覆蓋此檔後，將同一個網頁應用程式部署更新為「新版本」。
  * doPost、events、postData 等英文名稱是 GAS／LINE 固定協定欄位。
  */
-var 製一LINE正式接線版本_ = 'v1.9.6_LINE製造AI助理_ReadOnly';
+var 製一LINE正式接線版本_ = 'v1.9.7_LINE製造工具中心直通';
 
 function doPost(請求) {
   if (!請求) throw new Error('這是 LINE Webhook 入口，不要在編輯器直接執行。');
@@ -90,6 +90,33 @@ function doPost(請求) {
 }
 
 function 製一LINE正式接線_分派_(內容) {
+  if (!內容 || !Array.isArray(內容.events) || 內容.events.length === 0) return null;
+
+  var 第一事件 = 內容.events[0];
+
+  // 固定系統指令「製造工具」最高優先直通 75_LINE，避免被 AI／指令中心先攔截。
+  if (製一LINE正式接線_是否製造工具_(第一事件)) {
+    console.log('v1.9.7｜命中製造工具最高優先路由');
+
+    if (typeof LINE製造工具75_嘗試處理Webhook_ !== 'function') {
+      throw new Error('v1.9.7｜找不到 LINE製造工具75_嘗試處理Webhook_');
+    }
+
+    var 製造工具副本 = JSON.parse(JSON.stringify(內容));
+    var 製造工具結果 = LINE製造工具75_嘗試處理Webhook_(製造工具副本);
+
+    console.log('v1.9.7｜75_LINE 回傳：' + JSON.stringify(製造工具結果));
+
+    if (製造工具結果 && 製造工具結果.已處理 === true) {
+      return { 名稱: '製造工具中心', 結果: 製造工具結果 };
+    }
+
+    throw new Error(
+      'v1.9.7｜製造工具已命中，但 75_LINE 未回傳已處理=true｜回傳=' +
+      JSON.stringify(製造工具結果)
+    );
+  }
+
   var 路由 = [
     ['智慧5S群組', typeof 智慧5S_LINE群組綁定_嘗試處理Webhook_ === 'function'
       ? 智慧5S_LINE群組綁定_嘗試處理Webhook_ : null],
@@ -114,30 +141,57 @@ function 製一LINE正式接線_分派_(內容) {
   for (var 索引 = 0; 索引 < 路由.length; 索引++) {
     var 函式 = 路由[索引][1];
     if (!函式) continue;
-    // 各模組可移除已處理事件；使用獨立副本，不影響原請求。
+
     var 副本 = JSON.parse(JSON.stringify(內容));
     var 結果 = 函式(副本);
+
     if (結果 && 結果.已處理 === true) {
       return { 名稱: 路由[索引][0], 結果: 結果 };
     }
+
     if (結果 && (結果.已部分處理 || Number(結果.處理筆數) > 0)) {
-      // 每次只分派一筆；若模組已做出處理，不得再次回覆同一事件。
       throw new Error('單筆事件回傳不一致：' + 路由[索引][0]);
     }
   }
+
   return null;
+}
+
+function 製一LINE正式接線_是否製造工具_(事件) {
+  if (!事件) return false;
+
+  if (事件.type === 'message' && 事件.message && 事件.message.type === 'text') {
+    var 文字 = String(事件.message.text || '')
+      .replace(/\u3000/g, '')
+      .replace(/\s+/g, '')
+      .trim();
+
+    return ['製造工具', '製造工具中心', '工具中心', '更多工具', '其他工具'].indexOf(文字) >= 0;
+  }
+
+  if (事件.type === 'postback' && 事件.postback) {
+    var 資料 = String(事件.postback.data || '').trim();
+    return 資料.indexOf('action=manufacturing_tools') >= 0 || 資料.indexOf('action=製造工具') >= 0;
+  }
+
+  return false;
 }
 
 function 製一LINE正式接線_正規化指令_(事件) {
   if (事件.type !== 'message' || !事件.message || 事件.message.type !== 'text') return;
+
   var 文字 = String(事件.message.text || '').replace(/\u3000/g, ' ').trim();
+
   if (/^(選單跟新|選單更新|更新選單|重整選單|重新整理選單)$/.test(文字)) {
     文字 = '選單更新';
   } else if (/^(主管入口|主管選單|主管入口選單)$/.test(文字)) {
     文字 = '主管選單';
   } else if (/^(智慧\s*5s|5s|智慧\s*5s入口|5s入口|5s巡檢|開啟智慧\s*5s|開啟5s)$/i.test(文字)) {
     文字 = '智慧5S';
+  } else if (/^(製造工具|製造工具中心|工具中心|更多工具|其他工具)$/i.test(文字)) {
+    文字 = '製造工具';
   }
+
   事件.message.text = 文字;
 }
 
@@ -167,6 +221,40 @@ function 製一LINE正式接線_JSON_(內容) {
   return ContentService.createTextOutput(JSON.stringify(Object.assign({
     接線版本: 製一LINE正式接線版本_
   }, 內容))).setMimeType(ContentService.MimeType.JSON);
+}
+
+function 診斷製一LINE正式接線_v197() {
+  var errors = [];
+  var 製造工具命中 = 製一LINE正式接線_是否製造工具_({ type: 'message', message: { type: 'text', text: '製造工具' } });
+  var 工具中心命中 = 製一LINE正式接線_是否製造工具_({ type: 'message', message: { type: 'text', text: '工具中心' } });
+  var A916不得命中 = !製一LINE正式接線_是否製造工具_({ type: 'message', message: { type: 'text', text: 'A916000000 今天做到哪裡' } });
+
+  if (typeof doPost !== 'function') errors.push('doPost 不存在');
+  if (typeof doPost_舊版備份 !== 'function') errors.push('doPost_舊版備份 不存在');
+  if (typeof LINE製造工具75_嘗試處理Webhook_ !== 'function') errors.push('75_LINE 製造工具模組不存在');
+  if (!製造工具命中 || !工具中心命中 || !A916不得命中) errors.push('製造工具指令解析失敗');
+
+  var result = {
+    success: errors.length === 0,
+    version: 製一LINE正式接線版本_,
+    doPost: typeof doPost === 'function',
+    oldDoPost: typeof doPost_舊版備份 === 'function',
+    tool75: typeof LINE製造工具75_嘗試處理Webhook_ === 'function',
+    smart5S: typeof LINE智慧5S入口39_嘗試處理Webhook_ === 'function',
+    commandCenter: typeof LINE指令中心37_嘗試處理Webhook_ === 'function',
+    manufacturingAI: typeof LINE製造AI助理35_嘗試處理Webhook_ === 'function',
+    roleRouter: typeof LINE角色分流34_嘗試處理Webhook_ === 'function',
+    v4Compatibility: typeof 報工作業V4_PWA_嘗試展開動作_ === 'function',
+    manufacturingToolParser: {
+      製造工具: 製造工具命中,
+      工具中心: 工具中心命中,
+      A916查詢不得命中: A916不得命中
+    },
+    errors: errors
+  };
+
+  console.log(JSON.stringify(result, null, 2));
+  return result;
 }
 
 // ── V4 專用接收器：單筆收據、同請求防重、唯讀查詢 ──
