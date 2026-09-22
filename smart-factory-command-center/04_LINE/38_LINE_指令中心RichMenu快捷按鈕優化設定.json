@@ -1,12 +1,12 @@
 {
   "模組": "38_LINE 指令中心 Rich Menu 快捷按鈕優化",
-  "版本": "v1.8.9_主管六格新圖正式上線",
-  "目的": "主管入口改用使用者指定中英雙語新圖；製造工具維持串接 75_LINE Flex Carousel；一般員工入口維持既有功能。",
+  "版本": "v1.9.0_高對比六格_PWA_V4_圖片Flex",
+  "目的": "主管入口改用高對比中英雙語新圖；主管與一般員工報工皆改接正式 PWA V4；製造工具使用照片 Hero Flex Carousel。",
   "圖片": [
     {
-      "檔名": "richmenu-supervisor-v189.png",
-      "用途": "主管快捷入口中英雙語正式新圖",
-      "ScriptProperty": "LINE_RICH_MENU_主管入口圖片網址_v189"
+      "檔名": "richmenu-supervisor-v190.png",
+      "用途": "主管快捷入口高對比中英雙語正式圖",
+      "ScriptProperty": "LINE_RICH_MENU_主管入口圖片網址_v190"
     },
     {
       "檔名": "richmenu-worker-v186.png",
@@ -33,7 +33,7 @@
     {
       "位置": "左下",
       "功能": "製造生產",
-      "動作": "uri: 正式 /exec?page=07_報工作業V2"
+      "動作": "uri: work-report-v4-477.html 正式 PWA V4"
     },
     {
       "位置": "中下",
@@ -43,14 +43,14 @@
     {
       "位置": "右下",
       "功能": "製造工具",
-      "動作": "message: 製造工具 → 75_LINE Flex Carousel"
+      "動作": "message: 製造工具 → 75_LINE 圖片 Hero Flex Carousel"
     }
   ],
   "一般員工入口六宮格": [
     {
       "位置": "左上",
       "功能": "報工作業",
-      "動作": "uri: 報工作業V2"
+      "動作": "uri: work-report-v4-477.html 正式 PWA V4"
     },
     {
       "位置": "中上",
@@ -82,10 +82,10 @@
     "初始化38_LINE指令中心RichMenu快捷按鈕優化",
     "測試38_LINE快捷RichMenu_本機規格",
     "測試38_LINE快捷RichMenu圖片讀取",
-    "驗收38_LINE主管新圖_v189",
-    "上線38_LINE主管新圖_v189並同步",
+    "驗收38_LINE主管新圖_v190",
+    "上線38_LINE主管新圖_v190並同步",
     "批次同步34_LINE所有已綁定使用者選單"
   ],
-  "一鍵上線函數": "上線38_LINE主管新圖_v189並同步",
+  "一鍵上線函數": "上線38_LINE主管新圖_v190並同步",
   "文字備援": "選單更新與製造工具仍可直接輸入，不占用額外 Rich Menu 區塊"
 }
