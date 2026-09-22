@@ -1,6 +1,6 @@
 /**
  * 化新精密｜75_LINE 製造工具中心
- * 版本：v1.1.0
+ * 版本：v1.1.1
  *
  * 功能：
  * 1. 接收 LINE「製造工具」固定指令。
@@ -10,7 +10,7 @@
  * 5. 不建立第二個 LINE Bot、不建立第二個 Web App。
  */
 
-const 製造工具75_版本_ = 'v1.1.0_圖片HeroFlex';
+const 製造工具75_版本_ = 'v1.1.1_LINE內開圖片HeroFlex';
 const 製造工具75_正式主庫ID_ = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
 const 製造工具75_工作表名稱_ = 'LINE_製造工具中心';
 const 製造工具75_LINE回覆網址_ = 'https://api.line.me/v2/bot/message/reply';
@@ -212,7 +212,7 @@ function 製造工具75_讀取工具設定_() {
         取值(列, '說明') || ''
       ).trim(),
       圖片網址: 製造工具75_補預設圖片_(顯示名稱, 圖片網址),
-      PWA網址: PWA網址,
+      PWA網址: 製造工具75_LINE內開網址_(PWA網址),
       分類: String(
         取值(列, '分類') || '製造工具'
       ).trim(),
@@ -227,6 +227,24 @@ function 製造工具75_讀取工具設定_() {
   });
 
   return 工具.slice(0, 12);
+}
+
+function 製造工具75_LINE內開網址_(url) {
+  var 文字 = String(url || '').trim();
+  if (!文字 || !/^https:\/\//i.test(文字)) return 文字;
+
+  文字 = 文字
+    .replace(/([?&])openExternalBrowser=(?:1|true)(?:&|$)/ig, '$1')
+    .replace(/([?&])externalBrowser=(?:1|true)(?:&|$)/ig, '$1')
+    .replace(/[?&]$/, '')
+    .replace(/\?&/, '?')
+    .replace(/&&+/g, '&');
+
+  if (!/[?&](?:來源|source)=/i.test(文字)) {
+    文字 += (文字.indexOf('?') >= 0 ? '&' : '?') + '來源=LINEBOT_TOOL';
+  }
+
+  return 文字;
 }
 
 function 製造工具75_補預設圖片_(顯示名稱, 圖片網址) {
@@ -333,7 +351,7 @@ function 製造工具75_建立Bubble_(工具) {
           action: {
             type: 'uri',
             label: String(工具.按鈕文字 || '立即開啟').substring(0, 20),
-            uri: String(工具.PWA網址)
+            uri: 製造工具75_LINE內開網址_(工具.PWA網址)
           }
         }
       ]

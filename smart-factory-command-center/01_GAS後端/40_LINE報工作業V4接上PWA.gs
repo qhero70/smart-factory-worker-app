@@ -1,5 +1,5 @@
 /**
- * 40｜LINE 報工作業 V4 接上 PWA｜v1.9.4
+ * 40｜LINE 報工作業 V4 接上 PWA｜v1.9.5 LINE內開
  * 在原 NEXUS OS 專案新增本檔，儲存後執行：套用40_LINE報工作業V4到PWA
  * 沿用既有 Token、圖片、角色與智慧5S入口；只替換報工按鈕網址。
  * 本檔沒有 doGet / doPost，不需改動 v1.9.3 主路由或 Webhook 部署。
@@ -96,7 +96,7 @@ function 套用40_LINE報工作業V4到PWA() {
 }
 
 function 報工PWA40_正式網址_() {
-  return 'https://qhero70.github.io/smart-factory-worker-app/work-report-v4-477.html?v=539&fix=stable-no-flicker&openExternalBrowser=1';
+  return 'https://qhero70.github.io/smart-factory-worker-app/work-report-v4-477.html?v=539&fix=stable-no-flicker&來源=LINEBOT_RICHMENU';
 }
 
 function 報工PWA40_準備選單_(項目, 清單, 屬性) {

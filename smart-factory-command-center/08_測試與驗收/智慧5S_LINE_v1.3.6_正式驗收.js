@@ -2,7 +2,7 @@
 'use strict';
 
 /**
- * 化新精密｜製一｜智慧5S LINE v1.3.6／Rich Menu v1.9.0 正式驗收
+ * 化新精密｜製一｜智慧5S LINE v1.3.6／Rich Menu v1.9.1 正式驗收
  *
  * 僅在本機記憶體檢查程式、入口版本與圖片，不連線、不推播、不修改正式資料。
  */
@@ -98,7 +98,7 @@ function 取得PNG資訊(檔案) {
   斷言.ok(!/[?&]v=(?:102|103|105)(?:&|$)/.test(網址));
 });
 
-驗收('Rich Menu', '主管六格改為PWA V4／製造工具圖片Flex，一般員工保留智慧5S直達入口', () => {
+驗收('Rich Menu', '主管六格維持PWA V4／製造工具圖片Flex，所有URI不得要求跳出LINE', () => {
   const 上下文 = 載入(快捷選單程式, {
     PropertiesService: { getScriptProperties: () => ({ getProperty: () => '' }) },
     LINE智慧5S入口39_取得網址_: () => 'https://qhero70.github.io/smart-factory-worker-app/5s/?來源=LINEBOT_RICHMENU&v=1360'
@@ -118,6 +118,8 @@ function 取得PNG資訊(檔案) {
   斷言.match(製造生產.uri, /work-report-v4-/);
   斷言.ok(!/\/dev(?:\?|$)/.test(製造生產.uri));
   斷言.match(員工.areas[0].action.uri, /work-report-v4-/);
+  斷言.ok(!/openExternalBrowser=(?:1|true)/i.test(製造生產.uri));
+  斷言.ok(!/openExternalBrowser=(?:1|true)/i.test(員工.areas[0].action.uri));
 
   const 製造工具 = 主管.areas[5].action;
   斷言.equal(製造工具.label, '製造工具');
@@ -163,9 +165,9 @@ function 取得PNG資訊(檔案) {
   });
 });
 
-驗收('設定', 'Rich Menu 設定檔為 v1.9.0，主管使用高對比新圖與PWA V4、一般員工保留智慧5S', () => {
+驗收('設定', 'Rich Menu 設定檔為 v1.9.1，PWA V4 與工具連結維持 LINE 內建瀏覽器', () => {
   const 設定 = JSON.parse(讀取(設定檔));
-  斷言.match(設定.版本, /^v1\.9\.0/);
+  斷言.match(設定.版本, /^v1\.9\.1/);
   斷言.equal(設定.主管入口六宮格.filter(區 => 區.功能 === '製造生產').length, 1);
   斷言.equal(設定.主管入口六宮格.filter(區 => 區.功能 === '製造工具').length, 1);
   斷言.equal(設定.主管入口六宮格.filter(區 => 區.功能 === '智慧5S').length, 0);

@@ -1,10 +1,10 @@
 /**
  * 38_LINE｜指令中心 Rich Menu 快捷按鈕優化
- * 版本：v1.9.0
- * 目的：主管六格改用高對比中英雙語新圖；主管與一般員工報工皆改接正式 PWA V4；製造工具維持 75_LINE 圖片 Flex Carousel。
+ * 版本：v1.9.1
+ * 目的：主管六格維持高對比中英雙語；所有 Rich Menu / PWA URI 統一採 LINE 內建瀏覽器開啟；主管與一般員工報工維持正式 PWA V4；製造工具維持 75_LINE 圖片 Flex Carousel。
  */
 
-const RichMenu38_版本 = 'v1.9.0_高對比六格_PWA_V4_圖片Flex';
+const RichMenu38_版本 = 'v1.9.1_LINE內開_PWA_V4_圖片Flex';
 const RichMenu38_寬度 = 1200;
 const RichMenu38_高度 = 810;
 const RichMenu38_正式主庫ID = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
@@ -272,21 +272,50 @@ function RichMenu38_製造生產網址_() {
 
 function RichMenu38_報工V4網址_() {
   const props = PropertiesService.getScriptProperties();
+
   const customUrl = String(
+    props.getProperty('LINE_RICH_MENU_報工V4網址_v191') ||
     props.getProperty('LINE_RICH_MENU_報工V4網址_v190') ||
     props.getProperty('LINE_WORK_REPORT_V4_PWA_URL') ||
     ''
   ).trim();
 
-  if (customUrl && /^https:\/\//i.test(customUrl)) return customUrl;
+  if (customUrl && /^https:\/\//i.test(customUrl)) {
+    return RichMenu38_LINE內開網址_(customUrl, 'LINEBOT_RICHMENU');
+  }
 
   if (typeof 報工PWA40_正式網址_ === 'function') {
     const moduleUrl = String(報工PWA40_正式網址_() || '').trim();
-    if (moduleUrl && /^https:\/\//i.test(moduleUrl)) return moduleUrl;
+    if (moduleUrl && /^https:\/\//i.test(moduleUrl)) {
+      return RichMenu38_LINE內開網址_(moduleUrl, 'LINEBOT_RICHMENU');
+    }
   }
 
-  return 'https://qhero70.github.io/smart-factory-worker-app/work-report-v4-477.html?v=539&fix=stable-no-flicker&openExternalBrowser=1';
+  return RichMenu38_LINE內開網址_(
+    'https://qhero70.github.io/smart-factory-worker-app/work-report-v4-477.html?v=539&fix=stable-no-flicker',
+    'LINEBOT_RICHMENU'
+  );
 }
+function RichMenu38_LINE內開網址_(url, source) {
+  var 文字 = String(url || '').trim();
+  if (!文字 || !/^https:\/\//i.test(文字)) return 文字;
+
+  // 移除任何會要求跳出 LINE 的參數。
+  文字 = 文字
+    .replace(/([?&])openExternalBrowser=(?:1|true)(?:&|$)/ig, '$1')
+    .replace(/([?&])externalBrowser=(?:1|true)(?:&|$)/ig, '$1')
+    .replace(/[?&]$/, '')
+    .replace(/\?&/, '?')
+    .replace(/&&+/g, '&');
+
+  var 來源 = String(source || 'LINEBOT').trim();
+  if (來源 && !/[?&](?:來源|source)=/i.test(文字)) {
+    文字 += (文字.indexOf('?') >= 0 ? '&' : '?') + '來源=' + encodeURIComponent(來源);
+  }
+
+  return 文字;
+}
+
 function RichMenu38_組合查詢網址_(baseUrl, key, value) {
   const base = String(baseUrl || '').trim();
   if (!base) return '';
@@ -323,6 +352,8 @@ function 驗收38_LINE主管新圖_v190() {
   if (production.type !== 'uri' || production.label !== '製造生產') errors.push('製造生產動作不正確');
   if (!/work-report-v4-/i.test(String(production.uri || ''))) errors.push('主管製造生產尚未改為 PWA V4');
   if (!/work-report-v4-/i.test(String(workerReport.uri || ''))) errors.push('一般員工報工尚未改為 PWA V4');
+  if (/openExternalBrowser=(?:1|true)/i.test(String(production.uri || ''))) errors.push('主管 PWA V4 仍要求外部瀏覽器');
+  if (/openExternalBrowser=(?:1|true)/i.test(String(workerReport.uri || ''))) errors.push('員工 PWA V4 仍要求外部瀏覽器');
   if (tool.type !== 'message' || tool.text !== '製造工具') errors.push('製造工具沒有串接 75_LINE');
   if (!/richmenu-supervisor-v190\.png(?:\?|$)/i.test(imageUrl)) errors.push('主管圖片不是 v190 高對比版');
 
@@ -332,6 +363,9 @@ function 驗收38_LINE主管新圖_v190() {
     imageUrl: imageUrl,
     productionUrl: String(production.uri || ''),
     workerReportUrl: String(workerReport.uri || ''),
+    lineInAppBrowser: !/openExternalBrowser=(?:1|true)/i.test(
+      String(production.uri || '') + ' ' + String(workerReport.uri || '')
+    ),
     flexToolReady: typeof LINE製造工具75_嘗試處理Webhook_ === 'function',
     token: !!RichMenu38_取得Token_(),
     errors: errors

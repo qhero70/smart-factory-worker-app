@@ -57,14 +57,19 @@ jobs:
           test -s 'docs/line/richmenu-supervisor-v189.png'
           test -s 'docs/line/richmenu-supervisor-v190.png'
           test -f 'smart-factory-command-center/01_GAS後端/75_LINE_製造工具中心_v1.0.gs'
-          grep -q "v1.1.0_圖片HeroFlex" 'smart-factory-command-center/01_GAS後端/75_LINE_製造工具中心_v1.0.gs'
+          grep -q "v1.1.1_LINE內開圖片HeroFlex" 'smart-factory-command-center/01_GAS後端/75_LINE_製造工具中心_v1.0.gs'
           grep -q "LINE製造工具75_嘗試處理Webhook_" 'smart-factory-command-center/01_GAS後端/75_LINE_製造工具中心_v1.0.gs'
           grep -q "v1.9.7_LINE製造工具中心直通" 'smart-factory-command-center/01_GAS後端/總控_38_6_doPost最終接線.gs'
           grep -q "LINE製造工具75_嘗試處理Webhook_" 'smart-factory-command-center/01_GAS後端/總控_38_6_doPost最終接線.gs'
-          grep -q "v1.9.0_高對比六格_PWA_V4_圖片Flex" 'smart-factory-command-center/01_GAS後端/38_LINE_指令中心RichMenu快捷按鈕優化.gs'
+          grep -q "v1.9.1_LINE內開_PWA_V4_圖片Flex" 'smart-factory-command-center/01_GAS後端/38_LINE_指令中心RichMenu快捷按鈕優化.gs'
           grep -q "richmenu-supervisor-v190.png" 'smart-factory-command-center/01_GAS後端/38_LINE_指令中心RichMenu快捷按鈕優化.gs'
           grep -q 'work-report-v4-477.html' 'smart-factory-command-center/01_GAS後端/38_LINE_指令中心RichMenu快捷按鈕優化.gs'
           grep -q 'SITE-A5-008.jpg' 'smart-factory-command-center/01_GAS後端/75_LINE_製造工具中心_v1.0.gs'
+          # LINE內開防退版：不得再要求跳出LINE到Safari/Chrome。
+          ! grep -q 'openExternalBrowser=1' 'smart-factory-command-center/01_GAS後端/38_LINE_指令中心RichMenu快捷按鈕優化.gs'
+          ! grep -q 'openExternalBrowser=1' 'smart-factory-command-center/01_GAS後端/40_LINE報工作業V4接上PWA.gs'
+          grep -q '來源=LINEBOT_RICHMENU' 'smart-factory-command-center/01_GAS後端/40_LINE報工作業V4接上PWA.gs'
+          grep -q '製造工具75_LINE內開網址_' 'smart-factory-command-center/01_GAS後端/75_LINE_製造工具中心_v1.0.gs'
           test -s 'docs/line/richmenu-worker-v186.png'
 
           # 待回補存檔仍須保留列印入口；文件內需明確警示不是完整稽核證據。
