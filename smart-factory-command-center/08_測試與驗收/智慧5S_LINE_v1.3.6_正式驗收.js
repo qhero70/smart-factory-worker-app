@@ -2,7 +2,7 @@
 'use strict';
 
 /**
- * 化新精密｜製一｜智慧5S LINE v1.3.6／Rich Menu v1.8.8 正式驗收
+ * 化新精密｜製一｜智慧5S LINE v1.3.6／Rich Menu v1.8.9 正式驗收
  *
  * 僅在本機記憶體檢查程式、入口版本與圖片，不連線、不推播、不修改正式資料。
  */
@@ -155,16 +155,16 @@ function 取得PNG資訊(檔案) {
 });
 
 驗收('圖片', '主管與員工正式圖皆為 1200×810 PNG 且小於 1MB', () => {
-  ['richmenu-supervisor-v188.png', 'richmenu-worker-v186.png'].forEach(檔名 => {
+  ['richmenu-supervisor-v189.png', 'richmenu-worker-v186.png'].forEach(檔名 => {
     const 資訊 = 取得PNG資訊(路徑工具.join(圖片目錄, 檔名));
     斷言.deepEqual([資訊.寬, 資訊.高], [1200, 810], 檔名);
     斷言.ok(資訊.位元組 < 1024 * 1024, `${檔名} 超過 1MB`);
   });
 });
 
-驗收('設定', 'Rich Menu 設定檔為 v1.8.8，主管使用製造工具、一般員工保留智慧5S', () => {
+驗收('設定', 'Rich Menu 設定檔為 v1.8.9，主管使用新圖與製造工具、一般員工保留智慧5S', () => {
   const 設定 = JSON.parse(讀取(設定檔));
-  斷言.match(設定.版本, /^v1\.8\.8/);
+  斷言.match(設定.版本, /^v1\.8\.9/);
   斷言.equal(設定.主管入口六宮格.filter(區 => 區.功能 === '製造生產').length, 1);
   斷言.equal(設定.主管入口六宮格.filter(區 => 區.功能 === '製造工具').length, 1);
   斷言.equal(設定.主管入口六宮格.filter(區 => 區.功能 === '智慧5S').length, 0);

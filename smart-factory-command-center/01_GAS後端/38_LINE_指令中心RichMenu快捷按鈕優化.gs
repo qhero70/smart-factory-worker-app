@@ -1,14 +1,14 @@
 /**
  * 38_LINE｜指令中心 Rich Menu 快捷按鈕優化
- * 版本：v1.8.8
- * 目的：主管六格整合「製造生產／製造工具」，製造工具串接 75_LINE Flex 中心；一般員工入口維持既有報工、5S、身份與指令中心。
+ * 版本：v1.8.9
+ * 目的：主管六格改用使用者指定中英雙語新圖；製造工具維持串接 75_LINE Flex 中心；一般員工入口維持既有報工、5S、身份與指令中心。
  */
 
-const RichMenu38_版本 = 'v1.8.8_38_LINE製造工具正式網址修正';
+const RichMenu38_版本 = 'v1.8.9_主管六格新圖正式上線';
 const RichMenu38_寬度 = 1200;
 const RichMenu38_高度 = 810;
 const RichMenu38_正式主庫ID = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
-const RichMenu38_預設主管圖片 = 'https://qhero70.github.io/smart-factory-worker-app/line/richmenu-supervisor-v188.png';
+const RichMenu38_預設主管圖片 = 'https://qhero70.github.io/smart-factory-worker-app/line/richmenu-supervisor-v189.png';
 const RichMenu38_預設員工圖片 = 'https://qhero70.github.io/smart-factory-worker-app/line/richmenu-worker-v186.png';
 const RichMenu38_紀錄表 = '38_LINE快捷選單上線紀錄';
 const RichMenu38_紀錄欄位 = ['時間戳', '版本', '目標選單', 'richMenuId', '動作', '結果', '圖片網址', '備註'];
@@ -123,7 +123,7 @@ function RichMenu38_取得既有選單_(target, propertyKey, menu) {
   const propertyId = String(props.getProperty(propertyKey) || '').trim();
   const hit = list.find(function(item) { return propertyId && String(item.richMenuId || '').trim() === propertyId; })
     || list.find(function(item) { return String(item.name || '').trim() === String(menu.name || '').trim(); });
-  if (!hit || !hit.richMenuId) throw new Error('找不到既有 ' + target + ' v1.8.6 Rich Menu；為避免重複建立，已停止上線。');
+  if (!hit || !hit.richMenuId) throw new Error('找不到既有 ' + target + ' Rich Menu；為避免誤用舊圖，請使用對應版本上線函數。');
   const id = String(hit.richMenuId).trim();
   props.setProperty(propertyKey, id);
   return { 成功: true, 訊息: '已沿用既有 ' + target + ' Rich Menu', richMenuId: id, 是否新建: false };
@@ -235,6 +235,7 @@ function RichMenu38_讀圖片_(url) {
 function RichMenu38_主管圖片網址_() {
   const props = PropertiesService.getScriptProperties();
   return String(
+    props.getProperty('LINE_RICH_MENU_主管入口圖片網址_v189') ||
     props.getProperty('LINE_RICH_MENU_主管入口圖片網址_v188') ||
     props.getProperty('LINE_RICH_MENU_主管入口圖片網址_v187') ||
     props.getProperty('LINE_RICH_MENU_主管入口圖片網址_v186') ||
@@ -261,7 +262,7 @@ function RichMenu38_取得WebAppURL_() {
 
 function RichMenu38_製造生產網址_() {
   const props = PropertiesService.getScriptProperties();
-  const customUrl = String(props.getProperty('LINE_RICH_MENU_製造生產網址_v188') || '').trim();
+  const customUrl = String(props.getProperty('LINE_RICH_MENU_製造生產網址_v189') || props.getProperty('LINE_RICH_MENU_製造生產網址_v188') || '').trim();
 
   if (
     customUrl &&
@@ -318,6 +319,72 @@ function 驗收38_LINE製造工具中心_v188() {
     errors: errors
   };
 
+  console.log(JSON.stringify(result, null, 2));
+  return result;
+}
+
+function 驗收38_LINE主管新圖_v189() {
+  const errors = [];
+  const boss = RichMenu38_取得主管設定_();
+  const worker = RichMenu38_取得員工設定_();
+  const production = boss.areas[3] && boss.areas[3].action ? boss.areas[3].action : {};
+  const tool = boss.areas[5] && boss.areas[5].action ? boss.areas[5].action : {};
+  const imageUrl = RichMenu38_主管圖片網址_();
+
+  if (boss.areas.length !== 6) errors.push('主管六格數量不正確');
+  if (worker.areas.length !== 6) errors.push('員工六格數量不正確');
+  if (production.type !== 'uri' || production.label !== '製造生產') errors.push('製造生產動作不正確');
+  if (/\/dev(?:\?|$)/i.test(String(production.uri || ''))) errors.push('製造生產仍使用 /dev');
+  if (String(production.uri || '').indexOf('/exec') < 0) errors.push('製造生產不是正式 /exec');
+  if (tool.type !== 'message' || tool.text !== '製造工具') errors.push('製造工具沒有串接 75_LINE');
+  if (!/richmenu-supervisor-v189\.png(?:\?|$)/i.test(imageUrl)) errors.push('主管圖片不是 v189');
+
+  const result = {
+    success: errors.length === 0,
+    version: RichMenu38_版本,
+    imageUrl: imageUrl,
+    supervisor: {
+      layout: ['主管戰情', '今日戰情', '指令中心', '製造生產', '我的狀態', '製造工具'],
+      productionAction: production,
+      toolAction: tool
+    },
+    worker: { check: RichMenu38_檢查設定_(worker) },
+    tool75: typeof LINE製造工具75_嘗試處理Webhook_ === 'function',
+    token: !!RichMenu38_取得Token_(),
+    errors: errors
+  };
+
+  console.log(JSON.stringify(result, null, 2));
+  return result;
+}
+
+function 上線38_LINE主管新圖_v189並同步() {
+  初始化38_LINE指令中心RichMenu快捷按鈕優化();
+  const spec = 測試38_LINE快捷RichMenu_本機規格();
+  if (!spec.成功) throw new Error('Rich Menu 規格未通過：' + spec.訊息);
+
+  const before = 驗收38_LINE主管新圖_v189();
+  if (!before.success) throw new Error('v189 上線前驗收未通過：' + JSON.stringify(before));
+
+  const boss = 建立38_LINE主管快捷RichMenu();
+  const sync = RichMenu38_批次同步已綁定使用者_();
+
+  const props = PropertiesService.getScriptProperties();
+  const managerId = String(props.getProperty('LINE_RICH_MENU_主管入口_ID') || '').trim();
+  if (!managerId || managerId !== String(boss.richMenuId || '').trim()) {
+    throw new Error('主管 Rich Menu ID 更新後回讀不一致');
+  }
+
+  const result = {
+    success: true,
+    version: RichMenu38_版本,
+    supervisorRichMenuId: managerId,
+    imageUrl: RichMenu38_主管圖片網址_(),
+    sync: sync,
+    flexToolReady: typeof LINE製造工具75_嘗試處理Webhook_ === 'function'
+  };
+
+  RichMenu38_寫入紀錄_('主管入口', managerId, 'v1.8.9 新圖建立並同步角色', '完成', RichMenu38_主管圖片網址_(), '製造工具維持串接75_LINE Flex');
   console.log(JSON.stringify(result, null, 2));
   return result;
 }
