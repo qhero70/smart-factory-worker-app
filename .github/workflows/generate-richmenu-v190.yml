@@ -34,13 +34,14 @@ jobs:
 
       - name: 提交產生圖片
         run: |
-          if git diff --quiet -- 'docs/line/richmenu-supervisor-v190.png'; then
+          git add 'docs/line/richmenu-supervisor-v190.png'
+
+          if git diff --cached --quiet; then
             echo '圖片沒有變更'
             exit 0
           fi
 
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add 'docs/line/richmenu-supervisor-v190.png'
           git commit -m 'chore(line): 產生主管 Rich Menu v1.9.0 高對比圖片'
           git push
