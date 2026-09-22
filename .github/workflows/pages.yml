@@ -54,6 +54,13 @@ jobs:
           node 'smart-factory-command-center/08_測試與驗收/智慧5S_LINE_v1.3.6_正式驗收.js'
           test -s 'docs/line/richmenu-supervisor-v186.png'
           test -s 'docs/line/richmenu-supervisor-v188.png'
+          test -f 'smart-factory-command-center/01_GAS後端/75_LINE_製造工具中心_v1.0.gs'
+          grep -q "v1.0.1" 'smart-factory-command-center/01_GAS後端/75_LINE_製造工具中心_v1.0.gs'
+          grep -q "LINE製造工具75_嘗試處理Webhook_" 'smart-factory-command-center/01_GAS後端/75_LINE_製造工具中心_v1.0.gs'
+          grep -q "v1.9.7_LINE製造工具中心直通" 'smart-factory-command-center/01_GAS後端/總控_38_6_doPost最終接線.gs'
+          grep -q "LINE製造工具75_嘗試處理Webhook_" 'smart-factory-command-center/01_GAS後端/總控_38_6_doPost最終接線.gs'
+          grep -q "v1.8.8_38_LINE製造工具正式網址修正" 'smart-factory-command-center/01_GAS後端/38_LINE_指令中心RichMenu快捷按鈕優化.gs'
+          grep -q "richmenu-supervisor-v188.png" 'smart-factory-command-center/01_GAS後端/38_LINE_指令中心RichMenu快捷按鈕優化.gs'
           test -s 'docs/line/richmenu-worker-v186.png'
 
           # 待回補存檔仍須保留列印入口；文件內需明確警示不是完整稽核證據。
