@@ -1,6 +1,6 @@
 /**
  * 化新精密｜75_LINE 製造工具中心
- * 版本：v1.0.1
+ * 版本：v1.1.0
  *
  * 功能：
  * 1. 接收 LINE「製造工具」固定指令。
@@ -10,11 +10,12 @@
  * 5. 不建立第二個 LINE Bot、不建立第二個 Web App。
  */
 
-const 製造工具75_版本_ = 'v1.0.1';
+const 製造工具75_版本_ = 'v1.1.0_圖片HeroFlex';
 const 製造工具75_正式主庫ID_ = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
 const 製造工具75_工作表名稱_ = 'LINE_製造工具中心';
 const 製造工具75_LINE回覆網址_ = 'https://api.line.me/v2/bot/message/reply';
 const 製造工具75_智慧5S正式網址_ = 'https://qhero70.github.io/smart-factory-worker-app/5s/';
+const 製造工具75_智慧5S預設圖片_ = 'https://qhero70.github.io/smart-factory-worker-app/5s/assets/a5/SITE-A5-008.jpg';
 
 function LINE製造工具75_嘗試處理Webhook_(內容) {
   try {
@@ -104,7 +105,7 @@ function 製造工具75_取得預設工具_() {
       顯示名稱: '智慧5S',
       說明: '巡檢、歷史與改善',
       分類: '現場管理',
-      圖片網址: '',
+      圖片網址: 製造工具75_智慧5S預設圖片_,
       PWA網址: 製造工具75_智慧5S正式網址_,
       按鈕文字: '立即開啟'
     }
@@ -210,7 +211,7 @@ function 製造工具75_讀取工具設定_() {
       說明: String(
         取值(列, '說明') || ''
       ).trim(),
-      圖片網址: 圖片網址,
+      圖片網址: 製造工具75_補預設圖片_(顯示名稱, 圖片網址),
       PWA網址: PWA網址,
       分類: String(
         取值(列, '分類') || '製造工具'
@@ -226,6 +227,19 @@ function 製造工具75_讀取工具設定_() {
   });
 
   return 工具.slice(0, 12);
+}
+
+function 製造工具75_補預設圖片_(顯示名稱, 圖片網址) {
+  var url = String(圖片網址 || '').trim();
+  if (/^https:\/\//i.test(url)) return url;
+
+  var name = String(顯示名稱 || '').replace(/\s+/g, '').trim();
+
+  if (/智慧5S|5S/i.test(name)) {
+    return 製造工具75_智慧5S預設圖片_;
+  }
+
+  return '';
 }
 
 function 製造工具75_轉布林值_(值) {
@@ -262,45 +276,45 @@ function 製造工具75_建立Flex訊息_(工具清單) {
 }
 
 function 製造工具75_建立Bubble_(工具) {
+  var heroUrl = 製造工具75_補預設圖片_(工具.顯示名稱, 工具.圖片網址);
+
   var bubble = {
     type: 'bubble',
-    size: 'kilo',
+    size: 'mega',
 
     body: {
       type: 'box',
       layout: 'vertical',
-      spacing: 'md',
-      paddingAll: '20px',
+      spacing: 'sm',
+      paddingAll: '18px',
 
       contents: [
         {
           type: 'text',
-          text: String(
-            工具.分類 || '製造工具'
-          ),
+          text: String(工具.分類 || '製造工具'),
           size: 'xs',
           weight: 'bold',
-          color: '#1769AA'
+          color: '#1F6AA5'
         },
         {
           type: 'text',
-          text: String(
-            工具.顯示名稱 || ''
-          ),
+          text: String(工具.顯示名稱 || ''),
           size: 'xl',
           weight: 'bold',
-          color: '#0F3D63',
+          color: '#222222',
           wrap: true
         },
         {
           type: 'text',
-          text: String(
-            工具.說明 ||
-            '點選下方按鈕開啟'
-          ),
+          text: String(工具.說明 || '點選下方功能開啟'),
           size: 'sm',
-          color: '#667085',
-          wrap: true
+          color: '#666666',
+          wrap: true,
+          margin: 'md'
+        },
+        {
+          type: 'separator',
+          margin: 'xl'
         }
       ]
     },
@@ -308,44 +322,34 @@ function 製造工具75_建立Bubble_(工具) {
     footer: {
       type: 'box',
       layout: 'vertical',
+      spacing: 'sm',
       paddingAll: '16px',
 
       contents: [
         {
           type: 'button',
-          style: 'primary',
-          color: '#1769AA',
-
+          style: 'link',
+          height: 'sm',
           action: {
             type: 'uri',
-            label: String(
-              工具.按鈕文字 ||
-              '立即開啟'
-            ).substring(0, 20),
-            uri: String(
-              工具.PWA網址
-            )
+            label: String(工具.按鈕文字 || '立即開啟').substring(0, 20),
+            uri: String(工具.PWA網址)
           }
         }
       ]
     }
   };
 
-  if (
-    工具.圖片網址 &&
-    /^https:\/\//i.test(
-      工具.圖片網址
-    )
-  ) {
+  if (heroUrl) {
     bubble.hero = {
       type: 'image',
-      url: 工具.圖片網址,
+      url: heroUrl,
       size: 'full',
       aspectRatio: '20:13',
       aspectMode: 'cover',
       action: {
         type: 'uri',
-        uri: 工具.PWA網址
+        uri: String(工具.PWA網址)
       }
     };
   }
