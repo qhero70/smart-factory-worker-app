@@ -1,14 +1,14 @@
 /**
  * 38_LINE｜指令中心 Rich Menu 快捷按鈕優化
- * 版本：v1.8.9
- * 目的：主管六格改用使用者指定中英雙語新圖；製造工具維持串接 75_LINE Flex 中心；一般員工入口維持既有報工、5S、身份與指令中心。
+ * 版本：v1.9.0
+ * 目的：主管六格改用高對比中英雙語新圖；主管與一般員工報工皆改接正式 PWA V4；製造工具維持 75_LINE 圖片 Flex Carousel。
  */
 
-const RichMenu38_版本 = 'v1.8.9_主管六格新圖正式上線';
+const RichMenu38_版本 = 'v1.9.0_高對比六格_PWA_V4_圖片Flex';
 const RichMenu38_寬度 = 1200;
 const RichMenu38_高度 = 810;
 const RichMenu38_正式主庫ID = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
-const RichMenu38_預設主管圖片 = 'https://qhero70.github.io/smart-factory-worker-app/line/richmenu-supervisor-v189.png';
+const RichMenu38_預設主管圖片 = 'https://qhero70.github.io/smart-factory-worker-app/line/richmenu-supervisor-v190.png';
 const RichMenu38_預設員工圖片 = 'https://qhero70.github.io/smart-factory-worker-app/line/richmenu-worker-v186.png';
 const RichMenu38_紀錄表 = '38_LINE快捷選單上線紀錄';
 const RichMenu38_紀錄欄位 = ['時間戳', '版本', '目標選單', 'richMenuId', '動作', '結果', '圖片網址', '備註'];
@@ -181,11 +181,17 @@ function RichMenu38_取得主管設定_() {
 }
 
 function RichMenu38_取得員工設定_() {
-  const reportUrl = RichMenu38_取得WebAppURL_();
-  const 報工Action = reportUrl ? { type: 'uri', label: '報工作業', uri: reportUrl + '?page=07_報工作業V2' } : { type: 'message', label: '報工作業', text: '報工作業' };
+  const reportUrl = RichMenu38_報工V4網址_();
+  const 報工Action = reportUrl
+    ? { type: 'uri', label: '報工作業', uri: reportUrl }
+    : { type: 'message', label: '報工作業', text: '報工作業' };
   const 智慧5SAction = { type: 'uri', label: '智慧5S', uri: RichMenu38_智慧5S網址_() };
+
   return {
-    size: { width: RichMenu38_寬度, height: RichMenu38_高度 }, selected: true, name: '38_員工快捷入口_' + RichMenu38_版本, chatBarText: '報工入口',
+    size: { width: RichMenu38_寬度, height: RichMenu38_高度 },
+    selected: true,
+    name: '38_員工快捷入口_' + RichMenu38_版本,
+    chatBarText: '報工入口',
     areas: [
       { bounds: { x: 0, y: 0, width: 400, height: 405 }, action: 報工Action },
       { bounds: { x: 400, y: 0, width: 400, height: 405 }, action: { type: 'message', label: '我的狀態', text: '我的狀態' } },
@@ -196,7 +202,6 @@ function RichMenu38_取得員工設定_() {
     ]
   };
 }
-
 function RichMenu38_建立並上傳_(name, menu, imageUrl) {
   // 圖片必須先完整讀取，避免外部圖源失敗時留下沒有圖片的空白 Rich Menu。
   const blob = RichMenu38_讀圖片_(imageUrl);
@@ -235,6 +240,7 @@ function RichMenu38_讀圖片_(url) {
 function RichMenu38_主管圖片網址_() {
   const props = PropertiesService.getScriptProperties();
   return String(
+    props.getProperty('LINE_RICH_MENU_主管入口圖片網址_v190') ||
     props.getProperty('LINE_RICH_MENU_主管入口圖片網址_v189') ||
     props.getProperty('LINE_RICH_MENU_主管入口圖片網址_v188') ||
     props.getProperty('LINE_RICH_MENU_主管入口圖片網址_v187') ||
@@ -261,23 +267,26 @@ function RichMenu38_取得WebAppURL_() {
 }
 
 function RichMenu38_製造生產網址_() {
-  const props = PropertiesService.getScriptProperties();
-  const customUrl = String(props.getProperty('LINE_RICH_MENU_製造生產網址_v189') || props.getProperty('LINE_RICH_MENU_製造生產網址_v188') || '').trim();
-
-  if (
-    customUrl &&
-    /^https:\/\//i.test(customUrl) &&
-    !/script\.google\.com\/.*\/dev(?:\?|$)/i.test(customUrl)
-  ) {
-    return customUrl;
-  }
-
-  const baseUrl = RichMenu38_取得WebAppURL_();
-  if (!baseUrl) return '';
-
-  return RichMenu38_組合查詢網址_(baseUrl, 'page', '07_報工作業V2');
+  return RichMenu38_報工V4網址_();
 }
 
+function RichMenu38_報工V4網址_() {
+  const props = PropertiesService.getScriptProperties();
+  const customUrl = String(
+    props.getProperty('LINE_RICH_MENU_報工V4網址_v190') ||
+    props.getProperty('LINE_WORK_REPORT_V4_PWA_URL') ||
+    ''
+  ).trim();
+
+  if (customUrl && /^https:\/\//i.test(customUrl)) return customUrl;
+
+  if (typeof 報工PWA40_正式網址_ === 'function') {
+    const moduleUrl = String(報工PWA40_正式網址_() || '').trim();
+    if (moduleUrl && /^https:\/\//i.test(moduleUrl)) return moduleUrl;
+  }
+
+  return 'https://qhero70.github.io/smart-factory-worker-app/work-report-v4-477.html?v=539&fix=stable-no-flicker&openExternalBrowser=1';
+}
 function RichMenu38_組合查詢網址_(baseUrl, key, value) {
   const base = String(baseUrl || '').trim();
   if (!base) return '';
@@ -385,6 +394,70 @@ function 上線38_LINE主管新圖_v189並同步() {
   };
 
   RichMenu38_寫入紀錄_('主管入口', managerId, 'v1.8.9 新圖建立並同步角色', '完成', RichMenu38_主管圖片網址_(), '製造工具維持串接75_LINE Flex');
+  console.log(JSON.stringify(result, null, 2));
+  return result;
+}
+
+function 驗收38_LINE主管新圖_v190() {
+  const errors = [];
+  const boss = RichMenu38_取得主管設定_();
+  const worker = RichMenu38_取得員工設定_();
+  const production = boss.areas[3] && boss.areas[3].action ? boss.areas[3].action : {};
+  const workerReport = worker.areas[0] && worker.areas[0].action ? worker.areas[0].action : {};
+  const tool = boss.areas[5] && boss.areas[5].action ? boss.areas[5].action : {};
+  const imageUrl = RichMenu38_主管圖片網址_();
+
+  if (boss.areas.length !== 6) errors.push('主管六格數量不正確');
+  if (worker.areas.length !== 6) errors.push('員工六格數量不正確');
+  if (production.type !== 'uri' || production.label !== '製造生產') errors.push('製造生產動作不正確');
+  if (!/work-report-v4-/i.test(String(production.uri || ''))) errors.push('主管製造生產尚未改為 PWA V4');
+  if (!/work-report-v4-/i.test(String(workerReport.uri || ''))) errors.push('一般員工報工尚未改為 PWA V4');
+  if (tool.type !== 'message' || tool.text !== '製造工具') errors.push('製造工具沒有串接 75_LINE');
+  if (!/richmenu-supervisor-v190\.png(?:\?|$)/i.test(imageUrl)) errors.push('主管圖片不是 v190 高對比版');
+
+  const result = {
+    success: errors.length === 0,
+    version: RichMenu38_版本,
+    imageUrl: imageUrl,
+    productionUrl: String(production.uri || ''),
+    workerReportUrl: String(workerReport.uri || ''),
+    flexToolReady: typeof LINE製造工具75_嘗試處理Webhook_ === 'function',
+    token: !!RichMenu38_取得Token_(),
+    errors: errors
+  };
+
+  console.log(JSON.stringify(result, null, 2));
+  return result;
+}
+
+function 上線38_LINE主管新圖_v190並同步() {
+  初始化38_LINE指令中心RichMenu快捷按鈕優化();
+
+  const spec = 測試38_LINE快捷RichMenu_本機規格();
+  if (!spec.成功) throw new Error('Rich Menu 規格未通過：' + spec.訊息);
+
+  測試38_LINE快捷RichMenu圖片讀取();
+
+  const before = 驗收38_LINE主管新圖_v190();
+  if (!before.success) throw new Error('v190 上線前驗收未通過：' + JSON.stringify(before));
+
+  const boss = 建立38_LINE主管快捷RichMenu();
+  const worker = 建立38_LINE一般員工快捷RichMenu();
+  const def = 設定38_LINE一般員工快捷RichMenu為預設();
+  const sync = RichMenu38_批次同步已綁定使用者_();
+
+  const result = {
+    success: true,
+    version: RichMenu38_版本,
+    supervisorRichMenuId: boss.richMenuId,
+    workerRichMenuId: worker.richMenuId,
+    imageUrl: RichMenu38_主管圖片網址_(),
+    pwaV4Url: RichMenu38_報工V4網址_(),
+    sync: sync,
+    defaultWorker: def,
+    flexToolReady: typeof LINE製造工具75_嘗試處理Webhook_ === 'function'
+  };
+
   console.log(JSON.stringify(result, null, 2));
   return result;
 }
