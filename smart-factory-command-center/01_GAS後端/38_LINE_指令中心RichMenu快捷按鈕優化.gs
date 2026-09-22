@@ -1,14 +1,14 @@
 /**
  * 38_LINE｜指令中心 Rich Menu 快捷按鈕優化
- * 版本：v1.8.6
- * 目的：主管與一般員工 Rich Menu 皆加入智慧5S正式入口，並保留既有戰情、報工、身份與指令中心。
+ * 版本：v1.8.8
+ * 目的：主管六格整合「製造生產／製造工具」，製造工具串接 75_LINE Flex 中心；一般員工入口維持既有報工、5S、身份與指令中心。
  */
 
-const RichMenu38_版本 = 'v1.8.6_38_LINE智慧5S快捷入口';
+const RichMenu38_版本 = 'v1.8.8_38_LINE製造工具正式網址修正';
 const RichMenu38_寬度 = 1200;
 const RichMenu38_高度 = 810;
 const RichMenu38_正式主庫ID = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
-const RichMenu38_預設主管圖片 = 'https://qhero70.github.io/smart-factory-worker-app/line/richmenu-supervisor-v186.png';
+const RichMenu38_預設主管圖片 = 'https://qhero70.github.io/smart-factory-worker-app/line/richmenu-supervisor-v188.png';
 const RichMenu38_預設員工圖片 = 'https://qhero70.github.io/smart-factory-worker-app/line/richmenu-worker-v186.png';
 const RichMenu38_紀錄表 = '38_LINE快捷選單上線紀錄';
 const RichMenu38_紀錄欄位 = ['時間戳', '版本', '目標選單', 'richMenuId', '動作', '結果', '圖片網址', '備註'];
@@ -153,18 +153,29 @@ function RichMenu38_批次同步已綁定使用者_() {
 }
 
 function RichMenu38_取得主管設定_() {
-  const reportUrl = RichMenu38_取得WebAppURL_();
-  const 報工Action = reportUrl ? { type: 'uri', label: '報工作業', uri: reportUrl + '?page=07_報工作業V2' } : { type: 'message', label: '報工作業', text: '報工作業' };
-  const 智慧5SAction = { type: 'uri', label: '智慧5S', uri: RichMenu38_智慧5S網址_() };
+  const 製造生產網址 = RichMenu38_製造生產網址_();
+  const 製造生產Action = 製造生產網址
+    ? { type: 'uri', label: '製造生產', uri: 製造生產網址 }
+    : { type: 'message', label: '製造生產', text: '報工作業' };
+
+  const 製造工具Action = {
+    type: 'message',
+    label: '製造工具',
+    text: '製造工具'
+  };
+
   return {
-    size: { width: RichMenu38_寬度, height: RichMenu38_高度 }, selected: true, name: '38_主管快捷入口_' + RichMenu38_版本, chatBarText: '主管入口',
+    size: { width: RichMenu38_寬度, height: RichMenu38_高度 },
+    selected: true,
+    name: '38_主管快捷入口_' + RichMenu38_版本,
+    chatBarText: '主管入口',
     areas: [
       { bounds: { x: 0, y: 0, width: 400, height: 405 }, action: { type: 'message', label: '主管戰情', text: '主管戰情' } },
       { bounds: { x: 400, y: 0, width: 400, height: 405 }, action: { type: 'message', label: '今日戰情', text: '今日戰情' } },
       { bounds: { x: 800, y: 0, width: 400, height: 405 }, action: { type: 'message', label: '指令中心', text: '指令' } },
-      { bounds: { x: 0, y: 405, width: 400, height: 405 }, action: 報工Action },
+      { bounds: { x: 0, y: 405, width: 400, height: 405 }, action: 製造生產Action },
       { bounds: { x: 400, y: 405, width: 400, height: 405 }, action: { type: 'message', label: '我的狀態', text: '我的狀態' } },
-      { bounds: { x: 800, y: 405, width: 400, height: 405 }, action: 智慧5SAction }
+      { bounds: { x: 800, y: 405, width: 400, height: 405 }, action: 製造工具Action }
     ]
   };
 }
@@ -221,10 +232,96 @@ function RichMenu38_讀圖片_(url) {
   return blob;
 }
 
-function RichMenu38_主管圖片網址_() { return String(PropertiesService.getScriptProperties().getProperty('LINE_RICH_MENU_主管入口圖片網址_v186') || RichMenu38_預設主管圖片).trim(); }
+function RichMenu38_主管圖片網址_() {
+  const props = PropertiesService.getScriptProperties();
+  return String(
+    props.getProperty('LINE_RICH_MENU_主管入口圖片網址_v188') ||
+    props.getProperty('LINE_RICH_MENU_主管入口圖片網址_v187') ||
+    props.getProperty('LINE_RICH_MENU_主管入口圖片網址_v186') ||
+    RichMenu38_預設主管圖片
+  ).trim();
+}
 function RichMenu38_員工圖片網址_() { return String(PropertiesService.getScriptProperties().getProperty('LINE_RICH_MENU_一般員工圖片網址_v186') || RichMenu38_預設員工圖片).trim(); }
 function RichMenu38_智慧5S網址_() { if (typeof LINE智慧5S入口39_取得網址_ === 'function') return LINE智慧5S入口39_取得網址_('首頁'); return 'https://qhero70.github.io/smart-factory-worker-app/5s/?來源=LINEBOT_RICHMENU&v=1360'; }
-function RichMenu38_取得WebAppURL_() { try { return String(ScriptApp.getService().getUrl() || '').trim(); } catch (err) { return ''; } }
+function RichMenu38_取得WebAppURL_() {
+  const props = PropertiesService.getScriptProperties();
+  const propertyUrl = String(props.getProperty('LINE_正式WEB_APP_URL') || '').trim();
+
+  if (
+    propertyUrl &&
+    /^https:\/\//i.test(propertyUrl) &&
+    /\/exec(?:\?|$)/i.test(propertyUrl) &&
+    !/\/dev(?:\?|$)/i.test(propertyUrl)
+  ) {
+    return propertyUrl.split('?')[0].trim();
+  }
+
+  return 'https://script.google.com/macros/s/AKfycby2ghuwkxTr1kbt2bU9D3U24O55c6GhcabA1IhDC67OEw86pH6MjS3nnBMASnjEmggw/exec';
+}
+
+function RichMenu38_製造生產網址_() {
+  const props = PropertiesService.getScriptProperties();
+  const customUrl = String(props.getProperty('LINE_RICH_MENU_製造生產網址_v188') || '').trim();
+
+  if (
+    customUrl &&
+    /^https:\/\//i.test(customUrl) &&
+    !/script\.google\.com\/.*\/dev(?:\?|$)/i.test(customUrl)
+  ) {
+    return customUrl;
+  }
+
+  const baseUrl = RichMenu38_取得WebAppURL_();
+  if (!baseUrl) return '';
+
+  return RichMenu38_組合查詢網址_(baseUrl, 'page', '07_報工作業V2');
+}
+
+function RichMenu38_組合查詢網址_(baseUrl, key, value) {
+  const base = String(baseUrl || '').trim();
+  if (!base) return '';
+  const separator = base.indexOf('?') >= 0 ? '&' : '?';
+  return base + separator + encodeURIComponent(key) + '=' + encodeURIComponent(value);
+}
+
+function 驗收38_LINE製造工具中心_v188() {
+  const errors = [];
+  const boss = RichMenu38_取得主管設定_();
+  const worker = RichMenu38_取得員工設定_();
+  const bossCheck = RichMenu38_檢查設定_(boss);
+  const workerCheck = RichMenu38_檢查設定_(worker);
+  const production = boss.areas[3] && boss.areas[3].action ? boss.areas[3].action : {};
+  const tools = boss.areas[5] && boss.areas[5].action ? boss.areas[5].action : {};
+  const productionUrl = String(production.uri || '');
+
+  if (!bossCheck.成功) errors.push('主管選單規格失敗：' + bossCheck.訊息);
+  if (!workerCheck.成功) errors.push('員工選單規格失敗：' + workerCheck.訊息);
+  if (production.label !== '製造生產' || production.type !== 'uri') errors.push('主管左下不是製造生產正式 URI');
+  if (/\/dev(?:\?|$)/i.test(productionUrl)) errors.push('製造生產仍使用 /dev');
+  if (productionUrl.indexOf('/exec') < 0) errors.push('製造生產不是正式 /exec');
+  if (tools.type !== 'message' || tools.text !== '製造工具') errors.push('主管右下未串接製造工具');
+  if (typeof LINE製造工具75_嘗試處理Webhook_ !== 'function') errors.push('找不到 75_LINE 製造工具模組');
+
+  const result = {
+    success: errors.length === 0,
+    version: RichMenu38_版本,
+    supervisor: {
+      layout: ['主管戰情', '今日戰情', '指令中心', '製造生產', '我的狀態', '製造工具'],
+      productionAction: production,
+      toolAction: tools
+    },
+    worker: { check: workerCheck },
+    officialWebApp: RichMenu38_取得WebAppURL_(),
+    productionUrl: productionUrl,
+    tool75: typeof LINE製造工具75_嘗試處理Webhook_ === 'function',
+    token: !!RichMenu38_取得Token_(),
+    errors: errors
+  };
+
+  console.log(JSON.stringify(result, null, 2));
+  return result;
+}
+
 function RichMenu38_取得Token_() { if (typeof 取得LINEToken_ === 'function') return String(取得LINEToken_() || '').trim(); return String(PropertiesService.getScriptProperties().getProperty('LINE_CHANNEL_ACCESS_TOKEN') || '').trim(); }
 function RichMenu38_取得目前預設RichMenu_() { return RichMenu38_呼叫LINE_('get', 'https://api.line.me/v2/bot/user/all/richmenu', null); }
 function RichMenu38_呼叫LINE_(method, url, payload) { const opt = { method: method, headers: { Authorization: 'Bearer ' + RichMenu38_取得Token_() }, muteHttpExceptions: true }; if (payload !== null && payload !== undefined) { opt.contentType = 'application/json'; opt.payload = JSON.stringify(payload); } const res = UrlFetchApp.fetch(url, opt); const code = res.getResponseCode(); const body = res.getContentText() || '{}'; if (code < 200 || code >= 300) throw new Error('LINE API 失敗 HTTP ' + code + '：' + body); try { return JSON.parse(body || '{}'); } catch (err) { return { 狀態碼: code, 原始回應: body }; } }
