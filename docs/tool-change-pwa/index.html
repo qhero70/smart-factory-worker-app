@@ -19,6 +19,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style id="dynamic-page-style">@page { size: A4 portrait; margin: 0; }</style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -364,6 +365,39 @@ html, body {
     min-height: 110px;
     transition: border-color .15s, box-shadow .15s, background .15s;
 }
+.tool-type-select {
+    flex: 1;
+    min-width: 0;
+    width: 100%;
+    padding: 14px 40px 14px 15px;
+    border-radius: 14px;
+    border: 1.5px solid var(--line);
+    background: var(--ghost);
+    font-size: 16px !important;
+    font-family: inherit;
+    font-weight: 700;
+    color: var(--ink);
+    appearance: auto;
+    -webkit-appearance: menulist;
+}
+.tool-type-select:focus {
+    outline: none;
+    background: var(--white);
+    border-color: var(--g-blue);
+    box-shadow: 0 0 0 3px rgba(26,115,232,.13);
+}
+.export-btn.image {
+    color:#6A1B9A;
+    border-color:#D6B8E8;
+    background:#F7EEFC;
+}
+@media (min-width: 768px) {
+    #export-btn-container { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+}
+@media (max-width: 767px) {
+    #export-btn-container { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
 .textarea-field:focus {
     outline: none;
     background: var(--white);
@@ -1992,7 +2026,7 @@ html, body {
             <div class="ms-sec" id="sec1">
                 <h3><span class="n">01</span>系統總覽與適用對象<span class="ui-en">System Overview & Intended Users</span></h3><div class="ms-en" data-en-summary="sec1"><b>English — System Overview</b><br>
 This PWA is a guided tool-sheet generator for CNC lathe and milling operations. Instead of formatting Excel manually, the wizard asks for production and tooling information step by step and fills a print-ready A4 or A3 sheet automatically.
-<ul><li>Type 1: A4 portrait for Lathe N/C, up to 8 displayed tool rows, chuck pressure and one QR Code.</li><li>Type 2: A3 landscape for Milling M/C, 10+ tool rows, tool-image gallery, #500 settings, machine tips and two QR Codes.</li><li>Local autosave stores up to 10 sheets in this browser. Word, Excel, JSON backup and PDF/print output are supported.</li></ul></div>
+<ul><li>Type 1: A4 portrait for Lathe N/C, up to 8 displayed tool rows, chuck pressure, one QR Code, an A4 Tool Type dropdown, and 2480×3508 PNG export.</li><li>Type 2: A3 landscape for Milling M/C, 10+ tool rows, tool-image gallery, #500 settings, machine tips and two QR Codes.</li><li>Local autosave stores up to 10 sheets in this browser. Word, Excel, JSON backup and PDF/print output are supported.</li></ul></div>
 
                 <h4>1-1 這套系統是什麼？</h4>
                 <p>
@@ -3435,6 +3469,7 @@ On desktop, press Enter to submit standard text inputs. Use Preview for quick co
             <button class="export-btn desktop-only" onclick="switchTab('chat')">↩ 返回編輯 / Back to Edit</button>
             <button class="export-btn word" onclick="exportWordFile()">📝 Word</button>
             <button class="export-btn excel" onclick="exportExcelFile()">📊 Excel</button>
+            <button class="export-btn image" id="a4-image-export-btn" onclick="exportA4ImageFile()">🖼️ A4圖片<br><span class="ui-en">A4 PNG</span></button>
             <button class="export-btn drive" onclick="saveCurrentToGoogleDrive()">☁️ Google Drive</button>
         </div>
 
@@ -3683,6 +3718,7 @@ On desktop, press Enter to submit standard text inputs. Use Preview for quick co
                 <button class="tm-cloud-btn save" onclick="saveCurrentToGoogleDrive()">☁️ 儲存 Word＋Excel＋備份到 Google Drive<br><span class="ui-en">Save Word + Excel + Backup to Google Drive</span></button>
                 <button class="tm-cloud-btn import" onclick="exportWordFile()">📝 匯出 Word<br><span class="ui-en">Export Word</span></button>
                 <button class="tm-cloud-btn folder" onclick="exportExcelFile()">📊 匯出 Excel<br><span class="ui-en">Export Excel</span></button>
+                <button class="tm-cloud-btn import" onclick="exportA4ImageFile()">🖼️ 匯出 A4 圖片<br><span class="ui-en">Export A4 PNG</span></button>
                 <button class="tm-cloud-btn import" onclick="chooseGoogleDriveBackup()">📥 匯入雲端備份<br><span class="ui-en">Import Cloud Backup</span></button>
                 <button class="tm-cloud-btn folder" onclick="openGoogleDriveFolder()">📂 開啟雲端資料夾<br><span class="ui-en">Open Cloud Folder</span></button>
             </div>
@@ -3783,6 +3819,17 @@ S85X=主軸同步攻牙
 OXX88=刀庫總模式
 OXX99=刀庫總結模式`;
 
+const A4_TOOL_TYPES = [
+    { value: '內徑粗車', label: '內徑粗車 / ID Roughing' },
+    { value: '外徑粗車', label: '外徑粗車 / OD Roughing' },
+    { value: '內徑精車', label: '內徑精車 / ID Finishing' },
+    { value: '外徑精車', label: '外徑精車 / OD Finishing' },
+    { value: '內徑牙刀', label: '內徑牙刀 / ID Threading' },
+    { value: '外徑牙刀', label: '外徑牙刀 / OD Threading' },
+    { value: '內徑構槽刀', label: '內徑構槽刀 / ID Grooving' },
+    { value: '外徑構槽刀', label: '外徑構槽刀 / OD Grooving' }
+];
+
 /* ============================================================
    流程定義
    ============================================================ */
@@ -3802,7 +3849,7 @@ const flowType1 = [
 
 const toolFlowType1 = [
     { id: 't_seq', type: 'text', q: '請輸入【刀序 / N工序 / N Process】\nEnter process number', placeholder: 'N10' },
-    { id: 't_type', type: 'text', q: '請輸入【刀具形式 / Tool Type】', placeholder: '外徑粗車 / OD Roughing' },
+    { id: 't_type', type: 'select', q: '請選擇【刀具形式 / Tool Type】\nSelect the tool type', placeholder: '請選擇 / Select', options: A4_TOOL_TYPES },
     { id: 't_no', type: 'text', q: '請輸入【刀號 / Tool No.】', placeholder: 'T01' },
     { id: 't_h', type: 'text', q: '請輸入【H值 / H Offset】', placeholder: '01', optional: true },
     { id: 't_gx', type: 'text', q: '請輸入此 N工序的【G補正 X軸 / G Offset X】', placeholder: '例 Example: X-0.02', optional: true },
@@ -4097,6 +4144,7 @@ function changeFormat(type) {
 
     updateA4Preview();
     updateA3Preview();
+    updateA4ImageButtonVisibility();
     restartChat();
     addBotMessage(type === 2
         ? '🔄 已切換為【第二類 A3 格式 / Type 2 A3】\n我們從頭開始建立。 / Starting a new sheet.'
@@ -4104,9 +4152,106 @@ function changeFormat(type) {
     setTimeout(adjustPreviewScale, 60);
 }
 
+function updateA4ImageButtonVisibility() {
+    const btn = document.getElementById('a4-image-export-btn');
+    if (btn) btn.style.display = Number(appData.type) === 1 ? '' : 'none';
+}
+
 function doPrint() {
     saveCurrent();
     setTimeout(() => window.print(), 80);
+}
+
+/* ============================================================
+   A4 PNG 圖片匯出（2480 × 3508 px）
+   ============================================================ */
+async function 建立A4圖片檔_(table) {
+    if (Number((table && table.data && table.data.type) || appData.type) !== 1) {
+        throw new Error('A4 圖片僅適用第一類 A4 車床格式 / A4 PNG is only available for Type 1 A4.');
+    }
+    if (typeof html2canvas === 'undefined') {
+        throw new Error('A4 圖片元件尚未載入 / A4 image component is not loaded.');
+    }
+
+    updateA4Preview();
+    const target = document.getElementById('a4-document');
+    if (!target) throw new Error('找不到 A4 預覽 / A4 preview not found.');
+
+    const originalTransform = target.parentElement ? target.parentElement.style.transform : '';
+    const originalMarginBottom = target.parentElement ? target.parentElement.style.marginBottom : '';
+    if (target.parentElement) {
+        target.parentElement.style.transform = 'none';
+        target.parentElement.style.marginBottom = '0';
+    }
+
+    const rect = target.getBoundingClientRect();
+    const scale = rect.width > 0 ? (2480 / rect.width) : 3.12;
+
+    try {
+        const canvas = await html2canvas(target, {
+            scale,
+            backgroundColor: '#FFFFFF',
+            useCORS: true,
+            allowTaint: true,
+            logging: false,
+            imageTimeout: 15000,
+            width: target.scrollWidth,
+            height: target.scrollHeight,
+            windowWidth: Math.max(document.documentElement.clientWidth, target.scrollWidth),
+            windowHeight: Math.max(document.documentElement.clientHeight, target.scrollHeight)
+        });
+
+        const out = document.createElement('canvas');
+        out.width = 2480;
+        out.height = 3508;
+        const ctx = out.getContext('2d');
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, out.width, out.height);
+
+        const ratio = Math.min(out.width / canvas.width, out.height / canvas.height);
+        const dw = canvas.width * ratio;
+        const dh = canvas.height * ratio;
+        const dx = (out.width - dw) / 2;
+        const dy = (out.height - dh) / 2;
+        ctx.drawImage(canvas, dx, dy, dw, dh);
+
+        const blob = await new Promise((resolve, reject) => {
+            out.toBlob(b => b ? resolve(b) : reject(new Error('PNG 產生失敗 / PNG generation failed.')), 'image/png', 1);
+        });
+
+        return new File([blob], 匯出檔名_(table) + '_A4_2480x3508.png', { type: 'image/png' });
+    } finally {
+        if (target.parentElement) {
+            target.parentElement.style.transform = originalTransform;
+            target.parentElement.style.marginBottom = originalMarginBottom;
+        }
+        setTimeout(adjustPreviewScale, 30);
+    }
+}
+
+async function exportA4ImageFile() {
+    try {
+        if (Number(appData.type) !== 1) {
+            alert('A4 圖片匯出僅適用第一類 A4 車床格式。\nA4 image export is only available for Type 1 A4 Lathe.');
+            return;
+        }
+        const table = 取得目前匯出表格_();
+        const file = await 建立A4圖片檔_(table);
+
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+                title: 'A4 刀具表圖片 / A4 Tool Sheet Image',
+                text: 'A4 PNG 2480 × 3508 px，可存至 Google Drive。 / Save this A4 PNG to Google Drive.',
+                files: [file]
+            });
+            return;
+        }
+        下載檔案_(file);
+    } catch (e) {
+        if (e && e.name === 'AbortError') return;
+        console.error(e);
+        alert('A4 圖片匯出失敗 / A4 image export failed: ' + (e.message || e));
+    }
 }
 
 /* ============================================================
@@ -4353,17 +4498,22 @@ async function saveCurrentToGoogleDrive() {
         const jsonFile = 建立JSON備份檔_(table);
         const files = [wordFile, excelFile, jsonFile];
 
+        if (Number(table.data && table.data.type) === 1) {
+            const a4ImageFile = await 建立A4圖片檔_(table);
+            files.push(a4ImageFile);
+        }
+
         if (navigator.share && navigator.canShare && navigator.canShare({ files })) {
             await navigator.share({
-                title: '刀具表雲端備份｜Word + Excel + JSON',
-                text: '請選擇 Google Drive 儲存。 / Choose Google Drive to save.\nWord 與 Excel 可直接開啟，JSON 可回到刀具表精靈匯入還原。 / Word and Excel open directly; JSON can be imported back into Tool Sheet Wizard.',
+                title: '刀具表雲端備份｜Word + Excel + JSON + A4 PNG',
+                text: '請選擇 Google Drive 儲存。 / Choose Google Drive to save.\nA4 格式會另外附上 2480×3508 PNG 圖片。 / Type 1 A4 also includes a 2480×3508 PNG image.\nWord、Excel 可直接開啟，JSON 可匯入還原。 / Word and Excel open directly; JSON can be imported for restore.',
                 files
             });
             return;
         }
 
         files.forEach(下載檔案_);
-        alert('已產生 Word、Excel、JSON 三個檔案。\nWord, Excel, and JSON files are ready.\n請將檔案存入 Google Drive。\nSave the files to Google Drive.');
+        alert('已產生 Word、Excel、JSON；A4 格式另含 PNG 圖片。\nWord, Excel, JSON are ready; Type 1 A4 also includes a PNG image.\n請將檔案存入 Google Drive。\nSave the files to Google Drive.');
         openGoogleDriveFolder();
     } catch (error) {
         if (error && error.name === 'AbortError') return;
@@ -4551,6 +4701,7 @@ function loadTable(id) {
 
     updateA4Preview();
     updateA3Preview();
+    updateA4ImageButtonVisibility();
     closeTableManager();
     restoreChatView();
     switchTab('chat');
@@ -4637,6 +4788,11 @@ function adjustPreviewScale() {
     }
 }
 
+document.addEventListener('click', (e) => {
+    const typePicker = e.target.closest('[data-tooltype-picker]');
+    if (typePicker) openA4ToolTypePicker(Number(typePicker.dataset.tooltypePicker));
+});
+
 window.addEventListener('resize', () => {
     if (window.innerWidth >= 768) {
         document.body.classList.remove('mobile-view-chat', 'mobile-view-preview');
@@ -4713,6 +4869,53 @@ function renderInput() {
             isToolLoop = true; toolStepIndex = 0; currentTool = {}; renderInput();
         };
         inputContainer.appendChild(btn);
+    }
+    else if (currentStepObj.type === 'select') {
+        const selectWrap = document.createElement('div');
+        selectWrap.className = 'input-row';
+
+        const selectEl = document.createElement('select');
+        selectEl.className = 'tool-type-select';
+
+        const placeholderOpt = document.createElement('option');
+        placeholderOpt.value = '';
+        placeholderOpt.textContent = currentStepObj.placeholder || '請選擇 / Select';
+        placeholderOpt.disabled = true;
+        placeholderOpt.selected = true;
+        selectEl.appendChild(placeholderOpt);
+
+        (currentStepObj.options || []).forEach(opt => {
+            const option = document.createElement('option');
+            if (typeof opt === 'string') {
+                option.value = opt;
+                option.textContent = opt;
+            } else {
+                option.value = opt.value;
+                option.textContent = opt.label || opt.value;
+            }
+            selectEl.appendChild(option);
+        });
+
+        const sendBtn = document.createElement('button');
+        sendBtn.textContent = '確認 / Confirm';
+        sendBtn.className = 'btn-send';
+
+        const submitSelect = () => {
+            if (!selectEl.value) {
+                alert('請先選擇刀具形式。\nPlease select a tool type.');
+                return;
+            }
+            handleSubmission(selectEl.value);
+        };
+
+        sendBtn.onclick = submitSelect;
+        selectEl.onchange = () => {
+            if (selectEl.value) submitSelect();
+        };
+
+        selectWrap.appendChild(selectEl);
+        selectWrap.appendChild(sendBtn);
+        inputContainer.appendChild(selectWrap);
     }
     else if (currentStepObj.type === 'file') {
         const fileLabel = document.createElement('label');
@@ -5130,6 +5333,25 @@ function onEditableBlur(e) {
     saveCurrent(true);
 }
 
+function openA4ToolTypePicker(rowIdx) {
+    const current = (appData.tools[rowIdx] && appData.tools[rowIdx].t_type) || '';
+    const labels = A4_TOOL_TYPES.map((item, idx) => `${idx + 1}. ${item.label}`).join('\n');
+    const answer = prompt(
+        '請選擇刀具形式 / Select Tool Type\n\n' + labels + '\n\n請輸入 1-' + A4_TOOL_TYPES.length + '：',
+        current ? String(Math.max(1, A4_TOOL_TYPES.findIndex(x => x.value === current) + 1)) : ''
+    );
+    if (answer === null) return;
+    const n = Number(String(answer).trim());
+    if (!Number.isInteger(n) || n < 1 || n > A4_TOOL_TYPES.length) {
+        alert('請輸入 1-' + A4_TOOL_TYPES.length + '。 / Enter a number from 1 to ' + A4_TOOL_TYPES.length + '.');
+        return;
+    }
+    while (appData.tools.length <= rowIdx) appData.tools.push({});
+    appData.tools[rowIdx].t_type = A4_TOOL_TYPES[n - 1].value;
+    saveCurrent(true);
+    updateA4Preview();
+}
+
 function onToolCellBlur(e) {
     const el = e.target.closest('[data-tool]');
     if (!el) return;
@@ -5233,8 +5455,8 @@ function updateA4Preview() {
                      data-tool="a4" data-row="${i}" data-key="t_seq">${esc(tool.t_seq || '')}</div>
             </td>
             <td class="font-bold text-lg">
-                <div class="ed-cell" contenteditable="true" spellcheck="false"
-                     data-tool="a4" data-row="${i}" data-key="t_type">${esc(tool.t_type || '')}</div>
+                <div class="ed-cell" role="button" tabindex="0"
+                     data-tooltype-picker="${i}" title="點擊選擇刀具形式 / Click to select tool type">${esc(tool.t_type || '')}</div>
             </td>
             <td class="font-bold text-lg">
                 <div class="ed-cell" contenteditable="true" spellcheck="false"
