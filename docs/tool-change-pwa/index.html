@@ -414,7 +414,7 @@ html, body {
     background:#F7EEFC;
 }
 @media (min-width: 768px) {
-    #export-btn-container { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    #export-btn-container { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 }
 @media (max-width: 767px) {
     #export-btn-container { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -1160,6 +1160,40 @@ html, body {
     #table-manager { align-items: center; }
     .tm-panel { border-radius: 22px; max-height: 82vh; }
 }
+
+/* =================================================================
+   照片檢視器 / Photo Viewer
+   ================================================================= */
+#image-viewer {
+    position:fixed; inset:0; z-index:140; display:none;
+    background:rgba(0,0,0,.94); align-items:center; justify-content:center;
+    flex-direction:column; touch-action:none;
+}
+#image-viewer.show { display:flex; }
+#image-viewer img {
+    max-width:92vw; max-height:72vh; object-fit:contain;
+    transform-origin:center center; transition:transform .08s linear;
+}
+.iv-name { color:#fff; font-size:.78rem; margin:12px 16px 8px; text-align:center; word-break:break-all; }
+.iv-tools { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; padding:8px 12px 20px; }
+.iv-btn { border:none; border-radius:999px; padding:11px 16px; background:#fff; color:#202124; font-weight:800; font-family:inherit; }
+.iv-close { position:absolute; right:18px; top:calc(16px + env(safe-area-inset-top)); font-size:28px; color:#fff; background:rgba(255,255,255,.15); border:none; width:46px; height:46px; border-radius:50%; }
+
+#photo-folder {
+    position:fixed; inset:0; z-index:130; display:none; background:rgba(32,33,36,.55);
+    align-items:flex-end; justify-content:center;
+}
+#photo-folder.show { display:flex; }
+.pf-panel {
+    width:100%; max-width:620px; max-height:88vh; overflow:auto; background:#fff;
+    border-radius:22px 22px 0 0; padding:14px 16px calc(20px + env(safe-area-inset-bottom));
+}
+.pf-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.pf-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; }
+.pf-item { border:1px solid var(--line); border-radius:12px; overflow:hidden; background:#f8f9fa; }
+.pf-item img { width:100%; aspect-ratio:1; object-fit:cover; display:block; }
+.pf-caption { padding:6px; font-size:.62rem; line-height:1.25; word-break:break-all; color:#5f6368; }
+@media(min-width:768px){ #photo-folder{align-items:center}.pf-panel{border-radius:22px}.pf-grid{grid-template-columns:repeat(5,1fr)}}
 
 /* =================================================================
    彈窗：頭像選擇
@@ -3501,6 +3535,7 @@ On desktop, press Enter to submit standard text inputs. Use Preview for quick co
         <div id="export-btn-container">
             <button class="export-btn desktop-only" onclick="switchTab('chat')">↩ 返回編輯 / Back to Edit</button>
             <button class="export-btn excel" onclick="exportExcelFile()">📊 Excel</button>
+            <button class="export-btn excel" onclick="exportMasterExcelFile()">📚 主檔 Excel<br><span class="ui-en">Master Workbook</span></button>
             <button class="export-btn image" id="a4-image-export-btn" onclick="exportA4ImageFile()">🖼️ A4圖片<br><span class="ui-en">A4 PNG</span></button>
             <button class="export-btn drive" onclick="saveCurrentToGoogleDrive()">☁️ Google Drive</button>
         </div>
@@ -3752,7 +3787,9 @@ On desktop, press Enter to submit standard text inputs. Use Preview for quick co
             <div class="tm-cloud-grid">
                 <button class="tm-cloud-btn save" onclick="saveCurrentToGoogleDrive()">☁️ 儲存 Excel＋備份到 Google Drive<br><span class="ui-en">Save Excel + Backup to Google Drive</span></button>
                 <button class="tm-cloud-btn folder" onclick="exportExcelFile()">📊 匯出 Excel<br><span class="ui-en">Export Excel</span></button>
+                <button class="tm-cloud-btn save" onclick="exportMasterExcelFile()">📚 主檔 Excel｜全部表格分頁<br><span class="ui-en">Master Workbook · One sheet per tool sheet</span></button>
                 <button class="tm-cloud-btn import" onclick="exportA4ImageFile()">🖼️ 匯出 A4 圖片<br><span class="ui-en">Export A4 PNG</span></button>
+                <button class="tm-cloud-btn folder" onclick="openPhotoFolder()">📷 照片資料夾<br><span class="ui-en">Photo Folder</span></button>
                 <button class="tm-cloud-btn import" onclick="chooseGoogleDriveBackup()">📥 匯入雲端備份<br><span class="ui-en">Import Cloud Backup</span></button>
                 <button class="tm-cloud-btn folder" onclick="openGoogleDriveFolder()">📂 開啟雲端資料夾<br><span class="ui-en">Open Cloud Folder</span></button>
             </div>
@@ -3764,6 +3801,32 @@ On desktop, press Enter to submit standard text inputs. Use Preview for quick co
                 💾 本機自動暫存最多 <b>10 張</b>；可輸出 Excel / JSON 備份<br><span class="ui-en">Up to 10 local sheets · Export Excel / JSON backup</span><br>手機可分享至 Google Drive，電腦可直接下載並預覽<br><span class="ui-en">Mobile can share to Google Drive; desktop can download and preview directly.</span>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     照片資料夾 / Photo Folder
+     ============================================================ -->
+<div id="photo-folder" onclick="if(event.target===this) closePhotoFolder()">
+    <div class="pf-panel">
+        <div class="pf-head">
+            <h3>📷 照片資料夾 <span class="ui-en inline">Photo Folder</span></h3>
+            <button class="tm-close" onclick="closePhotoFolder()">&times;</button>
+        </div>
+        <div id="photo-folder-grid" class="pf-grid"></div>
+    </div>
+</div>
+
+<div id="image-viewer">
+    <button class="iv-close" onclick="closeImageViewer()">&times;</button>
+    <img id="iv-image" alt="Tool photo">
+    <div id="iv-name" class="iv-name"></div>
+    <div class="iv-tools">
+        <button class="iv-btn" onclick="zoomImageViewer(-0.25)">−</button>
+        <button class="iv-btn" onclick="resetImageViewerZoom()">100%</button>
+        <button class="iv-btn" onclick="zoomImageViewer(0.25)">＋</button>
+        <button class="iv-btn" onclick="saveViewerImage()">📥 儲存照片 / Save Image</button>
+        <button class="iv-btn" id="iv-replace-btn">🔄 更換 / Replace</button>
     </div>
 </div>
 
@@ -4421,18 +4484,8 @@ async function exportA4ImageFile() {
         }
         const table = 取得目前匯出表格_();
         const file = await 建立A4圖片檔_(table);
-
-        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-            await navigator.share({
-                title: 'A4 刀具表圖片 / A4 Tool Sheet Image',
-                text: 'A4 PNG 2480 × 3508 px，可存至 Google Drive。 / Save this A4 PNG to Google Drive.',
-                files: [file]
-            });
-            return;
-        }
         下載檔案_(file);
     } catch (e) {
-        if (e && e.name === 'AbortError') return;
         console.error(e);
         alert('A4 圖片匯出失敗 / A4 image export failed: ' + (e.message || e));
     }
@@ -4531,6 +4584,106 @@ function 建立Excel檔_(table) {
     return new File([bytes], 匯出檔名_(table) + '.xlsx', {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     });
+}
+
+function Excel分頁名稱_(name, used) {
+    let base = String(name || '未命名')
+        .replace(/[\\/:*?\[\]]/g, '_')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 31) || '未命名';
+    let candidate = base;
+    let n = 2;
+    while (used.has(candidate)) {
+        const suffix = '_' + n++;
+        candidate = base.slice(0, Math.max(1, 31 - suffix.length)) + suffix;
+    }
+    used.add(candidate);
+    return candidate;
+}
+
+function 建立主檔Excel_() {
+    if (typeof XLSX === 'undefined') throw new Error('Excel 元件尚未載入 / Excel component not loaded.');
+    saveCurrent(true);
+
+    const tables = store.tables
+        .filter(t => t && t.data)
+        .slice()
+        .sort((a,b) => {
+            const ap = String(Number(a.data.type)===2 ? (a.data.productName||'') : (a.data.partName||''));
+            const bp = String(Number(b.data.type)===2 ? (b.data.productName||'') : (b.data.partName||''));
+            const c = ap.localeCompare(bp, 'zh-Hant');
+            if (c !== 0) return c;
+            const ao = String(Number(a.data.type)===2 ? (a.data.headerTitle||'') : (a.data.processCode||''));
+            const bo = String(Number(b.data.type)===2 ? (b.data.headerTitle||'') : (b.data.processCode||''));
+            return ao.localeCompare(bo, 'zh-Hant');
+        });
+
+    if (!tables.length) throw new Error('目前沒有可彙整的刀具表 / No tool sheets to combine.');
+
+    const wb = XLSX.utils.book_new();
+    const masterRows = [[
+        '品名 / Part Name','工序 / Process','機器號碼 / Machine No.',
+        '客戶品號 / Customer P/N','產品編號 / Product No.',
+        '加工時間 / Cycle Time','每日數量 / Daily Qty','格式 / Format','更新時間 / Updated'
+    ]];
+
+    tables.forEach(t => {
+        const d = t.data;
+        const a3 = Number(d.type) === 2;
+        masterRows.push([
+            a3 ? (d.productName||'') : (d.partName||''),
+            a3 ? (d.headerTitle||'') : (d.processCode||''),
+            a3 ? '' : (d.machineNo||''),
+            a3 ? (d.productNo||'') : (d.partNo||''),
+            a3 ? (d.customerNo1||'') : (d.customerNo||''),
+            a3 ? (d.processTime2||'') : (d.processTime||''),
+            a3 ? (d.dailyQty2||'') : (d.dailyQty||''),
+            a3 ? 'A3' : 'A4',
+            new Date(t.updatedAt || t.createdAt || Date.now()).toLocaleString('zh-TW')
+        ]);
+    });
+
+    const wsMaster = XLSX.utils.aoa_to_sheet(masterRows);
+    wsMaster['!cols'] = [
+        {wch:24},{wch:16},{wch:14},{wch:22},{wch:22},{wch:18},{wch:18},{wch:10},{wch:22}
+    ];
+    XLSX.utils.book_append_sheet(wb, wsMaster, '主檔_Master');
+
+    const used = new Set(['主檔_Master']);
+    tables.forEach(t => {
+        const d = t.data;
+        const data = 取得匯出資料_(t);
+        const part = Number(d.type)===2 ? (d.productName||'A3') : (d.partName||'A4');
+        const process = Number(d.type)===2 ? (d.headerTitle||'') : (d.processCode||'');
+        const sheetName = Excel分頁名稱_([part, process].filter(Boolean).join('_'), used);
+
+        const rows = [
+            ['刀具表 / Tool Sheet', t.name || ''],
+            ...data.basic,
+            [],
+            data.headers,
+            ...data.rows
+        ];
+        const ws = XLSX.utils.aoa_to_sheet(rows);
+        ws['!cols'] = data.headers.map((_,i)=>({wch:i===data.headers.length-1?26:18}));
+        XLSX.utils.book_append_sheet(wb, ws, sheetName);
+    });
+
+    const bytes = XLSX.write(wb, {bookType:'xlsx',type:'array'});
+    return new File([bytes], '刀具表主檔_Master_' + getBackupTimestamp() + '.xlsx', {
+        type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    });
+}
+
+function exportMasterExcelFile() {
+    try {
+        const file = 建立主檔Excel_();
+        下載檔案_(file);
+    } catch (e) {
+        console.error(e);
+        alert('主檔 Excel 匯出失敗 / Master Excel export failed: ' + (e.message || e));
+    }
 }
 
 function 建立JSON備份檔_(table) {
@@ -5348,7 +5501,10 @@ function handleSubmission(val, isImage = false) {
         currentStepIndex++;
     } else {
         const stepId = toolFlow[toolStepIndex].id;
-        if ((stepId === 't_gx' || stepId === 't_gz') && val !== '') {
+        if (stepId === 't_image' && val) {
+            currentTool[stepId] = val;
+            currentTool.t_imageName = buildToolPhotoName(currentTool, (appData.type === 2 ? appData.tools2.length : appData.tools.length));
+        } else if ((stepId === 't_gx' || stepId === 't_gz') && val !== '') {
             const n = String(val).replace(/[XZxz]/g, '').trim();
             currentTool[stepId] = n;
         } else {
@@ -5555,7 +5711,14 @@ function initEditablePreview() {
     document.getElementById('preview-container').addEventListener('click', e => {
         const slot = e.target.closest('[data-imgrow]');
         if (slot) {
-            pickImageForTool(parseInt(slot.dataset.imgrow, 10));
+            const rowIdx = parseInt(slot.dataset.imgrow, 10);
+            const arr = Number(appData.type)===2 ? appData.tools2 : appData.tools;
+            const tool = arr && arr[rowIdx] ? arr[rowIdx] : null;
+            if (e.target.tagName === 'IMG' && tool && tool.t_image) {
+                openImageViewer(tool.t_image,rowIdx,tool.t_imageName || buildToolPhotoName(tool,rowIdx));
+            } else {
+                pickImageForTool(rowIdx);
+            }
             return;
         }
         const qr = e.target.closest('[data-qr]');
@@ -5601,6 +5764,33 @@ function onEditableBlur(e) {
     }
 
     saveCurrent(true);
+}
+
+function promptOptionPicker_(title, options, current) {
+    const labels = options.map((item,idx)=>(idx+1)+'. '+(item.label||item.value)).join('\n');
+    const currentIndex = Math.max(0, options.findIndex(x=>x.value===current));
+    const answer = prompt(title + '\n\n' + labels + '\n\n請輸入 / Enter 1-' + options.length + '：', current ? String(currentIndex+1) : '');
+    if (answer === null) return null;
+    const n = Number(String(answer).trim());
+    if (!Number.isInteger(n) || n < 1 || n > options.length) {
+        alert('請輸入 1-' + options.length + '。 / Enter 1-' + options.length + '.');
+        return null;
+    }
+    return options[n-1].value;
+}
+function openA4ProcessPicker(rowIdx) {
+    while (appData.tools.length <= rowIdx) appData.tools.push({});
+    const tool = appData.tools[rowIdx] || (appData.tools[rowIdx] = {});
+    const v = promptOptionPicker_('選擇 N工序 / Select N Process', A4_N_PROCESSES, tool.t_seq || '');
+    if (v == null) return;
+    tool.t_seq=v; saveCurrent(true); updateA4Preview();
+}
+function openA4ToolNoPicker(rowIdx) {
+    while (appData.tools.length <= rowIdx) appData.tools.push({});
+    const tool = appData.tools[rowIdx] || (appData.tools[rowIdx] = {});
+    const v = promptOptionPicker_('選擇刀號 / Select Tool No.', A4_TOOL_NUMBERS, tool.t_no || '');
+    if (v == null) return;
+    tool.t_no=v; saveCurrent(true); updateA4Preview();
 }
 
 function openA4ToolTypePicker(rowIdx) {
@@ -5649,6 +5839,112 @@ function onToolCellBlur(e) {
     saveCurrent(true);
 }
 
+function buildToolPhotoName(tool, index) {
+    const part = getSafeBackupName((appData.partName || appData.productName || '刀具'));
+    const process = getSafeBackupName(appData.processCode || appData.headerTitle || 'OP');
+    const seq = getSafeBackupName((tool && tool.t_seq) || ('N' + String((index + 1) * 10)));
+    const toolNo = getSafeBackupName((tool && tool.t_no) || ('T' + String(index + 1).padStart(2,'0')));
+    return [part, process, seq, toolNo].filter(Boolean).join('_') + '.jpg';
+}
+
+let viewerScale = 1;
+let viewerRow = -1;
+let viewerDataUrl = '';
+let viewerFileName = '';
+let viewerPinchDistance = 0;
+
+function openImageViewer(dataUrl, rowIdx, fileName) {
+    if (!dataUrl) return;
+    viewerScale = 1;
+    viewerRow = Number.isInteger(rowIdx) ? rowIdx : -1;
+    viewerDataUrl = dataUrl;
+    viewerFileName = fileName || 'tool-photo.jpg';
+    const img = document.getElementById('iv-image');
+    img.src = dataUrl;
+    img.style.transform = 'scale(1)';
+    document.getElementById('iv-name').textContent = viewerFileName;
+    document.getElementById('iv-replace-btn').onclick = () => {
+        const row = viewerRow;
+        closeImageViewer();
+        if (row >= 0) pickImageForTool(row);
+    };
+    document.getElementById('image-viewer').classList.add('show');
+}
+function closeImageViewer() { document.getElementById('image-viewer').classList.remove('show'); }
+function zoomImageViewer(delta) {
+    viewerScale = Math.min(5, Math.max(.5, viewerScale + delta));
+    document.getElementById('iv-image').style.transform = 'scale(' + viewerScale + ')';
+}
+function resetImageViewerZoom() {
+    viewerScale = 1;
+    document.getElementById('iv-image').style.transform = 'scale(1)';
+}
+function setupImageViewerGestures() {
+    const viewer = document.getElementById('image-viewer');
+    if (!viewer || viewer.dataset.gestureReady) return;
+    viewer.dataset.gestureReady = '1';
+    viewer.addEventListener('touchstart', e => {
+        if (e.touches.length === 2) {
+            viewerPinchDistance = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+        }
+    }, {passive:true});
+    viewer.addEventListener('touchmove', e => {
+        if (e.touches.length === 2 && viewerPinchDistance > 0) {
+            const d = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+            viewerScale = Math.min(5, Math.max(.5, viewerScale * (d / viewerPinchDistance)));
+            document.getElementById('iv-image').style.transform = 'scale(' + viewerScale + ')';
+            viewerPinchDistance = d;
+        }
+    }, {passive:true});
+    viewer.addEventListener('touchend', () => { viewerPinchDistance = 0; }, {passive:true});
+}
+async function dataUrlToFile_(dataUrl, name) {
+    const res = await fetch(dataUrl);
+    const blob = await res.blob();
+    return new File([blob], name || 'tool-photo.jpg', {type:blob.type || 'image/jpeg'});
+}
+async function saveViewerImage() {
+    const file = await dataUrlToFile_(viewerDataUrl, viewerFileName);
+    try {
+        if (navigator.share && navigator.canShare && navigator.canShare({files:[file]})) {
+            await navigator.share({title:viewerFileName,files:[file]});
+        } else {
+            下載檔案_(file);
+        }
+    } catch (e) {
+        if (e && e.name === 'AbortError') return;
+        下載檔案_(file);
+    }
+}
+function currentPhotoItems() {
+    const arr = Number(appData.type)===2 ? (appData.tools2||[]) : (appData.tools||[]);
+    return arr.map((tool,index)=>({tool,index})).filter(x=>x.tool && x.tool.t_image);
+}
+function openPhotoFolder() {
+    const grid = document.getElementById('photo-folder-grid');
+    const items = currentPhotoItems();
+    grid.innerHTML = items.length ? items.map(({tool,index}) =>
+        '<div class="pf-item" data-photo-index="' + index + '"><img src="' + tool.t_image + '"><div class="pf-caption">' +
+        esc(tool.t_imageName || buildToolPhotoName(tool,index)) + '</div></div>'
+    ).join('') : '<div style="grid-column:1/-1;text-align:center;color:#9aa0a6;padding:32px 8px;">尚無照片 / No photos yet</div>';
+    grid.querySelectorAll('[data-photo-index]').forEach(el => {
+        el.onclick = () => {
+            const i = Number(el.dataset.photoIndex);
+            const arr = Number(appData.type)===2 ? appData.tools2 : appData.tools;
+            const tool = arr[i];
+            openImageViewer(tool.t_image,i,tool.t_imageName || buildToolPhotoName(tool,i));
+        };
+    });
+    document.getElementById('photo-folder').classList.add('show');
+}
+function closePhotoFolder() { document.getElementById('photo-folder').classList.remove('show'); }
+
 function pickImageForTool(rowIdx) {
     const input = document.createElement('input');
     input.type = 'file';
@@ -5663,6 +5959,7 @@ function pickImageForTool(rowIdx) {
             while (arr.length <= rowIdx) arr.push({});
             if (!arr[rowIdx]) arr[rowIdx] = {};
             arr[rowIdx].t_image = dataUrl;
+            arr[rowIdx].t_imageName = buildToolPhotoName(arr[rowIdx], rowIdx);
             saveCurrent(true);
             updateA4Preview();
             updateA3Preview();
@@ -5719,21 +6016,21 @@ function updateA4Preview() {
         tr.className = 'tool-row';
 
         const imgHtml = tool.t_image
-            ? `<div class="tool-img-container" data-imgrow="${i}" title="點擊更換圖片"><img src="${tool.t_image}"></div>`
+            ? `<div class="tool-img-container" data-imgrow="${i}" title="點擊放大 / Tap to zoom"><img src="${tool.t_image}"></div>`
             : `<div class="tool-img-container tool-img-empty" data-imgrow="${i}" title="點擊上傳圖片">＋</div>`;
 
         tr.innerHTML = `
             <td class="font-bold text-lg bg-[#f2f2f2]">
-                <div class="ed-cell" contenteditable="true" spellcheck="false"
-                     data-tool="a4" data-row="${i}" data-key="t_seq">${esc(tool.t_seq || '')}</div>
+                <div class="ed-cell" role="button" tabindex="0"
+                     data-process-picker="${i}" title="選擇 N工序 / Select N Process">${esc(tool.t_seq || '')}</div>
             </td>
             <td class="font-bold text-lg">
                 <div class="ed-cell" role="button" tabindex="0"
                      data-tooltype-picker="${i}" title="點擊選擇刀具形式 / Click to select tool type">${esc(tool.t_type || '')}</div>
             </td>
             <td class="font-bold text-lg">
-                <div class="ed-cell" contenteditable="true" spellcheck="false"
-                     data-tool="a4" data-row="${i}" data-key="t_no">${esc(tool.t_no || '')}</div>
+                <div class="ed-cell" role="button" tabindex="0"
+                     data-toolno-picker="${i}" title="選擇刀號 / Select Tool No.">${esc(tool.t_no || '')}</div>
             </td>
             <td class="font-medium text-lg">
                 <div class="ed-cell" contenteditable="true" spellcheck="false"
@@ -5909,6 +6206,7 @@ window.onload = async () => {
     loadAvatar();
     renderTableList();
     initEditablePreview();
+    setupImageViewerGestures();
     refreshAvatars();
 
     /* 頭像上傳 */
