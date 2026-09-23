@@ -4249,7 +4249,6 @@ function exportExcelFile() {
    Google Drive 雲端備份
    ============================================================ */
 const GOOGLE_DRIVE_FOLDER_URL = 'https://drive.google.com/drive/folders/14SPCeOwlEMsmii1Yu89jeOWSNCvyDJaj';
-const GOOGLE_DRIVE_DIRECT_API = ''; // 部署雲端直存 Apps Script 後填入 /exec 網址
 const CLOUD_BACKUP_VERSION = '1.0';
 
 function getSafeBackupName(name) {
@@ -4288,41 +4287,6 @@ function buildCloudBackup(table) {
     };
 }
 
-function 檔案轉Base64_(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-            const value = String(reader.result || '');
-            resolve(value.includes(',') ? value.split(',')[1] : value);
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
-}
-
-async function 直接上傳到GoogleDrive_(files) {
-    if (!GOOGLE_DRIVE_DIRECT_API) return false;
-    const encoded = [];
-    for (const file of files) {
-        encoded.push({
-            name: file.name,
-            mimeType: file.type || 'application/octet-stream',
-            base64: await 檔案轉Base64_(file)
-        });
-    }
-    await fetch(GOOGLE_DRIVE_DIRECT_API, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
-        body: JSON.stringify({
-            action: 'saveToolSheetBundle',
-            folderId: '14SPCeOwlEMsmii1Yu89jeOWSNCvyDJaj',
-            files: encoded
-        })
-    });
-    return true;
-}
-
 async function saveCurrentToGoogleDrive() {
     saveCurrent(true);
 
@@ -4337,12 +4301,6 @@ async function saveCurrentToGoogleDrive() {
         const excelFile = 建立Excel檔_(table);
         const jsonFile = 建立JSON備份檔_(table);
         const files = [wordFile, excelFile, jsonFile];
-
-        if (GOOGLE_DRIVE_DIRECT_API) {
-            await 直接上傳到GoogleDrive_(files);
-            alert('✅ Word、Excel、JSON 已直接送至指定 Google Drive 資料夾。');
-            return;
-        }
 
         if (navigator.share && navigator.canShare && navigator.canShare({ files })) {
             await navigator.share({
