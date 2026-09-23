@@ -2,7 +2,7 @@
  * 刀具表精靈 • 手機版｜PWA 離線服務
  * 原則：不修改既有 UI / UX / 功能，只提供殼層快取與外部資源執行期快取。
  */
-const 快取版本 = '刀具表精靈-pwa-v1.6.0';
+const 快取版本 = '刀具表精靈-pwa-v1.7.0';
 const 殼層快取 = `${快取版本}-殼層`;
 const 外部快取 = `${快取版本}-外部`;
 
@@ -15,7 +15,6 @@ const 必備檔案 = [
 const 外部必備檔案 = [
   'https://cdn.tailwindcss.com',
   'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js',
   'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',
   'https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Roboto:wght@400;500;700;900&display=swap'
