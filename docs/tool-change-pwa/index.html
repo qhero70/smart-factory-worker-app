@@ -14,7 +14,7 @@
 <meta name="apple-mobile-web-app-title" content="刀具表精靈 • 手機版">
 <meta name="application-name" content="刀具表精靈 • 手機版">
 
-<title>換刀表生成精靈 · 手機版</title>
+<title>刀具表精靈 • 手機版 | Tool Sheet Wizard • Mobile</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -431,6 +431,40 @@ html, body {
 }
 #edit-hint b { color: var(--g-blue); }
 
+.ui-en {
+    display:block;
+    font-size:.72em;
+    line-height:1.15;
+    font-weight:600;
+    color:#5F6368;
+    margin-top:2px;
+    letter-spacing:0;
+}
+.ui-en.inline {
+    display:inline;
+    margin:0 0 0 4px;
+    font-size:.88em;
+}
+.btn .ui-en, .icon-btn .ui-en, .nav-btn .ui-en,
+.tm-cloud-btn .ui-en, .tm-btn .ui-en, .ws-btn .ui-en,
+.btn-print .ui-en, .export-btn .ui-en {
+    color:inherit;
+    opacity:.86;
+}
+.ms-en {
+    margin: 10px 0 16px;
+    padding: 11px 13px;
+    border-left: 4px solid var(--g-blue);
+    border-radius: 0 10px 10px 0;
+    background: #F4F8FF;
+    color: #3C4043;
+    font-size: .76rem;
+    line-height: 1.75;
+}
+.ms-en b { color:#174EA6; }
+.ms-en ul, .ms-en ol { margin:6px 0 0; padding-left:18px; }
+.ms-en li { margin-bottom:3px; color:#3C4043; }
+
 .bi-en {
     display: block;
     font-size: .62em;
@@ -500,7 +534,7 @@ html, body {
     background: rgba(26,115,232,.06);
 }
 .ed-cell:empty::before {
-    content: '點擊輸入';
+    content: '點擊輸入 / Tap to enter';
     color: #C2C6CA;
     font-weight: 400;
     font-size: .62em;
@@ -1396,7 +1430,7 @@ html, body {
 .ws-foot b { color: var(--ink-2); }
 
 /* =================================================================
-   ★★★ 使用說明書（Manual） ★★★
+   ★★★ 使用說明<span class="ui-en">Guide</span>書（Manual） ★★★
    ================================================================= */
 #manual-screen {
     position: fixed;
@@ -1802,120 +1836,120 @@ html, body {
             <!-- 主視覺 -->
             <div class="ws-hero">
                 <div class="ws-logo">🛠️</div>
-                <div class="ws-badge">版本 v2.1 ・ 手機 / 平板 / 電腦 皆可使用</div>
-                <h1 class="ws-title">智慧刀具表 <em>製作</em></h1>
+                <div class="ws-badge">版本 v2.2 ・ 手機 / 平板 / 電腦 皆可使用<br><span class="ui-en">Version v2.2 · Mobile / Tablet / Desktop</span></div>
+                <h1 class="ws-title">智慧刀具表 <em>製作</em><span class="ui-en" style="font-size:.42em;margin-top:8px;">Smart Tool Sheet Builder</span></h1>
                 <p class="ws-sub">
-                    用「對話」取代「打字排版」。<br>
-                    只要照著精靈的提問逐項回答，系統就會自動幫您<br>
-                    排版出<b>可以直接列印</b>的專業刀具表。
+                    用「對話」取代「打字排版」。<br><span class="ui-en">Use guided conversation instead of manual formatting.</span><br>
+                    只要照著精靈的提問逐項回答，系統就會自動幫您<br><span class="ui-en">Answer the wizard step by step and the system will automatically</span><br>
+                    排版出<b>可以直接列印</b>的專業刀具表。<br><span class="ui-en">create a professional tool sheet ready to print.</span>
                 </p>
             </div>
 
             <!-- 主按鍵區 -->
             <div class="ws-actions">
-                <button class="ws-btn primary" onclick="startFromWelcome()">🚀 開始製作刀具表</button>
-                <button class="ws-btn outline" onclick="openManual()">📖 使用說明書</button>
-                <button class="ws-btn green" onclick="goPreviewFromWelcome()">📄 直接看預覽報表</button>
-                <button class="ws-btn plain" onclick="openTableManager()">📁 我的刀具表</button>
+                <button class="ws-btn primary" onclick="startFromWelcome()">🚀 開始製作刀具表<br><span class="ui-en">Start Tool Sheet</span></button>
+                <button class="ws-btn outline" onclick="openManual()">📖 使用說明<span class="ui-en">Guide</span>書<br><span class="ui-en">User Guide</span></button>
+                <button class="ws-btn green" onclick="goPreviewFromWelcome()">📄 直接看預覽報表<span class="ui-en">Preview</span><br><span class="ui-en">Preview Tool Sheet</span></button>
+                <button class="ws-btn plain" onclick="openTableManager()">📁 我的刀具表<br><span class="ui-en">My Tool Sheets</span></button>
             </div>
 
             <!-- 功能特色 -->
-            <div class="ws-sec-title">✨ 六大核心功能</div>
+            <div class="ws-sec-title">✨ 六大核心功能 <span class="ui-en inline">Six Core Features</span></div>
             <div class="ws-features">
                 <div class="ws-card">
                     <div class="ic">💬</div>
-                    <h4>對話式輸入</h4>
-                    <p>一問一答，不用學 Excel，不會漏填欄位。</p>
+                    <h4>對話式輸入<span class="ui-en">Guided Input</span></h4>
+                    <p>一問一答，不用學 Excel，不會漏填欄位。<br><span class="ui-en">Answer one question at a time. No Excel skills required.</span></p>
                 </div>
                 <div class="ws-card">
                     <div class="ic">✏️</div>
-                    <h4>所見即所得</h4>
-                    <p>預覽區任何欄位都能直接點擊修改，改完立即生效。</p>
+                    <h4>所見即所得<span class="ui-en">WYSIWYG Editing</span></h4>
+                    <p>預覽區任何欄位都能直接點擊修改，改完立即生效。<br><span class="ui-en">Tap any field in preview to edit it instantly.</span></p>
                 </div>
                 <div class="ws-card">
                     <div class="ic">🖨️</div>
-                    <h4>一鍵列印</h4>
-                    <p>自動套好 A4 / A3 版面，直接列印或存成 PDF。</p>
+                    <h4>一鍵列印<span class="ui-en">One-tap Print</span></h4>
+                    <p>自動套好 A4 / A3 版面，直接列印或存成 PDF<span class="ui-en">Print or Save as PDF</span>。<br><span class="ui-en">Automatic A4/A3 layout for printing or PDF export.</span></p>
                 </div>
                 <div class="ws-card">
                     <div class="ic">🖼️</div>
-                    <h4>刀具圖片牆</h4>
-                    <p>可上傳刀具照片，系統自動壓縮並排版。</p>
+                    <h4>刀具圖片牆<span class="ui-en">Tool Image Gallery</span></h4>
+                    <p>可上傳刀具照片，系統自動壓縮並排版。<br><span class="ui-en">Upload tool photos; the system compresses and lays them out automatically.</span></p>
                 </div>
                 <div class="ws-card">
                     <div class="ic">📁</div>
-                    <h4>雲端 + Office</h4>
-                    <p>本機 10 張暫存，並可輸出 Word、Excel 與 Google Drive 備份。</p>
+                    <h4>雲端 + Office<span class="ui-en">Cloud + Office</span></h4>
+                    <p>本機 10 張暫存，並可輸出 Word、Excel 與 Google Drive 備份。<br><span class="ui-en">Keep up to 10 local sheets and export Word, Excel, or Google Drive backups.</span></p>
                 </div>
                 <div class="ws-card">
                     <div class="ic">🔒</div>
-                    <h4>中英合併版</h4>
-                    <p>表格欄位採中英文並列，手機與電腦皆可預覽。</p>
+                    <h4>中英合併版<span class="ui-en">Bilingual Chinese-English</span></h4>
+                    <p>表格欄位採中英文並列，手機與電腦皆可預覽。<br><span class="ui-en">Chinese and English labels are shown together on mobile and desktop.</span></p>
                 </div>
             </div>
 
             <!-- 兩種格式比較 -->
-            <div class="ws-sec-title">📐 兩種表格格式</div>
+            <div class="ws-sec-title">📐 兩種表格格式 <span class="ui-en inline">Two Sheet Formats</span></div>
             <div class="ws-compare">
                 <div class="ws-compare-card a4">
-                    <h4>第一類 · A4 直式</h4>
+                    <h4>第一類 · A4 直式<span class="ui-en">Type 1 · A4 Portrait</span></h4>
                     <ul>
-                        <li>車床 N/C 規格</li>
-                        <li>刀具列固定 8 列</li>
-                        <li>含夾頭壓力設定欄</li>
-                        <li>右下角 QR Code 區</li>
-                        <li>適合單件、少量刀具</li>
+                        <li>車床 N/C 規格<span class="ui-en">Lathe N/C Format</span></li>
+                        <li>刀具列固定 8 列<span class="ui-en">8 fixed tool rows</span></li>
+                        <li>含夾頭壓力設定<span class="bi-en">Chuck Pressure</span>欄<span class="ui-en">Includes chuck pressure</span></li>
+                        <li>右下角 QR Code 區<span class="ui-en">Bottom-right QR Code area</span></li>
+                        <li>適合單件、少量刀具<span class="ui-en">Best for smaller tool sets</span></li>
                     </ul>
                 </div>
                 <div class="ws-compare-card a3">
-                    <h4>第二類 · A3 橫式</h4>
+                    <h4>第二類 · A3 橫式<span class="ui-en">Type 2 · A3 Landscape</span></h4>
                     <ul>
-                        <li>銑床 M/C 規格</li>
-                        <li>刀具列最少 10 列</li>
-                        <li>右側 5 欄刀具圖片牆</li>
-                        <li>貼心提醒 / #500 / 機台技巧</li>
-                        <li>雙 QR Code、雙品名區</li>
+                        <li>銑床 M/C 規格<span class="ui-en">Milling M/C Format</span></li>
+                        <li>刀具列最少 10 列<span class="ui-en">At least 10 tool rows</span></li>
+                        <li>右側 5 欄刀具圖片牆<span class="ui-en">5-column tool image gallery</span><span class="ui-en">Tool Image Gallery</span></li>
+                        <li>貼心提醒 / #500 / 機台技巧<span class="ui-en">Tool Notes / #500 / Machine Tips</span></li>
+                        <li>雙 QR Code、雙品名<span class="bi-en">Part Name</span>區<span class="ui-en">Dual QR Codes and dual part-name sections</span></li>
                     </ul>
                 </div>
             </div>
 
             <!-- 操作流程 -->
-            <div class="ws-sec-title">🧭 操作流程四步驟</div>
+            <div class="ws-sec-title">🧭 操作流程四步驟 <span class="ui-en inline">Four-step Workflow</span></div>
             <div class="ws-steps">
                 <div class="ws-step">
                     <div class="num">1</div>
                     <div>
-                        <h5>選擇表格格式</h5>
-                        <p>在上方切換「車床N/C規格（A4）」或「銑床M/C規格（A3）」。切換後系統會從頭引導您填寫。</p>
+                        <h5>選擇表格格式<span class="ui-en">Choose Sheet Format</span></h5>
+                        <p>在上方切換「車床N/C規格（A4）」或「銑床M/C規格（A3）」。切換後系統會從頭引導您填寫。<br><span class="ui-en">Choose Lathe N/C (A4) or Milling M/C (A3). The wizard will guide you from the beginning.</span></p>
                     </div>
                 </div>
                 <div class="ws-step">
                     <div class="num">2</div>
                     <div>
-                        <h5>回答精靈提問</h5>
-                        <p>基本資料 → 刀具資料（可一直新增）→ QR Code 內容。選填欄位可一鍵略過，不會被強迫填寫。</p>
+                        <h5>回答精靈提問<span class="ui-en">Answer Wizard Questions</span></h5>
+                        <p>基本資料 → 刀具資料（可一直新增）→ QR Code 內容。選填欄位可一鍵略過，不會被強迫填寫。<br><span class="ui-en">Basic info → Tool data → QR Code. Optional fields can be skipped.</span></p>
                     </div>
                 </div>
                 <div class="ws-step">
                     <div class="num">3</div>
                     <div>
-                        <h5>在預覽區微調</h5>
-                        <p>切到「預覽報表」頁籤，任何文字欄位、表格內容、圖片、QR Code 都能直接點擊修改。</p>
+                        <h5>在預覽區微調<span class="ui-en">Fine-tune in Preview</span></h5>
+                        <p>切到「預覽報表<span class="ui-en">Preview</span>」頁籤，任何文字欄位、表格內容、圖片、QR Code 都能直接點擊修改。</p>
                     </div>
                 </div>
                 <div class="ws-step">
                     <div class="num">4</div>
                     <div>
-                        <h5>列印或存成 PDF</h5>
-                        <p>按「列印 / 存為 PDF」按鈕，紙張尺寸已自動設定好，直接輸出即可交給現場使用。</p>
+                        <h5>列印或存成 PDF<span class="ui-en">Print or Save as PDF</span></h5>
+                        <p>按「列印 / 存為 PDF」按鈕，紙張尺寸已自動設定好，直接輸出即可交給現場使用。<br><span class="ui-en">Use Print / Save PDF. Paper size is already configured for shop-floor use.</span></p>
                     </div>
                 </div>
             </div>
 
             <div class="ws-foot">
-                <b>智慧刀具表製作系統</b><br>
-                本機自動暫存 · Google Drive 備份 · 免安裝 · 離線可用<br>
-                建議使用 Chrome / Edge / Safari 最新版本
+                <b>智慧刀具表製作系統<span class="ui-en">Smart Tool Sheet System</span></b><br>
+                本機自動暫存 · Google Drive 備份 · 免安裝 · 離線可用<br><span class="ui-en">Local Autosave · Google Drive Backup · No Install · Offline Ready</span><br>
+                建議使用 Chrome / Edge / Safari 最新版本<br><span class="ui-en">Use the latest Chrome / Edge / Safari for best results.</span>
             </div>
 
         </div>
@@ -1923,40 +1957,42 @@ html, body {
 </div>
 
 <!-- ============================================================
-     ★★★ 使用說明書（Manual） ★★★
+     ★★★ 使用說明<span class="ui-en">Guide</span>書（Manual） ★★★
      ============================================================ -->
 <div id="manual-screen">
     <div class="ms-panel">
 
         <div class="ms-head">
             <button class="ms-back" onclick="closeManual()" title="返回">←</button>
-            <h2>📖 使用說明書 <span class="ms-tag">完整版</span></h2>
+            <h2>📖 使用說明<span class="ui-en">Guide</span>書<br><span class="ui-en">User Guide</span> <span class="ms-tag">完整版 / Full Edition</span></h2>
         </div>
 
         <div id="ms-scroll">
 
             <!-- ======= 目錄 ======= -->
             <div class="ms-toc">
-                <h3>📑 目錄（點擊可快速跳轉）</h3>
-                <a onclick="jumpTo('sec1')"><span class="k">01</span>系統總覽與適用對象</a>
-                <a onclick="jumpTo('sec2')"><span class="k">02</span>介面導覽（手機版 / 電腦版）</a>
-                <a onclick="jumpTo('sec3')"><span class="k">03</span>快速開始：三步驟完成第一張表</a>
-                <a onclick="jumpTo('sec4')"><span class="k">04</span>第一類 A4（車床 N/C）完整操作流程</a>
-                <a onclick="jumpTo('sec5')"><span class="k">05</span>第二類 A3（銑床 M/C）完整操作流程</a>
-                <a onclick="jumpTo('sec6')"><span class="k">06</span>預覽區「所見即所得」編輯功能</a>
-                <a onclick="jumpTo('sec7')"><span class="k">07</span>圖片上傳與自動壓縮機制</a>
-                <a onclick="jumpTo('sec8')"><span class="k">08</span>QR Code 設定方法</a>
-                <a onclick="jumpTo('sec9')"><span class="k">09</span>我的刀具表（本機暫存管理）</a>
-                <a onclick="jumpTo('sec10')"><span class="k">10</span>列印與匯出 PDF 完整設定</a>
-                <a onclick="jumpTo('sec11')"><span class="k">11</span>精靈頭像更換</a>
-                <a onclick="jumpTo('sec12')"><span class="k">12</span>常見問題 FAQ（20 問）</a>
-                <a onclick="jumpTo('sec13')"><span class="k">13</span>注意事項與資料保存</a>
-                <a onclick="jumpTo('sec14')"><span class="k">14</span>快速鍵與效率小技巧</a>
+                <h3>📑 目錄（點擊可快速跳轉）<span class="ui-en">Contents · Tap to Jump</span></h3>
+                <a onclick="jumpTo('sec1')"><span class="k">01</span>系統總覽與適用對象<span class="ui-en">System Overview & Intended Users</span></a>
+                <a onclick="jumpTo('sec2')"><span class="k">02</span>介面導覽（手機版 / 電腦版）<span class="ui-en">Interface Guide (Mobile / Desktop)</span></a>
+                <a onclick="jumpTo('sec3')"><span class="k">03</span>快速開始：三步驟完成第一張表<span class="ui-en">Quick Start: Finish Your First Sheet in 3 Steps</span></a>
+                <a onclick="jumpTo('sec4')"><span class="k">04</span>第一類 A4（車床 N/C）完整操作流程<span class="ui-en">Type 1 A4 (Lathe N/C) Full Workflow</span></a>
+                <a onclick="jumpTo('sec5')"><span class="k">05</span>第二類 A3（銑床 M/C）完整操作流程<span class="ui-en">Type 2 A3 (Milling M/C) Full Workflow</span></a>
+                <a onclick="jumpTo('sec6')"><span class="k">06</span>預覽區「所見即所得<span class="ui-en">WYSIWYG Editing</span>」編輯功能</a>
+                <a onclick="jumpTo('sec7')"><span class="k">07</span>圖片上傳與自動壓縮機制<span class="ui-en">Image Upload & Auto Compression</span></a>
+                <a onclick="jumpTo('sec8')"><span class="k">08</span>QR Code 設定方法<span class="ui-en">QR Code Setup</span></a>
+                <a onclick="jumpTo('sec9')"><span class="k">09</span>我的刀具表（本機暫存管理）<span class="ui-en">My Tool Sheets (Local Storage)</span></a>
+                <a onclick="jumpTo('sec10')"><span class="k">10</span>列印與匯出 PDF 完整設定<span class="ui-en">Print & PDF Export Settings</span></a>
+                <a onclick="jumpTo('sec11')"><span class="k">11</span>精靈頭像更換<span class="ui-en">Change Wizard Avatar</span></a>
+                <a onclick="jumpTo('sec12')"><span class="k">12</span>常見問題 FAQ（20 問）<span class="ui-en">FAQ (20 Questions)</span></a>
+                <a onclick="jumpTo('sec13')"><span class="k">13</span>注意事項與資料保存<span class="ui-en">Data Preservation & Important Notes</span></a>
+                <a onclick="jumpTo('sec14')"><span class="k">14</span>快速鍵與效率小技巧<span class="ui-en">Shortcuts & Productivity Tips</span></a>
             </div>
 
             <!-- ======= 01 ======= -->
             <div class="ms-sec" id="sec1">
-                <h3><span class="n">01</span>系統總覽與適用對象</h3>
+                <h3><span class="n">01</span>系統總覽與適用對象<span class="ui-en">System Overview & Intended Users</span></h3><div class="ms-en" data-en-summary="sec1"><b>English — System Overview</b><br>
+This PWA is a guided tool-sheet generator for CNC lathe and milling operations. Instead of formatting Excel manually, the wizard asks for production and tooling information step by step and fills a print-ready A4 or A3 sheet automatically.
+<ul><li>Type 1: A4 portrait for Lathe N/C, up to 8 displayed tool rows, chuck pressure and one QR Code.</li><li>Type 2: A3 landscape for Milling M/C, 10+ tool rows, tool-image gallery, #500 settings, machine tips and two QR Codes.</li><li>Local autosave stores up to 10 sheets in this browser. Word, Excel, JSON backup and PDF/print output are supported.</li></ul></div>
 
                 <h4>1-1 這套系統是什麼？</h4>
                 <p>
@@ -1986,8 +2022,8 @@ html, body {
                     </tr>
                     <tr>
                         <td><b>對應機型</b></td>
-                        <td>車床 N/C 規格</td>
-                        <td>銑床 M/C 規格</td>
+                        <td>車床 N/C 規格<span class="ui-en">Lathe N/C Format</span></td>
+                        <td>銑床 M/C 規格<span class="ui-en">Milling M/C Format</span></td>
                     </tr>
                     <tr>
                         <td><b>紙張</b></td>
@@ -2006,8 +2042,8 @@ html, body {
                     </tr>
                     <tr>
                         <td><b>特有欄位</b></td>
-                        <td>夾頭壓力設定</td>
-                        <td>貼心提醒 / #500 切換 / 機台技巧 / 雙品名</td>
+                        <td>夾頭壓力設定<span class="bi-en">Chuck Pressure</span></td>
+                        <td>貼心提醒 / #500 切換 / 機台技巧 / 雙品名<span class="bi-en">Part Name</span></td>
                     </tr>
                     <tr>
                         <td><b>QR Code</b></td>
@@ -2033,13 +2069,14 @@ html, body {
                 <div class="ms-warn">
                     ⚠️ <b>重要觀念</b>：因為資料是存在「這台裝置的這個瀏覽器」裡，
                     所以換一台電腦、換一個瀏覽器、或清除瀏覽器資料，都會看不到原本的表格。
-                    重要表格請務必<b>列印或存成 PDF</b> 備份。
+                    重要表格請務必<b>列印或存成 PDF<span class="ui-en">Print or Save as PDF</span></b> 備份。
                 </div>
             </div>
 
             <!-- ======= 02 ======= -->
             <div class="ms-sec" id="sec2">
-                <h3><span class="n">02</span>介面導覽（手機版 / 電腦版）</h3>
+                <h3><span class="n">02</span>介面導覽（手機版 / 電腦版）<span class="ui-en">Interface Guide (Mobile / Desktop)</span></h3><div class="ms-en" data-en-summary="sec2"><b>English — Interface Guide</b><br>
+On mobile, use the bottom navigation for Guided Input, Preview, My Sheets and User Guide. On desktop, the conversation panel and live preview can be viewed side by side, and the dedicated Preview button opens a full-sheet view. Empty preview fields can be tapped and edited directly.</div>
 
                 <h4>2-1 手機版（畫面寬度小於 768px）</h4>
                 <p>手機版採用<b>三個頁籤</b>的切換方式，由畫面最下方的導航列控制：</p>
@@ -2050,17 +2087,17 @@ html, body {
                         <th>功能說明</th>
                     </tr>
                     <tr>
-                        <td><b>對話輸入</b></td>
+                        <td><b>對話輸入<span class="ui-en">Guided Input</span></b></td>
                         <td>💬</td>
                         <td>與精靈對話、回答問題、建立刀具資料。這是主要的作業畫面。</td>
                     </tr>
                     <tr>
-                        <td><b>預覽報表</b></td>
+                        <td><b>預覽報表<span class="ui-en">Preview</span></b></td>
                         <td>📄</td>
                         <td>查看已排版的表格。可直接點擊任何欄位編輯，也可按列印。</td>
                     </tr>
                     <tr>
-                        <td><b>我的表格</b></td>
+                        <td><b>我的表格<span class="ui-en">My Sheets</span></b></td>
                         <td>📁</td>
                         <td>管理本機暫存的刀具表（最多 10 張）。圖示右上角紅點會顯示目前張數。</td>
                     </tr>
@@ -2074,7 +2111,7 @@ html, body {
                 <h4>2-2 上方標題列</h4>
                 <ul>
                     <li><b>🤖 精靈頭像（左側）</b>：點擊可開啟頭像選擇視窗，更換成其他表情符號或上傳自己的圖片。</li>
-                    <li><b>📁 我的表格按鈕（右側）</b>：後方的數字（例：3/10）代表目前已暫存 3 張、上限 10 張。</li>
+                    <li><b>📁 我的表格<span class="ui-en">My Sheets</span>按鈕（右側）</b>：後方的數字（例：3/10）代表目前已暫存 3 張、上限 10 張。</li>
                     <li><b>❓ 說明按鈕（右側）</b>：隨時開啟本說明書，不會中斷您正在填寫的資料。</li>
                 </ul>
 
@@ -2147,11 +2184,15 @@ html, body {
 
             <!-- ======= 03 ======= -->
             <div class="ms-sec" id="sec3">
-                <h3><span class="n">03</span>快速開始：三步驟完成第一張表</h3>
+                <h3><span class="n">03</span>快速開始：三步驟完成第一張表<span class="ui-en">Quick Start: Finish Your First Sheet in 3 Steps</span></h3><div class="ms-en" data-en-summary="sec3"><b>English — Quick Start</b><ol>
+<li>Select Type 1 A4 Lathe or Type 2 A3 Milling.</li>
+<li>Answer the wizard questions for basic data, tools, offsets, tool life, images and QR content.</li>
+<li>Open Preview, make any final edits, then print, save as PDF, export Word/Excel or create a Google Drive backup.</li>
+</ol></div>
 
                 <h4>步驟一：選擇格式</h4>
                 <p>
-                    在頂覽首頁按「🚀 開始製作刀具表」進入系統後，
+                    在頂覽首頁按「🚀 開始製作刀具表<br><span class="ui-en">Start Tool Sheet</span>」進入系統後，
                     先在上方切換列選擇 <b>車床N/C規格</b> 或 <b>銑床M/C規格</b>。
                     選錯了也沒關係，隨時可以重新切換，系統會重新開始引導。
                 </p>
@@ -2171,7 +2212,7 @@ html, body {
                 <h4>步驟三：預覽、微調、列印</h4>
                 <p>
                     所有問題回答完畢後，系統會顯示「🎉 恭喜！建立完成，已自動暫存」。
-                    手機版會自動在約 1 秒後切換到「預覽報表」頁籤。
+                    手機版會自動在約 1 秒後切換到「預覽報表<span class="ui-en">Preview</span>」頁籤。
                 </p>
                 <p>在預覽區您可以：</p>
                 <ul>
@@ -2189,7 +2230,8 @@ html, body {
 
             <!-- ======= 04 ======= -->
             <div class="ms-sec" id="sec4">
-                <h3><span class="n">04</span>第一類 A4（車床 N/C）完整操作流程</h3>
+                <h3><span class="n">04</span>第一類 A4（車床 N/C）完整操作流程<span class="ui-en">Type 1 A4 (Lathe N/C) Full Workflow</span></h3><div class="ms-en" data-en-summary="sec4"><b>English — Type 1 A4 Lathe Workflow</b><br>
+Enter title, program/subtitle, date, prepared-by, chuck pressure, part name, Customer P/N, Product No., cycle time and daily quantity. For every N process, enter Tool Type, Tool No., H Offset, G Offset X, G Offset Z and Tool Life in the format <code>#xxx=Qty</code> (example: <code>#500=30</code>). Type 1 intentionally does not use a Tool Length column.</div>
 
                 <p>當您選擇「車床N/C規格」後，精靈會依序詢問以下欄位。<b>標註「選填」者，可以直接按略過按鈕跳過。</b></p>
 
@@ -2227,37 +2269,37 @@ html, body {
                     </tr>
                     <tr>
                         <td>5</td>
-                        <td><b>夾頭壓力設定</b></td>
+                        <td><b>夾頭壓力設定<span class="bi-en">Chuck Pressure</span></b></td>
                         <td>顯示於表格中段的藍色大字。例：<code>15KG</code>、<code>18~20KG</code></td>
                         <td>✔</td>
                     </tr>
                     <tr>
                         <td>6</td>
-                        <td><b>品名</b></td>
+                        <td><b>品名<span class="bi-en">Part Name</span></b></td>
                         <td>零件名稱。例：<code>SLIDER</code></td>
                         <td>✔</td>
                     </tr>
                     <tr>
                         <td>7</td>
-                        <td><b>客戶品號</b></td>
+                        <td><b>客戶品號<span class="bi-en">Customer P/N</span></b></td>
                         <td>零件料號。例：<code>Z907100000</code></td>
                         <td>✔</td>
                     </tr>
                     <tr>
                         <td>8</td>
-                        <td><b>產品編號</b></td>
+                        <td><b>產品編號<span class="bi-en">Product No.</span></b></td>
                         <td>客戶端的圖號或編號。例：<code>1A8310-14250</code></td>
                         <td>選填</td>
                     </tr>
                     <tr>
                         <td>9</td>
-                        <td><b>加工時間</b></td>
-                        <td>單件加工時間。例：<code>3'00"</code>、<code>1分30秒</code></td>
+                        <td><b>加工時間<span class="bi-en">Cycle Time</span></b></td>
+                        <td>單件加工時間<span class="bi-en">Cycle Time</span>。例：<code>3'00"</code>、<code>1分30秒</code></td>
                         <td>選填</td>
                     </tr>
                     <tr>
                         <td>10</td>
-                        <td><b>每日數量</b></td>
+                        <td><b>每日數量<span class="bi-en">Daily Qty</span></b></td>
                         <td>每日目標產量。例：<code>120 PCS</code></td>
                         <td>選填</td>
                     </tr>
@@ -2343,7 +2385,7 @@ html, body {
 
                 <div class="ms-info">
                     💡 <b>關於 8 列的限制</b>：A4 表格固定顯示 8 列。
-                    如果您填超過 8 把刀，資料仍然會存在（可以在「我的表格」看到），
+                    如果您填超過 8 把刀，資料仍然會存在（可以在「我的表格<span class="ui-en">My Sheets</span>」看到），
                     但列印時只會顯示前 8 把。超過 8 把刀的場合，建議改用第二類 A3 格式。
                 </div>
 
@@ -2379,7 +2421,7 @@ html, body {
                     </tr>
                     <tr>
                         <td><b>左下資訊區</b></td>
-                        <td>品名、客戶品號、產品編號、加工時間、每日數量（灰底標籤 + 白底內容）。</td>
+                        <td>品名<span class="bi-en">Part Name</span>、客戶品號<span class="bi-en">Customer P/N</span>、產品編號<span class="bi-en">Product No.</span>、加工時間<span class="bi-en">Cycle Time</span>、每日數量<span class="bi-en">Daily Qty</span>（灰底標籤 + 白底內容）。</td>
                     </tr>
                     <tr>
                         <td><b>右下 QR 區</b></td>
@@ -2394,7 +2436,8 @@ html, body {
 
             <!-- ======= 05 ======= -->
             <div class="ms-sec" id="sec5">
-                <h3><span class="n">05</span>第二類 A3（銑床 M/C）完整操作流程</h3>
+                <h3><span class="n">05</span>第二類 A3（銑床 M/C）完整操作流程<span class="ui-en">Type 2 A3 (Milling M/C) Full Workflow</span></h3><div class="ms-en" data-en-summary="sec5"><b>English — Type 2 A3 Milling Workflow</b><br>
+Type 2 supports two part-name groups, Customer P/N and Product No., cycle time, daily quantity, tool notes, #500 settings, machine tips, Tool Length, G Offset X/Z, Tool Life, a tool-image gallery and dual QR Codes. Tool rows expand automatically beyond ten rows.</div>
 
                 <h4>5-1 基本資料階段（共 19 題 + 1 個動作）</h4>
                 <table class="ms-table">
@@ -2430,49 +2473,49 @@ html, body {
                     </tr>
                     <tr>
                         <td>5</td>
-                        <td><b>品名（第一組）</b></td>
+                        <td><b>品名<span class="bi-en">Part Name</span>（第一組）</b></td>
                         <td>例：<code>BOX (L)</code></td>
                         <td>✔</td>
                     </tr>
                     <tr>
                         <td>6</td>
-                        <td><b>客戶品號（第一組）</b></td>
+                        <td><b>客戶品號<span class="bi-en">Customer P/N</span>（第一組）</b></td>
                         <td>例：<code>Z907100000</code></td>
                         <td>✔</td>
                     </tr>
                     <tr>
                         <td>7</td>
-                        <td><b>產品編號（第一組）</b></td>
+                        <td><b>產品編號<span class="bi-en">Product No.</span>（第一組）</b></td>
                         <td>例：<code>1A8310-14250</code></td>
                         <td>選填</td>
                     </tr>
                     <tr>
                         <td>8</td>
-                        <td><b>品名（第二組）</b></td>
+                        <td><b>品名<span class="bi-en">Part Name</span>（第二組）</b></td>
                         <td>例：<code>BOX (R)</code>，沒有第二組可略過。</td>
                         <td>選填</td>
                     </tr>
                     <tr>
                         <td>9</td>
-                        <td><b>客戶品號（第二組）</b></td>
+                        <td><b>客戶品號<span class="bi-en">Customer P/N</span>（第二組）</b></td>
                         <td>例：<code>Z907000000</code></td>
                         <td>選填</td>
                     </tr>
                     <tr>
                         <td>10</td>
-                        <td><b>產品編號（第二組）</b></td>
+                        <td><b>產品編號<span class="bi-en">Product No.</span>（第二組）</b></td>
                         <td>例：<code>1A8310-14240</code></td>
                         <td>選填</td>
                     </tr>
                     <tr>
                         <td>11</td>
-                        <td><b>加工時間</b></td>
+                        <td><b>加工時間<span class="bi-en">Cycle Time</span></b></td>
                         <td>例：<code>3'00"</code></td>
                         <td>選填</td>
                     </tr>
                     <tr>
                         <td>12</td>
-                        <td><b>每日數量</b></td>
+                        <td><b>每日數量<span class="bi-en">Daily Qty</span></b></td>
                         <td>例：<code>120 PCS</code></td>
                         <td>選填</td>
                     </tr>
@@ -2591,14 +2634,14 @@ html, body {
                         <td>N工序 / 刀具形式（含副標題）/ 刀號 / H值 / 刀長 / G補正X軸 / G補正Z軸 / 刀具壽命</td>
                     </tr>
                     <tr>
-                        <td><b>刀具圖片牆</b></td>
+                        <td><b>刀具圖片牆<span class="ui-en">Tool Image Gallery</span></b></td>
                         <td>右上（寬 44%）</td>
                         <td>5 欄 × 自動列數，每格上方顯示刀序、下方顯示圖片</td>
                     </tr>
                     <tr>
                         <td><b>左下資訊區</b></td>
                         <td>左下（寬 30%）</td>
-                        <td>品名×2 / 客戶品號×2 / 產品編號×2 / 加工時間 / 每日數量 + 日報表 QR Code</td>
+                        <td>品名<span class="bi-en">Part Name</span>×2 / 客戶品號<span class="bi-en">Customer P/N</span>×2 / 產品編號<span class="bi-en">Product No.</span>×2 / 加工時間<span class="bi-en">Cycle Time</span> / 每日數量<span class="bi-en">Daily Qty</span> + 日報表 QR Code</td>
                     </tr>
                     <tr>
                         <td><b>貼心提醒區</b></td>
@@ -2631,7 +2674,8 @@ html, body {
 
             <!-- ======= 06 ======= -->
             <div class="ms-sec" id="sec6">
-                <h3><span class="n">06</span>預覽區「所見即所得」編輯功能</h3>
+                <h3><span class="n">06</span>預覽區「所見即所得<span class="ui-en">WYSIWYG Editing</span>」編輯功能</h3><div class="ms-en" data-en-summary="sec6"><b>English — WYSIWYG Preview Editing</b><br>
+Tap/click any editable preview field to change it directly. Changes are written back to local storage when editing is completed. Tool images and QR Codes can also be replaced from Preview. Empty editable cells show a light “Tap to enter” hint that is not printed.</div>
 
                 <p>
                     這是本系統最方便的功能之一。<b>預覽畫面上看到的每一個欄位，幾乎都可以直接點擊修改</b>，
@@ -2640,7 +2684,7 @@ html, body {
 
                 <h4>6-1 如何編輯文字欄位</h4>
                 <ol>
-                    <li>點擊要修改的文字（例如標題、品名、製表者）。</li>
+                    <li>點擊要修改的文字（例如標題、品名<span class="bi-en">Part Name</span>、製表者）。</li>
                     <li>欄位邊緣會出現<b>藍色外框</b>，游標開始閃爍，代表進入編輯狀態。</li>
                     <li>直接打字修改（會自動取代原本的內容，或依游標位置插入）。</li>
                     <li>修改完成後，按 <span class="ms-kbd">Enter</span> 或點擊畫面其他空白處，即完成儲存。</li>
@@ -2660,14 +2704,14 @@ html, body {
                     <tr>
                         <td><b>第一類 A4</b></td>
                         <td>
-                            主題、副標題、夾頭壓力、品名、客戶品號、產品編號、加工時間、每日數量、製表日期、製表者、
+                            主題、副標題、夾頭壓力、品名<span class="bi-en">Part Name</span>、客戶品號<span class="bi-en">Customer P/N</span>、產品編號<span class="bi-en">Product No.</span>、加工時間<span class="bi-en">Cycle Time</span>、每日數量<span class="bi-en">Daily Qty</span>、製表日期、製表者、
                             刀具表格 8 列 × 8 欄（N工序、刀具形式、刀號、H值、G補正X軸、G補正Z軸、刀具壽命）、刀具圖片、QR Code
                         </td>
                     </tr>
                     <tr>
                         <td><b>第二類 A3</b></td>
                         <td>
-                            主標題、副標題、品名×2、客戶品號×2、產品編號×2、加工時間、每日數量、
+                            主標題、副標題、品名<span class="bi-en">Part Name</span>×2、客戶品號<span class="bi-en">Customer P/N</span>×2、產品編號<span class="bi-en">Product No.</span>×2、加工時間<span class="bi-en">Cycle Time</span>、每日數量<span class="bi-en">Daily Qty</span>、
                             貼心提醒全文、#500 四行、機台操作小技巧全文、製表日期、製表者、
                             刀具表格 × 8 欄（含 G補正 X/Z、刀具壽命）、圖片牆刀序標籤、刀具圖片、兩組 QR Code
                         </td>
@@ -2699,7 +2743,8 @@ html, body {
 
             <!-- ======= 07 ======= -->
             <div class="ms-sec" id="sec7">
-                <h3><span class="n">07</span>圖片上傳與自動壓縮機制</h3>
+                <h3><span class="n">07</span>圖片上傳與自動壓縮機制<span class="ui-en">Image Upload & Auto Compression</span></h3><div class="ms-en" data-en-summary="sec7"><b>English — Images & Compression</b><br>
+Tool images can be selected during the wizard or replaced directly in Preview. Images are compressed automatically to reduce browser storage use while keeping sufficient quality for the tool-sheet layout. If local storage becomes full, delete unused saved sheets or reduce the number of images.</div>
 
                 <h4>7-1 兩種上傳圖片的時機</h4>
                 <ol>
@@ -2757,13 +2802,14 @@ html, body {
 
                 <div class="ms-warn">
                     ⚠️ 如果上傳後跳出「本機儲存空間不足」的警告，
-                    表示您的暫存表格太多了，請到「我的表格」刪除不需要的舊表。
+                    表示您的暫存表格太多了，請到「我的表格<span class="ui-en">My Sheets</span>」刪除不需要的舊表。
                 </div>
             </div>
 
             <!-- ======= 08 ======= -->
             <div class="ms-sec" id="sec8">
-                <h3><span class="n">08</span>QR Code 設定方法</h3>
+                <h3><span class="n">08</span>QR Code 設定方法<span class="ui-en">QR Code Setup</span></h3><div class="ms-en" data-en-summary="sec8"><b>English — QR Code</b><br>
+QR Codes may contain a Google Drive/OneDrive folder link, internal system URL, machining-program link, machine manual URL or plain text. Type 1 has one QR Code; Type 2 has two. Tap a QR area in Preview to edit or clear its content.</div>
 
                 <h4>8-1 三種設定時機</h4>
                 <ol>
@@ -2815,11 +2861,12 @@ html, body {
 
             <!-- ======= 09 ======= -->
             <div class="ms-sec" id="sec9">
-                <h3><span class="n">09</span>我的刀具表（本機暫存管理）</h3>
+                <h3><span class="n">09</span>我的刀具表（本機暫存管理）<span class="ui-en">My Tool Sheets (Local Storage)</span></h3><div class="ms-en" data-en-summary="sec9"><b>English — My Tool Sheets</b><br>
+Up to 10 tool sheets are autosaved locally. Each saved sheet shows its A4/A3 type, name, tool count, update time and editing status. You can load, delete or create a new sheet. JSON backups can be imported to restore a sheet on another device/browser.</div>
 
                 <h4>9-1 開啟方式</h4>
                 <ul>
-                    <li>手機版：點擊底部導航列的「📁 我的表格」。</li>
+                    <li>手機版：點擊底部導航列的「📁 我的表格<span class="ui-en">My Sheets</span>」。</li>
                     <li>任何裝置：點擊右上角的「📁 3/10」按鈕。</li>
                 </ul>
 
@@ -2836,7 +2883,7 @@ html, body {
                     </tr>
                     <tr>
                         <td><b>表格名稱</b></td>
-                        <td>自動取自主題（或主標題）+ 客戶品號。若尚未填寫則顯示「未命名刀具表」。</td>
+                        <td>自動取自主題（或主標題）+ 客戶品號<span class="bi-en">Customer P/N</span>。若尚未填寫則顯示「未命名刀具表」。</td>
                     </tr>
                     <tr>
                         <td><b>資訊列</b></td>
@@ -2854,7 +2901,7 @@ html, body {
 
                 <h4>9-3 新增表格</h4>
                 <p>
-                    點擊面板最上方的綠色「＋ 新增刀具表」按鈕，
+                    點擊面板最上方的綠色「＋ 新增刀具表<br><span class="ui-en">New Tool Sheet</span>」按鈕，
                     系統會先自動儲存目前編輯中的表格，然後建立一張全新的空白表。
                 </p>
                 <p>新表格會沿用目前的格式（A4 或 A3），並自動帶入今天的日期。</p>
@@ -2881,7 +2928,7 @@ html, body {
 
                 <div class="ms-warn">
                     ⚠️ <b>刪除後無法復原！</b>系統沒有垃圾桶功能。
-                    重要表格請先列印或存成 PDF 再刪除。
+                    重要表格請先列印或存成 PDF<span class="ui-en">Print or Save as PDF</span> 再刪除。
                 </div>
 
                 <h4>9-6 張數上限</h4>
@@ -2906,15 +2953,16 @@ html, body {
 
             <!-- ======= 10 ======= -->
             <div class="ms-sec" id="sec10">
-                <h3><span class="n">10</span>列印與匯出 PDF 完整設定</h3>
+                <h3><span class="n">10</span>列印與匯出 PDF 完整設定<span class="ui-en">Print & PDF Export Settings</span></h3><div class="ms-en" data-en-summary="sec10"><b>English — Print & Export</b><br>
+Use Print / Save PDF for the exact A4 portrait or A3 landscape paper size. Word (.docx) and Excel (.xlsx) export are also available. The Word and Excel files use bilingual Chinese-English headings so they can be opened on mobile or desktop.</div>
 
                 <h4>10-1 基本操作</h4>
                 <p>
                     在預覽區右上角（電腦版）或頁面上方（手機版）有一顆藍色按鈕：
                 </p>
                 <ul>
-                    <li>A4 格式時顯示「<b>列印 / 存為 PDF（A4 單頁）</b>」。</li>
-                    <li>A3 格式時顯示「<b>列印 / 存為 PDF（A3 橫向單頁）</b>」。</li>
+                    <li>A4 格式時顯示「<b>列印 / 存為 PDF（A4 單頁） / Print / Save PDF (A4)</b>」。</li>
+                    <li>A3 格式時顯示「<b>列印 / 存為 PDF（A3 橫向單頁） / Print / Save PDF (A3 Landscape)</b>」。</li>
                 </ul>
                 <p>點下去就會開啟瀏覽器的列印視窗。</p>
 
@@ -2989,7 +3037,8 @@ html, body {
 
             <!-- ======= 11 ======= -->
             <div class="ms-sec" id="sec11">
-                <h3><span class="n">11</span>精靈頭像更換</h3>
+                <h3><span class="n">11</span>精靈頭像更換<span class="ui-en">Change Wizard Avatar</span></h3><div class="ms-en" data-en-summary="sec11"><b>English — Wizard Avatar</b><br>
+Tap the wizard avatar to choose another icon or upload your own image. The avatar setting is stored locally in the current browser and does not affect tool-sheet data.</div>
 
                 <h4>11-1 開啟方式</h4>
                 <ul>
@@ -3004,13 +3053,13 @@ html, body {
 
                 <h4>11-3 上傳自訂圖片</h4>
                 <p>
-                    點擊「📷 上傳自訂圖片」，選擇您想要的圖片。
+                    點擊「📷 上傳自訂圖片 / Upload Custom Image」，選擇您想要的圖片。
                     系統會自動壓縮成最大邊長 180px、JPEG 品質 0.85。
                     適合放公司 Logo 或部門圖示。
                 </p>
 
                 <h4>11-4 恢復預設</h4>
-                <p>點擊「↺ 恢復預設 🤖」即可還原成原始的機器人圖示。</p>
+                <p>點擊「↺ 恢復預設 🤖 / Reset Default」即可還原成原始的機器人圖示。</p>
 
                 <div class="ms-info">
                     💡 頭像設定是<b>全系統共用</b>的，換一次之後所有對話訊息都會跟著換，
@@ -3020,7 +3069,8 @@ html, body {
 
             <!-- ======= 12 ======= -->
             <div class="ms-sec" id="sec12">
-                <h3><span class="n">12</span>常見問題 FAQ（20 問）</h3>
+                <h3><span class="n">12</span>常見問題 FAQ（20 問）<span class="ui-en">FAQ (20 Questions)</span></h3><div class="ms-en" data-en-summary="sec12"><b>English — FAQ</b><br>
+Common issues covered here include local-storage limits, missing images, print scaling, QR Code changes, loading saved sheets, switching A4/A3 formats, and using the PWA offline. If a sheet does not appear on another device, remember that local storage is device/browser specific; use JSON backup for transfer.</div>
 
                 <div class="ms-faq">
                     <div class="q">填到一半關掉網頁，資料會不見嗎？</div>
@@ -3032,7 +3082,7 @@ html, body {
                 <div class="ms-faq">
                     <div class="q">為什麼我填了 10 把刀，列印出來只有 8 把？</div>
                     <div class="a">第一類 A4 格式固定顯示 8 列，這是版面限制。
-                    資料本身有被保存（在「我的表格」可以看到刀具數量是 10），
+                    資料本身有被保存（在「我的表格<span class="ui-en">My Sheets</span>」可以看到刀具數量是 10），
                     只是列印時只顯示前 8 把。<b>超過 8 把請改用第二類 A3 格式。</b></div>
                 </div>
 
@@ -3045,7 +3095,7 @@ html, body {
                 <div class="ms-faq">
                     <div class="q">切換格式之後，原本填的資料去哪了？</div>
                     <div class="a">切換格式前系統會<b>自動存檔</b>。
-                    原本的表格會保留在「我的表格」清單裡，您可以隨時載入回來。
+                    原本的表格會保留在「我的表格<span class="ui-en">My Sheets</span>」清單裡，您可以隨時載入回來。
                     只有「製表日期」與「製表者」會被帶到新格式中。</div>
                 </div>
 
@@ -3082,13 +3132,13 @@ html, body {
                 <div class="ms-faq">
                     <div class="q">出現「本機儲存空間不足」怎麼辦？</div>
                     <div class="a">表示瀏覽器能給的空間滿了。解決方式：<br>
-                    ① 到「我的表格」刪除不需要的舊表格。<br>
+                    ① 到「我的表格<span class="ui-en">My Sheets</span>」刪除不需要的舊表格。<br>
                     ② 減少刀具圖片數量（圖片最佔空間）。<br>
                     ③ 把重要表格存成 PDF 後刪除。</div>
                 </div>
 
                 <div class="ms-faq">
-                    <div class="q">換電腦之後，我的表格還在嗎？</div>
+                    <div class="q">換電腦之後，我的表格<span class="ui-en">My Sheets</span>還在嗎？</div>
                     <div class="a">不在。資料是存在原本那台裝置的瀏覽器裡，
                     不會跟著帳號同步。換裝置請事先把表格存成 PDF 帶過去。</div>
                 </div>
@@ -3146,7 +3196,7 @@ html, body {
                 <div class="ms-faq">
                     <div class="q">如果我不小心按到「重新填寫基本資料」怎麼辦？</div>
                     <div class="a">系統在重新填寫前會先自動存檔，所以舊資料還在。
-                    請到「我的表格」找到剛才那張，重新載入即可。</div>
+                    請到「我的表格<span class="ui-en">My Sheets</span>」找到剛才那張，重新載入即可。</div>
                 </div>
 
                 <div class="ms-faq">
@@ -3167,7 +3217,8 @@ html, body {
 
             <!-- ======= 13 ======= -->
             <div class="ms-sec" id="sec13">
-                <h3><span class="n">13</span>注意事項與資料保存</h3>
+                <h3><span class="n">13</span>注意事項與資料保存<span class="ui-en">Data Preservation & Important Notes</span></h3><div class="ms-en" data-en-summary="sec13"><b>English — Data Preservation</b><br>
+Local autosave is convenient but browser data can be lost if site data is cleared, private browsing is used, the browser/device is changed or the operating system is reinstalled. Important sheets should be backed up as JSON and/or exported as Word, Excel or PDF.</div>
 
                 <h4>13-1 資料保存的黃金原則</h4>
                 <div class="ms-warn">
@@ -3189,7 +3240,7 @@ html, body {
                 <ol>
                     <li>建立刀具表 → 完成所有欄位。</li>
                     <li>預覽區確認無誤。</li>
-                    <li><b>立刻列印或存成 PDF。</b></li>
+                    <li><b>立刻列印或存成 PDF<span class="ui-en">Print or Save as PDF</span>。</b></li>
                     <li>存檔後，可依需求決定是否保留在本機暫存中。</li>
                 </ol>
 
@@ -3218,7 +3269,8 @@ html, body {
 
             <!-- ======= 14 ======= -->
             <div class="ms-sec" id="sec14">
-                <h3><span class="n">14</span>快速鍵與效率小技巧</h3>
+                <h3><span class="n">14</span>快速鍵與效率小技巧<span class="ui-en">Shortcuts & Productivity Tips</span></h3><div class="ms-en" data-en-summary="sec14"><b>English — Productivity Tips</b><br>
+On desktop, press Enter to submit standard text inputs. Use Preview for quick corrections instead of restarting the wizard. Reuse an existing sheet as a template when the process is similar, then change part information and tool data as needed.</div>
 
                 <h4>14-1 鍵盤快速鍵</h4>
                 <table class="ms-table">
@@ -3250,8 +3302,8 @@ html, body {
                         按一下就能帶入，再微調即可。</li>
                     <li><b>圖片先拍好</b>：把所有刀具照片先拍好存在相簿，
                         填寫時連續上傳，不用中斷。</li>
-                    <li><b>用「我的表格」做範本</b>：建立一張常用刀具表後，
-                        載入它、修改品名客戶品號，就能快速產生新的一張。</li>
+                    <li><b>用「我的表格<span class="ui-en">My Sheets</span>」做範本</b>：建立一張常用刀具表後，
+                        載入它、修改品名<span class="bi-en">Part Name</span>客戶品號<span class="bi-en">Customer P/N</span>，就能快速產生新的一張。</li>
                     <li><b>電腦版左右分割最方便</b>：左邊回答、右邊即時看結果，不用切來切去。</li>
                     <li><b>完成立刻存 PDF</b>：這是保護心血最有效的方法。</li>
                     <li><b>善用預覽區直接編輯</b>：填錯不用重跑流程，直接點該欄位改就好。</li>
@@ -3263,11 +3315,11 @@ html, body {
 副標題：加工程式O6370
 製表者：王小明
 夾頭壓力：15KG
-品名：SLIDER
-客戶品號：Z907100000
-產品編號：1A8310-14250
-加工時間：3'00"
-每日數量：120 PCS
+品名<span class="bi-en">Part Name</span>：SLIDER
+客戶品號<span class="bi-en">Customer P/N</span>：Z907100000
+產品編號<span class="bi-en">Product No.</span>：1A8310-14250
+加工時間<span class="bi-en">Cycle Time</span>：3'00"
+每日數量<span class="bi-en">Daily Qty</span>：120 PCS
 
 刀具 N1：
   刀序：N1
@@ -3282,12 +3334,12 @@ html, body {
                 <div class="ms-code">主標題：BOX OP110
 副標題：加工程式O0001盘絲和刀具O0009
 製表者：A1234
-品名：BOX (L)
-客戶品號：Z907100000
-產品編號：1A8310-14250
-品名2：BOX (R)
-客戶品號2：Z907000000
-產品編號2：1A8310-14240
+品名<span class="bi-en">Part Name</span>：BOX (L)
+客戶品號<span class="bi-en">Customer P/N</span>：Z907100000
+產品編號<span class="bi-en">Product No.</span>：1A8310-14250
+品名<span class="bi-en">Part Name</span>2：BOX (R)
+客戶品號<span class="bi-en">Customer P/N</span>2：Z907000000
+產品編號<span class="bi-en">Product No.</span>2：1A8310-14240
 
 刀具 N10：
   刀序：N10
@@ -3308,7 +3360,7 @@ html, body {
             </div>
 
             <div class="ms-end">
-                <b>智慧刀具表製作系統 ・ 使用說明書 v2.0</b><br>
+                <b>智慧刀具表製作系統<span class="ui-en">Smart Tool Sheet System</span> ・ 使用說明<span class="ui-en">Guide</span>書 v2.0</b><br>
                 本說明書內容涵蓋全部功能與操作細節<br>
                 如有未盡事宜，請依現場實際作業規範為準
             </div>
@@ -3316,8 +3368,8 @@ html, body {
         </div>
 
         <div class="ms-bottom-bar">
-            <button class="b1" onclick="closeManualAndStart()">🚀 開始製作刀具表</button>
-            <button class="b2" onclick="closeManual()">關閉說明書</button>
+            <button class="b1" onclick="closeManualAndStart()">🚀 開始製作刀具表<br><span class="ui-en">Start Tool Sheet</span></button>
+            <button class="b2" onclick="closeManual()">關閉說明書 / Close Guide</button>
         </div>
 
     </div>
@@ -3337,11 +3389,11 @@ html, body {
             <div class="header-row">
                 <div class="brand">
                     <span class="logo-dot" id="brand-avatar" title="點擊更換頭像" onclick="openAvatarPicker()">🤖</span>
-                    <span>刀具表精靈 • 手機版</span>
+                    <span>刀具表精靈 • 手機版<br><small style="font-size:.62em;font-weight:700;color:#5F6368;">Tool Sheet Wizard • Mobile</small></span>
                 </div>
                 <div class="header-actions">
-                    <button class="icon-btn desktop-only" onclick="switchTab('preview')" title="電腦版預覽報表">🖥️ 預覽</button>
-                    <button class="icon-btn" onclick="openManual()" title="使用說明書">❓</button>
+                    <button class="icon-btn desktop-only" onclick="switchTab('preview')" title="電腦版預覽報表<span class="ui-en">Preview</span>">🖥️ 預覽 / Preview</button>
+                    <button class="icon-btn" onclick="openManual()" title="使用說明<span class="ui-en">Guide</span>書">❓</button>
                     <button class="icon-btn" onclick="openTableManager()" title="我的刀具表">
                         📁 <span id="table-count-badge" class="badge-count">0/10</span>
                     </button>
@@ -3350,8 +3402,8 @@ html, body {
 
             <!-- 格式切換 -->
             <div id="mode-switch-bar">
-                <button id="mode-btn-1" class="mode-btn active" onclick="changeFormat(1)">1:《車床N/C .A4規格》</button>
-                <button id="mode-btn-2" class="mode-btn" onclick="changeFormat(2)">2：《銑床M/C.A3規格》</button>
+                <button id="mode-btn-1" class="mode-btn active" onclick="changeFormat(1)">1:《車床N/C .A4規格》<span class="ui-en">Lathe N/C · A4</span></button>
+                <button id="mode-btn-2" class="mode-btn" onclick="changeFormat(2)">2：《銑床M/C.A3規格》<span class="ui-en">Milling M/C · A3</span></button>
             </div>
         </header>
 
@@ -3375,19 +3427,19 @@ html, body {
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                 </svg>
-                <span id="print-btn-label">列印 / 存為 PDF（A4 單頁）</span>
+                <span id="print-btn-label">列印 / 存為 PDF（A4 單頁） / Print / Save PDF (A4)</span>
             </button>
         </div>
 
         <div id="export-btn-container">
-            <button class="export-btn desktop-only" onclick="switchTab('chat')">↩ 返回編輯</button>
+            <button class="export-btn desktop-only" onclick="switchTab('chat')">↩ 返回編輯 / Back to Edit</button>
             <button class="export-btn word" onclick="exportWordFile()">📝 Word</button>
             <button class="export-btn excel" onclick="exportExcelFile()">📊 Excel</button>
             <button class="export-btn drive" onclick="saveCurrentToGoogleDrive()">☁️ Google Drive</button>
         </div>
 
         <div id="edit-hint">
-            💡 <b>點擊表單任何欄位即可直接編輯</b>　·　刀具圖片可點擊更換　·　QR Code 可點擊修改
+            💡 <b>點擊表單任何欄位即可直接編輯</b>　·　刀具圖片可點擊更換　·　QR Code 可點擊修改<br><span class="ui-en">Tap any field to edit · Tap tool images to replace · Tap QR Code to modify</span>
         </div>
 
         <!-- ============ 第一類 A4 ============ -->
@@ -3417,7 +3469,7 @@ html, body {
                 </table>
 
                 <div class="w-full border-b-4 border-black border-x-4 border-t-0 text-center py-1 font-bold text-xl shrink-0 bg-white">
-                    夾頭壓力設定<br>
+                    夾頭壓力設定<span class="bi-en">Chuck Pressure</span><br>
                     <span id="out-pressure" class="text-2xl text-blue-800 tracking-wider"></span>
                 </div>
 
@@ -3596,20 +3648,20 @@ html, body {
     <nav id="mobile-nav">
         <button id="nav-chat" class="nav-btn active" onclick="switchTab('chat')">
             <span class="nav-icon">💬</span>
-            <span>對話輸入</span>
+            <span>對話輸入<span class="ui-en">Guided Input</span></span>
         </button>
         <button id="nav-preview" class="nav-btn" onclick="switchTab('preview')">
             <span class="nav-icon">📄</span>
-            <span>預覽報表</span>
+            <span>預覽報表<span class="ui-en">Preview</span></span>
         </button>
         <button class="nav-btn" onclick="openTableManager()">
             <span class="nav-icon">📁</span>
-            <span>我的表格</span>
+            <span>我的表格<span class="ui-en">My Sheets</span></span>
             <span id="nav-table-dot" class="nav-dot" style="display:none;">0</span>
         </button>
         <button class="nav-btn" onclick="openManual()">
             <span class="nav-icon">📖</span>
-            <span>使用說明</span>
+            <span>使用說明<span class="ui-en">Guide</span></span>
         </button>
     </nav>
 
@@ -3622,25 +3674,24 @@ html, body {
     <div class="tm-panel">
         <div class="tm-handle"></div>
         <div class="tm-head">
-            <h2>📁 我的刀具表 <span id="tm-count" style="font-size:.75rem;font-weight:500;color:#5F6368;"></span></h2>
+            <h2>📁 我的刀具表<br><span class="ui-en">My Tool Sheets</span> <span id="tm-count" style="font-size:.75rem;font-weight:500;color:#5F6368;"></span></h2>
             <button class="tm-close" onclick="closeTableManager()">&times;</button>
         </div>
         <div class="tm-footer" style="border-top:none;padding-top:0;">
-            <button class="tm-new" onclick="createNewTable()">＋ 新增刀具表</button>
+            <button class="tm-new" onclick="createNewTable()">＋ 新增刀具表<br><span class="ui-en">New Tool Sheet</span></button>
             <div class="tm-cloud-grid">
-                <button class="tm-cloud-btn save" onclick="saveCurrentToGoogleDrive()">☁️ 儲存 Word＋Excel＋備份到 Google Drive</button>
-                <button class="tm-cloud-btn import" onclick="exportWordFile()">📝 匯出 Word</button>
-                <button class="tm-cloud-btn folder" onclick="exportExcelFile()">📊 匯出 Excel</button>
-                <button class="tm-cloud-btn import" onclick="chooseGoogleDriveBackup()">📥 匯入雲端備份</button>
-                <button class="tm-cloud-btn folder" onclick="openGoogleDriveFolder()">📂 開啟雲端資料夾</button>
+                <button class="tm-cloud-btn save" onclick="saveCurrentToGoogleDrive()">☁️ 儲存 Word＋Excel＋備份到 Google Drive<br><span class="ui-en">Save Word + Excel + Backup to Google Drive</span></button>
+                <button class="tm-cloud-btn import" onclick="exportWordFile()">📝 匯出 Word<br><span class="ui-en">Export Word</span></button>
+                <button class="tm-cloud-btn folder" onclick="exportExcelFile()">📊 匯出 Excel<br><span class="ui-en">Export Excel</span></button>
+                <button class="tm-cloud-btn import" onclick="chooseGoogleDriveBackup()">📥 匯入雲端備份<br><span class="ui-en">Import Cloud Backup</span></button>
+                <button class="tm-cloud-btn folder" onclick="openGoogleDriveFolder()">📂 開啟雲端資料夾<br><span class="ui-en">Open Cloud Folder</span></button>
             </div>
             <input id="google-drive-import-file" type="file" accept=".json,application/json" hidden onchange="importGoogleDriveBackup(event)">
         </div>
         <div id="tm-list" class="tm-body"></div>
         <div class="tm-footer">
             <div class="tm-note">
-                💾 本機自動暫存最多 <b>10 張</b>；可輸出 Word / Excel / JSON 備份<br>
-                手機可分享至 Google Drive，電腦可直接下載並預覽
+                💾 本機自動暫存最多 <b>10 張</b>；可輸出 Word / Excel / JSON 備份<br><span class="ui-en">Up to 10 local sheets · Export Word / Excel / JSON backup</span><br>手機可分享至 Google Drive，電腦可直接下載並預覽<br><span class="ui-en">Mobile can share to Google Drive; desktop can download and preview directly.</span>
             </div>
         </div>
     </div>
@@ -3653,15 +3704,15 @@ html, body {
     <div class="ap-panel">
         <div class="ap-handle"></div>
         <div class="ap-head">
-            <h3>🎨 更換精靈頭像</h3>
+            <h3>🎨 更換精靈頭像 <span class="ui-en inline">Change Wizard Avatar</span></h3>
             <button class="tm-close" onclick="closeAvatarPicker()">&times;</button>
         </div>
         <div class="ap-grid" id="ap-grid"></div>
         <label class="ap-upload">
-            📷 上傳自訂圖片
+            📷 上傳自訂圖片 / Upload Custom Image
             <input type="file" accept="image/*" id="ap-file" hidden>
         </label>
-        <button class="ap-reset" onclick="resetAvatar()">↺ 恢復預設 🤖</button>
+        <button class="ap-reset" onclick="resetAvatar()">↺ 恢復預設 🤖 / Reset Default</button>
     </div>
 </div>
 
@@ -3712,10 +3763,10 @@ const inputContainer = document.getElementById('input-container');
 /* ============================================================
    預設文字（第二類）
    ============================================================ */
-const DEFAULT_REMINDER = `1.正刀長G43,刀長數字越大.孔深就越淺
-2.正刀長G43,刀長數字越小.孔深就越深
-3.補正值H，負向（-）越深，正向（+）越淺
-4.刀片：有分R0.2 ，R0.4，R0.8`;
+const DEFAULT_REMINDER = `1. 正刀長 G43：刀長數字越大，孔深越淺 / G43: Larger tool length = shallower hole
+2. 正刀長 G43：刀長數字越小，孔深越深 / G43: Smaller tool length = deeper hole
+3. H補正：負向（-）越深，正向（+）越淺 / H offset: Negative = deeper, Positive = shallower
+4. 刀片 R：R0.2 / R0.4 / R0.8 / Insert nose radius: R0.2 / R0.4 / R0.8`;
 
 const DEFAULT_MACHINE_TIPS = `#10=刀長補正
 #10+ロロロ=刀長磨耗
@@ -3736,63 +3787,63 @@ OXX99=刀庫總結模式`;
    流程定義
    ============================================================ */
 const flowType1 = [
-    { id: 'title', type: 'text', q: '歡迎使用【第一類1: 《車床N/C.A4規格》】！\n請輸入表單【主題：品名/工序】\n(例: SLIDER OP110)', placeholder: 'SLIDER OP110' },
-    { id: 'subtitle', type: 'text', q: '請輸入【副標題主頁程式0xxxx/加工程式 / Oxxx】', placeholder: '加工程式O6370', optional: true },
-    { id: 'date', type: 'date', q: '請確認【製表日期】' },
-    { id: 'creator', type: 'text', q: '請輸入【製表者】', placeholder: '姓名 ' },
-    { id: 'pressure', type: 'text', q: '請輸入【夾頭壓力設定 / Chuck Pressure】', placeholder: '15KG' },
-    { id: 'partName', type: 'text', q: '接著是零件資訊。\n請輸入【品名 / Part Name】', placeholder: '零件名稱' },
-    { id: 'partNo', type: 'text', q: '請輸入【客戶品號 / Customer P/N】', placeholder: '零件編號' },
-    { id: 'customerNo', type: 'text', q: '請輸入【產品編號 / Product No.】', placeholder: '產品編號', optional: true },
-    { id: 'processTime', type: 'text', q: '請輸入【加工時間 / Cycle Time】', placeholder: "3'00\"", optional: true },
-    { id: 'dailyQty', type: 'text', q: '請輸入【每日數量 / Daily Qty】', placeholder: '120 PCS', optional: true },
-    { id: 'start_tools', type: 'action', q: '✅ 基本資料設定完成！\n接下來我們逐一建立【刀具資料】。', btnText: '新增第一把刀具' }
+    { id: 'title', type: 'text', q: '歡迎使用【第一類：車床 N/C · A4】！\nWelcome to Type 1: Lathe N/C · A4.\n請輸入【主題：品名 / 工序】\nEnter the title: Part Name / Process\n(例 Example: SLIDER OP110)', placeholder: 'SLIDER OP110' },
+    { id: 'subtitle', type: 'text', q: '請輸入【副標題 / 主頁程式 / 加工程式】\nEnter Subtitle / Main Program / Machining Program', placeholder: '加工程式 / Program O6370', optional: true },
+    { id: 'date', type: 'date', q: '請確認【製表日期】\nConfirm 【Date】' },
+    { id: 'creator', type: 'text', q: '請輸入【製表者 / 代碼】\nEnter 【Prepared By / ID】', placeholder: '姓名 / Name' },
+    { id: 'pressure', type: 'text', q: '請輸入【夾頭壓力設定 / Chuck Pressure】\nEnter chuck pressure', placeholder: '15KG' },
+    { id: 'partName', type: 'text', q: '接著是零件資訊。\nNext: part information.\n請輸入【品名 / Part Name】', placeholder: '零件名稱 / Part Name' },
+    { id: 'partNo', type: 'text', q: '請輸入【客戶品號 / Customer P/N】\nEnter customer part number', placeholder: '客戶品號 / Customer P/N' },
+    { id: 'customerNo', type: 'text', q: '請輸入【產品編號 / Product No.】\nEnter product number', placeholder: '產品編號 / Product No.', optional: true },
+    { id: 'processTime', type: 'text', q: '請輸入【加工時間 / Cycle Time】\nEnter cycle time', placeholder: "3'00\"", optional: true },
+    { id: 'dailyQty', type: 'text', q: '請輸入【每日數量 / Daily Qty】\nEnter daily quantity', placeholder: '120 PCS', optional: true },
+    { id: 'start_tools', type: 'action', q: '✅ 基本資料設定完成！\nBasic information is complete.\n接下來逐一建立【刀具資料 / Tool Data】。', btnText: '新增第一把刀具 / Add First Tool' }
 ];
 
 const toolFlowType1 = [
-    { id: 't_seq', type: 'text', q: '請輸入【刀序 / N工序】(例: N10)', placeholder: 'N10' },
-    { id: 't_type', type: 'text', q: '請輸入【刀具形式 / Tool Type】', placeholder: '外徑粗車' },
-    { id: 't_no', type: 'text', q: '請輸入【刀號 / Tool No.】(例: T01)', placeholder: 'T01' },
+    { id: 't_seq', type: 'text', q: '請輸入【刀序 / N工序 / N Process】\nEnter process number', placeholder: 'N10' },
+    { id: 't_type', type: 'text', q: '請輸入【刀具形式 / Tool Type】', placeholder: '外徑粗車 / OD Roughing' },
+    { id: 't_no', type: 'text', q: '請輸入【刀號 / Tool No.】', placeholder: 'T01' },
     { id: 't_h', type: 'text', q: '請輸入【H值 / H Offset】', placeholder: '01', optional: true },
-    { id: 't_gx', type: 'text', q: '請輸入此 N工序的【G補正 X軸 / G Offset X】', placeholder: '例：X-0.02', optional: true },
-    { id: 't_gz', type: 'text', q: '請輸入此 N工序的【G補正 Z軸】', placeholder: '例：Z+0.03', optional: true },
-    { id: 't_remark', type: 'text', q: '請輸入【刀具壽命 / Tool Life】\n格式：#xxx=數量', placeholder: '#500=30', optional: true },
-    { id: 't_image', type: 'file', q: '請選擇【導入圖示】\n(選取圖片，無圖請點略過)' }
+    { id: 't_gx', type: 'text', q: '請輸入此 N工序的【G補正 X軸 / G Offset X】', placeholder: '例 Example: X-0.02', optional: true },
+    { id: 't_gz', type: 'text', q: '請輸入此 N工序的【G補正 Z軸 / G Offset Z】', placeholder: '例 Example: Z+0.03', optional: true },
+    { id: 't_remark', type: 'text', q: '請輸入【刀具壽命 / Tool Life】\n格式 / Format：#xxx=數量 / Qty', placeholder: '#500=30', optional: true },
+    { id: 't_image', type: 'file', q: '請選擇【導入圖示 / Tool Image】\n選取圖片，無圖可略過 / Select an image or skip' }
 ];
 
 const flowType2 = [
-    { id: 'headerTitle', type: 'text', q: '歡迎使用【第二類 2：《銑床M/C.A3規格》】！\n請輸入【主題品名/工序】\n(例: BOX OP110)', placeholder: 'BOX OP110' },
-    { id: 'headerSubtitle', type: 'text', q: '請輸入【副標題主頁程式0xxxx/加工程式 / Oxxx】】\n(例: 加工程式O0001和刀具O0009)', placeholder: '加工程式O0001盘絲和刀具O0009', optional: true },
-    { id: 'date', type: 'date', q: '請確認【製表日期】' },
-    { id: 'creator', type: 'text', q: '請輸入【製表者】', placeholder: '姓名 ' },
-    { id: 'productName', type: 'text', q: '請輸入【品名 / Part Name】(左側第一組)', placeholder: 'BOX (L)' },
+    { id: 'headerTitle', type: 'text', q: '歡迎使用【第二類：銑床 M/C · A3】！\nWelcome to Type 2: Milling M/C · A3.\n請輸入【主題：品名 / 工序】\nEnter the title: Part Name / Process\n(例 Example: BOX OP110)', placeholder: 'BOX OP110' },
+    { id: 'headerSubtitle', type: 'text', q: '請輸入【副標題 / 主頁程式 / 加工程式】\nEnter Subtitle / Main Program / Machining Program', placeholder: '加工程式 / Program O0001 + Tool O0009', optional: true },
+    { id: 'date', type: 'date', q: '請確認【製表日期】\nConfirm 【Date】' },
+    { id: 'creator', type: 'text', q: '請輸入【製表者 / 代碼】\nEnter 【Prepared By / ID】', placeholder: '姓名 / Name' },
+    { id: 'productName', type: 'text', q: '請輸入【品名 / Part Name】（第一組 / Set 1）', placeholder: 'BOX (L)' },
     { id: 'productNo', type: 'text', q: '請輸入【客戶品號 / Customer P/N】', placeholder: 'Z907100000' },
     { id: 'customerNo1', type: 'text', q: '請輸入【產品編號 / Product No.】', placeholder: '1A8310-14250', optional: true },
-    { id: 'productName2', type: 'text', q: '請輸入【品名2】(第二組)', placeholder: 'BOX (R)', optional: true },
-    { id: 'productNo2', type: 'text', q: '請輸入【客戶品號2】', placeholder: 'Z907000000', optional: true },
-    { id: 'customerNo2', type: 'text', q: '請輸入【產品編號2】', placeholder: '1A8310-14240', optional: true },
+    { id: 'productName2', type: 'text', q: '請輸入【品名2 / Part Name 2】（第二組 / Set 2）', placeholder: 'BOX (R)', optional: true },
+    { id: 'productNo2', type: 'text', q: '請輸入【客戶品號2 / Customer P/N 2】', placeholder: 'Z907000000', optional: true },
+    { id: 'customerNo2', type: 'text', q: '請輸入【產品編號2 / Product No. 2】', placeholder: '1A8310-14240', optional: true },
     { id: 'processTime2', type: 'text', q: '請輸入【加工時間 / Cycle Time】', placeholder: "3'00\"", optional: true },
     { id: 'dailyQty2', type: 'text', q: '請輸入【每日數量 / Daily Qty】', placeholder: '120 PCS', optional: true },
-    { id: 'reminderText', type: 'textarea', q: '請輸入【刀具相關貼心提醒】\n(可留空使用預設內容)', placeholder: '機台要是有送給製二組...', optional: true, defaultValue: DEFAULT_REMINDER },
-    { id: 'programSide1', type: 'text', q: '請輸入【#500 設定值1】(例: #500=1.)', placeholder: '#500=1.', optional: true, defaultValue: '#500=1.' },
-    { id: 'programSide2', type: 'text', q: '請輸入【#500 說明2】', placeholder: '(#500=1.)(ONLY L SIDE)', optional: true, defaultValue: '(#500=1.)(ONLY L SIDE)' },
-    { id: 'programSide3', type: 'text', q: '請輸入【#500 說明3】', placeholder: '(#500=2.)(ONLY R SIDE)', optional: true, defaultValue: '(#500=2.)(ONLY R SIDE)' },
-    { id: 'programSide4', type: 'text', q: '請輸入【#500 說明4】', placeholder: '(#500=3.)(L SIDE + R SIDE)', optional: true, defaultValue: '(#500=3.)(L SIDE + R SIDE)' },
-    { id: 'machineTips', type: 'textarea', q: '請輸入【機台操作小技巧】\n(每行一條，可留空使用預設內容)', placeholder: '#10=刀長補正...', optional: true, defaultValue: DEFAULT_MACHINE_TIPS },
-    { id: 'start_tools', type: 'action', q: '✅ 第二類基本資料設定完成！\n接下來逐一建立【刀具資料】。', btnText: '新增第一把刀具' }
+    { id: 'reminderText', type: 'textarea', q: '請輸入【刀具相關貼心提醒 / Tool Notes】\n可留空使用預設內容 / Leave blank to use defaults', placeholder: '刀具提醒 / Tool notes...', optional: true, defaultValue: DEFAULT_REMINDER },
+    { id: 'programSide1', type: 'text', q: '請輸入【#500 設定值1 / #500 Setting 1】', placeholder: '#500=1.', optional: true, defaultValue: '#500=1.' },
+    { id: 'programSide2', type: 'text', q: '請輸入【#500 說明2 / #500 Note 2】', placeholder: '(#500=1.)(ONLY L SIDE)', optional: true, defaultValue: '(#500=1.)(ONLY L SIDE)' },
+    { id: 'programSide3', type: 'text', q: '請輸入【#500 說明3 / #500 Note 3】', placeholder: '(#500=2.)(ONLY R SIDE)', optional: true, defaultValue: '(#500=2.)(ONLY R SIDE)' },
+    { id: 'programSide4', type: 'text', q: '請輸入【#500 說明4 / #500 Note 4】', placeholder: '(#500=3.)(L SIDE + R SIDE)', optional: true, defaultValue: '(#500=3.)(L SIDE + R SIDE)' },
+    { id: 'machineTips', type: 'textarea', q: '請輸入【機台操作小技巧 / Machine Tips】\n每行一條，可留空使用預設內容 / One item per line; leave blank for defaults', placeholder: '#10=刀長補正 / Tool length offset...', optional: true, defaultValue: DEFAULT_MACHINE_TIPS },
+    { id: 'start_tools', type: 'action', q: '✅ 第二類基本資料設定完成！\nType 2 basic information is complete.\n接下來逐一建立【刀具資料 / Tool Data】。', btnText: '新增第一把刀具 / Add First Tool' }
 ];
 
 const toolFlowType2 = [
-    { id: 't_seq', type: 'text', q: '請輸入【刀序 / N工序】(例: N10)', placeholder: 'N10' },
-    { id: 't_type', type: 'text', q: '請輸入【刀具形式 / Tool Type】(主標題)', placeholder: 'D63-MILL' },
-    { id: 't_typeDesc', type: 'text', q: '請輸入【刀具形式描述】(副標題)', placeholder: '銑大面.平底度5條', optional: true },
-    { id: 't_no', type: 'text', q: '請輸入【刀號 / Tool No.】(例: T01)', placeholder: 'T01' },
-    { id: 't_h', type: 'text', q: '請輸入【H值】', placeholder: '01', optional: true },
-    { id: 't_len', type: 'text', q: '請輸入【刀長】', placeholder: '99.95', optional: true },
-    { id: 't_gx', type: 'text', q: '請輸入此 N工序的【G補正 X軸】', placeholder: '例：X-0.02', optional: true },
-    { id: 't_gz', type: 'text', q: '請輸入此 N工序的【G補正 Z軸】', placeholder: '例：Z+0.03', optional: true },
-    { id: 't_remark', type: 'text', q: '請輸入【刀具壽命 / Tool Life】\n格式：#xxx=數量', placeholder: '#500=30', optional: true },
-    { id: 't_image', type: 'file', q: '請選擇【導入圖示】\n(選取圖片，無圖請點略過)' }
+    { id: 't_seq', type: 'text', q: '請輸入【刀序 / N工序 / N Process】\nEnter process number', placeholder: 'N10' },
+    { id: 't_type', type: 'text', q: '請輸入【刀具形式 / Tool Type】（主標題 / Main）', placeholder: 'D63-MILL' },
+    { id: 't_typeDesc', type: 'text', q: '請輸入【刀具形式描述 / Tool Description】（副標題 / Subtitle）', placeholder: '銑大面 / Face Milling', optional: true },
+    { id: 't_no', type: 'text', q: '請輸入【刀號 / Tool No.】', placeholder: 'T01' },
+    { id: 't_h', type: 'text', q: '請輸入【H值 / H Offset】', placeholder: '01', optional: true },
+    { id: 't_len', type: 'text', q: '請輸入【刀長 / Tool Length】', placeholder: '99.95', optional: true },
+    { id: 't_gx', type: 'text', q: '請輸入此 N工序的【G補正 X軸 / G Offset X】', placeholder: '例 Example: X-0.02', optional: true },
+    { id: 't_gz', type: 'text', q: '請輸入此 N工序的【G補正 Z軸 / G Offset Z】', placeholder: '例 Example: Z+0.03', optional: true },
+    { id: 't_remark', type: 'text', q: '請輸入【刀具壽命 / Tool Life】\n格式 / Format：#xxx=數量 / Qty', placeholder: '#500=30', optional: true },
+    { id: 't_image', type: 'file', q: '請選擇【導入圖示 / Tool Image】\n選取圖片，無圖可略過 / Select an image or skip' }
 ];
 
 /* ============================================================
@@ -3915,7 +3966,7 @@ function refreshAvatars() {
     document.querySelectorAll('.avatar-bot').forEach(el => {
         el.innerHTML = avatarBotHTML();
         el.onclick = openAvatarPicker;
-        el.title = '點擊更換頭像';
+        el.title = '點擊更換頭像 / Change Avatar';
     });
 }
 
@@ -3970,7 +4021,7 @@ function persist() {
         return true;
     } catch (e) {
         console.error(e);
-        alert('⚠️ 本機儲存空間不足，表格暫存失敗。\n建議刪除不需要的舊表格，或減少刀具圖片。');
+        alert('⚠️ 本機儲存空間不足，表格暫存失敗。\nLocal storage is full and autosave failed.\n建議刪除不需要的舊表格，或減少刀具圖片。\nDelete old sheets or reduce tool images.');
         return false;
     }
 }
@@ -3995,7 +4046,7 @@ function saveCurrent(keepIfEmpty) {
             id: 'T' + Date.now() + Math.random().toString(36).slice(2, 6),
             createdAt: Date.now(),
             updatedAt: Date.now(),
-            name: '未命名刀具表',
+            name: '未命名刀具表 / Untitled Tool Sheet',
             data: null
         };
         store.tables.push(t);
@@ -4007,11 +4058,11 @@ function saveCurrent(keepIfEmpty) {
     if (appData.type === 2) {
         t.name = appData.headerTitle
             ? typeTag + appData.headerTitle + (appData.productNo ? ' · ' + appData.productNo : '')
-            : typeTag + '未命名刀具表';
+            : typeTag + '未命名刀具表 / Untitled Tool Sheet';
     } else {
         t.name = appData.title
             ? typeTag + appData.title + (appData.partNo ? ' · ' + appData.partNo : '')
-            : typeTag + '未命名刀具表';
+            : typeTag + '未命名刀具表 / Untitled Tool Sheet';
     }
     t.data = JSON.parse(JSON.stringify(appData));
     persist();
@@ -4038,8 +4089,8 @@ function changeFormat(type) {
     document.getElementById('a3-wrapper').classList.toggle('hidden', type !== 2);
 
     document.getElementById('print-btn-label').textContent = type === 2
-        ? '列印 / 存為 PDF（A3 橫向單頁）'
-        : '列印 / 存為 PDF（A4 單頁）';
+        ? '列印 / 存為 PDF（A3 橫向單頁） / Print / Save PDF (A3 Landscape)'
+        : '列印 / 存為 PDF（A4 單頁） / Print / Save PDF (A4)';
     document.getElementById('dynamic-page-style').textContent = type === 2
         ? '@page { size: A3 landscape; margin: 0; }'
         : '@page { size: A4 portrait; margin: 0; }';
@@ -4048,8 +4099,8 @@ function changeFormat(type) {
     updateA3Preview();
     restartChat();
     addBotMessage(type === 2
-        ? '🔄 已切換為【第二類 A3 格式】\n我們從頭開始建立。'
-        : '🔄 已切換為【第一類 A4 格式】\n我們從頭開始建立。');
+        ? '🔄 已切換為【第二類 A3 格式 / Type 2 A3】\n我們從頭開始建立。 / Starting a new sheet.'
+        : '🔄 已切換為【第一類 A4 格式 / Type 1 A4】\n我們從頭開始建立。 / Starting a new sheet.');
     setTimeout(adjustPreviewScale, 60);
 }
 
@@ -4094,25 +4145,25 @@ function 取得匯出資料_(table) {
     const basic = isA3 ? [
         ['主題 / Title', d.headerTitle || ''],
         ['副標題 / Subtitle', d.headerSubtitle || ''],
-        ['品名 / Part Name', d.productName || ''],
-        ['客戶品號 / Customer P/N', d.productNo || ''],
-        ['產品編號 / Product No.', d.customerNo1 || ''],
-        ['品名2 / Part Name 2', d.productName2 || ''],
-        ['客戶品號2 / Customer P/N 2', d.productNo2 || ''],
-        ['產品編號2 / Product No. 2', d.customerNo2 || ''],
-        ['加工時間 / Cycle Time', d.processTime2 || ''],
-        ['每日數量 / Daily Qty', d.dailyQty2 || ''],
+        ['品名<span class="bi-en">Part Name</span> / Part Name', d.productName || ''],
+        ['客戶品號<span class="bi-en">Customer P/N</span> / Customer P/N', d.productNo || ''],
+        ['產品編號<span class="bi-en">Product No.</span> / Product No.', d.customerNo1 || ''],
+        ['品名<span class="bi-en">Part Name</span>2 / Part Name 2', d.productName2 || ''],
+        ['客戶品號<span class="bi-en">Customer P/N</span>2 / Customer P/N 2', d.productNo2 || ''],
+        ['產品編號<span class="bi-en">Product No.</span>2 / Product No. 2', d.customerNo2 || ''],
+        ['加工時間<span class="bi-en">Cycle Time</span> / Cycle Time', d.processTime2 || ''],
+        ['每日數量<span class="bi-en">Daily Qty</span> / Daily Qty', d.dailyQty2 || ''],
         ['製表日期 / Date', d.date || ''],
         ['製表者 / Prepared By', d.creator || '']
     ] : [
         ['主題 / Title', d.title || ''],
         ['副標題 / Subtitle', d.subtitle || ''],
         ['夾頭壓力 / Chuck Pressure', d.pressure || ''],
-        ['品名 / Part Name', d.partName || ''],
-        ['客戶品號 / Customer P/N', d.partNo || ''],
-        ['產品編號 / Product No.', d.customerNo || ''],
-        ['加工時間 / Cycle Time', d.processTime || ''],
-        ['每日數量 / Daily Qty', d.dailyQty || ''],
+        ['品名<span class="bi-en">Part Name</span> / Part Name', d.partName || ''],
+        ['客戶品號<span class="bi-en">Customer P/N</span> / Customer P/N', d.partNo || ''],
+        ['產品編號<span class="bi-en">Product No.</span> / Product No.', d.customerNo || ''],
+        ['加工時間<span class="bi-en">Cycle Time</span> / Cycle Time', d.processTime || ''],
+        ['每日數量<span class="bi-en">Daily Qty</span> / Daily Qty', d.dailyQty || ''],
         ['製表日期 / Date', d.date || ''],
         ['製表者 / Prepared By', d.creator || '']
     ];
@@ -4230,7 +4281,7 @@ async function exportWordFile() {
         下載檔案_(file);
     } catch (e) {
         console.error(e);
-        alert('Word 匯出失敗：' + (e.message || e));
+        alert('Word 匯出失敗 / Word export failed: ' + (e.message || e));
     }
 }
 
@@ -4241,7 +4292,7 @@ function exportExcelFile() {
         下載檔案_(file);
     } catch (e) {
         console.error(e);
-        alert('Excel 匯出失敗：' + (e.message || e));
+        alert('Excel 匯出失敗 / Excel export failed: ' + (e.message || e));
     }
 }
 
@@ -4252,11 +4303,11 @@ const GOOGLE_DRIVE_FOLDER_URL = 'https://drive.google.com/drive/folders/14SPCeOw
 const CLOUD_BACKUP_VERSION = '1.0';
 
 function getSafeBackupName(name) {
-    const cleaned = String(name || '未命名刀具表')
+    const cleaned = String(name || '未命名刀具表 / Untitled Tool Sheet')
         .replace(/[\\/:*?"<>|]/g, '_')
         .replace(/\s+/g, ' ')
         .trim();
-    return cleaned || '未命名刀具表';
+    return cleaned || '未命名刀具表 / Untitled Tool Sheet';
 }
 
 function getBackupTimestamp(date) {
@@ -4279,7 +4330,7 @@ function buildCloudBackup(table) {
         source: location.href,
         table: {
             id: table.id,
-            name: table.name || '未命名刀具表',
+            name: table.name || '未命名刀具表 / Untitled Tool Sheet',
             createdAt: table.createdAt || Date.now(),
             updatedAt: table.updatedAt || Date.now(),
             data: JSON.parse(JSON.stringify(table.data || appData))
@@ -4291,7 +4342,7 @@ async function saveCurrentToGoogleDrive() {
     saveCurrent(true);
 
     if (!hasMeaningfulData()) {
-        alert('目前刀具表還沒有資料，請先建立內容再進行雲端備份。');
+        alert('目前刀具表還沒有資料，請先建立內容再進行雲端備份。\nThe current tool sheet has no data. Add content before cloud backup.');
         return;
     }
 
@@ -4305,19 +4356,19 @@ async function saveCurrentToGoogleDrive() {
         if (navigator.share && navigator.canShare && navigator.canShare({ files })) {
             await navigator.share({
                 title: '刀具表雲端備份｜Word + Excel + JSON',
-                text: '請選擇 Google Drive 儲存。Word 與 Excel 可直接開啟，JSON 可回到刀具表精靈匯入還原。',
+                text: '請選擇 Google Drive 儲存。 / Choose Google Drive to save.\nWord 與 Excel 可直接開啟，JSON 可回到刀具表精靈匯入還原。 / Word and Excel open directly; JSON can be imported back into Tool Sheet Wizard.',
                 files
             });
             return;
         }
 
         files.forEach(下載檔案_);
-        alert('已產生 Word、Excel、JSON 三個檔案。\n請將檔案存入指定 Google Drive 資料夾。');
+        alert('已產生 Word、Excel、JSON 三個檔案。\nWord, Excel, and JSON files are ready.\n請將檔案存入 Google Drive。\nSave the files to Google Drive.');
         openGoogleDriveFolder();
     } catch (error) {
         if (error && error.name === 'AbortError') return;
         console.error('Google Drive 備份失敗', error);
-        alert('雲端備份沒有完成：' + (error.message || error));
+        alert('雲端備份沒有完成 / Cloud backup was not completed: ' + (error.message || error));
     }
 }
 
@@ -4350,7 +4401,7 @@ async function importGoogleDriveBackup(event) {
         saveCurrent();
 
         if (store.tables.length >= MAX_TABLES) {
-            alert('本機已達 10 張表格上限。\n請先刪除一張不需要的刀具表，再匯入雲端備份。');
+            alert('本機已達 10 張表格上限。\nLocal storage has reached the 10-sheet limit.\n請先刪除一張不需要的刀具表，再匯入雲端備份。\nDelete one sheet before importing a cloud backup.');
             return;
         }
 
@@ -4371,10 +4422,10 @@ async function importGoogleDriveBackup(event) {
         persist();
         renderTableList();
         loadTable(newId);
-        alert('✅ Google Drive 刀具表備份已匯入完成。');
+        alert('✅ Google Drive 刀具表備份已匯入完成。\nGoogle Drive tool-sheet backup imported successfully.');
     } catch (error) {
         console.error('匯入 Google Drive 備份失敗', error);
-        alert('無法匯入這個檔案。\n請確認它是由「刀具表精靈」產生的 JSON 備份檔。');
+        alert('無法匯入這個檔案。\nUnable to import this file.\n請確認它是由「刀具表精靈」產生的 JSON 備份檔。\nMake sure it is a JSON backup created by Tool Sheet Wizard.');
     } finally {
         if (input) input.value = '';
     }
@@ -4409,7 +4460,7 @@ function renderTableList() {
     if (store.tables.length === 0) {
         list.innerHTML = `<div style="text-align:center;color:#9AA0A6;padding:40px 16px;font-size:.85rem;line-height:1.8;">
             尚無暫存表格<br>
-            <span style="font-size:.75rem;">按上方「＋ 新增刀具表」開始建立</span>
+            <span style="font-size:.75rem;">按上方「＋ 新增刀具表<br><span class="ui-en">New Tool Sheet</span>」開始建立</span>
         </div>`;
         return;
     }
@@ -4429,14 +4480,14 @@ function renderTableList() {
         <div class="tm-item ${isCur ? 'current' : ''}">
             <div class="tm-tag ${typeTag === 'A3' ? 'a3' : 'a4'}">${typeTag}</div>
             <div class="tm-info">
-                <div class="tm-name">${esc(t.name || '未命名刀具表')}</div>
+                <div class="tm-name">${esc(t.name || '未命名刀具表 / Untitled Tool Sheet')}</div>
                 <div class="tm-meta">
                     ${count} 把刀具 · ${time}
                     ${isCur ? '· <span class="live">編輯中</span>' : ''}
                 </div>
             </div>
-            <button class="tm-btn load" onclick="loadTable('${t.id}')">載入</button>
-            <button class="tm-btn del" onclick="deleteTable('${t.id}')">刪除</button>
+            <button class="tm-btn load" onclick="loadTable('${t.id}')">載入 / Load</button>
+            <button class="tm-btn del" onclick="deleteTable('${t.id}')">刪除 / Delete</button>
         </div>`;
     }).join('');
 }
@@ -4445,7 +4496,7 @@ function createNewTable() {
     saveCurrent();
 
     if (store.tables.length >= MAX_TABLES) {
-        alert(`已達 ${MAX_TABLES} 張表格上限！\n請先刪除不需要的表格，再新增。`);
+        alert(`已達 ${MAX_TABLES} 張表格上限！ / ${MAX_TABLES}-sheet limit reached.\n請先刪除不需要的表格，再新增。 / Delete an old sheet before creating a new one.`);
         return;
     }
 
@@ -4454,7 +4505,7 @@ function createNewTable() {
         id: 'T' + Date.now() + Math.random().toString(36).slice(2, 6),
         createdAt: Date.now(),
         updatedAt: Date.now(),
-        name: '未命名刀具表',
+        name: '未命名刀具表 / Untitled Tool Sheet',
         data: null
     };
     store.tables.push(t);
@@ -4467,7 +4518,7 @@ function createNewTable() {
     renderTableList();
     closeTableManager();
     restartChat();
-    addBotMessage('🆕 已建立新的刀具表\n我們從頭開始吧！');
+    addBotMessage('🆕 已建立新的刀具表 / New tool sheet created\n我們從頭開始吧！ / Let’s start from the beginning.');
 }
 
 function loadTable(id) {
@@ -4492,8 +4543,8 @@ function loadTable(id) {
     document.getElementById('a4-wrapper').classList.toggle('hidden', type !== 1);
     document.getElementById('a3-wrapper').classList.toggle('hidden', type !== 2);
     document.getElementById('print-btn-label').textContent = type === 2
-        ? '列印 / 存為 PDF（A3 橫向單頁）'
-        : '列印 / 存為 PDF（A4 單頁）';
+        ? '列印 / 存為 PDF（A3 橫向單頁） / Print / Save PDF (A3 Landscape)'
+        : '列印 / 存為 PDF（A4 單頁） / Print / Save PDF (A4)';
     document.getElementById('dynamic-page-style').textContent = type === 2
         ? '@page { size: A3 landscape; margin: 0; }'
         : '@page { size: A4 portrait; margin: 0; }';
@@ -4509,7 +4560,7 @@ function loadTable(id) {
 function deleteTable(id) {
     const t = store.tables.find(x => x.id === id);
     if (!t) return;
-    if (!confirm(`確定要刪除「${t.name || '未命名刀具表'}」嗎？\n刪除後無法復原。`)) return;
+    if (!confirm(`確定要刪除「${t.name || '未命名刀具表 / Untitled Tool Sheet'}」嗎？\nDelete this sheet?\n刪除後無法復原。 / This action cannot be undone.`)) return;
 
     store.tables = store.tables.filter(x => x.id !== id);
 
@@ -4523,7 +4574,7 @@ function deleteTable(id) {
         updateA4Preview();
         updateA3Preview();
         restartChat();
-        addBotMessage('🗑 目前編輯的表格已刪除\n已為您開啟空白表格。');
+        addBotMessage('🗑 目前編輯的表格已刪除 / Current sheet deleted\n已為您開啟空白表格。 / A blank sheet is now open.');
     } else {
         persist();
         renderTableList();
@@ -4619,7 +4670,7 @@ function addUserMessage(text, isImage = false) {
     if (isImage) {
         content = `<img src="${text}" style="max-height:110px;border-radius:8px;display:block;">`;
     } else if (!text) {
-        content = '<span style="opacity:.72;font-style:italic;">（略過）</span>';
+        content = '<span style="opacity:.72;font-style:italic;">（略過 / Skipped）</span>';
     }
     const msgHtml = `
         <div class="chat-msg flex gap-2.5 justify-end w-full">
@@ -4669,7 +4720,7 @@ function renderInput() {
         fileLabel.innerHTML = '<span>📸 選擇圖片或拍照</span><input type="file" accept="image/*" class="hidden" id="img-upload">';
 
         const skipBtn = document.createElement('button');
-        skipBtn.textContent = '無圖，直接略過';
+        skipBtn.textContent = '無圖，直接略過 / Skip Image';
         skipBtn.className = 'btn btn-skip';
 
         inputContainer.appendChild(fileLabel);
@@ -4679,12 +4730,12 @@ function renderInput() {
         fileInput.onchange = (e) => {
             const file = e.target.files[0];
             if (!file) return;
-            fileLabel.querySelector('span').textContent = '⏳ 圖片處理中...';
+            fileLabel.querySelector('span').textContent = '⏳ 圖片處理中... / Processing Image...';
             compressImage(file).then(dataUrl => {
                 handleSubmission(dataUrl, true);
             }).catch(() => {
-                alert('圖片讀取失敗，請換一張試試。');
-                fileLabel.querySelector('span').textContent = '📸 選擇圖片或拍照';
+                alert('圖片讀取失敗，請換一張試試。\nImage could not be read. Please try another image.');
+                fileLabel.querySelector('span').textContent = '📸 選擇圖片或拍照 / Choose Image or Take Photo';
             });
         };
         skipBtn.onclick = () => handleSubmission('', false);
@@ -4701,12 +4752,12 @@ function renderInput() {
         btnRow.style.gap = '8px';
 
         const sendBtn = document.createElement('button');
-        sendBtn.textContent = '發送';
+        sendBtn.textContent = '發送 / Send';
         sendBtn.className = 'btn btn-blue';
         sendBtn.style.flex = '1';
 
         const resetBtn = document.createElement('button');
-        resetBtn.textContent = '套用預設';
+        resetBtn.textContent = '套用預設 / Use Default';
         resetBtn.className = 'btn btn-ghost';
         resetBtn.style.flex = 'none';
         resetBtn.style.width = 'auto';
@@ -4725,7 +4776,7 @@ function renderInput() {
 
         if (currentStepObj.optional) {
             const skipBtn = document.createElement('button');
-            skipBtn.textContent = '選填，略過此欄位';
+            skipBtn.textContent = '選填，略過此欄位 / Optional · Skip';
             skipBtn.className = 'btn btn-skip';
             skipBtn.onclick = () => handleSubmission('');
             inputContainer.appendChild(skipBtn);
@@ -4748,12 +4799,12 @@ function renderInput() {
         }
 
         const sendBtn = document.createElement('button');
-        sendBtn.textContent = '發送';
+        sendBtn.textContent = '發送 / Send';
         sendBtn.className = 'btn-send';
 
         const submitData = () => {
             if (inputEl.value.trim() === '' && !currentStepObj.optional) {
-                alert('此為必填欄位喔！'); return;
+                alert('此為必填欄位。\nThis field is required.'); return;
             }
             handleSubmission(inputEl.value);
         };
@@ -4767,7 +4818,7 @@ function renderInput() {
 
         if (currentStepObj.optional) {
             const skipBtn = document.createElement('button');
-            skipBtn.textContent = '選填，略過此欄位';
+            skipBtn.textContent = '選填，略過此欄位 / Optional · Skip';
             skipBtn.className = 'btn btn-skip';
             skipBtn.onclick = () => handleSubmission('');
             inputContainer.appendChild(skipBtn);
@@ -4848,24 +4899,24 @@ function handleSubmission(val, isImage = false) {
 
 function promptAddAnotherTool() {
     const count = (appData.type === 2) ? appData.tools2.length : appData.tools.length;
-    addBotMessage(`✅ 第 ${count} 把刀具已加入！\n請問是否還要新增下一把刀具？`);
+    addBotMessage(`✅ 第 ${count} 把刀具已加入！ / Tool ${count} added.\n請問是否還要新增下一把刀具？ / Add another tool?`);
 
     const btnYes = document.createElement('button');
-    btnYes.textContent = '➕ 是的，繼續新增';
+    btnYes.textContent = '➕ 是的，繼續新增 / Yes, Add Another';
     btnYes.className = 'btn btn-green';
-    btnYes.onclick = () => { addUserMessage('繼續新增'); toolStepIndex = 0; renderInput(); };
+    btnYes.onclick = () => { addUserMessage('繼續新增 / Add Another'); toolStepIndex = 0; renderInput(); };
 
     const btnNo = document.createElement('button');
-    btnNo.textContent = '🛑 否，結束設定';
+    btnNo.textContent = '🛑 否，結束設定 / No, Finish';
     btnNo.className = 'btn btn-slate';
-    btnNo.onclick = () => { addUserMessage('結束新增'); isToolLoop = false; currentStepIndex = getFlow().length; renderInput(); };
+    btnNo.onclick = () => { addUserMessage('結束新增 / Finish Adding'); isToolLoop = false; currentStepIndex = getFlow().length; renderInput(); };
 
     inputContainer.appendChild(btnYes);
     inputContainer.appendChild(btnNo);
 }
 
 function renderFinalStep() {
-    addBotMessage('🏁 最後一步！\n請輸入要產生的【QR Code 內容】\n(例：雲端資料夾網址，不需要請點略過)');
+    addBotMessage('🏁 最後一步！ / Final Step!\n請輸入【QR Code 內容】 / Enter QR Code content\n例：網址或文字；不需要可略過 / URL or text; skip if not needed');
 
     const inputEl = document.createElement('input');
     inputEl.type = 'text';
@@ -4873,21 +4924,21 @@ function renderFinalStep() {
     inputEl.placeholder = 'https://...';
 
     const sendBtn = document.createElement('button');
-    sendBtn.textContent = '🎉 完成並產生表單';
+    sendBtn.textContent = '🎉 完成並產生表單 / Finish & Generate Sheet';
     sendBtn.className = 'btn btn-green';
 
     const skipBtn = document.createElement('button');
-    skipBtn.textContent = '不需要 QR Code，直接完成';
+    skipBtn.textContent = '不需要 QR Code，直接完成 / Finish without QR Code';
     skipBtn.className = 'btn btn-ghost';
 
     const finishProcess = (val) => {
         appData.qrContent = val;
-        addUserMessage(val || '無');
+        addUserMessage(val || '無 / None');
         updateA4Preview();
         updateA3Preview();
         saveCurrent();
         inputContainer.innerHTML = '';
-        addBotMessage(`🎉 恭喜！\n「${appData.type === 2 ? (appData.headerTitle || '刀具表') : (appData.title || '刀具表')}」建立完成，已自動暫存。`);
+        addBotMessage(`🎉 恭喜！ / Completed!\n「${appData.type === 2 ? (appData.headerTitle || '刀具表 / Tool Sheet') : (appData.title || '刀具表 / Tool Sheet')}」建立完成，已自動暫存。\nThe tool sheet is complete and has been autosaved.`);
 
         if (window.innerWidth < 768) {
             setTimeout(() => switchTab('preview'), 1100);
@@ -4915,7 +4966,7 @@ function restoreChatView() {
 
     const count = (appData.type === 2) ? appData.tools2.length : appData.tools.length;
     const name = (appData.type === 2) ? (appData.headerTitle || '未命名') : (appData.title || '未命名');
-    addBotMessage(`📂 已載入刀具表「${name}」\n目前共 ${count} 把刀具。\n您可以繼續新增刀具，或重新填寫基本資料。`);
+    addBotMessage(`📂 已載入刀具表 / Tool sheet loaded: 「${name}」\n目前共 ${count} 把刀具 / ${count} tools total.\n您可以繼續新增刀具，或重新填寫基本資料。\nYou may add more tools or re-enter the basic information.`);
     showResumeOptions();
 }
 
@@ -4923,7 +4974,7 @@ function showResumeOptions() {
     inputContainer.innerHTML = '';
 
     const b1 = document.createElement('button');
-    b1.textContent = '➕ 繼續新增刀具';
+    b1.textContent = '➕ 繼續新增刀具 / Add More Tools';
     b1.className = 'btn btn-green';
     b1.onclick = () => {
         addUserMessage('繼續新增刀具');
@@ -4933,10 +4984,10 @@ function showResumeOptions() {
     };
 
     const b2 = document.createElement('button');
-    b2.textContent = '✏️ 重新填寫基本資料';
+    b2.textContent = '✏️ 重新填寫基本資料 / Re-enter Basic Info';
     b2.className = 'btn btn-slate';
     b2.onclick = () => {
-        addUserMessage('重新填寫基本資料');
+        addUserMessage('重新填寫基本資料 / Re-enter Basic Info');
         restartChat();
     };
 
@@ -5124,7 +5175,7 @@ function pickImageForTool(rowIdx) {
             updateA4Preview();
             updateA3Preview();
         } catch (err) {
-            alert('圖片讀取失敗，請換一張試試。');
+            alert('圖片讀取失敗，請換一張試試。\nImage could not be read. Please try another image.');
         }
     };
     input.click();
@@ -5134,7 +5185,7 @@ function editQrContent(which) {
     const cur = (which === 'machine')
         ? (appData.machineQrContent || appData.qrContent || '')
         : (appData.qrContent || '');
-    const v = prompt('請輸入 QR Code 內容（網址或文字）\n留空則不顯示 QR Code：', cur);
+    const v = prompt('請輸入 QR Code 內容（網址或文字）\nEnter QR Code content (URL or text).\n留空則不顯示 QR Code。\nLeave blank to hide the QR Code.', cur);
     if (v === null) return;
 
     if (which === 'machine') appData.machineQrContent = v.trim();
@@ -5369,7 +5420,7 @@ window.onload = () => {
             const d = await compressImage(f, 180, 0.85);
             setAvatar(d);
         } catch (e) {
-            alert('圖片讀取失敗，請換一張試試。');
+            alert('圖片讀取失敗，請換一張試試。\nImage could not be read. Please try another image.');
         }
         this.value = '';
     };
@@ -5396,8 +5447,8 @@ window.onload = () => {
             document.getElementById('a4-wrapper').classList.toggle('hidden', type !== 1);
             document.getElementById('a3-wrapper').classList.toggle('hidden', type !== 2);
             document.getElementById('print-btn-label').textContent = type === 2
-                ? '列印 / 存為 PDF（A3 橫向單頁）'
-                : '列印 / 存為 PDF（A4 單頁）';
+                ? '列印 / 存為 PDF（A3 橫向單頁） / Print / Save PDF (A3 Landscape)'
+                : '列印 / 存為 PDF（A4 單頁） / Print / Save PDF (A4)';
             document.getElementById('dynamic-page-style').textContent = type === 2
                 ? '@page { size: A3 landscape; margin: 0; }'
                 : '@page { size: A4 portrait; margin: 0; }';
