@@ -17,7 +17,6 @@
 <title>刀具表精靈 • 手機版 | Tool Sheet Wizard • Mobile</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style id="dynamic-page-style">@page { size: A4 portrait; margin: 0; }</style>
@@ -365,6 +364,29 @@ html, body {
     min-height: 110px;
     transition: border-color .15s, box-shadow .15s, background .15s;
 }
+.input-affix {
+    min-width: 58px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 0 14px;
+    border:1.5px solid var(--line);
+    background:#E8F0FE;
+    color:#174EA6;
+    border-radius:14px;
+    font-size:16px;
+    font-weight:900;
+    white-space:nowrap;
+}
+.time-pair {
+    display:grid;
+    grid-template-columns: 1fr auto 1fr auto;
+    gap:7px;
+    align-items:center;
+}
+.time-pair .input-field { min-width:0; text-align:center; }
+.time-unit { font-size:.76rem; font-weight:800; color:var(--ink-2); white-space:nowrap; }
+
 .tool-type-select {
     flex: 1;
     min-width: 0;
@@ -392,7 +414,7 @@ html, body {
     background:#F7EEFC;
 }
 @media (min-width: 768px) {
-    #export-btn-container { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    #export-btn-container { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 @media (max-width: 767px) {
     #export-btn-container { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -730,10 +752,21 @@ html, body {
 .excel-table th {
     background-color: #c5e0b4;
     font-weight: 700;
-    font-size: 1.05rem;
+    font-size: 0.95rem;
+    line-height: 1.05;
+    padding: 4px 3px;
+    height: 48px;
 }
 
-.tool-row { height: 65px; max-height: 65px; }
+.tool-row { height: 62px; max-height: 62px; }
+.a4-preview .tool-row td { height: 62px; max-height: 62px; overflow:hidden; }
+.a4-preview .ed-cell:empty::before { content: '' !important; }
+.a4-preview .bi-en { font-size: .58em; line-height: 1; margin-top:1px; }
+.a4-preview .tool-img-container { width:52px; height:50px; }
+.a4-bottom-info { flex: 1 1 auto; min-height: 250px; overflow:hidden; }
+.a4-bottom-info .excel-table td { padding-top:5px; padding-bottom:5px; }
+.a4-footer { height:30px; min-height:30px; }
+
 .tool-img-container {
     width: 60px; height: 55px;
     display: flex; align-items: center; justify-content: center;
@@ -1913,7 +1946,7 @@ html, body {
                 <div class="ws-card">
                     <div class="ic">📁</div>
                     <h4>雲端 + Office<span class="ui-en">Cloud + Office</span></h4>
-                    <p>本機 10 張暫存，並可輸出 Word、Excel 與 Google Drive 備份。<br><span class="ui-en">Keep up to 10 local sheets and export Word, Excel, or Google Drive backups.</span></p>
+                    <p>本機 10 張暫存，並可輸出 Excel 與 Google Drive 備份。<br><span class="ui-en">Keep up to 10 local sheets and export Word, Excel, or Google Drive backups.</span></p>
                 </div>
                 <div class="ws-card">
                     <div class="ic">🔒</div>
@@ -2026,7 +2059,7 @@ html, body {
             <div class="ms-sec" id="sec1">
                 <h3><span class="n">01</span>系統總覽與適用對象<span class="ui-en">System Overview & Intended Users</span></h3><div class="ms-en" data-en-summary="sec1"><b>English — System Overview</b><br>
 This PWA is a guided tool-sheet generator for CNC lathe and milling operations. Instead of formatting Excel manually, the wizard asks for production and tooling information step by step and fills a print-ready A4 or A3 sheet automatically.
-<ul><li>Type 1: A4 portrait for Lathe N/C, up to 8 displayed tool rows, chuck pressure, one QR Code, an A4 Tool Type dropdown, and 2480×3508 PNG export.</li><li>Type 2: A3 landscape for Milling M/C, 10+ tool rows, tool-image gallery, #500 settings, machine tips and two QR Codes.</li><li>Local autosave stores up to 10 sheets in this browser. Word, Excel, JSON backup and PDF/print output are supported.</li></ul></div>
+<ul><li>Type 1: A4 portrait for Lathe N/C, up to 8 displayed tool rows, chuck pressure, one QR Code, an A4 Tool Type dropdown, and 2480×3508 PNG export.</li><li>Type 2: A3 landscape for Milling M/C, 10+ tool rows, tool-image gallery, #500 settings, machine tips and two QR Codes.</li><li>Local autosave stores up to 10 sheets in this browser. Excel and JSON backup and PDF/print output are supported.</li></ul></div>
 
                 <h4>1-1 這套系統是什麼？</h4>
                 <p>
@@ -2988,7 +3021,7 @@ Up to 10 tool sheets are autosaved locally. Each saved sheet shows its A4/A3 typ
             <!-- ======= 10 ======= -->
             <div class="ms-sec" id="sec10">
                 <h3><span class="n">10</span>列印與匯出 PDF 完整設定<span class="ui-en">Print & PDF Export Settings</span></h3><div class="ms-en" data-en-summary="sec10"><b>English — Print & Export</b><br>
-Use Print / Save PDF for the exact A4 portrait or A3 landscape paper size. Word (.docx) and Excel (.xlsx) export are also available. The Word and Excel files use bilingual Chinese-English headings so they can be opened on mobile or desktop.</div>
+Use Print / Save PDF for the exact A4 portrait or A3 landscape paper size. Excel (.xlsx), A4 PNG and JSON backup are available. Excel uses bilingual Chinese-English headings and can be opened on mobile or desktop.</div>
 
                 <h4>10-1 基本操作</h4>
                 <p>
@@ -3252,7 +3285,7 @@ Common issues covered here include local-storage limits, missing images, print s
             <!-- ======= 13 ======= -->
             <div class="ms-sec" id="sec13">
                 <h3><span class="n">13</span>注意事項與資料保存<span class="ui-en">Data Preservation & Important Notes</span></h3><div class="ms-en" data-en-summary="sec13"><b>English — Data Preservation</b><br>
-Local autosave is convenient but browser data can be lost if site data is cleared, private browsing is used, the browser/device is changed or the operating system is reinstalled. Important sheets should be backed up as JSON and/or exported as Word, Excel or PDF.</div>
+Local autosave is convenient but browser data can be lost if site data is cleared, private browsing is used, the browser/device is changed or the operating system is reinstalled. Important sheets should be backed up as JSON and/or exported as Excel or PDF.</div>
 
                 <h4>13-1 資料保存的黃金原則</h4>
                 <div class="ms-warn">
@@ -3467,7 +3500,6 @@ On desktop, press Enter to submit standard text inputs. Use Preview for quick co
 
         <div id="export-btn-container">
             <button class="export-btn desktop-only" onclick="switchTab('chat')">↩ 返回編輯 / Back to Edit</button>
-            <button class="export-btn word" onclick="exportWordFile()">📝 Word</button>
             <button class="export-btn excel" onclick="exportExcelFile()">📊 Excel</button>
             <button class="export-btn image" id="a4-image-export-btn" onclick="exportA4ImageFile()">🖼️ A4圖片<br><span class="ui-en">A4 PNG</span></button>
             <button class="export-btn drive" onclick="saveCurrentToGoogleDrive()">☁️ Google Drive</button>
@@ -3508,7 +3540,7 @@ On desktop, press Enter to submit standard text inputs. Use Preview for quick co
                     <span id="out-pressure" class="text-2xl text-blue-800 tracking-wider"></span>
                 </div>
 
-                <div class="flex-1 flex border-x-4 border-b-4 border-black bg-white min-h-0">
+                <div class="a4-bottom-info flex border-x-4 border-b-4 border-black bg-white min-h-0">
                     <div class="w-[60%] flex flex-col">
                         <table class="excel-table h-full text-left" style="border:none;">
                             <tr style="border-top:none;">
@@ -3540,7 +3572,7 @@ On desktop, press Enter to submit standard text inputs. Use Preview for quick co
                     </div>
                 </div>
 
-                <div class="w-full flex justify-between p-1 bg-white font-bold text-sm shrink-0 border-x-4 border-b-4 border-black">
+                <div class="a4-footer w-full flex justify-between p-1 bg-white font-bold text-sm shrink-0 border-x-4 border-b-4 border-black">
                     <div class="w-1/2 flex items-center px-2">
                         製表日期 / Date：<span id="out-date" class="ml-2 font-normal"></span>
                     </div>
@@ -3715,8 +3747,7 @@ On desktop, press Enter to submit standard text inputs. Use Preview for quick co
         <div class="tm-footer" style="border-top:none;padding-top:0;">
             <button class="tm-new" onclick="createNewTable()">＋ 新增刀具表<br><span class="ui-en">New Tool Sheet</span></button>
             <div class="tm-cloud-grid">
-                <button class="tm-cloud-btn save" onclick="saveCurrentToGoogleDrive()">☁️ 儲存 Word＋Excel＋備份到 Google Drive<br><span class="ui-en">Save Word + Excel + Backup to Google Drive</span></button>
-                <button class="tm-cloud-btn import" onclick="exportWordFile()">📝 匯出 Word<br><span class="ui-en">Export Word</span></button>
+                <button class="tm-cloud-btn save" onclick="saveCurrentToGoogleDrive()">☁️ 儲存 Excel＋備份到 Google Drive<br><span class="ui-en">Save Word + Excel + Backup to Google Drive</span></button>
                 <button class="tm-cloud-btn folder" onclick="exportExcelFile()">📊 匯出 Excel<br><span class="ui-en">Export Excel</span></button>
                 <button class="tm-cloud-btn import" onclick="exportA4ImageFile()">🖼️ 匯出 A4 圖片<br><span class="ui-en">Export A4 PNG</span></button>
                 <button class="tm-cloud-btn import" onclick="chooseGoogleDriveBackup()">📥 匯入雲端備份<br><span class="ui-en">Import Cloud Backup</span></button>
@@ -3727,7 +3758,7 @@ On desktop, press Enter to submit standard text inputs. Use Preview for quick co
         <div id="tm-list" class="tm-body"></div>
         <div class="tm-footer">
             <div class="tm-note">
-                💾 本機自動暫存最多 <b>10 張</b>；可輸出 Word / Excel / JSON 備份<br><span class="ui-en">Up to 10 local sheets · Export Word / Excel / JSON backup</span><br>手機可分享至 Google Drive，電腦可直接下載並預覽<br><span class="ui-en">Mobile can share to Google Drive; desktop can download and preview directly.</span>
+                💾 本機自動暫存最多 <b>10 張</b>；可輸出 Excel / JSON 備份<br><span class="ui-en">Up to 10 local sheets · Export Excel / JSON backup</span><br>手機可分享至 Google Drive，電腦可直接下載並預覽<br><span class="ui-en">Mobile can share to Google Drive; desktop can download and preview directly.</span>
             </div>
         </div>
     </div>
@@ -3757,13 +3788,17 @@ On desktop, press Enter to submit standard text inputs. Use Preview for quick co
    全域資料
    ============================================================ */
 const STORAGE_KEY = 'cnc_tool_tables_v2';
+const STORAGE_BACKUP_KEY = 'cnc_tool_tables_v2_backup';
+const IDB_NAME = 'cnc_tool_sheet_db_v1';
+const IDB_STORE = 'state';
 const AVATAR_KEY  = 'cnc_bot_avatar_v1';
 const MAX_TABLES = 10;
 
 function makeEmptyAppData(type) {
     return {
         type: type || 1,
-        title: '', subtitle: '', pressure: '', partName: '', partNo: '',
+        title: '', subtitle: '', processCode: '', mainProgram: '', machiningProgram: '',
+        pressure: '', partName: '', partNo: '',
         customerNo: '', processTime: '', dailyQty: '', date: '', creator: '',
         qrContent: '', tools: [],
         headerTitle: '', headerSubtitle: '',
@@ -3834,17 +3869,18 @@ const A4_TOOL_TYPES = [
    流程定義
    ============================================================ */
 const flowType1 = [
-    { id: 'title', type: 'text', q: '歡迎使用【第一類：車床 N/C · A4】！\nWelcome to Type 1: Lathe N/C · A4.\n請輸入【主題：品名 / 工序】\nEnter the title: Part Name / Process\n(例 Example: SLIDER OP110)', placeholder: 'SLIDER OP110' },
-    { id: 'subtitle', type: 'text', q: '請輸入【副標題 / 主頁程式 / 加工程式】\nEnter Subtitle / Main Program / Machining Program', placeholder: '加工程式 / Program O6370', optional: true },
-    { id: 'date', type: 'date', q: '請確認【製表日期】\nConfirm 【Date】' },
-    { id: 'creator', type: 'text', q: '請輸入【製表者 / 代碼】\nEnter 【Prepared By / ID】', placeholder: '姓名 / Name' },
-    { id: 'pressure', type: 'text', q: '請輸入【夾頭壓力設定 / Chuck Pressure】\nEnter chuck pressure', placeholder: '15KG' },
-    { id: 'partName', type: 'text', q: '接著是零件資訊。\nNext: part information.\n請輸入【品名 / Part Name】', placeholder: '零件名稱 / Part Name' },
-    { id: 'partNo', type: 'text', q: '請輸入【客戶品號 / Customer P/N】\nEnter customer part number', placeholder: '客戶品號 / Customer P/N' },
-    { id: 'customerNo', type: 'text', q: '請輸入【產品編號 / Product No.】\nEnter product number', placeholder: '產品編號 / Product No.', optional: true },
-    { id: 'processTime', type: 'text', q: '請輸入【加工時間 / Cycle Time】\nEnter cycle time', placeholder: "3'00\"", optional: true },
-    { id: 'dailyQty', type: 'text', q: '請輸入【每日數量 / Daily Qty】\nEnter daily quantity', placeholder: '120 PCS', optional: true },
-    { id: 'start_tools', type: 'action', q: '✅ 基本資料設定完成！\nBasic information is complete.\n接下來逐一建立【刀具資料 / Tool Data】。', btnText: '新增第一把刀具 / Add First Tool' }
+    { id: 'partName', type: 'text', q: '請輸入【品名 / Part Name】\n品名會自動帶入主題與下方品名欄。\nThe part name will be used in the title and the Part Name field.', placeholder: 'PISTON' },
+    { id: 'processCode', type: 'prefix', prefix: 'OP', q: '請輸入【工序 / Process】\n只填 OP 後面的工序編號。 / Enter only the process number after OP.', placeholder: '110' },
+    { id: 'mainProgram', type: 'prefix', prefix: 'O', q: '副標題 1：【主程式 / Main Program】\n只填程式編號。 / Enter program number only.', placeholder: '03104', optional: true },
+    { id: 'machiningProgram', type: 'prefix', prefix: 'O', q: '副標題 2：【加工程式 / Machining Program】\n只填程式編號。 / Enter program number only.', placeholder: '0001', optional: true },
+    { id: 'date', type: 'date', q: '請確認【製表日期 / Date】' },
+    { id: 'creator', type: 'text', q: '請輸入【製表者 / 代碼 / Prepared By】', placeholder: '姓名 / Name' },
+    { id: 'pressure', type: 'unit', suffix: 'KG', prefill: '00', q: '請輸入【夾持壓力 / Chuck Pressure】\n預填 00，單位固定 KG。 / Default 00; unit is KG.' },
+    { id: 'partNo', type: 'text', q: '請輸入【客戶品號 / Customer P/N】', placeholder: '248-22103' },
+    { id: 'customerNo', type: 'text', q: '請輸入【產品編號 / Product No.】', placeholder: 'Z705800000', optional: true },
+    { id: 'processTime', type: 'timepair', q: '請輸入【加工時間 / Cycle Time】\n分 / 秒。 / Minutes / Seconds.', optional: true },
+    { id: 'dailyQty', type: 'unit', suffix: 'PCS', prefill: '0', q: '請輸入【每日數量 / Daily Qty】\n單位固定 PCS。 / Unit is PCS.', optional: true },
+    { id: 'start_tools', type: 'action', q: '✅ 基本資料設定完成！ / Basic information complete.\n接下來建立【刀具資料 / Tool Data】。', btnText: '新增第一把刀具 / Add First Tool' }
 ];
 
 const toolFlowType1 = [
@@ -3852,8 +3888,8 @@ const toolFlowType1 = [
     { id: 't_type', type: 'select', q: '請選擇【刀具形式 / Tool Type】\nSelect the tool type', placeholder: '請選擇 / Select', options: A4_TOOL_TYPES },
     { id: 't_no', type: 'text', q: '請輸入【刀號 / Tool No.】', placeholder: 'T01' },
     { id: 't_h', type: 'text', q: '請輸入【H值 / H Offset】', placeholder: '01', optional: true },
-    { id: 't_gx', type: 'text', q: '請輸入此 N工序的【G補正 X軸 / G Offset X】', placeholder: '例 Example: X-0.02', optional: true },
-    { id: 't_gz', type: 'text', q: '請輸入此 N工序的【G補正 Z軸 / G Offset Z】', placeholder: '例 Example: Z+0.03', optional: true },
+    { id: 't_gx', type: 'number', q: '請輸入【G補正 X軸 / G Offset X】\n只填數字。 / Numbers only.', placeholder: '-0.020', optional: true, step: 'any' },
+    { id: 't_gz', type: 'number', q: '請輸入【G補正 Z軸 / G Offset Z】\n只填數字。 / Numbers only.', placeholder: '-0.030', optional: true, step: 'any' },
     { id: 't_remark', type: 'text', q: '請輸入【刀具壽命 / Tool Life】\n格式 / Format：#xxx=數量 / Qty', placeholder: '#500=30', optional: true },
     { id: 't_image', type: 'file', q: '請選擇【導入圖示 / Tool Image】\n選取圖片，無圖可略過 / Select an image or skip' }
 ];
@@ -3896,6 +3932,36 @@ const toolFlowType2 = [
 /* ============================================================
    工具函式
    ============================================================ */
+function normalizeA4ProcessCode(value) {
+    const digits = String(value || '').toUpperCase().replace(/^OP\s*/i, '').replace(/[^0-9A-Z.-]/g, '');
+    return digits ? 'OP' + digits : 'OP';
+}
+function normalizeProgramNo(value) {
+    const digits = String(value || '').toUpperCase().replace(/^O\s*/i, '').replace(/[^0-9A-Z.-]/g, '');
+    return digits ? 'O' + digits : 'O';
+}
+function normalizePressure(value) {
+    const v = String(value == null ? '' : value).replace(/KG/ig, '').trim();
+    return (v || '00') + 'KG';
+}
+function normalizeDailyQty(value) {
+    const v = String(value == null ? '' : value).replace(/PCS/ig, '').trim();
+    return (v || '0') + ' PCS';
+}
+function syncA4DerivedFields() {
+    if (Number(appData.type) !== 1) return;
+    const part = String(appData.partName || '').trim();
+    const process = normalizeA4ProcessCode(appData.processCode || '');
+    appData.processCode = process;
+    appData.title = [part, process].filter(Boolean).join(' ').trim();
+
+    const main = normalizeProgramNo(appData.mainProgram || '');
+    const machining = normalizeProgramNo(appData.machiningProgram || '');
+    appData.mainProgram = main;
+    appData.machiningProgram = machining;
+    appData.subtitle = '主程式 ' + main + '　加工程式 ' + machining;
+}
+
 function getFlow() { return appData.type === 2 ? flowType2 : flowType1; }
 function getToolFlow() { return appData.type === 2 ? toolFlowType2 : toolFlowType1; }
 
@@ -4046,31 +4112,134 @@ function resetAvatar() {
 /* ============================================================
    本機暫存
    ============================================================ */
-function loadStore() {
+function openToolDB() {
+    return new Promise((resolve, reject) => {
+        if (!('indexedDB' in window)) { resolve(null); return; }
+        const req = indexedDB.open(IDB_NAME, 1);
+        req.onupgradeneeded = () => {
+            const db = req.result;
+            if (!db.objectStoreNames.contains(IDB_STORE)) db.createObjectStore(IDB_STORE);
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+    });
+}
+
+async function readStoreFromIDB() {
+    try {
+        const db = await openToolDB();
+        if (!db) return null;
+        return await new Promise((resolve, reject) => {
+            const tx = db.transaction(IDB_STORE, 'readonly');
+            const req = tx.objectStore(IDB_STORE).get('tool-store');
+            req.onsuccess = () => resolve(req.result || null);
+            req.onerror = () => reject(req.error);
+        });
+    } catch (e) {
+        console.warn('IndexedDB 讀取失敗', e);
+        return null;
+    }
+}
+
+async function persistToIDB(snapshot) {
+    try {
+        const db = await openToolDB();
+        if (!db) return;
+        await new Promise((resolve, reject) => {
+            const tx = db.transaction(IDB_STORE, 'readwrite');
+            tx.objectStore(IDB_STORE).put(snapshot, 'tool-store');
+            tx.oncomplete = () => resolve();
+            tx.onerror = () => reject(tx.error);
+        });
+    } catch (e) {
+        console.warn('IndexedDB 寫入失敗', e);
+    }
+}
+
+function storeScore(candidate) {
+    if (!candidate || !Array.isArray(candidate.tables)) return -1;
+    let newest = 0;
+    candidate.tables.forEach(t => { newest = Math.max(newest, Number(t.updatedAt || t.createdAt || 0)); });
+    return newest + candidate.tables.length;
+}
+
+function mergeStores(candidates) {
+    const valid = candidates.filter(x => x && Array.isArray(x.tables));
+    if (!valid.length) return { currentId: null, tables: [] };
+
+    const map = new Map();
+    valid.forEach(src => {
+        src.tables.forEach(t => {
+            if (!t || !t.id) return;
+            const old = map.get(t.id);
+            if (!old || Number(t.updatedAt || 0) >= Number(old.updatedAt || 0)) {
+                map.set(t.id, JSON.parse(JSON.stringify(t)));
+            }
+        });
+    });
+    const best = valid.slice().sort((a,b) => storeScore(b)-storeScore(a))[0];
+    const tables = Array.from(map.values()).sort((a,b)=>Number(b.updatedAt||0)-Number(a.updatedAt||0)).slice(0, MAX_TABLES);
+    const currentId = tables.some(t => t.id === best.currentId) ? best.currentId : (tables[0] ? tables[0].id : null);
+    return { currentId, tables };
+}
+
+async function loadStore() {
+    let primary = null, backup = null;
     try {
         const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) {
-            const parsed = JSON.parse(raw);
-            if (parsed && Array.isArray(parsed.tables)) store = parsed;
-        }
-    } catch (e) { console.warn('讀取暫存失敗', e); }
-    if (!store.tables) store = { currentId: null, tables: [] };
+        if (raw) primary = JSON.parse(raw);
+    } catch (e) { console.warn('讀取主暫存失敗', e); }
+
+    try {
+        const rawBackup = localStorage.getItem(STORAGE_BACKUP_KEY);
+        if (rawBackup) backup = JSON.parse(rawBackup);
+    } catch (e) { console.warn('讀取備援暫存失敗', e); }
+
+    const idb = await readStoreFromIDB();
+    store = mergeStores([primary, backup, idb]);
+
     store.tables.forEach(t => {
         if (t.data && typeof t.data.type === 'undefined') t.data.type = 1;
         if (t.data && !t.data.tools2) t.data.tools2 = [];
         if (t.data && !t.data.tools) t.data.tools = [];
+        if (t.data && Number(t.data.type) === 1) {
+            if (!('processCode' in t.data)) {
+                const m = String(t.data.title || '').match(/\b(OP[0-9A-Z.-]+)\b/i);
+                t.data.processCode = m ? m[1].toUpperCase() : 'OP';
+            }
+            if (!('mainProgram' in t.data)) t.data.mainProgram = 'O';
+            if (!('machiningProgram' in t.data)) {
+                const m = String(t.data.subtitle || '').match(/O[0-9A-Z.-]+/i);
+                t.data.machiningProgram = m ? m[0].toUpperCase() : 'O';
+            }
+        }
     });
+
+    persist();
 }
 
 function persist() {
+    const snapshot = JSON.parse(JSON.stringify(store));
     try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+        const payload = JSON.stringify(snapshot);
+        localStorage.setItem(STORAGE_KEY, payload);
+        localStorage.setItem(STORAGE_BACKUP_KEY, payload);
+        persistToIDB(snapshot);
         return true;
     } catch (e) {
         console.error(e);
-        alert('⚠️ 本機儲存空間不足，表格暫存失敗。\nLocal storage is full and autosave failed.\n建議刪除不需要的舊表格，或減少刀具圖片。\nDelete old sheets or reduce tool images.');
+        persistToIDB(snapshot);
+        alert('⚠️ 本機儲存空間不足。資料已嘗試寫入備援資料庫。\nLocal storage is full; a backup save was attempted.');
         return false;
     }
+}
+
+async function requestPersistentStorage() {
+    try {
+        if (navigator.storage && navigator.storage.persist) {
+            await navigator.storage.persist();
+        }
+    } catch (e) {}
 }
 
 function saveCurrent(keepIfEmpty) {
@@ -4167,38 +4336,50 @@ function doPrint() {
    ============================================================ */
 async function 建立A4圖片檔_(table) {
     if (Number((table && table.data && table.data.type) || appData.type) !== 1) {
-        throw new Error('A4 圖片僅適用第一類 A4 車床格式 / A4 PNG is only available for Type 1 A4.');
+        throw new Error('A4 圖片僅適用第一類 A4 車床格式 / Type 1 A4 only.');
     }
     if (typeof html2canvas === 'undefined') {
-        throw new Error('A4 圖片元件尚未載入 / A4 image component is not loaded.');
+        throw new Error('A4 圖片元件尚未載入 / Image component is not loaded.');
     }
 
     updateA4Preview();
-    const target = document.getElementById('a4-document');
-    if (!target) throw new Error('找不到 A4 預覽 / A4 preview not found.');
+    const source = document.getElementById('a4-document');
+    if (!source) throw new Error('找不到 A4 預覽 / A4 preview not found.');
 
-    const originalTransform = target.parentElement ? target.parentElement.style.transform : '';
-    const originalMarginBottom = target.parentElement ? target.parentElement.style.marginBottom : '';
-    if (target.parentElement) {
-        target.parentElement.style.transform = 'none';
-        target.parentElement.style.marginBottom = '0';
+    if (document.fonts && document.fonts.ready) {
+        try { await document.fonts.ready; } catch (e) {}
     }
 
-    const rect = target.getBoundingClientRect();
-    const scale = rect.width > 0 ? (2480 / rect.width) : 3.12;
+    const host = document.createElement('div');
+    host.style.cssText = 'position:fixed;left:-10000px;top:0;width:210mm;height:297mm;background:#fff;z-index:-9999;overflow:hidden;';
+    const clone = source.cloneNode(true);
+    clone.id = 'a4-export-clone';
+    clone.style.cssText += ';transform:none!important;margin:0!important;box-shadow:none!important;width:210mm!important;height:297mm!important;';
+    clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
+    host.appendChild(clone);
+    document.body.appendChild(host);
 
     try {
-        const canvas = await html2canvas(target, {
-            scale,
+        const images = Array.from(clone.querySelectorAll('img'));
+        await Promise.all(images.map(img => img.complete ? Promise.resolve() : new Promise(resolve => {
+            img.onload = img.onerror = resolve;
+        })));
+
+        const cssWidth = clone.offsetWidth;
+        const cssHeight = clone.offsetHeight;
+        const canvas = await html2canvas(clone, {
+            scale: 2480 / cssWidth,
             backgroundColor: '#FFFFFF',
             useCORS: true,
             allowTaint: true,
             logging: false,
             imageTimeout: 15000,
-            width: target.scrollWidth,
-            height: target.scrollHeight,
-            windowWidth: Math.max(document.documentElement.clientWidth, target.scrollWidth),
-            windowHeight: Math.max(document.documentElement.clientHeight, target.scrollHeight)
+            width: cssWidth,
+            height: cssHeight,
+            windowWidth: cssWidth,
+            windowHeight: cssHeight,
+            scrollX: 0,
+            scrollY: 0
         });
 
         const out = document.createElement('canvas');
@@ -4207,25 +4388,14 @@ async function 建立A4圖片檔_(table) {
         const ctx = out.getContext('2d');
         ctx.fillStyle = '#FFFFFF';
         ctx.fillRect(0, 0, out.width, out.height);
-
-        const ratio = Math.min(out.width / canvas.width, out.height / canvas.height);
-        const dw = canvas.width * ratio;
-        const dh = canvas.height * ratio;
-        const dx = (out.width - dw) / 2;
-        const dy = (out.height - dh) / 2;
-        ctx.drawImage(canvas, dx, dy, dw, dh);
+        ctx.drawImage(canvas, 0, 0, out.width, out.height);
 
         const blob = await new Promise((resolve, reject) => {
             out.toBlob(b => b ? resolve(b) : reject(new Error('PNG 產生失敗 / PNG generation failed.')), 'image/png', 1);
         });
-
         return new File([blob], 匯出檔名_(table) + '_A4_2480x3508.png', { type: 'image/png' });
     } finally {
-        if (target.parentElement) {
-            target.parentElement.style.transform = originalTransform;
-            target.parentElement.style.marginBottom = originalMarginBottom;
-        }
-        setTimeout(adjustPreviewScale, 30);
+        host.remove();
     }
 }
 
@@ -4255,7 +4425,7 @@ async function exportA4ImageFile() {
 }
 
 /* ============================================================
-   Word / Excel / 中英合併匯出
+   Excel / 中英合併匯出
    ============================================================ */
 function 取得目前匯出表格_() {
     saveCurrent(true);
@@ -4275,40 +4445,31 @@ function 匯出檔名_(table) {
     return name + '_' + getBackupTimestamp();
 }
 
-function XML跳脫_(value) {
-    return String(value == null ? '' : value)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&apos;');
-}
-
 function 取得匯出資料_(table) {
     const d = (table && table.data) || appData;
     const isA3 = Number(d.type) === 2;
     const basic = isA3 ? [
         ['主題 / Title', d.headerTitle || ''],
         ['副標題 / Subtitle', d.headerSubtitle || ''],
-        ['品名<span class="bi-en">Part Name</span> / Part Name', d.productName || ''],
-        ['客戶品號<span class="bi-en">Customer P/N</span> / Customer P/N', d.productNo || ''],
-        ['產品編號<span class="bi-en">Product No.</span> / Product No.', d.customerNo1 || ''],
-        ['品名<span class="bi-en">Part Name</span>2 / Part Name 2', d.productName2 || ''],
-        ['客戶品號<span class="bi-en">Customer P/N</span>2 / Customer P/N 2', d.productNo2 || ''],
-        ['產品編號<span class="bi-en">Product No.</span>2 / Product No. 2', d.customerNo2 || ''],
-        ['加工時間<span class="bi-en">Cycle Time</span> / Cycle Time', d.processTime2 || ''],
-        ['每日數量<span class="bi-en">Daily Qty</span> / Daily Qty', d.dailyQty2 || ''],
+        ['品名 / Part Name', d.productName || ''],
+        ['客戶品號 / Customer P/N', d.productNo || ''],
+        ['產品編號 / Product No.', d.customerNo1 || ''],
+        ['品名2 / Part Name 2', d.productName2 || ''],
+        ['客戶品號2 / Customer P/N 2', d.productNo2 || ''],
+        ['產品編號2 / Product No. 2', d.customerNo2 || ''],
+        ['加工時間 / Cycle Time', d.processTime2 || ''],
+        ['每日數量 / Daily Qty', d.dailyQty2 || ''],
         ['製表日期 / Date', d.date || ''],
         ['製表者 / Prepared By', d.creator || '']
     ] : [
         ['主題 / Title', d.title || ''],
         ['副標題 / Subtitle', d.subtitle || ''],
         ['夾頭壓力 / Chuck Pressure', d.pressure || ''],
-        ['品名<span class="bi-en">Part Name</span> / Part Name', d.partName || ''],
-        ['客戶品號<span class="bi-en">Customer P/N</span> / Customer P/N', d.partNo || ''],
-        ['產品編號<span class="bi-en">Product No.</span> / Product No.', d.customerNo || ''],
-        ['加工時間<span class="bi-en">Cycle Time</span> / Cycle Time', d.processTime || ''],
-        ['每日數量<span class="bi-en">Daily Qty</span> / Daily Qty', d.dailyQty || ''],
+        ['品名 / Part Name', d.partName || ''],
+        ['客戶品號 / Customer P/N', d.partNo || ''],
+        ['產品編號 / Product No.', d.customerNo || ''],
+        ['加工時間 / Cycle Time', d.processTime || ''],
+        ['每日數量 / Daily Qty', d.dailyQty || ''],
         ['製表日期 / Date', d.date || ''],
         ['製表者 / Prepared By', d.creator || '']
     ];
@@ -4357,59 +4518,6 @@ function 建立Excel檔_(table) {
     });
 }
 
-async function 建立Word檔_(table) {
-    if (typeof JSZip === 'undefined') throw new Error('Word 元件尚未載入，請重新整理後再試。');
-    const data = 取得匯出資料_(table);
-    const zip = new JSZip();
-
-    const p = (text, bold) => '<w:p><w:r>' + (bold ? '<w:rPr><w:b/></w:rPr>' : '') +
-        '<w:t xml:space="preserve">' + XML跳脫_(text) + '</w:t></w:r></w:p>';
-    const cell = (text, bold) => '<w:tc><w:tcPr><w:tcW w:w="2400" w:type="dxa"/></w:tcPr>' + p(text, bold) + '</w:tc>';
-    const row = (arr, bold) => '<w:tr>' + arr.map(v => cell(v, bold)).join('') + '</w:tr>';
-    const tableXml = rows => '<w:tbl><w:tblPr><w:tblBorders>' +
-        '<w:top w:val="single" w:sz="6" w:color="000000"/><w:left w:val="single" w:sz="6" w:color="000000"/>' +
-        '<w:bottom w:val="single" w:sz="6" w:color="000000"/><w:right w:val="single" w:sz="6" w:color="000000"/>' +
-        '<w:insideH w:val="single" w:sz="4" w:color="666666"/><w:insideV w:val="single" w:sz="4" w:color="666666"/>' +
-        '</w:tblBorders></w:tblPr>' + rows.join('') + '</w:tbl>';
-
-    const title = data.isA3
-        ? ((table.data.headerTitle || '') + ' ' + (table.data.headerSubtitle || '')).trim()
-        : ((table.data.title || '') + ' ' + (table.data.subtitle || '')).trim();
-
-    const basicRows = [row(['欄位 Field', '內容 Value'], true), ...data.basic.map(r => row(r, false))];
-    const toolRows = [row(data.headers, true), ...data.rows.map(r => row(r, false))];
-
-    const documentXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-        '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>' +
-        '<w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="32"/></w:rPr><w:t>' + XML跳脫_(title || '刀具表 Tool Sheet') + '</w:t></w:r></w:p>' +
-        p('刀具表精靈 • 手機版 / Tool Sheet Wizard', false) +
-        tableXml(basicRows) + p('', false) + tableXml(toolRows) +
-        '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="720" w:right="720" w:bottom="720" w:left="720"/></w:sectPr>' +
-        '</w:body></w:document>';
-
-    zip.file('[Content_Types].xml',
-        '<?xml version="1.0" encoding="UTF-8"?>' +
-        '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
-        '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
-        '<Default Extension="xml" ContentType="application/xml"/>' +
-        '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>' +
-        '</Types>');
-    zip.folder('_rels').file('.rels',
-        '<?xml version="1.0" encoding="UTF-8"?>' +
-        '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
-        '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>' +
-        '</Relationships>');
-    zip.folder('word').file('document.xml', documentXml);
-
-    const blob = await zip.generateAsync({
-        type: 'blob',
-        mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-    });
-    return new File([blob], 匯出檔名_(table) + '.docx', {
-        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-    });
-}
-
 function 建立JSON備份檔_(table) {
     const backup = buildCloudBackup(table);
     return new File(
@@ -4417,17 +4525,6 @@ function 建立JSON備份檔_(table) {
         匯出檔名_(table) + '.json',
         { type: 'application/json' }
     );
-}
-
-async function exportWordFile() {
-    try {
-        const table = 取得目前匯出表格_();
-        const file = await 建立Word檔_(table);
-        下載檔案_(file);
-    } catch (e) {
-        console.error(e);
-        alert('Word 匯出失敗 / Word export failed: ' + (e.message || e));
-    }
 }
 
 function exportExcelFile() {
@@ -4493,10 +4590,9 @@ async function saveCurrentToGoogleDrive() {
 
     try {
         const table = 取得目前匯出表格_();
-        const wordFile = await 建立Word檔_(table);
         const excelFile = 建立Excel檔_(table);
         const jsonFile = 建立JSON備份檔_(table);
-        const files = [wordFile, excelFile, jsonFile];
+        const files = [excelFile, jsonFile];
 
         if (Number(table.data && table.data.type) === 1) {
             const a4ImageFile = await 建立A4圖片檔_(table);
@@ -4505,15 +4601,15 @@ async function saveCurrentToGoogleDrive() {
 
         if (navigator.share && navigator.canShare && navigator.canShare({ files })) {
             await navigator.share({
-                title: '刀具表雲端備份｜Word + Excel + JSON + A4 PNG',
-                text: '請選擇 Google Drive 儲存。 / Choose Google Drive to save.\nA4 格式會另外附上 2480×3508 PNG 圖片。 / Type 1 A4 also includes a 2480×3508 PNG image.\nWord、Excel 可直接開啟，JSON 可匯入還原。 / Word and Excel open directly; JSON can be imported for restore.',
+                title: '刀具表雲端備份｜Excel + JSON + A4 PNG',
+                text: '請選擇 Google Drive 儲存。 / Choose Google Drive to save.\nA4 格式會另外附上 2480×3508 PNG 圖片。 / Type 1 A4 also includes a 2480×3508 PNG image.\nExcel 可直接開啟，JSON 可匯入還原。 / Excel opens directly; JSON can be imported for restore.',
                 files
             });
             return;
         }
 
         files.forEach(下載檔案_);
-        alert('已產生 Word、Excel、JSON；A4 格式另含 PNG 圖片。\nWord, Excel, JSON are ready; Type 1 A4 also includes a PNG image.\n請將檔案存入 Google Drive。\nSave the files to Google Drive.');
+        alert('已產生 Excel、JSON；A4 格式另含 PNG 圖片。\nExcel and JSON are ready; Type 1 A4 also includes a PNG image.\n請將檔案存入 Google Drive。\nSave the files to Google Drive.');
         openGoogleDriveFolder();
     } catch (error) {
         if (error && error.name === 'AbortError') return;
@@ -4664,6 +4760,15 @@ function createNewTable() {
 
     appData = makeEmptyAppData(type);
     appData.date = new Date().toISOString().split('T')[0];
+    if (Number(type) === 1) {
+        appData.processCode = 'OP';
+        appData.mainProgram = 'O';
+        appData.machiningProgram = 'O';
+        appData.pressure = '00KG';
+        appData.processTime = '0:00';
+        appData.dailyQty = '0 PCS';
+        syncA4DerivedFields();
+    }
 
     renderTableList();
     closeTableManager();
@@ -4870,6 +4975,116 @@ function renderInput() {
         };
         inputContainer.appendChild(btn);
     }
+    else if (currentStepObj.type === 'prefix') {
+        const wrap = document.createElement('div');
+        wrap.className = 'input-row';
+
+        const prefix = document.createElement('div');
+        prefix.className = 'input-affix';
+        prefix.textContent = currentStepObj.prefix || '';
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.inputMode = 'numeric';
+        input.className = 'input-field';
+        input.placeholder = currentStepObj.placeholder || '';
+        input.autocomplete = 'off';
+
+        const send = document.createElement('button');
+        send.className = 'btn-send';
+        send.textContent = '發送 / Send';
+
+        const submit = () => {
+            const raw = input.value.trim();
+            if (!raw && !currentStepObj.optional) {
+                alert('此為必填欄位。\nThis field is required.');
+                return;
+            }
+            handleSubmission(raw ? (currentStepObj.prefix || '') + raw : '');
+        };
+        send.onclick = submit;
+        input.onkeypress = e => { if (e.key === 'Enter') submit(); };
+
+        wrap.appendChild(prefix);
+        wrap.appendChild(input);
+        wrap.appendChild(send);
+        inputContainer.appendChild(wrap);
+
+        if (currentStepObj.optional) {
+            const skip = document.createElement('button');
+            skip.textContent = '選填，略過此欄位 / Optional · Skip';
+            skip.className = 'btn btn-skip';
+            skip.onclick = () => handleSubmission('');
+            inputContainer.appendChild(skip);
+        }
+    }
+    else if (currentStepObj.type === 'unit') {
+        const wrap = document.createElement('div');
+        wrap.className = 'input-row';
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.inputMode = 'decimal';
+        input.className = 'input-field';
+        input.value = currentStepObj.prefill || '';
+        input.placeholder = currentStepObj.prefill || '0';
+
+        const suffix = document.createElement('div');
+        suffix.className = 'input-affix';
+        suffix.textContent = currentStepObj.suffix || '';
+
+        const send = document.createElement('button');
+        send.className = 'btn-send';
+        send.textContent = '發送 / Send';
+
+        const submit = () => handleSubmission((input.value.trim() || currentStepObj.prefill || '0') + (currentStepObj.suffix === 'PCS' ? ' PCS' : currentStepObj.suffix || ''));
+        send.onclick = submit;
+        input.onkeypress = e => { if (e.key === 'Enter') submit(); };
+
+        wrap.appendChild(input);
+        wrap.appendChild(suffix);
+        wrap.appendChild(send);
+        inputContainer.appendChild(wrap);
+    }
+    else if (currentStepObj.type === 'timepair') {
+        const wrap = document.createElement('div');
+        wrap.className = 'time-pair';
+
+        const min = document.createElement('input');
+        min.type = 'number'; min.inputMode = 'numeric'; min.min = '0'; min.step = '1';
+        min.className = 'input-field'; min.value = '00'; min.placeholder = '00';
+
+        const minLabel = document.createElement('span');
+        minLabel.className = 'time-unit'; minLabel.textContent = '分 / min';
+
+        const sec = document.createElement('input');
+        sec.type = 'number'; sec.inputMode = 'numeric'; sec.min = '0'; sec.max = '59'; sec.step = '1';
+        sec.className = 'input-field'; sec.value = '00'; sec.placeholder = '00';
+
+        const secLabel = document.createElement('span');
+        secLabel.className = 'time-unit'; secLabel.textContent = '秒 / sec';
+
+        wrap.appendChild(min); wrap.appendChild(minLabel); wrap.appendChild(sec); wrap.appendChild(secLabel);
+        inputContainer.appendChild(wrap);
+
+        const send = document.createElement('button');
+        send.className = 'btn btn-blue';
+        send.textContent = '發送 / Send';
+        send.onclick = () => {
+            const m = Math.max(0, parseInt(min.value || '0', 10) || 0);
+            const s = Math.min(59, Math.max(0, parseInt(sec.value || '0', 10) || 0));
+            handleSubmission(String(m) + ':' + String(s).padStart(2, '0'));
+        };
+        inputContainer.appendChild(send);
+
+        if (currentStepObj.optional) {
+            const skip = document.createElement('button');
+            skip.textContent = '選填，略過此欄位 / Optional · Skip';
+            skip.className = 'btn btn-skip';
+            skip.onclick = () => handleSubmission('');
+            inputContainer.appendChild(skip);
+        }
+    }
     else if (currentStepObj.type === 'select') {
         const selectWrap = document.createElement('div');
         selectWrap.className = 'input-row';
@@ -4993,6 +5208,13 @@ function renderInput() {
         inputEl.type = currentStepObj.type;
         inputEl.className = 'input-field';
         inputEl.placeholder = currentStepObj.placeholder || '請輸入...';
+        if (currentStepObj.type === 'number') {
+            inputEl.inputMode = 'decimal';
+            inputEl.step = currentStepObj.step || 'any';
+        }
+        if (currentStepObj.prefill && currentStepObj.type !== 'date') {
+            inputEl.value = currentStepObj.prefill;
+        }
 
         if (currentStepObj.type === 'date') {
             inputEl.value = appData.date || new Date().toISOString().split('T')[0];
@@ -5078,11 +5300,35 @@ function handleSubmission(val, isImage = false) {
         if (val === '' && flow[currentStepIndex].defaultValue) {
             val = flow[currentStepIndex].defaultValue;
         }
-        appData[stepId] = val;
+        if (Number(appData.type) === 1) {
+            if (stepId === 'partName') {
+                appData.partName = String(val || '').trim();
+            } else if (stepId === 'processCode') {
+                appData.processCode = normalizeA4ProcessCode(val);
+            } else if (stepId === 'mainProgram') {
+                appData.mainProgram = normalizeProgramNo(val);
+            } else if (stepId === 'machiningProgram') {
+                appData.machiningProgram = normalizeProgramNo(val);
+            } else if (stepId === 'pressure') {
+                appData.pressure = normalizePressure(val);
+            } else if (stepId === 'dailyQty') {
+                appData.dailyQty = normalizeDailyQty(val);
+            } else {
+                appData[stepId] = val;
+            }
+            syncA4DerivedFields();
+        } else {
+            appData[stepId] = val;
+        }
         currentStepIndex++;
     } else {
         const stepId = toolFlow[toolStepIndex].id;
-        currentTool[stepId] = val;
+        if ((stepId === 't_gx' || stepId === 't_gz') && val !== '') {
+            const n = String(val).replace(/[XZxz]/g, '').trim();
+            currentTool[stepId] = n;
+        } else {
+            currentTool[stepId] = val;
+        }
         toolStepIndex++;
         if (toolStepIndex === toolFlow.length) {
             if (appData.type === 2) {
@@ -5215,8 +5461,6 @@ function restartChat() {
    ★ 預覽可編輯功能
    ============================================================ */
 const EDIT_MAP = {
-    'out-title': 'title',
-    'out-subtitle': 'subtitle',
     'out-pressure': 'pressure',
     'out-part-name': 'partName',
     'out-part-no': 'partNo',
@@ -5422,6 +5666,7 @@ function editQrContent(which) {
    A4 預覽更新（第一類）
    ============================================================ */
 function updateA4Preview() {
+    syncA4DerivedFields();
     document.getElementById('out-title').textContent = appData.title || '';
     document.getElementById('out-subtitle').textContent = appData.subtitle || '';
     document.getElementById('out-pressure').textContent = appData.pressure || '';
@@ -5499,7 +5744,7 @@ function updateA4Preview() {
     } else {
         qrContainer.innerHTML = '';
         qrHint.style.display = 'block';
-        qrHint.textContent = '點擊設定 QR Code';
+        qrHint.textContent = '設定 QR / Set QR';
     }
 }
 
@@ -5625,9 +5870,14 @@ function updateA3Preview() {
    初始化
    ============================================================ */
 window.addEventListener('beforeunload', () => { saveCurrent(); });
+window.addEventListener('pagehide', () => { saveCurrent(true); });
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') saveCurrent(true);
+});
 
-window.onload = () => {
-    loadStore();
+window.onload = async () => {
+    await requestPersistentStorage();
+    await loadStore();
     loadAvatar();
     renderTableList();
     initEditablePreview();
@@ -5661,6 +5911,18 @@ window.onload = () => {
             const type = (t.data.type === 2) ? 2 : 1;
             appData = makeEmptyAppData(type);
             Object.assign(appData, JSON.parse(JSON.stringify(t.data)));
+            if (Number(type) === 1) {
+                if (!appData.processCode) {
+                    const m = String(appData.title || '').match(/\b(OP[0-9A-Z.-]+)\b/i);
+                    appData.processCode = m ? m[1].toUpperCase() : 'OP';
+                }
+                if (!appData.mainProgram) appData.mainProgram = 'O';
+                if (!appData.machiningProgram) {
+                    const m = String(appData.subtitle || '').match(/O[0-9A-Z.-]+/i);
+                    appData.machiningProgram = m ? m[0].toUpperCase() : 'O';
+                }
+                syncA4DerivedFields();
+            }
             if (!Array.isArray(appData.tools)) appData.tools = [];
             if (!Array.isArray(appData.tools2)) appData.tools2 = [];
 
@@ -5692,6 +5954,13 @@ window.onload = () => {
 
     store.currentId = null;
     appData.date = new Date().toISOString().split('T')[0];
+    appData.processCode = 'OP';
+    appData.mainProgram = 'O';
+    appData.machiningProgram = 'O';
+    appData.pressure = '00KG';
+    appData.processTime = '0:00';
+    appData.dailyQty = '0 PCS';
+    syncA4DerivedFields();
     updateA4Preview();
     updateA3Preview();
     renderInput();
