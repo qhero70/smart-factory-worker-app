@@ -624,6 +624,7 @@ html, body {
 #mobile-nav {
     flex: none;
     display: flex;
+    position: relative;
     background: var(--white);
     border-top: 1px solid var(--line);
     box-shadow: 0 -2px 14px rgba(60,64,67,.1);
@@ -666,6 +667,51 @@ html, body {
     background: var(--g-blue);
 }
 .nav-btn:active { background: rgba(26,115,232,.06); }
+.nav-fab-slot {
+    flex: 0 0 74px;
+    position: relative;
+    min-height: 64px;
+}
+.nav-add-fab {
+    position: absolute;
+    left: 50%;
+    top: -24px;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 5px solid var(--white);
+    background: linear-gradient(135deg, var(--g-blue), #4285F4);
+    color: #fff;
+    font-size: 2rem;
+    font-weight: 400;
+    line-height: 1;
+    display: grid;
+    place-items: center;
+    box-shadow: 0 7px 20px rgba(26,115,232,.38);
+    cursor: pointer;
+    font-family: inherit;
+    z-index: 3;
+    transition: transform .12s, box-shadow .12s;
+}
+.nav-add-fab:active {
+    transform: translateX(-50%) scale(.92);
+    box-shadow: 0 3px 10px rgba(26,115,232,.28);
+}
+.nav-add-label {
+    position: absolute;
+    left: 50%;
+    top: 40px;
+    transform: translateX(-50%);
+    width: 86px;
+    text-align: center;
+    color: #5F6368;
+    font-size: .58rem;
+    font-weight: 800;
+    line-height: 1.12;
+    pointer-events: none;
+}
+.nav-add-label .ui-en { font-size:.9em; margin-top:1px; }
 .nav-btn .nav-dot {
     position: absolute;
     top: 7px; right: calc(50% - 20px);
@@ -1937,7 +1983,7 @@ html, body {
             <!-- 主視覺 -->
             <div class="ws-hero">
                 <div class="ws-logo">🛠️</div>
-                <div class="ws-badge">版本 v2.3 ・ 手機 / 平板 / 電腦 皆可使用<br><span class="ui-en">Version v2.2 · Mobile / Tablet / Desktop</span></div>
+                <div class="ws-badge">版本 v2.4 ・ 手機 / 平板 / 電腦 皆可使用<br><span class="ui-en">Version v2.2 · Mobile / Tablet / Desktop</span></div>
                 <h1 class="ws-title">智慧刀具表 <em>製作</em><span class="ui-en" style="font-size:.42em;margin-top:8px;">Smart Tool Sheet Builder</span></h1>
                 <p class="ws-sub">
                     用「對話」取代「打字排版」。<br><span class="ui-en">Use guided conversation instead of manual formatting.</span><br>
@@ -2332,7 +2378,7 @@ On mobile, use the bottom navigation for Guided Input, Preview, My Sheets and Us
             <!-- ======= 04 ======= -->
             <div class="ms-sec" id="sec4">
                 <h3><span class="n">04</span>第一類 A4（車床 N/C）完整操作流程<span class="ui-en">Type 1 A4 (Lathe N/C) Full Workflow</span></h3><div class="ms-en" data-en-summary="sec4"><b>English — Type 1 A4 Lathe Workflow</b><br>
-Enter title, program/subtitle, date, prepared-by, chuck pressure, part name, Customer P/N, Product No., cycle time and daily quantity. For every N process, enter Tool Type, Tool No., H Offset, G Offset X, G Offset Z and Tool Life in the format <code>#xxx=Qty</code> (example: <code>#500=30</code>). Type 1 intentionally does not use a Tool Length column.</div>
+Enter title, program/subtitle, date, prepared-by, chuck pressure, part name, Customer P/N, Product No., cycle time and daily quantity. For every N process, enter Tool Type, Tool No., H Offset, G Offset X, G Offset Z and Tool Life example: <code>#534+1=30 Usage Count</code> and <code>TOOL LIFE (End Count)=30</code>. Type 1 intentionally does not use a Tool Length column.</div>
 
                 <p>當您選擇「車床N/C規格」後，精靈會依序詢問以下欄位。<b>標註「選填」者，可以直接按略過按鈕跳過。</b></p>
 
@@ -2465,7 +2511,7 @@ Enter title, program/subtitle, date, prepared-by, chuck pressure, part name, Cus
                     <tr>
                         <td>6</td>
                         <td><b>刀具壽命</b></td>
-                        <td>填寫格式：<code>#xxx=數量</code>，例如 <code>#500=30</code></td>
+                        <td>填寫格式例：<code>#534+1=30 使用趟數</code><br><code>TOOL LIFE（結束數量）=30</code></td>
                         <td>選填</td>
                     </tr>
                     <tr>
@@ -2711,7 +2757,7 @@ Type 2 supports two part-name groups, Customer P/N and Product No., cycle time, 
                     <tr>
                         <td>7</td>
                         <td><b>刀具壽命</b></td>
-                        <td>格式：<code>#xxx=數量</code>，例：<code>#500=30</code></td>
+                        <td>格式例：<code>#534+1=30 使用趟數</code>，並填 <code>TOOL LIFE（結束數量）=30</code></td>
                         <td>選填</td>
                     </tr>
                     <tr>
@@ -3759,6 +3805,10 @@ On desktop, press Enter to submit standard text inputs. Use Preview for quick co
             <span class="nav-icon">📄</span>
             <span>預覽報表<span class="ui-en">Preview</span></span>
         </button>
+        <div class="nav-fab-slot">
+            <button id="nav-add-tool-fab" class="nav-add-fab" onclick="addMoreToolsFromNav()" aria-label="新增刀具 / Add More Tools">＋</button>
+            <div class="nav-add-label">新增刀具<span class="ui-en">Add Tools</span></div>
+        </div>
         <button class="nav-btn" onclick="openTableManager()">
             <span class="nav-icon">📁</span>
             <span>我的表格<span class="ui-en">My Sheets</span></span>
@@ -3920,10 +3970,10 @@ S85X=主軸同步攻牙
 OXX88=刀庫總模式
 OXX99=刀庫總結模式`;
 
-const A4_N_PROCESSES = [
-    { value: 'N10', label: 'N10' },
-    { value: 'N20', label: 'N20' }
-];
+const A4_N_PROCESSES = Array.from({ length: 20 }, (_, i) => {
+    const n = 'N' + ((i + 1) * 10);
+    return { value: n, label: n };
+});
 
 const A4_TOOL_NUMBERS = Array.from({ length: 24 }, (_, i) => {
     const n = String(i + 1).padStart(2, '0');
@@ -3947,7 +3997,7 @@ const A4_TOOL_TYPES = [
 const flowType1 = [
     { id: 'partName', type: 'text', q: '請輸入【品名 / Part Name】\n品名會自動帶入主題與下方品名欄。 / Used in title and Part Name field.', placeholder: 'PISTON' },
     { id: 'processCode', type: 'prefix', prefix: 'OP', q: '請輸入【工序 / Process】\n只填 OP 後面的工序編號。 / Enter only the number after OP.', placeholder: '110' },
-    { id: 'machineNo', type: 'text', prefill: '6', q: '請輸入【機器號碼 / Machine No.】\n預填 6，可直接修改。 / Default 6; editable.', placeholder: '6' },
+    { id: 'machineNo', type: 'text', q: '請輸入【機器號碼 / Machine No.】\n請直接填寫機器號碼。 / Enter the machine number.', placeholder: '機器號碼 / Machine No.' },
     { id: 'mainProgram', type: 'prefix', prefix: 'O', q: '副標題 1：【主程式 / Main Program】\n只填程式編號。 / Program number only.', placeholder: '03104', optional: true },
     { id: 'machiningProgram', type: 'prefix', prefix: 'O', q: '副標題 2：【加工程式 / Machining Program】\n只填程式編號。 / Program number only.', placeholder: '0001', optional: true },
     { id: 'date', type: 'date', q: '請確認【製表日期 / Date】' },
@@ -3967,7 +4017,7 @@ const toolFlowType1 = [
     { id: 't_h', type: 'text', q: '請輸入【H值 / H Offset】', placeholder: '01', optional: true },
     { id: 't_gx', type: 'number', q: '請輸入【G補正 X軸 / G Offset X】\n只填數字。 / Numbers only.', placeholder: '-0.020', optional: true, step: 'any' },
     { id: 't_gz', type: 'number', q: '請輸入【G補正 Z軸 / G Offset Z】\n只填數字。 / Numbers only.', placeholder: '-0.030', optional: true, step: 'any' },
-    { id: 't_remark', type: 'text', q: '請輸入【刀具壽命 / Tool Life】\n格式 / Format：#xxx=數量 / Qty', placeholder: '#500=30', optional: true },
+    { id: 't_remark', type: 'textarea', q: '請輸入【刀具壽命 / Tool Life】\n例 / Example：\n#534+1=30 使用趟數 / Usage Count\nTOOL LIFE（結束數量 / End Count）=30', placeholder: '#534+1=30 使用趟數\nTOOL LIFE（結束數量）=30', optional: true },
     { id: 't_image', type: 'file', q: '請選擇【導入圖示 / Tool Image】\n拍攝/選取後自動加入此刀具表的照片資料夾。 / Captured image is added to this sheet photo folder.' }
 ];
 
@@ -4002,7 +4052,7 @@ const toolFlowType2 = [
     { id: 't_len', type: 'text', q: '請輸入【刀長 / Tool Length】', placeholder: '99.95', optional: true },
     { id: 't_gx', type: 'text', q: '請輸入此 N工序的【G補正 X軸 / G Offset X】', placeholder: '例 Example: X-0.02', optional: true },
     { id: 't_gz', type: 'text', q: '請輸入此 N工序的【G補正 Z軸 / G Offset Z】', placeholder: '例 Example: Z+0.03', optional: true },
-    { id: 't_remark', type: 'text', q: '請輸入【刀具壽命 / Tool Life】\n格式 / Format：#xxx=數量 / Qty', placeholder: '#500=30', optional: true },
+    { id: 't_remark', type: 'textarea', q: '請輸入【刀具壽命 / Tool Life】\n例 / Example：\n#534+1=30 使用趟數 / Usage Count\nTOOL LIFE（結束數量 / End Count）=30', placeholder: '#534+1=30 使用趟數\nTOOL LIFE（結束數量）=30', optional: true },
     { id: 't_image', type: 'file', q: '請選擇【導入圖示 / Tool Image】\n選取圖片，無圖可略過 / Select an image or skip' }
 ];
 
@@ -4932,7 +4982,7 @@ function createNewTable() {
         appData.processCode = 'OP';
         appData.mainProgram = 'O';
         appData.machiningProgram = 'O';
-        appData.machineNo = '6';
+        appData.machineNo = '';
         appData.pressure = '';
         appData.processTime = '';
         appData.dailyQty = '';
@@ -5529,19 +5579,17 @@ function handleSubmission(val, isImage = false) {
 
 function promptAddAnotherTool() {
     const count = (appData.type === 2) ? appData.tools2.length : appData.tools.length;
-    addBotMessage(`✅ 第 ${count} 把刀具已加入！ / Tool ${count} added.\n請問是否還要新增下一把刀具？ / Add another tool?`);
-
-    const btnYes = document.createElement('button');
-    btnYes.textContent = '➕ 是的，繼續新增 / Yes, Add Another';
-    btnYes.className = 'btn btn-green';
-    btnYes.onclick = () => { addUserMessage('繼續新增 / Add Another'); toolStepIndex = 0; renderInput(); };
+    addBotMessage(`✅ 第 ${count} 把刀具已加入！ / Tool ${count} added.\n要再新增刀具，可按下方中央「＋」。 / Tap the center ＋ below to add another tool.`);
 
     const btnNo = document.createElement('button');
-    btnNo.textContent = '🛑 否，結束設定 / No, Finish';
+    btnNo.textContent = '🛑 結束刀具設定 / Finish Tool Setup';
     btnNo.className = 'btn btn-slate';
-    btnNo.onclick = () => { addUserMessage('結束新增 / Finish Adding'); isToolLoop = false; currentStepIndex = getFlow().length; renderInput(); };
-
-    inputContainer.appendChild(btnYes);
+    btnNo.onclick = () => {
+        addUserMessage('結束新增 / Finish Adding');
+        isToolLoop = false;
+        currentStepIndex = getFlow().length;
+        renderInput();
+    };
     inputContainer.appendChild(btnNo);
 }
 
@@ -5600,18 +5648,29 @@ function restoreChatView() {
     showResumeOptions();
 }
 
+function addMoreToolsFromNav() {
+    if (!hasMeaningfulData()) {
+        alert('請先完成基本資料，再新增刀具。\nComplete the basic information before adding tools.');
+        switchTab('chat');
+        return;
+    }
+    hideWelcome();
+    closeTableManager();
+    inputContainer.innerHTML = '';
+    addUserMessage('➕ 新增刀具 / Add More Tools');
+    isToolLoop = true;
+    toolStepIndex = 0;
+    currentTool = {};
+    switchTab('chat');
+    renderInput();
+}
+
 function showResumeOptions() {
     inputContainer.innerHTML = '';
 
-    const b1 = document.createElement('button');
-    b1.textContent = '➕ 繼續新增刀具 / Add More Tools';
-    b1.className = 'btn btn-green';
-    b1.onclick = () => {
-        addUserMessage('繼續新增刀具');
-        isToolLoop = true; toolStepIndex = 0; currentTool = {};
-        inputContainer.innerHTML = '';
-        renderInput();
-    };
+    const note = document.createElement('div');
+    note.style.cssText = 'text-align:center;color:#5F6368;font-size:.78rem;line-height:1.6;padding:5px 4px 8px;';
+    note.innerHTML = '新增刀具請按下方中央「＋」<br><span style="font-size:.9em;">Tap the center ＋ below to add tools.</span>';
 
     const b2 = document.createElement('button');
     b2.textContent = '✏️ 重新填寫基本資料 / Re-enter Basic Info';
@@ -5621,7 +5680,7 @@ function showResumeOptions() {
         restartChat();
     };
 
-    inputContainer.appendChild(b1);
+    inputContainer.appendChild(note);
     inputContainer.appendChild(b2);
 }
 
@@ -6047,7 +6106,7 @@ function updateA4Preview() {
             <td class="text-left p-1">
                 <div class="flex justify-between items-center w-full h-full">
                     <div class="ed-cell font-medium text-sm pl-2 leading-tight" contenteditable="true" spellcheck="false"
-                         data-tool="a4" data-row="${i}" data-key="t_remark"
+                         data-tool="a4" data-row="${i}" data-key="t_remark" data-multiline="1"
                          style="flex:1;min-height:1.2em;white-space:pre-line;">${esc(tool.t_remark || '')}</div>
                     <div class="shrink-0 pr-1">${imgHtml}</div>
                 </div>
@@ -6283,7 +6342,7 @@ window.onload = async () => {
     appData.processCode = 'OP';
     appData.mainProgram = 'O';
     appData.machiningProgram = 'O';
-    appData.machineNo = '6';
+    appData.machineNo = '';
     appData.pressure = '';
     appData.processTime = '';
     appData.dailyQty = '';
