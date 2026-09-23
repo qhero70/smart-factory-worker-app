@@ -1946,7 +1946,7 @@ html, body {
                 <div class="ws-card">
                     <div class="ic">📁</div>
                     <h4>雲端 + Office<span class="ui-en">Cloud + Office</span></h4>
-                    <p>本機 10 張暫存，並可輸出 Excel 與 Google Drive 備份。<br><span class="ui-en">Keep up to 10 local sheets and export Word, Excel, or Google Drive backups.</span></p>
+                    <p>本機 10 張暫存，並可輸出 Excel 與 Google Drive 備份。<br><span class="ui-en">Keep up to 10 local sheets and export Excel, A4 PNG, JSON, or Google Drive backups.</span></p>
                 </div>
                 <div class="ws-card">
                     <div class="ic">🔒</div>
@@ -2254,7 +2254,7 @@ On mobile, use the bottom navigation for Guided Input, Preview, My Sheets and Us
                 <h3><span class="n">03</span>快速開始：三步驟完成第一張表<span class="ui-en">Quick Start: Finish Your First Sheet in 3 Steps</span></h3><div class="ms-en" data-en-summary="sec3"><b>English — Quick Start</b><ol>
 <li>Select Type 1 A4 Lathe or Type 2 A3 Milling.</li>
 <li>Answer the wizard questions for basic data, tools, offsets, tool life, images and QR content.</li>
-<li>Open Preview, make any final edits, then print, save as PDF, export Word/Excel or create a Google Drive backup.</li>
+<li>Open Preview, make any final edits, then print, save as PDF, export Excel/A4 PNG or create a Google Drive backup.</li>
 </ol></div>
 
                 <h4>步驟一：選擇格式</h4>
@@ -3747,7 +3747,7 @@ On desktop, press Enter to submit standard text inputs. Use Preview for quick co
         <div class="tm-footer" style="border-top:none;padding-top:0;">
             <button class="tm-new" onclick="createNewTable()">＋ 新增刀具表<br><span class="ui-en">New Tool Sheet</span></button>
             <div class="tm-cloud-grid">
-                <button class="tm-cloud-btn save" onclick="saveCurrentToGoogleDrive()">☁️ 儲存 Excel＋備份到 Google Drive<br><span class="ui-en">Save Word + Excel + Backup to Google Drive</span></button>
+                <button class="tm-cloud-btn save" onclick="saveCurrentToGoogleDrive()">☁️ 儲存 Excel＋備份到 Google Drive<br><span class="ui-en">Save Excel + Backup to Google Drive</span></button>
                 <button class="tm-cloud-btn folder" onclick="exportExcelFile()">📊 匯出 Excel<br><span class="ui-en">Export Excel</span></button>
                 <button class="tm-cloud-btn import" onclick="exportA4ImageFile()">🖼️ 匯出 A4 圖片<br><span class="ui-en">Export A4 PNG</span></button>
                 <button class="tm-cloud-btn import" onclick="chooseGoogleDriveBackup()">📥 匯入雲端備份<br><span class="ui-en">Import Cloud Backup</span></button>
@@ -3953,7 +3953,7 @@ function syncA4DerivedFields() {
     const part = String(appData.partName || '').trim();
     const process = normalizeA4ProcessCode(appData.processCode || '');
     appData.processCode = process;
-    appData.title = [part, process].filter(Boolean).join(' ').trim();
+    appData.title = part ? [part, process].filter(Boolean).join(' ').trim() : '';
 
     const main = normalizeProgramNo(appData.mainProgram || '');
     const machining = normalizeProgramNo(appData.machiningProgram || '');
