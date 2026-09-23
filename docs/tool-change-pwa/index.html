@@ -17,6 +17,8 @@
 <title>換刀表生成精靈 · 手機版</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style id="dynamic-page-style">@page { size: A4 portrait; margin: 0; }</style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -428,6 +430,53 @@ html, body {
     flex: none;
 }
 #edit-hint b { color: var(--g-blue); }
+
+.bi-en {
+    display: block;
+    font-size: .62em;
+    line-height: 1.05;
+    font-weight: 600;
+    letter-spacing: 0;
+    opacity: .76;
+    margin-top: 1px;
+}
+.desktop-only { display: none !important; }
+#export-btn-container {
+    width: 100%;
+    max-width: 420mm;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin: 0 auto 10px;
+}
+.export-btn {
+    min-height: 42px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--ink);
+    font-family: inherit;
+    font-size: .78rem;
+    font-weight: 800;
+    padding: 8px 10px;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(60,64,67,.08);
+}
+.export-btn:active { transform: scale(.97); }
+.export-btn.word { color:#185ABD; border-color:#B7CEF4; background:#EEF4FF; }
+.export-btn.excel { color:#107C41; border-color:#B8DEC9; background:#ECF8F1; }
+.export-btn.drive { color:#1A73E8; border-color:#AECBFA; background:#E8F0FE; }
+
+@media (min-width: 768px) {
+    .desktop-only { display: inline-flex !important; }
+    body.desktop-preview-only #sidebar { display: none !important; }
+    body.desktop-preview-only #preview-container { display: flex !important; width:100%; }
+    body.desktop-preview-only #export-btn-container { max-width: 420mm; }
+}
+@media (max-width: 767px) {
+    #export-btn-container { grid-template-columns: repeat(3, 1fr); }
+    .export-btn { font-size:.7rem; padding:8px 5px; }
+}
 
 #a4-wrapper, #a3-wrapper {
     transform-origin: top center;
@@ -1753,7 +1802,7 @@ html, body {
             <!-- 主視覺 -->
             <div class="ws-hero">
                 <div class="ws-logo">🛠️</div>
-                <div class="ws-badge">版本 v2.0 ・ 手機 / 平板 / 電腦 皆可使用</div>
+                <div class="ws-badge">版本 v2.1 ・ 手機 / 平板 / 電腦 皆可使用</div>
                 <h1 class="ws-title">智慧刀具表 <em>製作</em></h1>
                 <p class="ws-sub">
                     用「對話」取代「打字排版」。<br>
@@ -1795,13 +1844,13 @@ html, body {
                 </div>
                 <div class="ws-card">
                     <div class="ic">📁</div>
-                    <h4>10 張暫存</h4>
-                    <p>資料自動存在本機，隨時切換、載入、刪除。</p>
+                    <h4>雲端 + Office</h4>
+                    <p>本機 10 張暫存，並可輸出 Word、Excel 與 Google Drive 備份。</p>
                 </div>
                 <div class="ws-card">
                     <div class="ic">🔒</div>
-                    <h4>資料不外傳</h4>
-                    <p>全部保存在您的瀏覽器，不上雲端、不需登入。</p>
+                    <h4>中英合併版</h4>
+                    <p>表格欄位採中英文並列，手機與電腦皆可預覽。</p>
                 </div>
             </div>
 
@@ -2322,7 +2371,7 @@ html, body {
                     </tr>
                     <tr>
                         <td><b>刀具表格</b></td>
-                        <td>8 欄 × 8 列：N工序、刀具形式、刀號、H值、刀長、G補正X軸、G補正Z軸、刀具壽命/導入圖示。</td>
+                        <td>7 欄 × 8 列：N工序、刀具形式、刀號、H值、G補正X軸、G補正Z軸、刀具壽命/導入圖示。</td>
                     </tr>
                     <tr>
                         <td><b>夾頭壓力區</b></td>
@@ -2612,7 +2661,7 @@ html, body {
                         <td><b>第一類 A4</b></td>
                         <td>
                             主題、副標題、夾頭壓力、品名、客戶品號、產品編號、加工時間、每日數量、製表日期、製表者、
-                            刀具表格 8 列 × 8 欄（N工序、刀具形式、刀號、H值、刀長、G補正X軸、G補正Z軸、刀具壽命）、刀具圖片、QR Code
+                            刀具表格 8 列 × 8 欄（N工序、刀具形式、刀號、H值、G補正X軸、G補正Z軸、刀具壽命）、刀具圖片、QR Code
                         </td>
                     </tr>
                     <tr>
@@ -3225,7 +3274,6 @@ html, body {
   刀具形式：外徑粗車
   刀號：T01
   H值：01
-  刀長：125.35
   G補正 X軸：X-0.02
   G補正 Z軸：Z+0.03
   刀具壽命：#500=30</div>
@@ -3289,9 +3337,10 @@ html, body {
             <div class="header-row">
                 <div class="brand">
                     <span class="logo-dot" id="brand-avatar" title="點擊更換頭像" onclick="openAvatarPicker()">🤖</span>
-                    <span>換刀表精靈</span>
+                    <span>刀具表精靈 • 手機版</span>
                 </div>
                 <div class="header-actions">
+                    <button class="icon-btn desktop-only" onclick="switchTab('preview')" title="電腦版預覽報表">🖥️ 預覽</button>
                     <button class="icon-btn" onclick="openManual()" title="使用說明書">❓</button>
                     <button class="icon-btn" onclick="openTableManager()" title="我的刀具表">
                         📁 <span id="table-count-badge" class="badge-count">0/10</span>
@@ -3330,6 +3379,13 @@ html, body {
             </button>
         </div>
 
+        <div id="export-btn-container">
+            <button class="export-btn desktop-only" onclick="switchTab('chat')">↩ 返回編輯</button>
+            <button class="export-btn word" onclick="exportWordFile()">📝 Word</button>
+            <button class="export-btn excel" onclick="exportExcelFile()">📊 Excel</button>
+            <button class="export-btn drive" onclick="saveCurrentToGoogleDrive()">☁️ Google Drive</button>
+        </div>
+
         <div id="edit-hint">
             💡 <b>點擊表單任何欄位即可直接編輯</b>　·　刀具圖片可點擊更換　·　QR Code 可點擊修改
         </div>
@@ -3348,14 +3404,13 @@ html, body {
                 <table class="excel-table table-fixed">
                     <thead>
                         <tr>
-                            <th style="width:7%">N工序</th>
-                            <th style="width:16%">刀具形式</th>
-                            <th style="width:9%">刀號</th>
-                            <th style="width:7%">H值</th>
-                            <th style="width:9%">刀長</th>
-                            <th style="width:10%">G補正<br>X軸</th>
-                            <th style="width:10%">G補正<br>Z軸</th>
-                            <th style="width:32%">刀具壽命 / 導入圖示</th>
+                            <th style="width:8%">N工序<span class="bi-en">Process</span></th>
+                            <th style="width:18%">刀具形式<span class="bi-en">Tool Type</span></th>
+                            <th style="width:10%">刀號<span class="bi-en">Tool No.</span></th>
+                            <th style="width:8%">H值<span class="bi-en">H Offset</span></th>
+                            <th style="width:12%">G補正 X軸<span class="bi-en">G Offset X</span></th>
+                            <th style="width:12%">G補正 Z軸<span class="bi-en">G Offset Z</span></th>
+                            <th style="width:32%">刀具壽命 / 導入圖示<span class="bi-en">Tool Life / Image</span></th>
                         </tr>
                     </thead>
                     <tbody id="out-tool-body"></tbody>
@@ -3370,23 +3425,23 @@ html, body {
                     <div class="w-[60%] flex flex-col">
                         <table class="excel-table h-full text-left" style="border:none;">
                             <tr style="border-top:none;">
-                                <td class="w-[35%] font-bold bg-[#f2f2f2] text-center text-lg border-l-0" style="border-top:none;">品名</td>
+                                <td class="w-[35%] font-bold bg-[#f2f2f2] text-center text-lg border-l-0" style="border-top:none;">品名<span class="bi-en">Part Name</span></td>
                                 <td class="w-[65%] pl-4 font-bold text-lg" style="border-top:none;"><span id="out-part-name"></span></td>
                             </tr>
                             <tr>
-                                <td class="font-bold bg-[#f2f2f2] text-center text-lg border-l-0">客戶品號</td>
+                                <td class="font-bold bg-[#f2f2f2] text-center text-lg border-l-0">客戶品號<span class="bi-en">Customer P/N</span></td>
                                 <td class="pl-4 font-bold text-lg"><span id="out-part-no"></span></td>
                             </tr>
                             <tr>
-                                <td class="font-bold bg-[#f2f2f2] text-center text-lg border-l-0">產品編號</td>
+                                <td class="font-bold bg-[#f2f2f2] text-center text-lg border-l-0">產品編號<span class="bi-en">Product No.</span></td>
                                 <td class="pl-4 font-bold text-lg"><span id="out-customer-no"></span></td>
                             </tr>
                             <tr>
-                                <td class="font-bold bg-[#f2f2f2] text-center text-lg border-l-0">加工時間</td>
+                                <td class="font-bold bg-[#f2f2f2] text-center text-lg border-l-0">加工時間<span class="bi-en">Cycle Time</span></td>
                                 <td class="pl-4 font-bold text-lg"><span id="out-process-time"></span></td>
                             </tr>
                             <tr>
-                                <td class="font-bold bg-[#f2f2f2] text-center text-lg border-b-0 border-l-0">每日數量</td>
+                                <td class="font-bold bg-[#f2f2f2] text-center text-lg border-b-0 border-l-0">每日數量<span class="bi-en">Daily Qty</span></td>
                                 <td class="pl-4 font-bold text-lg border-b-0"><span id="out-daily-qty"></span></td>
                             </tr>
                         </table>
@@ -3400,10 +3455,10 @@ html, body {
 
                 <div class="w-full flex justify-between p-1 bg-white font-bold text-sm shrink-0 border-x-4 border-b-4 border-black">
                     <div class="w-1/2 flex items-center px-2">
-                        製表日期：<span id="out-date" class="ml-2 font-normal"></span>
+                        製表日期 / Date：<span id="out-date" class="ml-2 font-normal"></span>
                     </div>
                     <div class="w-1/2 flex items-center justify-end px-2">
-                        製表者/代碼：<span id="out-creator" class="ml-2 font-normal"></span>
+                        製表者 / Prepared By：<span id="out-creator" class="ml-2 font-normal"></span>
                     </div>
                 </div>
 
@@ -3434,14 +3489,14 @@ html, body {
                             </colgroup>
                             <thead>
                                 <tr>
-                                    <th>N工序</th>
-                                    <th>刀具形式</th>
-                                    <th>刀號</th>
-                                    <th>H值</th>
-                                    <th>刀長</th>
-                                    <th>G補正<br>X軸</th>
-                                    <th>G補正<br>Z軸</th>
-                                    <th>刀具壽命</th>
+                                    <th>N工序<span class="bi-en">Process</span></th>
+                                    <th>刀具形式<span class="bi-en">Tool Type</span></th>
+                                    <th>刀號<span class="bi-en">Tool No.</span></th>
+                                    <th>H值<span class="bi-en">H Offset</span></th>
+                                    <th>刀長<span class="bi-en">Tool Length</span></th>
+                                    <th>G補正 X軸<span class="bi-en">G Offset X</span></th>
+                                    <th>G補正 Z軸<span class="bi-en">G Offset Z</span></th>
+                                    <th>刀具壽命<span class="bi-en">Tool Life</span></th>
                                 </tr>
                             </thead>
                             <tbody id="out3-tool-body"></tbody>
@@ -3463,14 +3518,14 @@ html, body {
                                     <col style="width:66%">
                                 </colgroup>
                                 <tbody>
-                                    <tr><td class="lbl">品 名</td><td class="val" id="out3-productName"></td></tr>
-                                    <tr><td class="lbl">品 號</td><td class="val" id="out3-productNo"></td></tr>
-                                    <tr><td class="lbl">產品編號</td><td class="val" id="out3-customerNo"></td></tr>
-                                    <tr><td class="lbl">品 名</td><td class="val" id="out3-productName2"></td></tr>
-                                    <tr><td class="lbl">品 號</td><td class="val" id="out3-productNo2"></td></tr>
-                                    <tr><td class="lbl">產品編號</td><td class="val" id="out3-customerNo2"></td></tr>
-                                    <tr><td class="lbl">加工時間</td><td class="val" id="out3-processTime"></td></tr>
-                                    <tr><td class="lbl">每日數量</td><td class="val" id="out3-dailyQty"></td></tr>
+                                    <tr><td class="lbl">品 名<span class="bi-en">Part Name</span></td><td class="val" id="out3-productName"></td></tr>
+                                    <tr><td class="lbl">客戶品號<span class="bi-en">Customer P/N</span></td><td class="val" id="out3-productNo"></td></tr>
+                                    <tr><td class="lbl">產品編號<span class="bi-en">Product No.</span></td><td class="val" id="out3-customerNo"></td></tr>
+                                    <tr><td class="lbl">品 名<span class="bi-en">Part Name</span></td><td class="val" id="out3-productName2"></td></tr>
+                                    <tr><td class="lbl">客戶品號<span class="bi-en">Customer P/N</span></td><td class="val" id="out3-productNo2"></td></tr>
+                                    <tr><td class="lbl">產品編號<span class="bi-en">Product No.</span></td><td class="val" id="out3-customerNo2"></td></tr>
+                                    <tr><td class="lbl">加工時間<span class="bi-en">Cycle Time</span></td><td class="val" id="out3-processTime"></td></tr>
+                                    <tr><td class="lbl">每日數量<span class="bi-en">Daily Qty</span></td><td class="val" id="out3-dailyQty"></td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -3523,10 +3578,10 @@ html, body {
 
                 <div class="w-full flex justify-between px-2 py-0.5 bg-white font-bold text-[0.72rem] shrink-0 border-l-[3px] border-r-[3px] border-b-[3px] border-black">
                     <div class="flex items-center">
-                        製表日期：<span id="out3-date" class="ml-1 font-normal"></span>
+                        製表日期 / Date：<span id="out3-date" class="ml-1 font-normal"></span>
                     </div>
                     <div class="flex items-center">
-                        製表者/代碼：<span id="out3-creator" class="ml-1 font-normal"></span>
+                        製表者 / Prepared By：<span id="out3-creator" class="ml-1 font-normal"></span>
                     </div>
                 </div>
 
@@ -3573,7 +3628,9 @@ html, body {
         <div class="tm-footer" style="border-top:none;padding-top:0;">
             <button class="tm-new" onclick="createNewTable()">＋ 新增刀具表</button>
             <div class="tm-cloud-grid">
-                <button class="tm-cloud-btn save" onclick="saveCurrentToGoogleDrive()">☁️ 儲存目前刀具表到 Google Drive</button>
+                <button class="tm-cloud-btn save" onclick="saveCurrentToGoogleDrive()">☁️ 儲存 Word＋Excel＋備份到 Google Drive</button>
+                <button class="tm-cloud-btn import" onclick="exportWordFile()">📝 匯出 Word</button>
+                <button class="tm-cloud-btn folder" onclick="exportExcelFile()">📊 匯出 Excel</button>
                 <button class="tm-cloud-btn import" onclick="chooseGoogleDriveBackup()">📥 匯入雲端備份</button>
                 <button class="tm-cloud-btn folder" onclick="openGoogleDriveFolder()">📂 開啟雲端資料夾</button>
             </div>
@@ -3582,8 +3639,8 @@ html, body {
         <div id="tm-list" class="tm-body"></div>
         <div class="tm-footer">
             <div class="tm-note">
-                💾 本機自動暫存最多 <b>10 張</b>，也可另外備份到 Google Drive<br>
-                雲端備份檔可跨手機 / 平板 / 電腦匯入還原
+                💾 本機自動暫存最多 <b>10 張</b>；可輸出 Word / Excel / JSON 備份<br>
+                手機可分享至 Google Drive，電腦可直接下載並預覽
             </div>
         </div>
     </div>
@@ -3683,24 +3740,23 @@ const flowType1 = [
     { id: 'subtitle', type: 'text', q: '請輸入【副標題主頁程式0xxxx/加工程式 / Oxxx】', placeholder: '加工程式O6370', optional: true },
     { id: 'date', type: 'date', q: '請確認【製表日期】' },
     { id: 'creator', type: 'text', q: '請輸入【製表者】', placeholder: '姓名 ' },
-    { id: 'pressure', type: 'text', q: '請輸入【夾頭壓力設定】', placeholder: '15KG' },
-    { id: 'partName', type: 'text', q: '接著是零件資訊。\n請輸入【品名】', placeholder: '零件名稱' },
-    { id: 'partNo', type: 'text', q: '請輸入【客戶品號】', placeholder: '零件編號' },
-    { id: 'customerNo', type: 'text', q: '請輸入【產品編號】', placeholder: '產品編號', optional: true },
-    { id: 'processTime', type: 'text', q: '請輸入【加工時間】', placeholder: "3'00\"", optional: true },
-    { id: 'dailyQty', type: 'text', q: '請輸入【每日數量】', placeholder: '120 PCS', optional: true },
+    { id: 'pressure', type: 'text', q: '請輸入【夾頭壓力設定 / Chuck Pressure】', placeholder: '15KG' },
+    { id: 'partName', type: 'text', q: '接著是零件資訊。\n請輸入【品名 / Part Name】', placeholder: '零件名稱' },
+    { id: 'partNo', type: 'text', q: '請輸入【客戶品號 / Customer P/N】', placeholder: '零件編號' },
+    { id: 'customerNo', type: 'text', q: '請輸入【產品編號 / Product No.】', placeholder: '產品編號', optional: true },
+    { id: 'processTime', type: 'text', q: '請輸入【加工時間 / Cycle Time】', placeholder: "3'00\"", optional: true },
+    { id: 'dailyQty', type: 'text', q: '請輸入【每日數量 / Daily Qty】', placeholder: '120 PCS', optional: true },
     { id: 'start_tools', type: 'action', q: '✅ 基本資料設定完成！\n接下來我們逐一建立【刀具資料】。', btnText: '新增第一把刀具' }
 ];
 
 const toolFlowType1 = [
     { id: 't_seq', type: 'text', q: '請輸入【刀序 / N工序】(例: N10)', placeholder: 'N10' },
-    { id: 't_type', type: 'text', q: '請輸入【刀具形式】', placeholder: '外徑粗車' },
-    { id: 't_no', type: 'text', q: '請輸入【刀號】(例: T01)', placeholder: 'T01' },
-    { id: 't_h', type: 'text', q: '請輸入【H值】', placeholder: '01', optional: true },
-    { id: 't_len', type: 'text', q: '請輸入【刀長】', placeholder: '長度數值', optional: true },
-    { id: 't_gx', type: 'text', q: '請輸入此 N工序的【G補正 X軸】', placeholder: '例：X-0.02', optional: true },
+    { id: 't_type', type: 'text', q: '請輸入【刀具形式 / Tool Type】', placeholder: '外徑粗車' },
+    { id: 't_no', type: 'text', q: '請輸入【刀號 / Tool No.】(例: T01)', placeholder: 'T01' },
+    { id: 't_h', type: 'text', q: '請輸入【H值 / H Offset】', placeholder: '01', optional: true },
+    { id: 't_gx', type: 'text', q: '請輸入此 N工序的【G補正 X軸 / G Offset X】', placeholder: '例：X-0.02', optional: true },
     { id: 't_gz', type: 'text', q: '請輸入此 N工序的【G補正 Z軸】', placeholder: '例：Z+0.03', optional: true },
-    { id: 't_remark', type: 'text', q: '請輸入【刀具壽命】\n格式：#xxx=數量', placeholder: '#500=30', optional: true },
+    { id: 't_remark', type: 'text', q: '請輸入【刀具壽命 / Tool Life】\n格式：#xxx=數量', placeholder: '#500=30', optional: true },
     { id: 't_image', type: 'file', q: '請選擇【導入圖示】\n(選取圖片，無圖請點略過)' }
 ];
 
@@ -3709,14 +3765,14 @@ const flowType2 = [
     { id: 'headerSubtitle', type: 'text', q: '請輸入【副標題主頁程式0xxxx/加工程式 / Oxxx】】\n(例: 加工程式O0001和刀具O0009)', placeholder: '加工程式O0001盘絲和刀具O0009', optional: true },
     { id: 'date', type: 'date', q: '請確認【製表日期】' },
     { id: 'creator', type: 'text', q: '請輸入【製表者】', placeholder: '姓名 ' },
-    { id: 'productName', type: 'text', q: '請輸入【品名】(左側第一組)', placeholder: 'BOX (L)' },
-    { id: 'productNo', type: 'text', q: '請輸入【客戶品號】', placeholder: 'Z907100000' },
-    { id: 'customerNo1', type: 'text', q: '請輸入【產品編號】', placeholder: '1A8310-14250', optional: true },
+    { id: 'productName', type: 'text', q: '請輸入【品名 / Part Name】(左側第一組)', placeholder: 'BOX (L)' },
+    { id: 'productNo', type: 'text', q: '請輸入【客戶品號 / Customer P/N】', placeholder: 'Z907100000' },
+    { id: 'customerNo1', type: 'text', q: '請輸入【產品編號 / Product No.】', placeholder: '1A8310-14250', optional: true },
     { id: 'productName2', type: 'text', q: '請輸入【品名2】(第二組)', placeholder: 'BOX (R)', optional: true },
     { id: 'productNo2', type: 'text', q: '請輸入【客戶品號2】', placeholder: 'Z907000000', optional: true },
     { id: 'customerNo2', type: 'text', q: '請輸入【產品編號2】', placeholder: '1A8310-14240', optional: true },
-    { id: 'processTime2', type: 'text', q: '請輸入【加工時間】', placeholder: "3'00\"", optional: true },
-    { id: 'dailyQty2', type: 'text', q: '請輸入【每日數量】', placeholder: '120 PCS', optional: true },
+    { id: 'processTime2', type: 'text', q: '請輸入【加工時間 / Cycle Time】', placeholder: "3'00\"", optional: true },
+    { id: 'dailyQty2', type: 'text', q: '請輸入【每日數量 / Daily Qty】', placeholder: '120 PCS', optional: true },
     { id: 'reminderText', type: 'textarea', q: '請輸入【刀具相關貼心提醒】\n(可留空使用預設內容)', placeholder: '機台要是有送給製二組...', optional: true, defaultValue: DEFAULT_REMINDER },
     { id: 'programSide1', type: 'text', q: '請輸入【#500 設定值1】(例: #500=1.)', placeholder: '#500=1.', optional: true, defaultValue: '#500=1.' },
     { id: 'programSide2', type: 'text', q: '請輸入【#500 說明2】', placeholder: '(#500=1.)(ONLY L SIDE)', optional: true, defaultValue: '(#500=1.)(ONLY L SIDE)' },
@@ -3728,14 +3784,14 @@ const flowType2 = [
 
 const toolFlowType2 = [
     { id: 't_seq', type: 'text', q: '請輸入【刀序 / N工序】(例: N10)', placeholder: 'N10' },
-    { id: 't_type', type: 'text', q: '請輸入【刀具形式】(主標題)', placeholder: 'D63-MILL' },
+    { id: 't_type', type: 'text', q: '請輸入【刀具形式 / Tool Type】(主標題)', placeholder: 'D63-MILL' },
     { id: 't_typeDesc', type: 'text', q: '請輸入【刀具形式描述】(副標題)', placeholder: '銑大面.平底度5條', optional: true },
-    { id: 't_no', type: 'text', q: '請輸入【刀號】(例: T01)', placeholder: 'T01' },
+    { id: 't_no', type: 'text', q: '請輸入【刀號 / Tool No.】(例: T01)', placeholder: 'T01' },
     { id: 't_h', type: 'text', q: '請輸入【H值】', placeholder: '01', optional: true },
     { id: 't_len', type: 'text', q: '請輸入【刀長】', placeholder: '99.95', optional: true },
     { id: 't_gx', type: 'text', q: '請輸入此 N工序的【G補正 X軸】', placeholder: '例：X-0.02', optional: true },
     { id: 't_gz', type: 'text', q: '請輸入此 N工序的【G補正 Z軸】', placeholder: '例：Z+0.03', optional: true },
-    { id: 't_remark', type: 'text', q: '請輸入【刀具壽命】\n格式：#xxx=數量', placeholder: '#500=30', optional: true },
+    { id: 't_remark', type: 'text', q: '請輸入【刀具壽命 / Tool Life】\n格式：#xxx=數量', placeholder: '#500=30', optional: true },
     { id: 't_image', type: 'file', q: '請選擇【導入圖示】\n(選取圖片，無圖請點略過)' }
 ];
 
@@ -4003,6 +4059,193 @@ function doPrint() {
 }
 
 /* ============================================================
+   Word / Excel / 中英合併匯出
+   ============================================================ */
+function 取得目前匯出表格_() {
+    saveCurrent(true);
+    const found = store.tables.find(x => x.id === store.currentId);
+    if (found && found.data) return JSON.parse(JSON.stringify(found));
+    return {
+        id: 'TEMP-' + Date.now(),
+        name: appData.type === 2 ? (appData.headerTitle || 'A3刀具表') : (appData.title || 'A4刀具表'),
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        data: JSON.parse(JSON.stringify(appData))
+    };
+}
+
+function 匯出檔名_(table) {
+    const name = getSafeBackupName(table && table.name ? table.name : '刀具表');
+    return name + '_' + getBackupTimestamp();
+}
+
+function XML跳脫_(value) {
+    return String(value == null ? '' : value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+}
+
+function 取得匯出資料_(table) {
+    const d = (table && table.data) || appData;
+    const isA3 = Number(d.type) === 2;
+    const basic = isA3 ? [
+        ['主題 / Title', d.headerTitle || ''],
+        ['副標題 / Subtitle', d.headerSubtitle || ''],
+        ['品名 / Part Name', d.productName || ''],
+        ['客戶品號 / Customer P/N', d.productNo || ''],
+        ['產品編號 / Product No.', d.customerNo1 || ''],
+        ['品名2 / Part Name 2', d.productName2 || ''],
+        ['客戶品號2 / Customer P/N 2', d.productNo2 || ''],
+        ['產品編號2 / Product No. 2', d.customerNo2 || ''],
+        ['加工時間 / Cycle Time', d.processTime2 || ''],
+        ['每日數量 / Daily Qty', d.dailyQty2 || ''],
+        ['製表日期 / Date', d.date || ''],
+        ['製表者 / Prepared By', d.creator || '']
+    ] : [
+        ['主題 / Title', d.title || ''],
+        ['副標題 / Subtitle', d.subtitle || ''],
+        ['夾頭壓力 / Chuck Pressure', d.pressure || ''],
+        ['品名 / Part Name', d.partName || ''],
+        ['客戶品號 / Customer P/N', d.partNo || ''],
+        ['產品編號 / Product No.', d.customerNo || ''],
+        ['加工時間 / Cycle Time', d.processTime || ''],
+        ['每日數量 / Daily Qty', d.dailyQty || ''],
+        ['製表日期 / Date', d.date || ''],
+        ['製表者 / Prepared By', d.creator || '']
+    ];
+
+    const headers = isA3
+        ? ['N工序 / Process', '刀具形式 / Tool Type', '刀具描述 / Description', '刀號 / Tool No.', 'H值 / H Offset', '刀長 / Tool Length', 'G補正X軸 / G Offset X', 'G補正Z軸 / G Offset Z', '刀具壽命 / Tool Life']
+        : ['N工序 / Process', '刀具形式 / Tool Type', '刀號 / Tool No.', 'H值 / H Offset', 'G補正X軸 / G Offset X', 'G補正Z軸 / G Offset Z', '刀具壽命 / Tool Life'];
+
+    const src = isA3 ? (d.tools2 || []) : (d.tools || []);
+    const rows = src.map(t => isA3
+        ? [t.t_seq||'', t.t_type||'', t.t_typeDesc||'', t.t_no||'', t.t_h||'', t.t_len||'', t.t_gx||'', t.t_gz||'', t.t_remark||'']
+        : [t.t_seq||'', t.t_type||'', t.t_no||'', t.t_h||'', t.t_gx||'', t.t_gz||'', t.t_remark||'']
+    );
+
+    return { isA3, basic, headers, rows };
+}
+
+function 下載檔案_(file) {
+    const url = URL.createObjectURL(file);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = file.name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1800);
+}
+
+function 建立Excel檔_(table) {
+    if (typeof XLSX === 'undefined') throw new Error('Excel 元件尚未載入，請重新整理後再試。');
+    const data = 取得匯出資料_(table);
+    const wb = XLSX.utils.book_new();
+
+    const infoRows = [['欄位 Field', '內容 Value'], ...data.basic];
+    const wsInfo = XLSX.utils.aoa_to_sheet(infoRows);
+    wsInfo['!cols'] = [{wch:28}, {wch:42}];
+    XLSX.utils.book_append_sheet(wb, wsInfo, '基本資料 Basic Info');
+
+    const wsTools = XLSX.utils.aoa_to_sheet([data.headers, ...data.rows]);
+    wsTools['!cols'] = data.headers.map((h, i) => ({wch: i === data.headers.length - 1 ? 24 : 18}));
+    XLSX.utils.book_append_sheet(wb, wsTools, '刀具表 Tool List');
+
+    const bytes = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    return new File([bytes], 匯出檔名_(table) + '.xlsx', {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    });
+}
+
+async function 建立Word檔_(table) {
+    if (typeof JSZip === 'undefined') throw new Error('Word 元件尚未載入，請重新整理後再試。');
+    const data = 取得匯出資料_(table);
+    const zip = new JSZip();
+
+    const p = (text, bold) => '<w:p><w:r>' + (bold ? '<w:rPr><w:b/></w:rPr>' : '') +
+        '<w:t xml:space="preserve">' + XML跳脫_(text) + '</w:t></w:r></w:p>';
+    const cell = (text, bold) => '<w:tc><w:tcPr><w:tcW w:w="2400" w:type="dxa"/></w:tcPr>' + p(text, bold) + '</w:tc>';
+    const row = (arr, bold) => '<w:tr>' + arr.map(v => cell(v, bold)).join('') + '</w:tr>';
+    const tableXml = rows => '<w:tbl><w:tblPr><w:tblBorders>' +
+        '<w:top w:val="single" w:sz="6" w:color="000000"/><w:left w:val="single" w:sz="6" w:color="000000"/>' +
+        '<w:bottom w:val="single" w:sz="6" w:color="000000"/><w:right w:val="single" w:sz="6" w:color="000000"/>' +
+        '<w:insideH w:val="single" w:sz="4" w:color="666666"/><w:insideV w:val="single" w:sz="4" w:color="666666"/>' +
+        '</w:tblBorders></w:tblPr>' + rows.join('') + '</w:tbl>';
+
+    const title = data.isA3
+        ? ((table.data.headerTitle || '') + ' ' + (table.data.headerSubtitle || '')).trim()
+        : ((table.data.title || '') + ' ' + (table.data.subtitle || '')).trim();
+
+    const basicRows = [row(['欄位 Field', '內容 Value'], true), ...data.basic.map(r => row(r, false))];
+    const toolRows = [row(data.headers, true), ...data.rows.map(r => row(r, false))];
+
+    const documentXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+        '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>' +
+        '<w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="32"/></w:rPr><w:t>' + XML跳脫_(title || '刀具表 Tool Sheet') + '</w:t></w:r></w:p>' +
+        p('刀具表精靈 • 手機版 / Tool Sheet Wizard', false) +
+        tableXml(basicRows) + p('', false) + tableXml(toolRows) +
+        '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="720" w:right="720" w:bottom="720" w:left="720"/></w:sectPr>' +
+        '</w:body></w:document>';
+
+    zip.file('[Content_Types].xml',
+        '<?xml version="1.0" encoding="UTF-8"?>' +
+        '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+        '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+        '<Default Extension="xml" ContentType="application/xml"/>' +
+        '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>' +
+        '</Types>');
+    zip.folder('_rels').file('.rels',
+        '<?xml version="1.0" encoding="UTF-8"?>' +
+        '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+        '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>' +
+        '</Relationships>');
+    zip.folder('word').file('document.xml', documentXml);
+
+    const blob = await zip.generateAsync({
+        type: 'blob',
+        mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    });
+    return new File([blob], 匯出檔名_(table) + '.docx', {
+        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    });
+}
+
+function 建立JSON備份檔_(table) {
+    const backup = buildCloudBackup(table);
+    return new File(
+        [JSON.stringify(backup, null, 2)],
+        匯出檔名_(table) + '.json',
+        { type: 'application/json' }
+    );
+}
+
+async function exportWordFile() {
+    try {
+        const table = 取得目前匯出表格_();
+        const file = await 建立Word檔_(table);
+        下載檔案_(file);
+    } catch (e) {
+        console.error(e);
+        alert('Word 匯出失敗：' + (e.message || e));
+    }
+}
+
+function exportExcelFile() {
+    try {
+        const table = 取得目前匯出表格_();
+        const file = 建立Excel檔_(table);
+        下載檔案_(file);
+    } catch (e) {
+        console.error(e);
+        alert('Excel 匯出失敗：' + (e.message || e));
+    }
+}
+
+/* ============================================================
    Google Drive 雲端備份
    ============================================================ */
 const GOOGLE_DRIVE_FOLDER_URL = 'https://drive.google.com/drive/folders/14SPCeOwlEMsmii1Yu89jeOWSNCvyDJaj';
@@ -4052,42 +4295,29 @@ async function saveCurrentToGoogleDrive() {
         return;
     }
 
-    const table = store.tables.find(x => x.id === store.currentId);
-    if (!table) {
-        alert('找不到目前刀具表，請先完成至少一個欄位。');
-        return;
-    }
-
-    const backup = buildCloudBackup(table);
-    const fileName = getSafeBackupName(table.name) + '_' + getBackupTimestamp() + '.json';
-    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json;charset=utf-8' });
-    const file = new File([blob], fileName, { type: 'application/json' });
-
     try {
-        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        const table = 取得目前匯出表格_();
+        const wordFile = await 建立Word檔_(table);
+        const excelFile = 建立Excel檔_(table);
+        const jsonFile = 建立JSON備份檔_(table);
+        const files = [wordFile, excelFile, jsonFile];
+
+        if (navigator.share && navigator.canShare && navigator.canShare({ files })) {
             await navigator.share({
-                title: '刀具表 Google Drive 備份',
-                text: '請選擇 Google Drive，並儲存到指定的刀具表雲端資料夾。',
-                files: [file]
+                title: '刀具表雲端備份｜Word + Excel + JSON',
+                text: '請選擇 Google Drive 儲存。Word 與 Excel 可直接開啟，JSON 可回到刀具表精靈匯入還原。',
+                files
             });
             return;
         }
 
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        setTimeout(() => URL.revokeObjectURL(url), 1500);
-
-        alert('已產生刀具表雲端備份檔。\n請將下載的 JSON 檔上傳到 Google Drive 資料夾。');
+        files.forEach(下載檔案_);
+        alert('已產生 Word、Excel、JSON 三個檔案。\n請將檔案存入指定 Google Drive 資料夾。');
         openGoogleDriveFolder();
     } catch (error) {
         if (error && error.name === 'AbortError') return;
         console.error('Google Drive 備份失敗', error);
-        alert('雲端備份沒有完成，請再試一次。');
+        alert('雲端備份沒有完成：' + (error.message || error));
     }
 }
 
@@ -4310,13 +4540,21 @@ function switchTab(tabName) {
     if (window.innerWidth < 768) {
         document.body.classList.toggle('mobile-view-chat', tabName === 'chat');
         document.body.classList.toggle('mobile-view-preview', tabName === 'preview');
+    } else {
+        document.body.classList.toggle('desktop-preview-only', tabName === 'preview');
     }
 
-    navChat.classList.toggle('active', tabName === 'chat');
-    navPreview.classList.toggle('active', tabName === 'preview');
+    if (navChat) navChat.classList.toggle('active', tabName === 'chat');
+    if (navPreview) navPreview.classList.toggle('active', tabName === 'preview');
 
     if (tabName === 'chat') scrollToBottom();
-    else adjustPreviewScale();
+    else {
+        updateA4Preview();
+        updateA3Preview();
+        const preview = document.getElementById('preview-container');
+        if (preview) preview.scrollTop = 0;
+        setTimeout(adjustPreviewScale, 30);
+    }
 }
 
 function adjustPreviewScale() {
@@ -4954,10 +5192,6 @@ function updateA4Preview() {
             <td class="font-medium text-lg">
                 <div class="ed-cell" contenteditable="true" spellcheck="false"
                      data-tool="a4" data-row="${i}" data-key="t_h">${esc(tool.t_h || '')}</div>
-            </td>
-            <td class="font-medium text-lg">
-                <div class="ed-cell" contenteditable="true" spellcheck="false"
-                     data-tool="a4" data-row="${i}" data-key="t_len">${esc(tool.t_len || '')}</div>
             </td>
             <td class="font-medium text-base">
                 <div class="ed-cell" contenteditable="true" spellcheck="false"
