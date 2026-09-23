@@ -3514,10 +3514,13 @@ On desktop, press Enter to submit standard text inputs. Use Preview for quick co
             <div class="a4-preview top-accent border-heavy p-0 font-sans" id="a4-document">
 
                 <div class="text-center py-4 border-b-4 border-black bg-white flex flex-col justify-center h-[100px] shrink-0">
-                    <h1 class="text-[2.5rem] font-black tracking-widest m-0 leading-none">
+                    <h1 class="text-[2.35rem] font-black tracking-widest m-0 leading-none">
                         <span id="out-title"></span>
-                        <span id="out-subtitle" class="text-2xl font-bold ml-4"></span>
                     </h1>
+                    <div class="mt-2 flex items-center justify-center gap-5 flex-wrap">
+                        <span id="out-subtitle" class="text-lg font-bold"></span>
+                        <span class="text-lg font-black">M/C：<span id="out-machine-no"></span></span>
+                    </div>
                 </div>
 
                 <table class="excel-table table-fixed">
@@ -3797,7 +3800,7 @@ const MAX_TABLES = 10;
 function makeEmptyAppData(type) {
     return {
         type: type || 1,
-        title: '', subtitle: '', processCode: '', mainProgram: '', machiningProgram: '',
+        title: '', subtitle: '', processCode: '', machineNo: '', mainProgram: '', machiningProgram: '',
         pressure: '', partName: '', partNo: '',
         customerNo: '', processTime: '', dailyQty: '', date: '', creator: '',
         qrContent: '', tools: [],
@@ -3854,6 +3857,16 @@ S85X=主軸同步攻牙
 OXX88=刀庫總模式
 OXX99=刀庫總結模式`;
 
+const A4_N_PROCESSES = [
+    { value: 'N10', label: 'N10' },
+    { value: 'N20', label: 'N20' }
+];
+
+const A4_TOOL_NUMBERS = Array.from({ length: 24 }, (_, i) => {
+    const n = String(i + 1).padStart(2, '0');
+    return { value: 'T' + n, label: 'T' + n + ' / ' + (i + 1) + '號' };
+});
+
 const A4_TOOL_TYPES = [
     { value: '內徑粗車', label: '內徑粗車 / ID Roughing' },
     { value: '外徑粗車', label: '外徑粗車 / OD Roughing' },
@@ -3869,29 +3882,30 @@ const A4_TOOL_TYPES = [
    流程定義
    ============================================================ */
 const flowType1 = [
-    { id: 'partName', type: 'text', q: '請輸入【品名 / Part Name】\n品名會自動帶入主題與下方品名欄。\nThe part name will be used in the title and the Part Name field.', placeholder: 'PISTON' },
-    { id: 'processCode', type: 'prefix', prefix: 'OP', q: '請輸入【工序 / Process】\n只填 OP 後面的工序編號。 / Enter only the process number after OP.', placeholder: '110' },
-    { id: 'mainProgram', type: 'prefix', prefix: 'O', q: '副標題 1：【主程式 / Main Program】\n只填程式編號。 / Enter program number only.', placeholder: '03104', optional: true },
-    { id: 'machiningProgram', type: 'prefix', prefix: 'O', q: '副標題 2：【加工程式 / Machining Program】\n只填程式編號。 / Enter program number only.', placeholder: '0001', optional: true },
+    { id: 'partName', type: 'text', q: '請輸入【品名 / Part Name】\n品名會自動帶入主題與下方品名欄。 / Used in title and Part Name field.', placeholder: 'PISTON' },
+    { id: 'processCode', type: 'prefix', prefix: 'OP', q: '請輸入【工序 / Process】\n只填 OP 後面的工序編號。 / Enter only the number after OP.', placeholder: '110' },
+    { id: 'machineNo', type: 'text', prefill: '6', q: '請輸入【機器號碼 / Machine No.】\n預填 6，可直接修改。 / Default 6; editable.', placeholder: '6' },
+    { id: 'mainProgram', type: 'prefix', prefix: 'O', q: '副標題 1：【主程式 / Main Program】\n只填程式編號。 / Program number only.', placeholder: '03104', optional: true },
+    { id: 'machiningProgram', type: 'prefix', prefix: 'O', q: '副標題 2：【加工程式 / Machining Program】\n只填程式編號。 / Program number only.', placeholder: '0001', optional: true },
     { id: 'date', type: 'date', q: '請確認【製表日期 / Date】' },
     { id: 'creator', type: 'text', q: '請輸入【製表者 / 代碼 / Prepared By】', placeholder: '姓名 / Name' },
-    { id: 'pressure', type: 'unit', suffix: 'KG', prefill: '00', q: '請輸入【夾持壓力 / Chuck Pressure】\n預填 00，單位固定 KG。 / Default 00; unit is KG.' },
+    { id: 'pressure', type: 'unit', suffix: 'KG', q: '請輸入【夾持壓力 / Chuck Pressure】\n不預填數字，單位固定 KG。 / No numeric default; KG is fixed.', placeholder: '例如 18' },
     { id: 'partNo', type: 'text', q: '請輸入【客戶品號 / Customer P/N】', placeholder: '248-22103' },
     { id: 'customerNo', type: 'text', q: '請輸入【產品編號 / Product No.】', placeholder: 'Z705800000', optional: true },
-    { id: 'processTime', type: 'timepair', q: '請輸入【加工時間 / Cycle Time】\n分 / 秒。 / Minutes / Seconds.', optional: true },
-    { id: 'dailyQty', type: 'unit', suffix: 'PCS', prefill: '0', q: '請輸入【每日數量 / Daily Qty】\n單位固定 PCS。 / Unit is PCS.', optional: true },
+    { id: 'processTime', type: 'timepair', q: '請輸入【加工時間 / Cycle Time】\n分 / 秒，不預填 0。 / Minutes / Seconds, no zero default.', optional: true },
+    { id: 'dailyQty', type: 'unit', suffix: 'PCS', q: '請輸入【每日數量 / Daily Qty】\n不預填數字，單位固定 PCS。 / No numeric default; PCS is fixed.', optional: true, placeholder: '例如 80' },
     { id: 'start_tools', type: 'action', q: '✅ 基本資料設定完成！ / Basic information complete.\n接下來建立【刀具資料 / Tool Data】。', btnText: '新增第一把刀具 / Add First Tool' }
 ];
 
 const toolFlowType1 = [
-    { id: 't_seq', type: 'text', q: '請輸入【刀序 / N工序 / N Process】\nEnter process number', placeholder: 'N10' },
-    { id: 't_type', type: 'select', q: '請選擇【刀具形式 / Tool Type】\nSelect the tool type', placeholder: '請選擇 / Select', options: A4_TOOL_TYPES },
-    { id: 't_no', type: 'text', q: '請輸入【刀號 / Tool No.】', placeholder: 'T01' },
+    { id: 't_seq', type: 'select', q: '請選擇【刀序 / N工序 / N Process】', placeholder: '請選擇 / Select', options: A4_N_PROCESSES },
+    { id: 't_type', type: 'select', q: '請選擇【刀具形式 / Tool Type】', placeholder: '請選擇 / Select', options: A4_TOOL_TYPES },
+    { id: 't_no', type: 'select', q: '請選擇【刀號 / Tool No.】1–24', placeholder: '請選擇刀號 / Select Tool No.', options: A4_TOOL_NUMBERS },
     { id: 't_h', type: 'text', q: '請輸入【H值 / H Offset】', placeholder: '01', optional: true },
     { id: 't_gx', type: 'number', q: '請輸入【G補正 X軸 / G Offset X】\n只填數字。 / Numbers only.', placeholder: '-0.020', optional: true, step: 'any' },
     { id: 't_gz', type: 'number', q: '請輸入【G補正 Z軸 / G Offset Z】\n只填數字。 / Numbers only.', placeholder: '-0.030', optional: true, step: 'any' },
     { id: 't_remark', type: 'text', q: '請輸入【刀具壽命 / Tool Life】\n格式 / Format：#xxx=數量 / Qty', placeholder: '#500=30', optional: true },
-    { id: 't_image', type: 'file', q: '請選擇【導入圖示 / Tool Image】\n選取圖片，無圖可略過 / Select an image or skip' }
+    { id: 't_image', type: 'file', q: '請選擇【導入圖示 / Tool Image】\n拍攝/選取後自動加入此刀具表的照片資料夾。 / Captured image is added to this sheet photo folder.' }
 ];
 
 const flowType2 = [
@@ -3942,11 +3956,11 @@ function normalizeProgramNo(value) {
 }
 function normalizePressure(value) {
     const v = String(value == null ? '' : value).replace(/KG/ig, '').trim();
-    return (v || '00') + 'KG';
+    return v ? (v + 'KG') : '';
 }
 function normalizeDailyQty(value) {
     const v = String(value == null ? '' : value).replace(/PCS/ig, '').trim();
-    return (v || '0') + ' PCS';
+    return v ? (v + ' PCS') : '';
 }
 function syncA4DerivedFields() {
     if (Number(appData.type) !== 1) return;
@@ -4464,6 +4478,7 @@ function 取得匯出資料_(table) {
     ] : [
         ['主題 / Title', d.title || ''],
         ['副標題 / Subtitle', d.subtitle || ''],
+        ['機器號碼 / Machine No.', d.machineNo || ''],
         ['夾頭壓力 / Chuck Pressure', d.pressure || ''],
         ['品名 / Part Name', d.partName || ''],
         ['客戶品號 / Customer P/N', d.partNo || ''],
@@ -4764,9 +4779,10 @@ function createNewTable() {
         appData.processCode = 'OP';
         appData.mainProgram = 'O';
         appData.machiningProgram = 'O';
-        appData.pressure = '00KG';
-        appData.processTime = '0:00';
-        appData.dailyQty = '0 PCS';
+        appData.machineNo = '6';
+        appData.pressure = '';
+        appData.processTime = '';
+        appData.dailyQty = '';
         syncA4DerivedFields();
     }
 
@@ -5027,7 +5043,7 @@ function renderInput() {
         input.inputMode = 'decimal';
         input.className = 'input-field';
         input.value = currentStepObj.prefill || '';
-        input.placeholder = currentStepObj.prefill || '0';
+        input.placeholder = currentStepObj.placeholder || '';
 
         const suffix = document.createElement('div');
         suffix.className = 'input-affix';
@@ -5037,7 +5053,11 @@ function renderInput() {
         send.className = 'btn-send';
         send.textContent = '發送 / Send';
 
-        const submit = () => handleSubmission((input.value.trim() || currentStepObj.prefill || '0') + (currentStepObj.suffix === 'PCS' ? ' PCS' : currentStepObj.suffix || ''));
+        const submit = () => {
+            const raw = input.value.trim();
+            if (!raw) { handleSubmission(''); return; }
+            handleSubmission(raw + (currentStepObj.suffix === 'PCS' ? ' PCS' : currentStepObj.suffix || ''));
+        };
         send.onclick = submit;
         input.onkeypress = e => { if (e.key === 'Enter') submit(); };
 
@@ -5052,14 +5072,14 @@ function renderInput() {
 
         const min = document.createElement('input');
         min.type = 'number'; min.inputMode = 'numeric'; min.min = '0'; min.step = '1';
-        min.className = 'input-field'; min.value = '00'; min.placeholder = '00';
+        min.className = 'input-field'; min.value = ''; min.placeholder = '分 / min';
 
         const minLabel = document.createElement('span');
         minLabel.className = 'time-unit'; minLabel.textContent = '分 / min';
 
         const sec = document.createElement('input');
         sec.type = 'number'; sec.inputMode = 'numeric'; sec.min = '0'; sec.max = '59'; sec.step = '1';
-        sec.className = 'input-field'; sec.value = '00'; sec.placeholder = '00';
+        sec.className = 'input-field'; sec.value = ''; sec.placeholder = '秒 / sec';
 
         const secLabel = document.createElement('span');
         secLabel.className = 'time-unit'; secLabel.textContent = '秒 / sec';
@@ -5071,9 +5091,12 @@ function renderInput() {
         send.className = 'btn btn-blue';
         send.textContent = '發送 / Send';
         send.onclick = () => {
-            const m = Math.max(0, parseInt(min.value || '0', 10) || 0);
-            const s = Math.min(59, Math.max(0, parseInt(sec.value || '0', 10) || 0));
-            handleSubmission(String(m) + ':' + String(s).padStart(2, '0'));
+            const minRaw = min.value.trim();
+            const secRaw = sec.value.trim();
+            if (!minRaw && !secRaw) { handleSubmission(''); return; }
+            const m = Math.max(0, parseInt(minRaw || '0', 10) || 0);
+            const secNum = Math.min(59, Math.max(0, parseInt(secRaw || '0', 10) || 0));
+            handleSubmission(String(m) + ':' + String(secNum).padStart(2, '0'));
         };
         inputContainer.appendChild(send);
 
@@ -5305,6 +5328,8 @@ function handleSubmission(val, isImage = false) {
                 appData.partName = String(val || '').trim();
             } else if (stepId === 'processCode') {
                 appData.processCode = normalizeA4ProcessCode(val);
+            } else if (stepId === 'machineNo') {
+                appData.machineNo = String(val || '').trim();
             } else if (stepId === 'mainProgram') {
                 appData.mainProgram = normalizeProgramNo(val);
             } else if (stepId === 'machiningProgram') {
@@ -5461,6 +5486,7 @@ function restartChat() {
    ★ 預覽可編輯功能
    ============================================================ */
 const EDIT_MAP = {
+    'out-machine-no': 'machineNo',
     'out-pressure': 'pressure',
     'out-part-name': 'partName',
     'out-part-no': 'partNo',
@@ -5669,6 +5695,8 @@ function updateA4Preview() {
     syncA4DerivedFields();
     document.getElementById('out-title').textContent = appData.title || '';
     document.getElementById('out-subtitle').textContent = appData.subtitle || '';
+    const machineEl = document.getElementById('out-machine-no');
+    if (machineEl) machineEl.textContent = appData.machineNo || '';
     document.getElementById('out-pressure').textContent = appData.pressure || '';
     document.getElementById('out-part-name').textContent = appData.partName || '';
     document.getElementById('out-part-no').textContent = appData.partNo || '';
@@ -5957,9 +5985,10 @@ window.onload = async () => {
     appData.processCode = 'OP';
     appData.mainProgram = 'O';
     appData.machiningProgram = 'O';
-    appData.pressure = '00KG';
-    appData.processTime = '0:00';
-    appData.dailyQty = '0 PCS';
+    appData.machineNo = '6';
+    appData.pressure = '';
+    appData.processTime = '';
+    appData.dailyQty = '';
     syncA4DerivedFields();
     updateA4Preview();
     updateA3Preview();
