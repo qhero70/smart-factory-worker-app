@@ -1,6 +1,6 @@
 /**
  * 化新精密｜75_LINE 製造工具中心
- * 版本：v1.1.1
+ * 版本：v1.1.2
  *
  * 功能：
  * 1. 接收 LINE「製造工具」固定指令。
@@ -676,6 +676,119 @@ function 診斷75_LINE製造工具中心() {
       結果.token &&
       結果.flex
     );
+
+  console.log(
+    JSON.stringify(
+      結果,
+      null,
+      2
+    )
+  );
+
+  return 結果;
+}
+
+
+/**
+ * ============================================================
+ * LINE 官方 Flex Payload 驗證
+ * 不消耗 replyToken、不送訊息，只驗證 messages 物件是否合法。
+ * ============================================================
+ */
+function 驗證75_LINE製造工具Flex_API() {
+  var 結果 = {
+    success: false,
+    version: 製造工具75_版本_,
+    toolCount: 0,
+    validateHttp: 0,
+    validateBody: '',
+    imageHttp: null,
+    imageContentType: '',
+    errors: []
+  };
+
+  try {
+    var 工具清單 = 製造工具75_讀取工具設定_();
+    if (!工具清單.length) 工具清單 = 製造工具75_取得預設工具_();
+
+    結果.toolCount = 工具清單.length;
+
+    var flex = 製造工具75_建立Flex訊息_(工具清單);
+    var token = 製造工具75_取得Token_();
+
+    if (!token) throw new Error('找不到 LINE Channel Access Token');
+
+    var 驗證回應 = UrlFetchApp.fetch(
+      'https://api.line.me/v2/bot/message/validate/reply',
+      {
+        method: 'post',
+        contentType: 'application/json',
+        headers: {
+          Authorization: 'Bearer ' + token
+        },
+        payload: JSON.stringify({
+          messages: [flex]
+        }),
+        muteHttpExceptions: true
+      }
+    );
+
+    結果.validateHttp = 驗證回應.getResponseCode();
+    結果.validateBody = 驗證回應.getContentText() || '';
+
+    if (結果.validateHttp !== 200) {
+      結果.errors.push(
+        'LINE Flex 驗證失敗 HTTP ' +
+        結果.validateHttp +
+        '：' +
+        結果.validateBody
+      );
+    }
+
+    if (
+      工具清單[0] &&
+      工具清單[0].圖片網址
+    ) {
+      var 圖片回應 = UrlFetchApp.fetch(
+        String(工具清單[0].圖片網址),
+        {
+          method: 'get',
+          followRedirects: true,
+          muteHttpExceptions: true
+        }
+      );
+
+      結果.imageHttp = 圖片回應.getResponseCode();
+      結果.imageContentType = String(
+        圖片回應.getHeaders()['Content-Type'] ||
+        圖片回應.getBlob().getContentType() ||
+        ''
+      );
+
+      if (
+        結果.imageHttp < 200 ||
+        結果.imageHttp >= 300
+      ) {
+        結果.errors.push(
+          '第一張 Hero 圖片讀取失敗 HTTP ' +
+          結果.imageHttp
+        );
+      }
+    }
+
+    結果.success =
+      結果.validateHttp === 200 &&
+      結果.errors.length === 0;
+
+  } catch (錯誤) {
+    結果.errors.push(
+      String(
+        錯誤 &&
+        錯誤.message ||
+        錯誤
+      )
+    );
+  }
 
   console.log(
     JSON.stringify(
