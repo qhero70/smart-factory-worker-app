@@ -1,5 +1,5 @@
 /**
- * 化新精密｜製一 LINE／報工 V4 正式主路由｜v1.9.7（製造工具最高優先直通 75_LINE／LINE 製造AI助理 Read Only／前端 544／智慧5S 1.3.9）
+ * 化新精密｜製一 LINE／報工 V4 正式主路由｜v1.9.8（製造工具最高優先直通 75_LINE／LINE 製造AI助理 Read Only／前端 544／智慧5S 1.3.9）
  * 完整覆蓋「總控_38_6_doPost最終接線」這一檔。
  * 保留原主檔 doPost_舊版備份，以及既有 33／34／37／38／39 等模組。
  * LINE 路由保留；V4 專用寫入「0_報工對接pwa V4，報工」。
@@ -8,7 +8,7 @@
  * 完整覆蓋此檔後，將同一個網頁應用程式部署更新為「新版本」。
  * doPost、events、postData 等英文名稱是 GAS／LINE 固定協定欄位。
  */
-var 製一LINE正式接線版本_ = 'v1.9.7_LINE製造工具中心直通';
+var 製一LINE正式接線版本_ = 'v1.9.8_正式解析器相容修復';
 
 function doPost(請求) {
   if (!請求) throw new Error('這是 LINE Webhook 入口，不要在編輯器直接執行。');
@@ -27,7 +27,7 @@ function doPost(請求) {
   }
 
   // 使用你已確認存在的原主檔解析器。
-  var 內容 = 主檔_取得參數(請求);
+  var 內容 = 製一LINE正式接線_取得參數_(請求);
   if (!內容 || !Array.isArray(內容.events)) {
     // 其他報工版本、PWA 與 API 原封不動交回原主檔。
     return doPost_舊版備份(請求);
@@ -87,6 +87,26 @@ function doPost(請求) {
 
   if (首個錯誤) throw 首個錯誤;
   return 製一LINE正式接線_JSON_(統計);
+}
+
+function 製一LINE正式接線_取得參數_(請求) {
+  // 正式主檔實際使用「解析POST_」；保留「主檔_取得參數」僅作相容。
+  if (typeof 解析POST_ === 'function') {
+    return 解析POST_(請求);
+  }
+
+  if (typeof 主檔_取得參數 === 'function') {
+    return 主檔_取得參數(請求);
+  }
+
+  // 最後安全回退：LINE Webhook 為 JSON，其他表單 POST 則沿用 parameter。
+  if (請求 && 請求.postData && 請求.postData.contents) {
+    try {
+      return JSON.parse(請求.postData.contents);
+    } catch (忽略解析錯誤) {}
+  }
+
+  return 請求 && 請求.parameter ? 請求.parameter : {};
 }
 
 function 製一LINE正式接線_分派_(內容) {
@@ -224,14 +244,55 @@ function 製一LINE正式接線_JSON_(內容) {
 }
 
 function 診斷製一LINE正式接線_v197() {
+  console.warn('相容入口：v1.9.7 診斷已轉接 v1.9.8。');
+  return 診斷製一LINE正式接線_v198();
+}
+
+function 診斷製一LINE正式接線_v198() {
   var errors = [];
-  var 製造工具命中 = 製一LINE正式接線_是否製造工具_({ type: 'message', message: { type: 'text', text: '製造工具' } });
-  var 工具中心命中 = 製一LINE正式接線_是否製造工具_({ type: 'message', message: { type: 'text', text: '工具中心' } });
-  var A916不得命中 = !製一LINE正式接線_是否製造工具_({ type: 'message', message: { type: 'text', text: 'A916000000 今天做到哪裡' } });
+
+  var 製造工具命中 = 製一LINE正式接線_是否製造工具_({
+    type: 'message',
+    message: { type: 'text', text: '製造工具' }
+  });
+
+  var 工具中心命中 = 製一LINE正式接線_是否製造工具_({
+    type: 'message',
+    message: { type: 'text', text: '工具中心' }
+  });
+
+  var A916不得命中 = !製一LINE正式接線_是否製造工具_({
+    type: 'message',
+    message: { type: 'text', text: 'A916000000 今天做到哪裡' }
+  });
+
+  var 解析器測試 = null;
+  try {
+    解析器測試 = 製一LINE正式接線_取得參數_({
+      postData: {
+        contents: JSON.stringify({
+          events: [{
+            type: 'message',
+            message: { type: 'text', text: '製造工具' }
+          }]
+        })
+      },
+      parameter: {}
+    });
+  } catch (解析錯誤) {
+    errors.push('POST解析器執行失敗：' + String(解析錯誤 && 解析錯誤.message || 解析錯誤));
+  }
+
+  var parserReady = !!(
+    解析器測試 &&
+    Array.isArray(解析器測試.events) &&
+    解析器測試.events.length === 1
+  );
 
   if (typeof doPost !== 'function') errors.push('doPost 不存在');
   if (typeof doPost_舊版備份 !== 'function') errors.push('doPost_舊版備份 不存在');
   if (typeof LINE製造工具75_嘗試處理Webhook_ !== 'function') errors.push('75_LINE 製造工具模組不存在');
+  if (!parserReady) errors.push('正式 POST 解析器不可用');
   if (!製造工具命中 || !工具中心命中 || !A916不得命中) errors.push('製造工具指令解析失敗');
 
   var result = {
@@ -239,6 +300,12 @@ function 診斷製一LINE正式接線_v197() {
     version: 製一LINE正式接線版本_,
     doPost: typeof doPost === 'function',
     oldDoPost: typeof doPost_舊版備份 === 'function',
+    parser: {
+      resolver: typeof 製一LINE正式接線_取得參數_ === 'function',
+      解析POST_: typeof 解析POST_ === 'function',
+      主檔_取得參數: typeof 主檔_取得參數 === 'function',
+      runtimeTest: parserReady
+    },
     tool75: typeof LINE製造工具75_嘗試處理Webhook_ === 'function',
     smart5S: typeof LINE智慧5S入口39_嘗試處理Webhook_ === 'function',
     commandCenter: typeof LINE指令中心37_嘗試處理Webhook_ === 'function',
