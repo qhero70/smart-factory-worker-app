@@ -1,6 +1,6 @@
 /**
  * 化新精密｜75_LINE 製造工具中心
- * 版本：v1.1.2
+ * 版本：v1.1.3
  *
  * 功能：
  * 1. 接收 LINE「製造工具」固定指令。
@@ -10,7 +10,7 @@
  * 5. 不建立第二個 LINE Bot、不建立第二個 Web App。
  */
 
-const 製造工具75_版本_ = 'v1.1.2_LINE官方驗證診斷';
+const 製造工具75_版本_ = 'v1.1.3_FlexURI_ASCII修復';
 const 製造工具75_正式主庫ID_ = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
 const 製造工具75_工作表名稱_ = 'LINE_製造工具中心';
 const 製造工具75_LINE回覆網址_ = 'https://api.line.me/v2/bot/message/reply';
@@ -236,15 +236,23 @@ function 製造工具75_LINE內開網址_(url) {
   文字 = 文字
     .replace(/([?&])openExternalBrowser=(?:1|true)(?:&|$)/ig, '$1')
     .replace(/([?&])externalBrowser=(?:1|true)(?:&|$)/ig, '$1')
+    // Flex URI action 對未編碼的非 ASCII query key 會判定 Invalid action URI。
+    // 將既有「來源」參數轉為穩定 ASCII key：source。
+    .replace(/([?&])來源=([^&]*)/ig, '$1source=$2')
     .replace(/[?&]$/, '')
     .replace(/\?&/, '?')
     .replace(/&&+/g, '&');
 
-  if (!/[?&](?:來源|source)=/i.test(文字)) {
-    文字 += (文字.indexOf('?') >= 0 ? '&' : '?') + '來源=LINEBOT_TOOL';
+  if (!/[?&]source=/i.test(文字)) {
+    文字 += (文字.indexOf('?') >= 0 ? '&' : '?') + 'source=LINEBOT_TOOL';
   }
 
-  return 文字;
+  // LINE Flex URI action 要求合法 URI；避免空白或其他未編碼字元。
+  try {
+    return encodeURI(文字);
+  } catch (忽略) {
+    return 文字;
+  }
 }
 
 function 製造工具75_補預設圖片_(顯示名稱, 圖片網址) {
@@ -367,7 +375,7 @@ function 製造工具75_建立Bubble_(工具) {
       aspectMode: 'cover',
       action: {
         type: 'uri',
-        uri: String(工具.PWA網址)
+        uri: 製造工具75_LINE內開網址_(工具.PWA網址)
       }
     };
   }
@@ -704,6 +712,8 @@ function 驗證75_LINE製造工具Flex_API() {
     validateBody: '',
     imageHttp: null,
     imageContentType: '',
+    footerUri: '',
+    heroUri: '',
     errors: []
   };
 
