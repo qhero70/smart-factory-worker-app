@@ -10,7 +10,7 @@
  * 5. 不建立第二個 LINE Bot、不建立第二個 Web App。
  */
 
-const 製造工具75_版本_ = 'v1.1.1_LINE內開圖片HeroFlex';
+const 製造工具75_版本_ = 'v1.1.2_LINE官方驗證診斷';
 const 製造工具75_正式主庫ID_ = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
 const 製造工具75_工作表名稱_ = 'LINE_製造工具中心';
 const 製造工具75_LINE回覆網址_ = 'https://api.line.me/v2/bot/message/reply';
