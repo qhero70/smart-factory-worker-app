@@ -1,6 +1,6 @@
 /**
  * 化新精密｜75_LINE 製造工具中心
- * 版本：v1.1.3
+ * 版本：v1.2.0
  *
  * 功能：
  * 1. 接收 LINE「製造工具」固定指令。
@@ -10,12 +10,17 @@
  * 5. 不建立第二個 LINE Bot、不建立第二個 Web App。
  */
 
-const 製造工具75_版本_ = 'v1.1.3_FlexURI_ASCII修復';
+const 製造工具75_版本_ = 'v1.2.0_核心工具卡_新增入口';
 const 製造工具75_正式主庫ID_ = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
 const 製造工具75_工作表名稱_ = 'LINE_製造工具中心';
 const 製造工具75_LINE回覆網址_ = 'https://api.line.me/v2/bot/message/reply';
 const 製造工具75_智慧5S正式網址_ = 'https://qhero70.github.io/smart-factory-worker-app/5s/';
 const 製造工具75_智慧5S預設圖片_ = 'https://qhero70.github.io/smart-factory-worker-app/5s/assets/a5/SITE-A5-008.jpg';
+const 製造工具75_刀具表精靈網址_ = 'https://qhero70.github.io/smart-factory-worker-app/tool-change-pwa/';
+const 製造工具75_水位1064網址_ = 'https://huaxin-1064-water-team.qhero84.chatgpt.site';
+const 製造工具75_生產計畫清洗網址_ = 'https://qhero70.github.io/smart-factory-worker-app/production-plan-cleaner-v3.html';
+const 製造工具75_新增入口管理網址_ = 'https://docs.google.com/spreadsheets/d/19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8/edit';
+
 
 function LINE製造工具75_嘗試處理Webhook_(內容) {
   try {
@@ -27,19 +32,7 @@ function LINE製造工具75_嘗試處理Webhook_(內容) {
     var replyToken = String(事件.replyToken || '').trim();
     if (!replyToken) throw new Error('75_LINE 缺少 replyToken');
 
-    var 工具清單 = [];
-    try {
-      工具清單 = 製造工具75_讀取工具設定_();
-    } catch (設定錯誤) {
-      console.error(
-        '75_LINE 設定表讀取失敗：' +
-        String(設定錯誤 && 設定錯誤.message ? 設定錯誤.message : 設定錯誤)
-      );
-    }
-
-    if (!工具清單.length) {
-      工具清單 = 製造工具75_取得預設工具_();
-    }
+    var 工具清單 = 製造工具75_取得完整工具清單_();
 
     var flex = 製造工具75_建立Flex訊息_(工具清單);
     製造工具75_回覆LINE_(replyToken, flex);
@@ -101,6 +94,7 @@ function 製造工具75_是否為製造工具事件_(事件) {
 function 製造工具75_取得預設工具_() {
   return [
     {
+      工具編號: 'TOOL-5S',
       排序: 10,
       顯示名稱: '智慧5S',
       說明: '巡檢、歷史與改善',
@@ -108,8 +102,109 @@ function 製造工具75_取得預設工具_() {
       圖片網址: 製造工具75_智慧5S預設圖片_,
       PWA網址: 製造工具75_智慧5S正式網址_,
       按鈕文字: '立即開啟'
+    },
+    {
+      工具編號: 'TOOL-CUTTING-WIZARD',
+      排序: 20,
+      顯示名稱: '刀具表精靈',
+      說明: '刀具表建立、換刀與現場查詢',
+      分類: '刀具管理',
+      圖片網址: '',
+      PWA網址: 製造工具75_刀具表精靈網址_,
+      按鈕文字: '開啟精靈'
+    },
+    {
+      工具編號: 'TOOL-WATER-1064',
+      排序: 30,
+      顯示名稱: '1064 水位',
+      說明: '水位、ESG、網路與 3D 即時查看',
+      分類: 'IoT監控',
+      圖片網址: '',
+      PWA網址: 製造工具75_水位1064網址_,
+      按鈕文字: '查看水位'
+    },
+    {
+      工具編號: 'TOOL-PLAN-CLEANER',
+      排序: 40,
+      顯示名稱: '生產計畫表清洗',
+      說明: '計畫表匯入、清洗與排程資料整理',
+      分類: '生產計畫',
+      圖片網址: '',
+      PWA網址: 製造工具75_生產計畫清洗網址_,
+      按鈕文字: '開啟清洗器'
     }
   ];
+}
+
+function 製造工具75_取得新增入口卡_() {
+  return {
+    工具編號: 'TOOL-ADD',
+    排序: 9999,
+    顯示名稱: '＋ 新增工具',
+    說明: '到中央工具設定表新增一列；啟用後會自動出現在這裡',
+    分類: '工具管理',
+    圖片網址: '',
+    PWA網址: 製造工具75_新增入口管理網址_,
+    按鈕文字: '新增入口'
+  };
+}
+
+function 製造工具75_工具鍵_(工具) {
+  var id = String(工具 && 工具.工具編號 || '').trim().toUpperCase();
+  if (id) return 'ID:' + id;
+  return 'NAME:' + String(工具 && 工具.顯示名稱 || '')
+    .replace(/\s+/g, '')
+    .trim()
+    .toUpperCase();
+}
+
+function 製造工具75_取得完整工具清單_() {
+  var 核心 = 製造工具75_取得預設工具_();
+  var 設定工具 = [];
+
+  try {
+    設定工具 = 製造工具75_讀取工具設定_();
+  } catch (設定錯誤) {
+    console.error(
+      '75_LINE 設定表讀取失敗：' +
+      String(設定錯誤 && 設定錯誤.message ? 設定錯誤.message : 設定錯誤)
+    );
+  }
+
+  var map = {};
+  核心.forEach(function (工具) {
+    map[製造工具75_工具鍵_(工具)] = 工具;
+  });
+
+  // 主庫設定優先，可覆蓋核心卡片名稱、圖片、說明、排序與網址。
+  設定工具.forEach(function (工具) {
+    map[製造工具75_工具鍵_(工具)] = 工具;
+  });
+
+  var 工具清單 = Object.keys(map).map(function (key) {
+    return map[key];
+  });
+
+  工具清單.push(製造工具75_取得新增入口卡_());
+
+  工具清單.sort(function (a, b) {
+    return Number(a.排序 || 9999) - Number(b.排序 || 9999);
+  });
+
+  // LINE Flex Carousel 單次最多 12 張；保留最後一張「新增工具」入口。
+  if (工具清單.length > 12) {
+    var 新增卡 = 工具清單.filter(function (工具) {
+      return String(工具.工具編號 || '') === 'TOOL-ADD';
+    })[0];
+
+    工具清單 = 工具清單.filter(function (工具) {
+      return String(工具.工具編號 || '') !== 'TOOL-ADD';
+    }).slice(0, 11);
+
+    if (新增卡) 工具清單.push(新增卡);
+  }
+
+  return 工具清單;
 }
 
 function 製造工具75_讀取工具設定_() {
@@ -206,6 +301,7 @@ function 製造工具75_讀取工具設定_() {
     }
 
     工具.push({
+      工具編號: String(取值(列, '工具編號') || '').trim(),
       排序: 排序,
       顯示名稱: 顯示名稱,
       說明: String(
@@ -648,7 +744,7 @@ function 診斷75_LINE製造工具中心() {
       !!sheet;
 
     結果.tools =
-      製造工具75_讀取工具設定_();
+      製造工具75_取得完整工具清單_();
   } catch (e2) {
     結果.errors.push(
       'Sheet：' +
@@ -718,8 +814,7 @@ function 驗證75_LINE製造工具Flex_API() {
   };
 
   try {
-    var 工具清單 = 製造工具75_讀取工具設定_();
-    if (!工具清單.length) 工具清單 = 製造工具75_取得預設工具_();
+    var 工具清單 = 製造工具75_取得完整工具清單_();
 
     結果.toolCount = 工具清單.length;
 
