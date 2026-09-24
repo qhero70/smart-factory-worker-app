@@ -724,6 +724,31 @@ function 驗證75_LINE製造工具Flex_API() {
     結果.toolCount = 工具清單.length;
 
     var flex = 製造工具75_建立Flex訊息_(工具清單);
+
+    try {
+      結果.footerUri = String(
+        flex.contents &&
+        flex.contents.contents &&
+        flex.contents.contents[0] &&
+        flex.contents.contents[0].footer &&
+        flex.contents.contents[0].footer.contents &&
+        flex.contents.contents[0].footer.contents[0] &&
+        flex.contents.contents[0].footer.contents[0].action
+          ? flex.contents.contents[0].footer.contents[0].action.uri || ''
+          : ''
+      );
+
+      結果.heroUri = String(
+        flex.contents &&
+        flex.contents.contents &&
+        flex.contents.contents[0] &&
+        flex.contents.contents[0].hero &&
+        flex.contents.contents[0].hero.action
+          ? flex.contents.contents[0].hero.action.uri || ''
+          : ''
+      );
+    } catch (忽略URI診斷錯誤) {}
+
     var token = 製造工具75_取得Token_();
 
     if (!token) throw new Error('找不到 LINE Channel Access Token');
