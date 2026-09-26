@@ -1,5 +1,5 @@
 /**
- * 化新精密｜製一 LINE／報工 V4 正式主路由｜v1.10.0（75_LINE v1.4.0 管理PWA／製造工具最高優先／LINE 製造AI助理 Read Only／前端 544／智慧5S 1.3.9）
+ * 化新精密｜製一 LINE／報工 V4 正式主路由｜v1.10.1（75_LINE v1.4.1 效能快取／管理PWA／製造工具最高優先／LINE 製造AI助理 Read Only／前端 544／智慧5S 1.3.9）
  * 完整覆蓋「總控_38_6_doPost最終接線」這一檔。
  * 保留原主檔 doPost_舊版備份，以及既有 33／34／37／38／39 等模組。
  * LINE 路由保留；V4 專用寫入「0_報工對接pwa V4，報工」。
@@ -8,7 +8,7 @@
  * 完整覆蓋此檔後，將同一個網頁應用程式部署更新為「新版本」。
  * doPost、events、postData 等英文名稱是 GAS／LINE 固定協定欄位。
  */
-var 製一LINE正式接線版本_ = 'v1.10.0_製造工具管理PWA接線';
+var 製一LINE正式接線版本_ = 'v1.10.1_製造工具效能快取接線';
 
 function doPost(請求) {
   if (!請求) throw new Error('這是 LINE Webhook 入口，不要在編輯器直接執行。');
@@ -124,23 +124,23 @@ function 製一LINE正式接線_分派_(內容) {
 
   // 固定系統指令「製造工具」最高優先直通 75_LINE，避免被 AI／指令中心先攔截。
   if (製一LINE正式接線_是否製造工具_(第一事件)) {
-    console.log('v1.10.0｜命中製造工具/管理指令最高優先路由');
+    console.log('v1.10.1｜命中製造工具/管理指令最高優先路由');
 
     if (typeof LINE製造工具75_嘗試處理Webhook_ !== 'function') {
-      throw new Error('v1.10.0｜找不到 LINE製造工具75_嘗試處理Webhook_');
+      throw new Error('v1.10.1｜找不到 LINE製造工具75_嘗試處理Webhook_');
     }
 
     var 製造工具副本 = JSON.parse(JSON.stringify(內容));
     var 製造工具結果 = LINE製造工具75_嘗試處理Webhook_(製造工具副本);
 
-    console.log('v1.10.0｜75_LINE 回傳：' + JSON.stringify(製造工具結果));
+    console.log('v1.10.1｜75_LINE 回傳：' + JSON.stringify(製造工具結果));
 
     if (製造工具結果 && 製造工具結果.已處理 === true) {
       return { 名稱: '製造工具中心', 結果: 製造工具結果 };
     }
 
     throw new Error(
-      'v1.10.0｜製造工具/管理指令已命中，但 75_LINE 未回傳已處理=true｜回傳=' +
+      'v1.10.1｜製造工具/管理指令已命中，但 75_LINE 未回傳已處理=true｜回傳=' +
       JSON.stringify(製造工具結果)
     );
   }
@@ -253,14 +253,19 @@ function 製一LINE正式接線_JSON_(內容) {
 }
 
 function 診斷製一LINE正式接線_v197() {
-  console.warn('相容入口：v1.9.7 診斷已轉接 v1.10.0。');
+  console.warn('相容入口：v1.9.7 診斷已轉接 v1.10.1。');
   return 診斷製一LINE正式接線_v199();
 }
 
 function 診斷製一LINE正式接線_v198() {
-  console.warn('相容入口：v1.9.8 診斷已轉接 v1.10.0。');
+  console.warn('相容入口：v1.9.8 診斷已轉接 v1.10.1。');
   return 診斷製一LINE正式接線_v199();
 }
+
+function 診斷製一LINE正式接線_v1101() {
+  return 診斷製一LINE正式接線_v199();
+}
+
 
 function 診斷製一LINE正式接線_v1100() {
   return 診斷製一LINE正式接線_v199();
@@ -326,6 +331,10 @@ function 診斷製一LINE正式接線_v199() {
     errors.push('75_LINE 管理PWA接收器不存在');
   }
 
+  if (typeof 預熱75_LINE製造工具快取_v141 !== 'function') {
+    errors.push('75_LINE v1.4.1 效能快取函式不存在');
+  }
+
   if (!parserReady) errors.push('正式 POST 解析器不可用');
 
   if (
@@ -351,6 +360,7 @@ function 診斷製一LINE正式接線_v199() {
     },
     tool75: typeof LINE製造工具75_嘗試處理Webhook_ === 'function',
     tool75v131: typeof 初始化75_LINE製造工具中心_v131 === 'function',
+    tool75v141: typeof 初始化75_LINE製造工具中心_v141 === 'function',
     tool75Pwa: typeof LINE製造工具75_PWA_接收_ === 'function',
     smart5S: typeof LINE智慧5S入口39_嘗試處理Webhook_ === 'function',
     commandCenter: typeof LINE指令中心37_嘗試處理Webhook_ === 'function',
