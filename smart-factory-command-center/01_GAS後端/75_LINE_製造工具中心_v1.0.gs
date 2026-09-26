@@ -2486,7 +2486,18 @@ function 驗證75_LINE製造工具Flex_API_v131() {
     result.toolCount = tools.length;
 
     // 強制加入管理卡，確保正式管理員看到的 Flex 也通過 LINE 驗證。
-    var flex = 製造工具75_建立Flex訊息_(tools, '', true);
+    // 管理卡現在會產生短效簽章 PWA URL，因此驗證時必須使用真實管理員。
+    var adminsForValidation = 製造工具75_讀取管理員_();
+
+    if (!adminsForValidation.length) {
+      throw new Error('尚未設定製造工具管理員，無法驗證管理 PWA 卡片。');
+    }
+
+    var flex = 製造工具75_建立Flex訊息_(
+      tools,
+      String(adminsForValidation[0].LINE_USER_ID || ''),
+      true
+    );
     result.flexCardCount = flex.contents.contents.length;
 
     var token = 製造工具75_取得Token_();
@@ -2531,6 +2542,11 @@ function 驗證75_LINE製造工具Flex_API_v131() {
 
   console.log(JSON.stringify(result, null, 2));
   return result;
+}
+
+
+function 驗證75_LINE製造工具Flex_API_v140() {
+  return 驗證75_LINE製造工具Flex_API_v131();
 }
 
 
