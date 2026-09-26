@@ -1,6 +1,6 @@
 /**
  * 化新精密｜75_LINE 製造工具中心
- * 版本：v1.3.1
+ * 版本：v1.4.0
  *
  * 功能：
  * 1. 一般使用者只看啟用工具卡並開啟工具。
@@ -11,10 +11,11 @@
  *    - LINE_製造工具操作紀錄
  * 4. 自動補齊欄位、核心工具資料、既有高權限管理員。
  * 5. 正式異動保存操作人員、時間、eventId、idempotencyKey，避免 LINE 重送重複寫入。
- * 6. 不建立第二個 LINE Bot、不建立第二個 Web App。
+ * 6. 製造工具管理 PWA：短效簽章 Token、管理員白名單、圖片上傳、新增/啟停/排序。
+ * 7. 不建立第二個 LINE Bot、不建立第二個 Web App。
  */
 
-var 製造工具75_版本_ = 'v1.3.1_管理員鎖定_自動建表_完整管理';
+var 製造工具75_版本_ = 'v1.4.0_管理PWA_簽章權限_圖片上傳';
 
 var 製造工具75_正式主庫ID_ = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
 var 製造工具75_工作表名稱_ = 'LINE_製造工具中心';
@@ -37,6 +38,14 @@ var 製造工具75_水位1064網址_ =
 
 var 製造工具75_生產計畫清洗網址_ =
   'https://qhero70.github.io/smart-factory-worker-app/production-plan-cleaner-v3.html';
+
+var 製造工具75_管理PWA基底網址_ =
+  'https://qhero70.github.io/smart-factory-worker-app/manufacturing-tools-admin/';
+
+var 製造工具75_管理Token效期秒_ = 1800;
+var 製造工具75_管理密鑰屬性Key_ = 'TOOL75_ADMIN_HMAC_SECRET';
+var 製造工具75_圖片資料夾屬性Key_ = 'TOOL75_ADMIN_IMAGE_FOLDER_ID';
+var 製造工具75_圖片資料夾名稱_ = 'LINE_製造工具卡片圖片';
 
 var 製造工具75_工具欄位_ = [
   '工具編號',
@@ -605,7 +614,7 @@ function 製造工具75_建立Flex訊息_(工具清單, lineUserId, 強制顯示
     強制顯示管理卡 === true ||
     製造工具75_是否管理員_(lineUserId)
   ) {
-    cards.push(製造工具75_建立管理Bubble_());
+    cards.push(製造工具75_建立管理Bubble_(lineUserId));
   }
 
   return {
@@ -701,15 +710,19 @@ function 製造工具75_建立Bubble_(工具) {
 }
 
 
-function 製造工具75_建立管理Bubble_() {
+function 製造工具75_建立管理Bubble_(lineUserId) {
+  var 管理網址 = 製造工具75_建立管理PWA網址_(lineUserId);
+
   return {
     type: 'bubble',
     size: 'mega',
+
     body: {
       type: 'box',
       layout: 'vertical',
       spacing: 'md',
       paddingAll: '20px',
+
       contents: [
         {
           type: 'text',
@@ -728,27 +741,29 @@ function 製造工具75_建立管理Bubble_() {
         },
         {
           type: 'text',
-          text: '新增卡片、換圖片、啟用停用與排序。僅管理員可執行。',
+          text: '新增卡片、手機換照片、啟用停用與排序。每次開啟都會重新驗證管理員身份。',
           size: 'sm',
           color: '#666666',
           wrap: true
         }
       ]
     },
+
     footer: {
       type: 'box',
       layout: 'vertical',
       spacing: 'sm',
       paddingAll: '16px',
+
       contents: [
         {
           type: 'button',
           style: 'primary',
           color: '#0F3D63',
           action: {
-            type: 'message',
-            label: '＋ 新增工具',
-            text: '工具管理 新增工具'
+            type: 'uri',
+            label: '開啟工具管理',
+            uri: 管理網址
           }
         },
         {
@@ -756,26 +771,8 @@ function 製造工具75_建立管理Bubble_() {
           style: 'secondary',
           action: {
             type: 'message',
-            label: '更換圖片',
-            text: '工具管理 更換圖片'
-          }
-        },
-        {
-          type: 'button',
-          style: 'secondary',
-          action: {
-            type: 'message',
-            label: '啟用／停用',
-            text: '工具管理 啟用停用'
-          }
-        },
-        {
-          type: 'button',
-          style: 'secondary',
-          action: {
-            type: 'message',
-            label: '調整排序',
-            text: '工具管理 調整排序'
+            label: '查看工具清單',
+            text: '工具清單'
           }
         }
       ]
@@ -799,7 +796,7 @@ function 製造工具75_回覆管理入口_(replyToken, lineUserId) {
     altText: '製造工具管理',
     contents: {
       type: 'carousel',
-      contents: [製造工具75_建立管理Bubble_()]
+      contents: [製造工具75_建立管理Bubble_(lineUserId)]
     }
   };
 
@@ -1520,6 +1517,896 @@ function 製造工具75_回覆文字_(replyToken, text) {
       text: String(text || '').slice(0, 4900)
     }]
   );
+}
+
+
+
+/* ============================================================
+ * 製造工具管理 PWA v1.0
+ * - 不建立第二個 Web App
+ * - 使用原正式 Web App
+ * - 短效 HMAC Token + 管理員白名單雙重驗證
+ * ============================================================ */
+
+function 製造工具75_取得管理密鑰_() {
+  var props = PropertiesService.getScriptProperties();
+  var secret = String(
+    props.getProperty(製造工具75_管理密鑰屬性Key_) || ''
+  ).trim();
+
+  if (!secret) {
+    secret = [
+      Utilities.getUuid(),
+      Utilities.getUuid(),
+      String(new Date().getTime())
+    ].join('|');
+
+    props.setProperty(
+      製造工具75_管理密鑰屬性Key_,
+      secret
+    );
+  }
+
+  return secret;
+}
+
+
+function 製造工具75_Base64Url文字_(文字) {
+  return Utilities
+    .base64EncodeWebSafe(
+      String(文字 || ''),
+      Utilities.Charset.UTF_8
+    )
+    .replace(/=+$/g, '');
+}
+
+
+function 製造工具75_Base64Url還原文字_(encoded) {
+  var s = String(encoded || '');
+  while (s.length % 4) s += '=';
+
+  return Utilities
+    .newBlob(
+      Utilities.base64DecodeWebSafe(s)
+    )
+    .getDataAsString('UTF-8');
+}
+
+
+function 製造工具75_簽章_(payload64) {
+  return Utilities
+    .base64EncodeWebSafe(
+      Utilities.computeHmacSha256Signature(
+        String(payload64 || ''),
+        製造工具75_取得管理密鑰_(),
+        Utilities.Charset.UTF_8
+      )
+    )
+    .replace(/=+$/g, '');
+}
+
+
+function 製造工具75_產生管理Token_(lineUserId) {
+  var id = String(lineUserId || '').trim();
+
+  if (!製造工具75_是否管理員_(id)) {
+    throw new Error('只有製造工具管理員可建立管理 PWA Token');
+  }
+
+  var now = Math.floor(new Date().getTime() / 1000);
+
+  var payload = {
+    v: 1,
+    uid: id,
+    iat: now,
+    exp: now + Number(製造工具75_管理Token效期秒_ || 1800),
+    nonce: Utilities.getUuid().replace(/-/g, '').slice(0, 16)
+  };
+
+  var payload64 = 製造工具75_Base64Url文字_(
+    JSON.stringify(payload)
+  );
+
+  return payload64 + '.' + 製造工具75_簽章_(payload64);
+}
+
+
+function 製造工具75_安全字串比較_(a, b) {
+  a = String(a || '');
+  b = String(b || '');
+
+  if (a.length !== b.length) return false;
+
+  var diff = 0;
+  for (var i = 0; i < a.length; i++) {
+    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+
+  return diff === 0;
+}
+
+
+function 製造工具75_驗證管理Token_(token) {
+  var parts = String(token || '').split('.');
+
+  if (parts.length !== 2) {
+    throw new Error('管理憑證格式錯誤，請從 LINE 重新開啟工具管理。');
+  }
+
+  var expected = 製造工具75_簽章_(parts[0]);
+
+  if (!製造工具75_安全字串比較_(expected, parts[1])) {
+    throw new Error('管理憑證驗證失敗，請從 LINE 重新開啟工具管理。');
+  }
+
+  var payload;
+
+  try {
+    payload = JSON.parse(
+      製造工具75_Base64Url還原文字_(parts[0])
+    );
+  } catch (e) {
+    throw new Error('管理憑證內容錯誤。');
+  }
+
+  var now = Math.floor(new Date().getTime() / 1000);
+
+  if (
+    !payload ||
+    Number(payload.v) !== 1 ||
+    !String(payload.uid || '').trim() ||
+    Number(payload.exp || 0) < now
+  ) {
+    throw new Error('管理憑證已過期，請回 LINE 再次點「製造工具」。');
+  }
+
+  var admin = 製造工具75_取得管理員_(payload.uid);
+
+  if (!admin) {
+    throw new Error('此帳號目前沒有製造工具管理權限。');
+  }
+
+  return {
+    uid: String(payload.uid),
+    exp: Number(payload.exp),
+    admin: admin
+  };
+}
+
+
+function 製造工具75_建立管理PWA網址_(lineUserId) {
+  var token = 製造工具75_產生管理Token_(lineUserId);
+
+  return (
+    製造工具75_管理PWA基底網址_ +
+    '?token=' +
+    encodeURIComponent(token) +
+    '&source=LINEBOT_TOOL_ADMIN'
+  );
+}
+
+
+function 製造工具75_取得全部工具_() {
+  製造工具75_確保結構_();
+
+  var sh = SpreadsheetApp
+    .openById(製造工具75_正式主庫ID_)
+    .getSheetByName(製造工具75_工作表名稱_);
+
+  var rows = 製造工具75_讀表物件_(sh)
+    .map(function (r) {
+      return {
+        工具編號: String(r.工具編號 || '').trim(),
+        排序: Number(r.排序 || 9999),
+        顯示名稱: String(r.顯示名稱 || '').trim(),
+        說明: String(r.說明 || '').trim(),
+        圖片網址: String(r.圖片網址 || '').trim(),
+        PWA網址: String(r.PWA網址 || '').trim(),
+        分類: String(r.分類 || '製造工具').trim(),
+        啟用: 製造工具75_轉布林值_(r.啟用),
+        按鈕文字: String(r.按鈕文字 || '立即開啟').trim(),
+        備註: String(r.備註 || '').trim(),
+        更新時間: r.更新時間 || ''
+      };
+    })
+    .filter(function (r) {
+      return !!(r.工具編號 || r.顯示名稱);
+    });
+
+  rows.sort(function (a, b) {
+    var n = Number(a.排序 || 9999) - Number(b.排序 || 9999);
+    if (n) return n;
+    return String(a.顯示名稱 || '').localeCompare(String(b.顯示名稱 || ''), 'zh-Hant');
+  });
+
+  return rows;
+}
+
+
+function 製造工具75_PWA_解析JSON_(值) {
+  if (值 && typeof 值 === 'object') return 值;
+
+  var text = String(值 || '').trim();
+
+  if (!text) return {};
+
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    throw new Error('PWA payload 不是有效 JSON。');
+  }
+}
+
+
+function 製造工具75_PWA_管理員摘要_(auth) {
+  var a = auth.admin || {};
+
+  return {
+    LINE_USER_ID: auth.uid,
+    工號: a.工號 || '',
+    姓名: a.姓名 || '',
+    角色: a.角色 || '工具管理員',
+    權限等級: a.權限等級 || '',
+    可新增工具: 製造工具75_轉布林值_(a.可新增工具),
+    可更換圖片: 製造工具75_轉布林值_(a.可更換圖片),
+    可啟用停用: 製造工具75_轉布林值_(a.可啟用停用),
+    可調整排序: 製造工具75_轉布林值_(a.可調整排序),
+    tokenExpiresAt: auth.exp
+  };
+}
+
+
+function 製造工具75_PWA_要求確認_(參數) {
+  var ok = String(
+    參數.confirm ||
+    參數.confirmed ||
+    參數['確認'] ||
+    ''
+  ).trim().toUpperCase();
+
+  if (['YES', 'TRUE', '1', 'CONFIRM', '確認'].indexOf(ok) < 0) {
+    throw new Error('此正式異動需要管理員再次確認。');
+  }
+}
+
+
+function 製造工具75_PWA_檢查權限_(auth, capability) {
+  var p = 製造工具75_檢查權限_(auth.uid, capability);
+
+  if (!p.success) {
+    throw new Error(p.message || '管理員權限不足。');
+  }
+
+  return p;
+}
+
+
+function 製造工具75_PWA_正規冪等鍵_(key, action, toolId, userId) {
+  var k = String(key || '').trim();
+
+  if (/^[A-Za-z0-9_.:-]{12,180}$/.test(k)) {
+    return 'TOOL75_PWA_' + k;
+  }
+
+  var raw = [
+    'TOOL75_PWA',
+    action || '',
+    toolId || '',
+    userId || '',
+    k || Utilities.getUuid()
+  ].join('|');
+
+  var digest = Utilities.computeDigest(
+    Utilities.DigestAlgorithm.SHA_256,
+    raw,
+    Utilities.Charset.UTF_8
+  );
+
+  return (
+    'TOOL75_PWA_' +
+    Utilities
+      .base64EncodeWebSafe(digest)
+      .replace(/=+$/g, '')
+      .slice(0, 42)
+  );
+}
+
+
+function 製造工具75_PWA_寫紀錄_(
+  auth,
+  action,
+  toolId,
+  before,
+  after,
+  result,
+  idempotencyKey,
+  eventId
+) {
+  var sh = SpreadsheetApp
+    .openById(製造工具75_正式主庫ID_)
+    .getSheetByName(製造工具75_操作紀錄表名稱_);
+
+  var admin = auth.admin || {};
+
+  製造工具75_新增資料列_(
+    sh,
+    {
+      時間戳: new Date(),
+      eventId: String(eventId || ''),
+      idempotencyKey: String(idempotencyKey || ''),
+      LINE_USER_ID: auth.uid,
+      工號: admin.工號 || '',
+      姓名: admin.姓名 || '',
+      動作: action || '',
+      工具編號: toolId || '',
+      修改前: before == null ? '' : String(before),
+      修改後: after == null ? '' : String(after),
+      結果: result || '',
+      備註: 製造工具75_版本_ + '｜PWA'
+    }
+  );
+}
+
+
+function 製造工具75_取得圖片資料夾_() {
+  var props = PropertiesService.getScriptProperties();
+  var folderId = String(
+    props.getProperty(製造工具75_圖片資料夾屬性Key_) || ''
+  ).trim();
+
+  if (folderId) {
+    try {
+      var found = DriveApp.getFolderById(folderId);
+      if (!found.isTrashed()) return found;
+    } catch (ignore) {}
+  }
+
+  var folder = DriveApp.createFolder(
+    製造工具75_圖片資料夾名稱_
+  );
+
+  props.setProperty(
+    製造工具75_圖片資料夾屬性Key_,
+    folder.getId()
+  );
+
+  return folder;
+}
+
+
+function 製造工具75_PWA_儲存圖片_(toolId, dataUrl, fileName) {
+  var raw = String(dataUrl || '').trim();
+
+  var match = raw.match(
+    /^data:(image\/(?:jpeg|jpg|png|webp));base64,([A-Za-z0-9+/=\r\n]+)$/i
+  );
+
+  if (!match) {
+    throw new Error('圖片格式只接受 JPEG、PNG、WebP。');
+  }
+
+  var mime = String(match[1]).toLowerCase().replace('image/jpg', 'image/jpeg');
+  var bytes = Utilities.base64Decode(
+    String(match[2]).replace(/\s+/g, '')
+  );
+
+  if (!bytes.length) {
+    throw new Error('圖片內容是空白。');
+  }
+
+  if (bytes.length > 3 * 1024 * 1024) {
+    throw new Error('圖片上傳後仍超過 3 MB，請重新選擇較小照片。');
+  }
+
+  var ext = {
+    'image/jpeg': 'jpg',
+    'image/png': 'png',
+    'image/webp': 'webp'
+  }[mime] || 'jpg';
+
+  var safeToolId = String(toolId || 'TOOL')
+    .replace(/[^A-Za-z0-9_-]/g, '_')
+    .slice(0, 60);
+
+  var stamp = Utilities.formatDate(
+    new Date(),
+    'Asia/Taipei',
+    'yyyyMMdd_HHmmss'
+  );
+
+  var name = (
+    safeToolId +
+    '_' +
+    stamp +
+    '_' +
+    Utilities.getUuid().replace(/-/g, '').slice(0, 6) +
+    '.' +
+    ext
+  );
+
+  var folder = 製造工具75_取得圖片資料夾_();
+
+  var file = folder.createFile(
+    Utilities.newBlob(
+      bytes,
+      mime,
+      name
+    )
+  );
+
+  try {
+    file.setSharing(
+      DriveApp.Access.ANYONE_WITH_LINK,
+      DriveApp.Permission.VIEW
+    );
+  } catch (e) {
+    file.setTrashed(true);
+    throw new Error(
+      'Google Drive 無法將卡片圖片設為可公開讀取；目前網域分享政策不允許 LINE 讀圖。'
+    );
+  }
+
+  var url =
+    'https://drive.google.com/thumbnail?id=' +
+    encodeURIComponent(file.getId()) +
+    '&sz=w1600';
+
+  var test = UrlFetchApp.fetch(
+    url,
+    {
+      method: 'get',
+      followRedirects: true,
+      muteHttpExceptions: true
+    }
+  );
+
+  var code = test.getResponseCode();
+  var type = String(
+    test.getHeaders()['Content-Type'] ||
+    test.getBlob().getContentType() ||
+    ''
+  ).toLowerCase();
+
+  if (
+    code < 200 ||
+    code >= 300 ||
+    type.indexOf('image/') !== 0
+  ) {
+    file.setTrashed(true);
+
+    throw new Error(
+      '圖片已上傳但 LINE 無法公開讀取，HTTP ' +
+      code +
+      '／' +
+      type
+    );
+  }
+
+  return {
+    url: url,
+    fileId: file.getId(),
+    fileName: file.getName(),
+    mimeType: mime,
+    bytes: bytes.length
+  };
+}
+
+
+function 製造工具75_PWA_新增工具_(auth, 參數, payload) {
+  製造工具75_PWA_檢查權限_(auth, 'add');
+  製造工具75_PWA_要求確認_(參數);
+
+  var name = String(payload.顯示名稱 || payload.name || '').trim();
+  var pwa = String(payload.PWA網址 || payload.url || '').trim();
+  var imageDataUrl = String(payload.imageDataUrl || '').trim();
+  var imageUrl = String(payload.圖片網址 || payload.imageUrl || '').trim();
+  var sort = Number(payload.排序 == null ? 999 : payload.排序);
+
+  if (!name) throw new Error('請輸入工具名稱。');
+  if (!/^https:\/\//i.test(pwa)) throw new Error('PWA 網址必須是 https://');
+  if (imageUrl && !/^https:\/\//i.test(imageUrl)) throw new Error('圖片網址必須是 https://');
+  if (!isFinite(sort) || sort < 0 || sort > 9999) throw new Error('排序必須是 0～9999。');
+
+  var toolId = String(payload.工具編號 || payload.toolId || '').trim();
+  if (!toolId) toolId = 製造工具75_產生工具編號_(name);
+
+  if (製造工具75_取得工具資料_(toolId)) {
+    throw new Error('工具編號已存在：' + toolId);
+  }
+
+  var idem = 製造工具75_PWA_正規冪等鍵_(
+    參數.idempotencyKey,
+    'ADD',
+    toolId,
+    auth.uid
+  );
+
+  if (製造工具75_已完成冪等_(idem)) {
+    return {
+      success: true,
+      duplicated: true,
+      message: '此新增請求已完成，已安全略過重送。',
+      toolId: toolId
+    };
+  }
+
+  var uploaded = null;
+
+  if (imageDataUrl) {
+    uploaded = 製造工具75_PWA_儲存圖片_(
+      toolId,
+      imageDataUrl,
+      payload.fileName || ''
+    );
+    imageUrl = uploaded.url;
+  }
+
+  var admin = auth.admin || {};
+  var now = new Date();
+
+  var sh = SpreadsheetApp
+    .openById(製造工具75_正式主庫ID_)
+    .getSheetByName(製造工具75_工作表名稱_);
+
+  製造工具75_新增資料列_(
+    sh,
+    {
+      工具編號: toolId,
+      排序: sort,
+      顯示名稱: name,
+      說明: String(payload.說明 || payload.description || '').trim(),
+      圖片網址: imageUrl,
+      PWA網址: pwa,
+      分類: String(payload.分類 || payload.category || '製造工具').trim(),
+      啟用: true,
+      按鈕文字: String(payload.按鈕文字 || payload.buttonText || '立即開啟').trim(),
+      備註: String(payload.備註 || '').trim(),
+      建立者LINE_USER_ID: auth.uid,
+      建立者姓名: admin.姓名 || '',
+      建立時間: now,
+      更新者LINE_USER_ID: auth.uid,
+      更新者姓名: admin.姓名 || '',
+      更新時間: now
+    }
+  );
+
+  製造工具75_PWA_寫紀錄_(
+    auth,
+    'PWA新增工具',
+    toolId,
+    '',
+    JSON.stringify({
+      顯示名稱: name,
+      PWA網址: pwa,
+      圖片網址: imageUrl,
+      排序: sort
+    }),
+    '完成',
+    idem,
+    參數.eventId
+  );
+
+  return {
+    success: true,
+    message: '工具已新增。',
+    toolId: toolId,
+    image: uploaded
+  };
+}
+
+
+function 製造工具75_PWA_更換圖片_(auth, 參數, payload) {
+  製造工具75_PWA_檢查權限_(auth, 'image');
+  製造工具75_PWA_要求確認_(參數);
+
+  var toolId = String(payload.工具編號 || payload.toolId || '').trim();
+  var imageDataUrl = String(payload.imageDataUrl || '').trim();
+
+  if (!toolId) throw new Error('缺少工具編號。');
+  if (!imageDataUrl) throw new Error('請先選擇照片。');
+
+  var info = 製造工具75_取得工具資料_(toolId);
+  if (!info) throw new Error('找不到工具：' + toolId);
+
+  var idem = 製造工具75_PWA_正規冪等鍵_(
+    參數.idempotencyKey,
+    'IMAGE',
+    toolId,
+    auth.uid
+  );
+
+  if (製造工具75_已完成冪等_(idem)) {
+    return {
+      success: true,
+      duplicated: true,
+      message: '此換圖請求已完成，已安全略過重送。',
+      toolId: toolId
+    };
+  }
+
+  var uploaded = 製造工具75_PWA_儲存圖片_(
+    toolId,
+    imageDataUrl,
+    payload.fileName || ''
+  );
+
+  var before = String(info.data.圖片網址 || '');
+  var admin = auth.admin || {};
+
+  製造工具75_寫欄位值_(info.sheet, info.row, '圖片網址', uploaded.url);
+  製造工具75_寫欄位值_(info.sheet, info.row, '更新者LINE_USER_ID', auth.uid);
+  製造工具75_寫欄位值_(info.sheet, info.row, '更新者姓名', admin.姓名 || '');
+  製造工具75_寫欄位值_(info.sheet, info.row, '更新時間', new Date());
+
+  製造工具75_PWA_寫紀錄_(
+    auth,
+    'PWA更換圖片',
+    toolId,
+    before,
+    uploaded.url,
+    '完成',
+    idem,
+    參數.eventId
+  );
+
+  return {
+    success: true,
+    message: '卡片圖片已更新。',
+    toolId: toolId,
+    image: uploaded
+  };
+}
+
+
+function 製造工具75_PWA_啟停_(auth, 參數, payload) {
+  製造工具75_PWA_檢查權限_(auth, 'enable');
+  製造工具75_PWA_要求確認_(參數);
+
+  var toolId = String(payload.工具編號 || payload.toolId || '').trim();
+  var enabled =
+    payload.啟用 === true ||
+    String(payload.enabled || payload.啟用 || '').toUpperCase() === 'TRUE';
+
+  if (!toolId) throw new Error('缺少工具編號。');
+
+  var info = 製造工具75_取得工具資料_(toolId);
+  if (!info) throw new Error('找不到工具：' + toolId);
+
+  var idem = 製造工具75_PWA_正規冪等鍵_(
+    參數.idempotencyKey,
+    enabled ? 'ENABLE' : 'DISABLE',
+    toolId,
+    auth.uid
+  );
+
+  if (製造工具75_已完成冪等_(idem)) {
+    return {
+      success: true,
+      duplicated: true,
+      message: '此啟停請求已完成，已安全略過重送。',
+      toolId: toolId,
+      enabled: enabled
+    };
+  }
+
+  var before = 製造工具75_轉布林值_(info.data.啟用);
+  var admin = auth.admin || {};
+
+  製造工具75_寫欄位值_(info.sheet, info.row, '啟用', enabled);
+  製造工具75_寫欄位值_(info.sheet, info.row, '更新者LINE_USER_ID', auth.uid);
+  製造工具75_寫欄位值_(info.sheet, info.row, '更新者姓名', admin.姓名 || '');
+  製造工具75_寫欄位值_(info.sheet, info.row, '更新時間', new Date());
+
+  製造工具75_PWA_寫紀錄_(
+    auth,
+    enabled ? 'PWA啟用工具' : 'PWA停用工具',
+    toolId,
+    String(before),
+    String(enabled),
+    '完成',
+    idem,
+    參數.eventId
+  );
+
+  return {
+    success: true,
+    message: enabled ? '工具已啟用。' : '工具已停用。',
+    toolId: toolId,
+    enabled: enabled
+  };
+}
+
+
+function 製造工具75_PWA_排序_(auth, 參數, payload) {
+  製造工具75_PWA_檢查權限_(auth, 'sort');
+  製造工具75_PWA_要求確認_(參數);
+
+  var toolId = String(payload.工具編號 || payload.toolId || '').trim();
+  var sort = Number(payload.排序 == null ? payload.sort : payload.排序);
+
+  if (!toolId) throw new Error('缺少工具編號。');
+  if (!isFinite(sort) || sort < 0 || sort > 9999) {
+    throw new Error('排序必須是 0～9999。');
+  }
+
+  var info = 製造工具75_取得工具資料_(toolId);
+  if (!info) throw new Error('找不到工具：' + toolId);
+
+  var idem = 製造工具75_PWA_正規冪等鍵_(
+    參數.idempotencyKey,
+    'SORT',
+    toolId,
+    auth.uid
+  );
+
+  if (製造工具75_已完成冪等_(idem)) {
+    return {
+      success: true,
+      duplicated: true,
+      message: '此排序請求已完成，已安全略過重送。',
+      toolId: toolId,
+      sort: sort
+    };
+  }
+
+  var before = info.data.排序;
+  var admin = auth.admin || {};
+
+  製造工具75_寫欄位值_(info.sheet, info.row, '排序', sort);
+  製造工具75_寫欄位值_(info.sheet, info.row, '更新者LINE_USER_ID', auth.uid);
+  製造工具75_寫欄位值_(info.sheet, info.row, '更新者姓名', admin.姓名 || '');
+  製造工具75_寫欄位值_(info.sheet, info.row, '更新時間', new Date());
+
+  製造工具75_PWA_寫紀錄_(
+    auth,
+    'PWA調整排序',
+    toolId,
+    String(before),
+    String(sort),
+    '完成',
+    idem,
+    參數.eventId
+  );
+
+  return {
+    success: true,
+    message: '排序已更新。',
+    toolId: toolId,
+    sort: sort
+  };
+}
+
+
+function LINE製造工具75_PWA_接收_(請求) {
+  var 參數 = Object.assign(
+    {},
+    請求 && 請求.parameter || {}
+  );
+
+  var action = String(
+    參數.action ||
+    參數['動作'] ||
+    ''
+  ).trim();
+
+  if (action.indexOf('TOOL75_PWA_') !== 0) {
+    return null;
+  }
+
+  try {
+    製造工具75_確保結構_();
+
+    var auth = 製造工具75_驗證管理Token_(
+      參數.adminToken ||
+      參數.token ||
+      ''
+    );
+
+    var payload = 製造工具75_PWA_解析JSON_(
+      參數.payload ||
+      參數['資料'] ||
+      '{}'
+    );
+
+    var lock = null;
+    var locked = false;
+    var result;
+
+    if (action === 'TOOL75_PWA_INIT') {
+      result = {
+        success: true,
+        version: 製造工具75_版本_,
+        admin: 製造工具75_PWA_管理員摘要_(auth),
+        tools: 製造工具75_取得全部工具_()
+      };
+
+    } else {
+      lock = LockService.getScriptLock();
+      locked = lock.tryLock(8000);
+
+      if (!locked) {
+        throw new Error('另一筆工具管理異動正在處理，請稍後再試。');
+      }
+
+      if (action === 'TOOL75_PWA_ADD') {
+        result = 製造工具75_PWA_新增工具_(auth, 參數, payload);
+
+      } else if (action === 'TOOL75_PWA_IMAGE') {
+        result = 製造工具75_PWA_更換圖片_(auth, 參數, payload);
+
+      } else if (action === 'TOOL75_PWA_TOGGLE') {
+        result = 製造工具75_PWA_啟停_(auth, 參數, payload);
+
+      } else if (action === 'TOOL75_PWA_SORT') {
+        result = 製造工具75_PWA_排序_(auth, 參數, payload);
+
+      } else {
+        throw new Error('不支援的製造工具管理動作：' + action);
+      }
+    }
+
+    if (!result) result = { success: true };
+
+    result.version = 製造工具75_版本_;
+    result.admin = 製造工具75_PWA_管理員摘要_(auth);
+    result.tools = 製造工具75_取得全部工具_();
+
+    return result;
+
+  } catch (error) {
+    return {
+      success: false,
+      version: 製造工具75_版本_,
+      message: String(
+        error && error.message || error
+      ),
+      errors: [
+        String(
+          error && error.message || error
+        )
+      ]
+    };
+
+  } finally {
+    try {
+      if (typeof lock !== 'undefined' && lock && locked) {
+        lock.releaseLock();
+      }
+    } catch (ignore) {}
+  }
+}
+
+
+function 驗證75_LINE製造工具管理PWA_v140() {
+  var result = {
+    success: false,
+    version: 製造工具75_版本_,
+    pwaUrl: 製造工具75_管理PWA基底網址_,
+    pwaReceiver: typeof LINE製造工具75_PWA_接收_ === 'function',
+    tokenSecretReady: false,
+    adminCount: 0,
+    toolCount: 0,
+    errors: []
+  };
+
+  try {
+    製造工具75_確保結構_();
+    result.tokenSecretReady = !!製造工具75_取得管理密鑰_();
+    result.adminCount = 製造工具75_讀取管理員_().length;
+    result.toolCount = 製造工具75_取得全部工具_().length;
+  } catch (e) {
+    result.errors.push(String(e && e.message || e));
+  }
+
+  result.success =
+    result.pwaReceiver &&
+    result.tokenSecretReady &&
+    result.adminCount > 0 &&
+    result.toolCount > 0 &&
+    result.errors.length === 0;
+
+  console.log(JSON.stringify(result, null, 2));
+  return result;
 }
 
 
