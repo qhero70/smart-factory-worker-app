@@ -1,6 +1,6 @@
 /**
  * 化新精密｜75_LINE 製造工具中心
- * 版本：v1.4.0
+ * 版本：v1.4.1
  *
  * 功能：
  * 1. 一般使用者只看啟用工具卡並開啟工具。
@@ -15,7 +15,7 @@
  * 7. 不建立第二個 LINE Bot、不建立第二個 Web App。
  */
 
-var 製造工具75_版本_ = 'v1.4.0_管理PWA_簽章權限_圖片上傳';
+var 製造工具75_版本_ = 'v1.4.1_效能快取_管理PWA';
 
 var 製造工具75_正式主庫ID_ = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
 var 製造工具75_工作表名稱_ = 'LINE_製造工具中心';
@@ -46,6 +46,12 @@ var 製造工具75_管理Token效期秒_ = 900;
 var 製造工具75_管理密鑰屬性Key_ = 'TOOL75_ADMIN_HMAC_SECRET';
 var 製造工具75_圖片資料夾屬性Key_ = 'TOOL75_ADMIN_IMAGE_FOLDER_ID';
 var 製造工具75_圖片資料夾名稱_ = 'LINE_製造工具卡片圖片';
+
+/* v1.4.1 效能：執行階段只讀快取；正式異動後立即清除。 */
+var 製造工具75_快取秒數_ = 600;
+var 製造工具75_快取Key_啟用工具_ = 'TOOL75_V141_ENABLED';
+var 製造工具75_快取Key_全部工具_ = 'TOOL75_V141_ALL';
+var 製造工具75_快取Key_管理員_ = 'TOOL75_V141_ADMINS';
 
 var 製造工具75_工具欄位_ = [
   '工具編號',
@@ -105,8 +111,7 @@ function LINE製造工具75_嘗試處理Webhook_(內容) {
   try {
     if (!內容 || !Array.isArray(內容.events) || !內容.events.length) return null;
 
-    製造工具75_確保結構_();
-
+    // v1.4.1：正式 LINE 點擊走快取，不再每次執行建表/補欄位/同步管理員。
     var 事件 = 內容.events[0];
     if (!製造工具75_是否為製造工具事件_(事件)) return null;
 
@@ -283,8 +288,13 @@ function 初始化75_LINE製造工具中心_v140() {
   return 初始化75_LINE製造工具中心_v131();
 }
 
+function 初始化75_LINE製造工具中心_v141() {
+  return 初始化75_LINE製造工具中心_v131();
+}
+
 
 function 製造工具75_確保結構_() {
+  製造工具75_清除快取_();
   var ss = SpreadsheetApp.openById(製造工具75_正式主庫ID_);
 
   製造工具75_建立或修復表_(
@@ -489,15 +499,140 @@ function 製造工具75_取得核心工具_() {
 
 
 /* ============================================================
+ * v1.4.1 執行階段快取
+ * - 讀取：CacheService，避免每次點 LINE 都掃 Google Sheets
+ * - 寫入：正式異動成功後立即清除快取
+ * - 建表/修復：只在初始化、診斷或明確維護時執行
+ * ============================================================ */
+
+function 製造工具75_讀快取JSON_(key) {
+  try {
+    var raw = CacheService.getScriptCache().get(String(key || ''));
+    return raw ? JSON.parse(raw) : null;
+  } catch (ignore) {
+    return null;
+  }
+}
+
+
+function 製造工具75_寫快取JSON_(key, value) {
+  try {
+    CacheService.getScriptCache().put(
+      String(key || ''),
+      JSON.stringify(value == null ? null : value),
+      Number(製造工具75_快取秒數_ || 600)
+    );
+  } catch (ignore) {}
+}
+
+
+function 製造工具75_清除快取_() {
+  try {
+    CacheService.getScriptCache().removeAll([
+      製造工具75_快取Key_啟用工具_,
+      製造工具75_快取Key_全部工具_,
+      製造工具75_快取Key_管理員_
+    ]);
+  } catch (ignore) {}
+}
+
+
+function 預熱75_LINE製造工具快取_v141() {
+  var started = new Date().getTime();
+
+  製造工具75_確保結構_();
+  製造工具75_清除快取_();
+
+  var t1 = new Date().getTime();
+  var enabled = 製造工具75_取得完整工具清單_();
+  var t2 = new Date().getTime();
+  var admins = 製造工具75_讀取管理員_();
+  var t3 = new Date().getTime();
+  var all = 製造工具75_取得全部工具_();
+  var t4 = new Date().getTime();
+
+  var result = {
+    success: true,
+    version: 製造工具75_版本_,
+    enabledTools: enabled.length,
+    admins: admins.length,
+    allTools: all.length,
+    ms: {
+      structure: t1 - started,
+      enabledTools: t2 - t1,
+      admins: t3 - t2,
+      allTools: t4 - t3,
+      total: t4 - started
+    }
+  };
+
+  console.log(JSON.stringify(result, null, 2));
+  return result;
+}
+
+
+function 效能診斷75_LINE製造工具_v141() {
+  製造工具75_清除快取_();
+
+  var a0 = new Date().getTime();
+  var enabledCold = 製造工具75_取得完整工具清單_();
+  var a1 = new Date().getTime();
+  var adminsCold = 製造工具75_讀取管理員_();
+  var a2 = new Date().getTime();
+  var allCold = 製造工具75_取得全部工具_();
+  var a3 = new Date().getTime();
+
+  var b0 = new Date().getTime();
+  var enabledWarm = 製造工具75_取得完整工具清單_();
+  var b1 = new Date().getTime();
+  var adminsWarm = 製造工具75_讀取管理員_();
+  var b2 = new Date().getTime();
+  var allWarm = 製造工具75_取得全部工具_();
+  var b3 = new Date().getTime();
+
+  var result = {
+    success: true,
+    version: 製造工具75_版本_,
+    counts: {
+      enabledCold: enabledCold.length,
+      adminsCold: adminsCold.length,
+      allCold: allCold.length,
+      enabledWarm: enabledWarm.length,
+      adminsWarm: adminsWarm.length,
+      allWarm: allWarm.length
+    },
+    coldMs: {
+      enabledTools: a1 - a0,
+      admins: a2 - a1,
+      allTools: a3 - a2,
+      total: a3 - a0
+    },
+    warmMs: {
+      enabledTools: b1 - b0,
+      admins: b2 - b1,
+      allTools: b3 - b2,
+      total: b3 - b0
+    }
+  };
+
+  console.log(JSON.stringify(result, null, 2));
+  return result;
+}
+
+
+/* ============================================================
  * 讀取工具 / 管理員 / 身份
  * ============================================================ */
 
 function 製造工具75_取得完整工具清單_() {
-  製造工具75_確保結構_();
+  var cached = 製造工具75_讀快取JSON_(製造工具75_快取Key_啟用工具_);
+  if (cached && Array.isArray(cached)) return cached;
 
   var sh = SpreadsheetApp
     .openById(製造工具75_正式主庫ID_)
     .getSheetByName(製造工具75_工作表名稱_);
+
+  if (!sh) throw new Error('找不到工作表：' + 製造工具75_工作表名稱_);
 
   var rows = 製造工具75_讀表物件_(sh)
     .filter(function (r) {
@@ -527,26 +662,32 @@ function 製造工具75_取得完整工具清單_() {
     return Number(a.排序 || 9999) - Number(b.排序 || 9999);
   });
 
-  return rows.slice(0, 11);
+  rows = rows.slice(0, 11);
+  製造工具75_寫快取JSON_(製造工具75_快取Key_啟用工具_, rows);
+  return rows;
 }
 
-
 function 製造工具75_讀取管理員_() {
+  var cached = 製造工具75_讀快取JSON_(製造工具75_快取Key_管理員_);
+  if (cached && Array.isArray(cached)) return cached;
+
   var sh = SpreadsheetApp
     .openById(製造工具75_正式主庫ID_)
     .getSheetByName(製造工具75_管理員表名稱_);
 
   if (!sh) return [];
 
-  return 製造工具75_讀表物件_(sh)
+  var rows = 製造工具75_讀表物件_(sh)
     .filter(function (r) {
       return (
         製造工具75_轉布林值_(r.啟用) &&
         String(r.LINE_USER_ID || '').trim()
       );
     });
-}
 
+  製造工具75_寫快取JSON_(製造工具75_快取Key_管理員_, rows);
+  return rows;
+}
 
 function 製造工具75_取得管理員_(lineUserId) {
   var id = String(lineUserId || '').trim();
@@ -1008,6 +1149,8 @@ function 製造工具75_執行新增工具指令_(事件, lineUserId, replyToken
     更新時間: now
   });
 
+  製造工具75_清除快取_();
+
   製造工具75_寫操作紀錄_(
     事件,
     lineUserId,
@@ -1059,6 +1202,8 @@ function 製造工具75_執行更換圖片指令_(事件, lineUserId, replyToken
   製造工具75_寫欄位值_(info.sheet, info.row, '更新者LINE_USER_ID', lineUserId);
   製造工具75_寫欄位值_(info.sheet, info.row, '更新者姓名', identity.姓名 || p.admin.姓名 || '');
   製造工具75_寫欄位值_(info.sheet, info.row, '更新時間', new Date());
+
+  製造工具75_清除快取_();
 
   製造工具75_寫操作紀錄_(
     事件,
@@ -1165,6 +1310,8 @@ function 製造工具75_執行排序指令_(事件, lineUserId, replyToken, text
   製造工具75_寫欄位值_(info.sheet, info.row, '更新者LINE_USER_ID', lineUserId);
   製造工具75_寫欄位值_(info.sheet, info.row, '更新者姓名', identity.姓名 || p.admin.姓名 || '');
   製造工具75_寫欄位值_(info.sheet, info.row, '更新時間', new Date());
+
+  製造工具75_清除快取_();
 
   製造工具75_寫操作紀錄_(
     事件,
@@ -1692,11 +1839,14 @@ function 製造工具75_建立管理PWA網址_(lineUserId) {
 
 
 function 製造工具75_取得全部工具_() {
-  製造工具75_確保結構_();
+  var cached = 製造工具75_讀快取JSON_(製造工具75_快取Key_全部工具_);
+  if (cached && Array.isArray(cached)) return cached;
 
   var sh = SpreadsheetApp
     .openById(製造工具75_正式主庫ID_)
     .getSheetByName(製造工具75_工作表名稱_);
+
+  if (!sh) throw new Error('找不到工作表：' + 製造工具75_工作表名稱_);
 
   var rows = 製造工具75_讀表物件_(sh)
     .map(function (r) {
@@ -1721,12 +1871,15 @@ function 製造工具75_取得全部工具_() {
   rows.sort(function (a, b) {
     var n = Number(a.排序 || 9999) - Number(b.排序 || 9999);
     if (n) return n;
-    return String(a.顯示名稱 || '').localeCompare(String(b.顯示名稱 || ''), 'zh-Hant');
+    return String(a.顯示名稱 || '').localeCompare(
+      String(b.顯示名稱 || ''),
+      'zh-Hant'
+    );
   });
 
+  製造工具75_寫快取JSON_(製造工具75_快取Key_全部工具_, rows);
   return rows;
 }
-
 
 function 製造工具75_PWA_解析JSON_(值) {
   if (值 && typeof 值 === 'object') return 值;
@@ -2075,6 +2228,8 @@ function 製造工具75_PWA_新增工具_(auth, 參數, payload) {
     }
   );
 
+  製造工具75_清除快取_();
+
   製造工具75_PWA_寫紀錄_(
     auth,
     'PWA新增工具',
@@ -2143,6 +2298,8 @@ function 製造工具75_PWA_更換圖片_(auth, 參數, payload) {
   製造工具75_寫欄位值_(info.sheet, info.row, '更新者姓名', admin.姓名 || '');
   製造工具75_寫欄位值_(info.sheet, info.row, '更新時間', new Date());
 
+  製造工具75_清除快取_();
+
   製造工具75_PWA_寫紀錄_(
     auth,
     'PWA更換圖片',
@@ -2201,6 +2358,8 @@ function 製造工具75_PWA_啟停_(auth, 參數, payload) {
   製造工具75_寫欄位值_(info.sheet, info.row, '更新者LINE_USER_ID', auth.uid);
   製造工具75_寫欄位值_(info.sheet, info.row, '更新者姓名', admin.姓名 || '');
   製造工具75_寫欄位值_(info.sheet, info.row, '更新時間', new Date());
+
+  製造工具75_清除快取_();
 
   製造工具75_PWA_寫紀錄_(
     auth,
@@ -2262,6 +2421,8 @@ function 製造工具75_PWA_排序_(auth, 參數, payload) {
   製造工具75_寫欄位值_(info.sheet, info.row, '更新者姓名', admin.姓名 || '');
   製造工具75_寫欄位值_(info.sheet, info.row, '更新時間', new Date());
 
+  製造工具75_清除快取_();
+
   製造工具75_PWA_寫紀錄_(
     auth,
     'PWA調整排序',
@@ -2299,8 +2460,7 @@ function LINE製造工具75_PWA_接收_(請求) {
   }
 
   try {
-    製造工具75_確保結構_();
-
+    // v1.4.1：管理 PWA 執行階段直接走快取/正式資料，不再每次做完整結構修復。
     var auth = 製造工具75_驗證管理Token_(
       參數.adminToken ||
       參數.token ||
@@ -2379,6 +2539,11 @@ function LINE製造工具75_PWA_接收_(請求) {
       }
     } catch (ignore) {}
   }
+}
+
+
+function 驗證75_LINE製造工具管理PWA_v141() {
+  return 驗證75_LINE製造工具管理PWA_v140();
 }
 
 
@@ -2477,6 +2642,10 @@ function 診斷75_LINE製造工具中心_v140() {
   return 診斷75_LINE製造工具中心_v131();
 }
 
+function 診斷75_LINE製造工具中心_v141() {
+  return 診斷75_LINE製造工具中心_v131();
+}
+
 
 function 驗證75_LINE製造工具Flex_API_v131() {
   var result = {
@@ -2559,6 +2728,10 @@ function 驗證75_LINE製造工具Flex_API_v140() {
   return 驗證75_LINE製造工具Flex_API_v131();
 }
 
+function 驗證75_LINE製造工具Flex_API_v141() {
+  return 驗證75_LINE製造工具Flex_API_v131();
+}
+
 
 /**
  * 手動設定第一位管理員用。
@@ -2603,6 +2776,8 @@ function 設定75_LINE製造工具管理員(lineUserId) {
     備註: '手動設定主管理員',
     更新時間: new Date()
   });
+
+  製造工具75_清除快取_();
 
   return {
     success: true,
