@@ -42,7 +42,7 @@ var 製造工具75_生產計畫清洗網址_ =
 var 製造工具75_管理PWA基底網址_ =
   'https://qhero70.github.io/smart-factory-worker-app/manufacturing-tools-admin/';
 
-var 製造工具75_管理Token效期秒_ = 1800;
+var 製造工具75_管理Token效期秒_ = 900;
 var 製造工具75_管理密鑰屬性Key_ = 'TOOL75_ADMIN_HMAC_SECRET';
 var 製造工具75_圖片資料夾屬性Key_ = 'TOOL75_ADMIN_IMAGE_FOLDER_ID';
 var 製造工具75_圖片資料夾名稱_ = 'LINE_製造工具卡片圖片';
