@@ -279,6 +279,11 @@ function 初始化75_LINE製造工具中心_v131() {
 }
 
 
+function 初始化75_LINE製造工具中心_v140() {
+  return 初始化75_LINE製造工具中心_v131();
+}
+
+
 function 製造工具75_確保結構_() {
   var ss = SpreadsheetApp.openById(製造工具75_正式主庫ID_);
 
@@ -2465,6 +2470,11 @@ function 診斷75_LINE製造工具中心_v131() {
 
   console.log(JSON.stringify(result, null, 2));
   return result;
+}
+
+
+function 診斷75_LINE製造工具中心_v140() {
+  return 診斷75_LINE製造工具中心_v131();
 }
 
 
