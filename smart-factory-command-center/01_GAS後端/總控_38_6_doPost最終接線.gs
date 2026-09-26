@@ -253,14 +253,19 @@ function 製一LINE正式接線_JSON_(內容) {
 }
 
 function 診斷製一LINE正式接線_v197() {
-  console.warn('相容入口：v1.9.7 診斷已轉接 v1.9.9。');
+  console.warn('相容入口：v1.9.7 診斷已轉接 v1.10.0。');
   return 診斷製一LINE正式接線_v199();
 }
 
 function 診斷製一LINE正式接線_v198() {
-  console.warn('相容入口：v1.9.8 診斷已轉接 v1.9.9。');
+  console.warn('相容入口：v1.9.8 診斷已轉接 v1.10.0。');
   return 診斷製一LINE正式接線_v199();
 }
+
+function 診斷製一LINE正式接線_v1100() {
+  return 診斷製一LINE正式接線_v199();
+}
+
 
 function 診斷製一LINE正式接線_v199() {
   var errors = [];
