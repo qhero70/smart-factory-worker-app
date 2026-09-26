@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#0f3d63">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="製造工具管理">
+<title>化新精密｜製造工具管理</title>
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="./app.css">
+</head>
+<body>
+<header><div class="head"><div class="logo">🔧</div><div><h1>製造工具管理</h1><p>化新精密｜Manufacturing Tool Center</p></div><div id="status" class="status">連線中</div></div></header>
+<main>
+<div id="notice" class="notice"></div>
+<section class="hero"><div class="eyebrow">ADMIN ONLY</div><h2>🔒 管理員專區</h2><p>新增工具卡、從手機更換卡片照片、啟用／停用及調整排序。所有正式異動都需要再次確認並留下操作紀錄。</p><div class="hero-meta"><span id="adminName" class="chip">驗證中</span><span id="toolCount" class="chip">工具 0</span><span class="chip">短效安全憑證</span></div></section>
+<div class="actions"><button id="addBtn" class="btn primary" disabled>＋ 新增工具</button><button id="refreshBtn" class="btn secondary">重新整理</button></div>
+<div class="section-title"><h3>工具卡片</h3><span id="listCount" class="count"></span></div>
+<div id="toolList" class="tool-list"><div class="empty">正在讀取工具資料…</div></div>
+<div class="footer-note">v1.0｜同一個 LINE Bot、同一個正式 Web App。<br>管理憑證逾時後請回 LINE 再次點「製造工具」。</div>
+</main>
+
+<div id="addSheet" class="overlay"><div class="sheet"><div class="grab"></div><h3>＋ 新增工具</h3><p class="sub">新增後會寫入中央主庫，啟用工具會出現在 LINE 製造工具卡。</p>
+<div class="field"><label>顯示名稱 *</label><input id="addName" placeholder="例如：AI 視覺檢查"></div>
+<div class="field"><label>說明</label><textarea id="addDesc" placeholder="這個工具的用途"></textarea></div>
+<div class="field"><label>分類</label><input id="addCategory" value="製造工具"></div>
+<div class="field"><label>PWA 網址 *</label><input id="addUrl" type="url" placeholder="https://..."></div>
+<div class="field"><label>按鈕文字</label><input id="addButtonText" value="立即開啟"></div>
+<div class="field"><label>排序</label><input id="addSort" type="number" min="0" max="9999" value="50"></div>
+<div class="field"><label>卡片照片（可選）</label><div id="addPreview" class="preview">尚未選擇照片</div><input id="addImage" type="file" accept="image/*" style="margin-top:9px"></div>
+<div class="sheet-actions"><button class="btn secondary" data-close="addSheet">取消</button><button id="addSubmit" class="btn primary">確認新增</button></div></div></div>
+
+<div id="imageSheet" class="overlay"><div class="sheet"><div class="grab"></div><h3>更換卡片圖片</h3><p id="imageToolName" class="sub"></p>
+<div class="field"><label>選擇照片</label><div id="imagePreview" class="preview">請選擇照片</div><input id="imageInput" type="file" accept="image/*" style="margin-top:9px"></div>
+<div class="sheet-actions"><button class="btn secondary" data-close="imageSheet">取消</button><button id="imageSubmit" class="btn primary">確認更換</button></div></div></div>
+
+<div id="sortSheet" class="overlay"><div class="sheet"><div class="grab"></div><h3>調整排序</h3><p id="sortToolName" class="sub"></p>
+<div class="field"><label>排序數字</label><input id="sortValue" type="number" min="0" max="9999"></div>
+<div class="sheet-actions"><button class="btn secondary" data-close="sortSheet">取消</button><button id="sortSubmit" class="btn primary">確認排序</button></div></div></div>
+
+<div id="loading" class="loading"><div class="spinner"></div></div>
+<div id="toast" class="toast"></div>
+<script src="./app.js?v=100"></script>
+</body>
+</html>
