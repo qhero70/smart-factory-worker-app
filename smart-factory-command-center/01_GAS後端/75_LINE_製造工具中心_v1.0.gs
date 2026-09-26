@@ -1258,6 +1258,8 @@ function 製造工具75_執行啟停工具指令_(事件, lineUserId, replyToken
   製造工具75_寫欄位值_(info.sheet, info.row, '更新者姓名', identity.姓名 || p.admin.姓名 || '');
   製造工具75_寫欄位值_(info.sheet, info.row, '更新時間', new Date());
 
+  製造工具75_清除快取_();
+
   製造工具75_寫操作紀錄_(
     事件,
     lineUserId,
