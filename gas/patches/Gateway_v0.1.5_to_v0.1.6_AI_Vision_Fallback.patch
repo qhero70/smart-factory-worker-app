@@ -1,0 +1,186 @@
+--- v0.1.5
++++ v0.1.6
+@@ -1,5 +1,5 @@
+ /**
+- * 化新精密｜HS Manufacturing Agent Gateway v0.1.5
++ * 化新精密｜HS Manufacturing Agent Gateway v0.1.6
+  * 檔案：74_製造AI中央閘道_v011.gs
+  *
+  * 版本重點：
+@@ -9,13 +9,16 @@
+  * - 供料、訂單(出貨)不計入 planQty。
+  * - 查無正式計畫時回 NO_DATA；不拿舊月份、相似料號或其他類型代替。
+  * - 保留既有 LINE / doPost / 41 啟用閘門相容入口；本檔不宣告 doGet / doPost。
++ * - AI Vision：外部 VISION_API_URL 優先；未設定時唯讀 09_AI視覺檢查紀錄。
++ * - 只有 releaseStatus=PRODUCTION_RELEASED 且有 inspectedAt 的 Vision 紀錄才算正式 AVAILABLE。
++ * - PILOT_OFFLINE / NOT_PRODUCTION_RELEASED 只作證據，不提升 7-source completeness。
+  * - Phase 1 Read Only，不寫入正式製造資料。
+@@
+-var 製造AI閘道_版本_ = '0.1.5';
++var 製造AI閘道_版本_ = '0.1.6';
+@@
+-  工單進度追蹤: '20_工單進度追蹤'
++  工單進度追蹤: '20_工單進度追蹤',
++  AI視覺檢查紀錄: '09_AI視覺檢查紀錄'
+ };
+@@
++function 製造AI閘道_Vision列轉資料_(d, sourceName) {
++  return {
++    inspectionId: 製造AI閘道_空轉Null_(d.inspectionId),
++    partNo: 製造AI閘道_空轉Null_(d.partNo),
++    lotId: 製造AI閘道_空轉Null_(d.lotId),
++    modelName: 製造AI閘道_空轉Null_(d.modelName),
++    modelVersion: 製造AI閘道_空轉Null_(d.modelVersion),
++    geometryVersion: 製造AI閘道_空轉Null_(d.geometryVersion),
++    inspectionType: 製造AI閘道_空轉Null_(d.inspectionType),
++    inspectionCount: 製造AI閘道_數值或Null_(d.inspectionCount),
++    expectedSlotCount: 製造AI閘道_數值或Null_(d.expectedSlotCount),
++    candidateCount: 製造AI閘道_數值或Null_(d.candidateCount),
++    matchedSlotCount: 製造AI閘道_數值或Null_(d.matchedSlotCount),
++    ngCount: 製造AI閘道_數值或Null_(d.ngCount),
++    result: 製造AI閘道_空轉Null_(d.result),
++    confidence: 製造AI閘道_數值或Null_(d.confidence),
++    reviewReasons: Array.isArray(d.reviewReasons)
++      ? d.reviewReasons
++      : 製造AI閘道_文字_(d.reviewReasons)
++        ? 製造AI閘道_文字_(d.reviewReasons).split('|').filter(Boolean)
++        : [],
++    slots: Array.isArray(d.slots) ? d.slots : [],
++    detections: d.detections || [],
++    sourcePhotoUrl: 製造AI閘道_空轉Null_(d.sourcePhotoUrl),
++    annotatedPhotoUrl: 製造AI閘道_空轉Null_(d.annotatedPhotoUrl),
++    inspectedAt: 製造AI閘道_日期時間ISO_(d.inspectedAt),
++    source: sourceName || 製造AI閘道_空轉Null_(d.source) || 'VISION_SERVICE',
++    validationStage: 製造AI閘道_空轉Null_(d.validationStage),
++    validationDate: 製造AI閘道_正規日期_(d.validationDate),
++    releaseStatus: 製造AI閘道_空轉Null_(d.releaseStatus)
++  };
++}
++
++function 製造AI閘道_Vision主庫Fallback_(partNo) {
++  var sheetName = 製造AI閘道_工作表_.AI視覺檢查紀錄;
++  var table;
++  try {
++    table = 製造AI閘道_讀分頁_(sheetName);
++  } catch (err) {
++    if (err && err.errorCode === 'SOURCE_NOT_FOUND') {
++      return {found:false,data:null,warnings:['VISION_SHEET_NOT_FOUND：正式主庫尚無 09_AI視覺檢查紀錄。']};
++    }
++    throw err;
++  }
++
++  var rows = 製造AI閘道_顯示物件列_(table).filter(function (r) {
++    return 製造AI閘道_精確相等_(r.partNo, partNo) && 製造AI閘道_文字_(r.inspectionId) !== '';
++  });
++  if (!rows.length) return {found:false,data:null,warnings:['Vision 主庫查無此料號的檢查紀錄。']};
++
++  var productionRows = rows.filter(function (r) {
++    return 製造AI閘道_文字_(r.releaseStatus).toUpperCase() === 'PRODUCTION_RELEASED'
++      && !!製造AI閘道_日期時間ISO_(r.inspectedAt);
++  });
++  if (productionRows.length) {
++    productionRows.sort(function (a,b) {
++      return String(製造AI閘道_日期時間ISO_(b.inspectedAt)||'')
++        .localeCompare(String(製造AI閘道_日期時間ISO_(a.inspectedAt)||''));
++    });
++    return {
++      found:true,
++      data:製造AI閘道_Vision列轉資料_(productionRows[0],'VISION_MASTER_SHEET'),
++      warnings:productionRows.length>1?['VISION_MULTI_RELEASED：找到多筆量產已發布 Vision 紀錄，回傳 inspectedAt 最新一筆。']:[]
++    };
++  }
++
++  var passCandidate=0, review=0, ngCandidate=0, models=[], geometries=[], validationDates=[];
++  rows.forEach(function(r){
++    var result=製造AI閘道_文字_(r.result).toUpperCase();
++    if(result==='PASS_CANDIDATE') passCandidate++;
++    else if(result==='REVIEW') review++;
++    else if(result==='NG_CANDIDATE'||result==='NG') ngCandidate++;
++    if(製造AI閘道_文字_(r.modelVersion)) models.push(製造AI閘道_文字_(r.modelVersion));
++    if(製造AI閘道_文字_(r.geometryVersion)) geometries.push(製造AI閘道_文字_(r.geometryVersion));
++    if(製造AI閘道_正規日期_(r.validationDate)) validationDates.push(製造AI閘道_正規日期_(r.validationDate));
++  });
++
++  return {
++    found:false,
++    data:{
++      partNo:partNo,
++      pilotRecordCount:rows.length,
++      passCandidateCount:passCandidate,
++      reviewCount:review,
++      ngCandidateCount:ngCandidate,
++      modelVersions:製造AI閘道_不重複_(models),
++      geometryVersions:製造AI閘道_不重複_(geometries),
++      latestValidationDate:validationDates.length?validationDates.sort().reverse()[0]:null,
++      validationStage:'PILOT_OFFLINE',
++      releaseStatus:'NOT_PRODUCTION_RELEASED'
++    },
++    warnings:[
++      'VISION_PILOT_ONLY：主庫有 '+rows.length+' 筆離線 Pilot Vision 證據，但尚未量產發布。',
++      'VISION_PILOT_SUMMARY：PASS_CANDIDATE='+passCandidate+'，REVIEW='+review+'，NG_CANDIDATE='+ngCandidate+'。',
++      'VISION_NOT_PRODUCTION_RELEASED：PASS_CANDIDATE 不等於正式 PASS；REVIEW 不等於正式 NG。'
++    ]
++  };
++}
+@@
+ function 製造AI閘道_Vision轉接器_(partNo) {
+   var props = PropertiesService.getScriptProperties();
+   var url = 製造AI閘道_文字_(props.getProperty(製造AI閘道_Vision設定_.網址屬性名稱));
+-
+-  if (!url) {
+-    return {
+-      found: false,
+-      data: null,
+-      warnings: [
+-        'VISION_API_NOT_CONFIGURED：正式 Vision API 尚未接入即時 Tool。'
+-      ]
+-    };
+-  }
++  // 正式外部 Vision API 優先；未設定時回查同一正式主資料庫。
++  if (!url) {
++    var fallback = 製造AI閘道_Vision主庫Fallback_(partNo);
++    if (!fallback.found) {
++      fallback.warnings = ['VISION_API_NOT_CONFIGURED：正式即時 Vision API 尚未設定，已改查主庫唯讀 fallback。']
++        .concat(fallback.warnings || []);
++    }
++    return fallback;
++  }
+@@
+-      reviewReasons: Array.isArray(d.reviewReasons) ? d.reviewReasons : [],
+-      slots: Array.isArray(d.slots) ? d.slots : [],
+-      detections: d.detections || [],
+-      sourcePhotoUrl: 製造AI閘道_空轉Null_(d.sourcePhotoUrl),
+-      annotatedPhotoUrl: 製造AI閘道_空轉Null_(d.annotatedPhotoUrl),
+-      inspectedAt: 製造AI閘道_日期時間ISO_(d.inspectedAt),
+-      source: 製造AI閘道_空轉Null_(d.source) || 'VISION_SERVICE'
+-    },
++      ...製造AI閘道_Vision列轉資料_(d,'VISION_SERVICE')
++    },
+     warnings: []
+   };
+ }
++
++function 驗收_AI視覺_A916_PILOT主庫Fallback_() {
++  var p='A916000000';
++  var r=製造AI閘道_Vision主庫Fallback_(p);
++  var d=r&&r.data?r.data:{};
++  var checks=[
++    {name:'Pilot 不可冒充量產正式 Vision',pass:r.found===false},
++    {name:'Pilot 共20筆',pass:Number(d.pilotRecordCount)===20},
++    {name:'PASS_CANDIDATE 共5筆',pass:Number(d.passCandidateCount)===5},
++    {name:'REVIEW 共15筆',pass:Number(d.reviewCount)===15},
++    {name:'正式NG不得由Pilot推定',pass:Number(d.ngCandidateCount)===0},
++    {name:'releaseStatus 未量產發布',pass:d.releaseStatus==='NOT_PRODUCTION_RELEASED'}
++  ];
++  var result={
++    success:checks.every(function(x){return x.pass;}),
++    service:製造AI閘道_系統名稱_,
++    version:製造AI閘道_版本_,
++    test:'A916_VISION_PILOT_MASTER_SHEET_FALLBACK',
++    checks:checks,
++    adapterResult:r
++  };
++  console.log(JSON.stringify(result,null,2));
++  Logger.log(JSON.stringify(result,null,2));
++  return result;
++}
