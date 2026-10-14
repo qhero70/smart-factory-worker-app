@@ -3983,6 +3983,212 @@ body.is-fullscreen .a3-preview {
     background: rgba(52, 168, 83, 0.10);
     color: var(--g-green-d);
 }
+
+/* 歡迎畫面單頁手機版 v2.0.1 */
+@media (max-width: 767px) {
+    #welcome-screen {
+        height: 100dvh;
+        max-height: 100dvh;
+        overflow: hidden;
+    }
+
+    #welcome-screen .g-bar {
+        height: 3px;
+        min-height: 3px;
+    }
+
+    .ws-scroll {
+        height: calc(100dvh - 3px);
+        flex: 1 1 auto;
+        overflow: hidden !important;
+        overscroll-behavior: none;
+        -webkit-overflow-scrolling: auto;
+    }
+
+    .ws-inner {
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+        max-height: 100%;
+        padding: 0 0 max(6px, env(safe-area-inset-bottom, 0px));
+        overflow: hidden;
+        justify-content: flex-start;
+    }
+
+    .ws-company-row {
+        padding: 7px 16px 0;
+        flex: none;
+    }
+
+    .ws-company {
+        gap: 7px;
+        font-size: 10.5px;
+        letter-spacing: 1px;
+    }
+
+    .ws-company .line {
+        width: 16px;
+        height: 2px;
+    }
+
+    .ws-hero-title {
+        padding: 4px 16px 0;
+        flex: none;
+    }
+
+    .ws-main-title {
+        font-size: clamp(27px, 4.8dvh, 36px);
+        line-height: 1.04;
+        letter-spacing: .3px;
+    }
+
+    .ws-main-sub {
+        margin-top: 5px;
+        font-size: 11.5px;
+        line-height: 1.25;
+        letter-spacing: .45px;
+    }
+
+    .ws-hero-visual {
+        height: clamp(160px, 25dvh, 235px);
+        min-height: 0;
+        margin-top: 0;
+        flex: 0 0 auto;
+        overflow: hidden;
+    }
+
+    .ws-tool-orbit {
+        top: 50%;
+        width: min(57vw, 218px);
+        height: min(57vw, 218px);
+        transform: translate(-50%, -50%);
+        animation: none;
+        box-shadow:
+            0 0 0 18px rgba(66, 133, 244, 0.04),
+            0 0 0 36px rgba(52, 168, 83, 0.025),
+            inset 0 0 42px rgba(66, 133, 244, 0.07);
+    }
+
+    .ws-tool-orbit::before {
+        inset: -7px;
+        animation: none;
+    }
+
+    .ws-dim-legend {
+        gap: 4px 6px;
+        margin-top: 2px;
+        padding: 0 10px;
+        flex: none;
+    }
+
+    .ws-dim-chip {
+        gap: 5px;
+        padding: 4px 8px;
+        font-size: 9.5px;
+        line-height: 1.1;
+    }
+
+    .ws-dim-chip .b {
+        width: 7px;
+        height: 7px;
+    }
+
+    .ws-visual-note {
+        margin-top: 3px;
+        font-size: 13.5px;
+        line-height: 1.2;
+        letter-spacing: .45px;
+        flex: none;
+    }
+
+    .ws-visual-desc {
+        margin-top: 3px;
+        padding: 0 12px;
+        font-size: 10.5px;
+        line-height: 1.25;
+        flex: none;
+    }
+
+    .ws-welcome-actions {
+        margin-top: 5px;
+        padding: 0 14px;
+        flex: none;
+    }
+
+    .ws-btn-white {
+        min-height: 43px;
+        padding: 10px 12px;
+        border-radius: 15px;
+        font-size: 14px;
+        box-shadow:
+            0 6px 18px rgba(66, 133, 244, 0.30),
+            inset 0 1px 1px rgba(255, 255, 255, 0.30);
+    }
+
+    .ws-btn-video {
+        min-height: 43px;
+        margin-top: 6px;
+        padding: 9px 10px;
+        border-radius: 15px;
+        font-size: 13px;
+        box-shadow: 0 5px 15px rgba(234, 67, 53, 0.26);
+    }
+
+    .ws-btn-video .play-ic {
+        width: 22px;
+        height: 22px;
+        font-size: 10px;
+    }
+
+    .ws-btn-outline {
+        min-height: 41px;
+        margin-top: 6px;
+        padding: 9px 10px;
+        border-radius: 14px;
+        font-size: 12.5px;
+    }
+
+    .ws-quick-row {
+        margin-top: 6px;
+        gap: 6px;
+    }
+
+    .ws-quick-btn {
+        min-height: 50px;
+        padding: 7px 3px 6px;
+        border-radius: 13px;
+        font-size: 10px;
+        line-height: 1.15;
+        gap: 3px;
+    }
+
+    .ws-quick-btn .ic {
+        font-size: 16px;
+    }
+
+    .ws-welcome-foot {
+        margin-top: 5px;
+        font-size: 9.5px;
+        line-height: 1.15;
+        letter-spacing: .45px;
+    }
+}
+
+@media (max-width: 767px) and (max-height: 700px) {
+    .ws-company-row { display: none; }
+    .ws-hero-title { padding-top: 3px; }
+    .ws-main-title { font-size: 27px; }
+    .ws-main-sub { margin-top: 3px; font-size: 10.5px; }
+    .ws-hero-visual { height: 145px; }
+    .ws-dim-chip { padding: 3px 6px; font-size: 8.8px; }
+    .ws-visual-note { font-size: 12.5px; }
+    .ws-visual-desc { display: none; }
+    .ws-welcome-actions { margin-top: 3px; padding: 0 10px; }
+    .ws-btn-white, .ws-btn-video, .ws-btn-outline { min-height: 38px; padding-top: 7px; padding-bottom: 7px; }
+    .ws-quick-btn { min-height: 44px; padding-top: 5px; padding-bottom: 4px; }
+    .ws-welcome-foot { margin-top: 3px; }
+}
+
 </style>
 </head>
 <body class="mobile-view-chat">
