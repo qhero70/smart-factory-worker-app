@@ -4348,6 +4348,61 @@ html, body {
     .nav-add-label { top:34px; }
 }
 
+
+/* 跨裝置雲端同步 v2.1.0 */
+.sync-status-dot {
+    width:9px; height:9px; border-radius:50%; display:inline-block; flex:none;
+    background:#9AA0A6; box-shadow:0 0 0 3px rgba(154,160,166,.12);
+}
+.sync-status-dot.ok { background:#34A853; box-shadow:0 0 0 3px rgba(52,168,83,.14); }
+.sync-status-dot.busy { background:#FBBC04; box-shadow:0 0 0 3px rgba(251,188,4,.16); }
+.sync-status-dot.error { background:#EA4335; box-shadow:0 0 0 3px rgba(234,67,53,.14); }
+.sync-panel-body { padding: 0 18px 20px; overflow-y:auto; }
+.sync-card {
+    border:1px solid rgba(218,220,224,.75);
+    background:rgba(255,255,255,.72);
+    border-radius:16px;
+    padding:14px;
+    margin-bottom:12px;
+}
+.sync-title { font-size:.82rem; font-weight:900; color:var(--ink); margin-bottom:6px; }
+.sync-desc { font-size:.70rem; line-height:1.55; color:var(--ink-3); }
+.sync-code-row { display:flex; gap:8px; margin-top:10px; }
+.sync-code-input {
+    flex:1; min-width:0; border:1.5px solid var(--line); border-radius:12px;
+    padding:10px 11px; font-family:ui-monospace,SFMono-Regular,Menlo,monospace !important;
+    font-size:14px !important; background:#fff; color:var(--ink);
+}
+.sync-btn {
+    min-height:40px; border-radius:12px; border:1px solid var(--line);
+    background:#fff; color:var(--ink-2); padding:9px 12px;
+    font-family:inherit; font-size:.74rem !important; font-weight:800;
+}
+.sync-btn.primary { background:#4285F4; border-color:#4285F4; color:#fff; }
+.sync-btn.green { background:#E6F4EA; border-color:#CEEAD6; color:#137333; }
+.sync-btn.red { background:#FCE8E6; border-color:#FAD2CF; color:#B3261E; }
+.sync-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px; }
+.sync-status-line {
+    display:flex; align-items:center; gap:8px; font-size:.72rem; line-height:1.4;
+    color:var(--ink-3); margin-top:8px;
+}
+.sync-toggle-row { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-top:10px; }
+.sync-switch {
+    width:46px; height:26px; border-radius:999px; border:none; padding:3px;
+    background:#DADCE0; position:relative; flex:none; cursor:pointer;
+}
+.sync-switch::after {
+    content:''; display:block; width:20px; height:20px; border-radius:50%;
+    background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.25); transition:transform .18s;
+}
+.sync-switch.on { background:#34A853; }
+.sync-switch.on::after { transform:translateX(20px); }
+@media(max-width:420px){
+    .sync-actions { grid-template-columns:1fr; }
+    .sync-code-row { flex-wrap:wrap; }
+    .sync-code-input { flex-basis:100%; }
+}
+
 </style>
 </head>
 <body class="mobile-view-chat">
@@ -4517,6 +4572,13 @@ html, body {
                     <small>My Tool Sheets · 本機暫存</small>
                 </span>
                 <span class="os-badge" id="os-table-count">0/10</span>
+            </button>
+            <button class="os-btn" onclick="openCloudSync(); closeSidebarOnMobile();">
+                <span class="os-btn-ic green">☁️</span>
+                <span class="os-btn-label">跨裝置雲端同步
+                    <small>Cloud Sync · 手機 / 電腦共用</small>
+                </span>
+                <span class="sync-status-dot" id="os-sync-dot"></span>
             </button>
             <button class="os-btn" onclick="openAvatarPicker(); closeSidebarOnMobile();">
                 <span class="os-btn-ic purple">🎨</span>
@@ -5730,6 +5792,7 @@ html, body {
                 <button class="tm-cloud-btn excel" onclick="exportExcelFile()">📊 匯出這張 Excel<br><span class="ui-en">Export This Sheet</span></button>
                 <button class="tm-cloud-btn sound" onclick="openSoundSettings()">🎨 音效設定<br><span class="ui-en">Sound Settings</span></button>
                 <button class="tm-cloud-btn master" onclick="exportMasterExcelFile()">📚 匯出主檔 Excel｜全部表格各一個分頁<br><span class="ui-en">Master Workbook</span></button>
+                <button class="tm-cloud-btn sync" onclick="openCloudSync()">☁️ 跨裝置同步<br><span class="ui-en">Cloud Sync · Phone / PC</span></button>
                 <button class="tm-cloud-btn voice" onclick="openVoiceSettings()">🔊 語音引導設定<br><span class="ui-en">Voice Guide Settings</span></button>
             </div>
         </div>
@@ -5740,6 +5803,64 @@ html, body {
             <div class="tm-note">
                 💾 本機自動暫存最多 <b>10 張</b>；電子資料只以 <b>Excel 試算表</b> 格式保存<br>
                 <span class="ui-en">Up to 10 local sheets · Electronic data saved as Excel spreadsheets only</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     跨裝置雲端同步
+     ============================================================ -->
+<div id="cloud-sync-modal" class="modal-backdrop" onclick="if(event.target===this) closeCloudSync()">
+    <div class="modal-panel" style="max-width:560px;">
+        <div class="modal-handle"></div>
+        <div class="modal-head">
+            <h2>☁️ 跨裝置雲端同步<br><span class="ui-en">Cloud Sync · Phone / PC</span></h2>
+            <button class="modal-close" onclick="closeCloudSync()">&times;</button>
+        </div>
+        <div class="sync-panel-body">
+            <div class="sync-card">
+                <div class="sync-title">同步碼 / Sync Code</div>
+                <div class="sync-desc">
+                    手機與電腦輸入同一組同步碼，就會共用同一批刀具表。同步碼等同私密鑰匙，請勿公開。
+                </div>
+                <div class="sync-code-row">
+                    <input id="sync-code-input" class="sync-code-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="尚未建立同步碼">
+                    <button class="sync-btn" onclick="copyCloudSyncCode()">複製</button>
+                </div>
+                <div class="sync-actions">
+                    <button class="sync-btn primary" onclick="createCloudSyncCode()">建立新同步碼</button>
+                    <button class="sync-btn" onclick="connectCloudSyncCode()">使用這組同步碼</button>
+                </div>
+            </div>
+
+            <div class="sync-card">
+                <div class="sync-title">同步資料 / Sync Data</div>
+                <div class="sync-desc">
+                    「合併雲端」會以每張刀具表最後更新時間合併手機與電腦資料，不會整批覆蓋。
+                </div>
+                <div class="sync-actions">
+                    <button class="sync-btn green" onclick="syncPushStore(false)">⬆ 上傳目前資料</button>
+                    <button class="sync-btn primary" onclick="syncPullStore(false)">↕ 合併雲端資料</button>
+                </div>
+                <div class="sync-toggle-row">
+                    <div>
+                        <div style="font-size:.76rem;font-weight:800;">自動同步</div>
+                        <div class="sync-desc">儲存後約 1.5 秒自動上傳。</div>
+                    </div>
+                    <button id="sync-auto-switch" class="sync-switch" onclick="toggleCloudAutoSync()" aria-label="自動同步"></button>
+                </div>
+                <div class="sync-status-line">
+                    <span class="sync-status-dot" id="sync-modal-dot"></span>
+                    <span id="sync-status-text">尚未設定同步碼</span>
+                </div>
+            </div>
+
+            <div class="sync-card">
+                <div class="sync-title">LINE 內建瀏覽器</div>
+                <div class="sync-desc">
+                    LINE 不能可靠選擇手機資料夾，但雲端同步可正常使用。完成同步後，在電腦輸入同一組同步碼即可看到資料。
+                </div>
             </div>
         </div>
     </div>
@@ -5967,7 +6088,9 @@ html, body {
                 <ul>
                     <li>本機最多 10 張。</li>
                     <li>自動存於 localStorage 與 IndexedDB 雙重備份。</li>
-                    <li>清除瀏覽器資料會遺失，請務必列印或匯出。</li>
+                    <li><b>跨裝置雲端同步</b>：手機與電腦使用同一組同步碼，可合併同一批刀具表。</li>
+                    <li>LINE 內建瀏覽器不能可靠選資料夾，但仍可使用雲端同步。</li>
+                    <li>清除瀏覽器資料前，建議先確認雲端同步完成或匯出 Excel。</li>
                 </ul>
             </div>
 
@@ -8499,6 +8622,259 @@ function setAvatar(v) {
 }
 function resetAvatar() { setAvatar('🤖'); }
 
+
+const CLOUD_SYNC_API = 'https://full-giddy-force--qhero70.replit.app/api/store';
+const CLOUD_SYNC_KEY_STORAGE = 'tool_sheet_cloud_sync_key_v1';
+const CLOUD_SYNC_AUTO_STORAGE = 'tool_sheet_cloud_sync_auto_v1';
+let cloudSyncTimer = null;
+let cloudSyncBusy = false;
+let cloudSyncApplying = false;
+let cloudSyncReady = false;
+let cloudSyncLastOk = 0;
+
+function normalizeCloudSyncKey(value) {
+    return String(value || '').trim().replace(/[^A-Za-z0-9_-]/g, '').slice(0, 80);
+}
+function getCloudSyncKey() {
+    return normalizeCloudSyncKey(localStorage.getItem(CLOUD_SYNC_KEY_STORAGE) || '');
+}
+function setCloudSyncKey(key) {
+    const normalized = normalizeCloudSyncKey(key);
+    if (normalized) localStorage.setItem(CLOUD_SYNC_KEY_STORAGE, normalized);
+    else localStorage.removeItem(CLOUD_SYNC_KEY_STORAGE);
+    updateCloudSyncUI();
+    return normalized;
+}
+function isCloudAutoSync() {
+    return localStorage.getItem(CLOUD_SYNC_AUTO_STORAGE) !== '0';
+}
+function setCloudAutoSync(on) {
+    localStorage.setItem(CLOUD_SYNC_AUTO_STORAGE, on ? '1' : '0');
+    updateCloudSyncUI();
+}
+function generateCloudSyncKey() {
+    const bytes = new Uint8Array(24);
+    crypto.getRandomValues(bytes);
+    let binary = '';
+    bytes.forEach(b => { binary += String.fromCharCode(b); });
+    return btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+function setCloudSyncStatus(state, text) {
+    const dots = [document.getElementById('os-sync-dot'), document.getElementById('sync-modal-dot')];
+    dots.forEach(dot => {
+        if (!dot) return;
+        dot.className = 'sync-status-dot' + (state ? ' ' + state : '');
+    });
+    const label = document.getElementById('sync-status-text');
+    if (label && text) label.textContent = text;
+}
+function updateCloudSyncUI() {
+    const key = getCloudSyncKey();
+    const input = document.getElementById('sync-code-input');
+    if (input && document.activeElement !== input) input.value = key;
+    const sw = document.getElementById('sync-auto-switch');
+    if (sw) sw.classList.toggle('on', isCloudAutoSync());
+    if (!key) setCloudSyncStatus('', '尚未設定同步碼');
+    else if (cloudSyncLastOk) setCloudSyncStatus('ok', '已連線 · 最近同步 ' + new Date(cloudSyncLastOk).toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'}));
+    else setCloudSyncStatus('', '已設定同步碼，尚未同步');
+}
+function openCloudSync() {
+    const modal = document.getElementById('cloud-sync-modal');
+    if (modal) modal.classList.add('show');
+    updateCloudSyncUI();
+}
+function closeCloudSync() {
+    const modal = document.getElementById('cloud-sync-modal');
+    if (modal) modal.classList.remove('show');
+}
+async function copyCloudSyncCode() {
+    const key = getCloudSyncKey();
+    if (!key) {
+        setCloudSyncStatus('error', '請先建立或輸入同步碼');
+        return;
+    }
+    try {
+        await navigator.clipboard.writeText(key);
+        setCloudSyncStatus('ok', '同步碼已複製');
+    } catch (e) {
+        window.prompt('請複製同步碼：', key);
+    }
+}
+async function createCloudSyncCode() {
+    const key = generateCloudSyncKey();
+    setCloudSyncKey(key);
+    setCloudAutoSync(true);
+    setCloudSyncStatus('busy', '正在建立雲端資料…');
+    await syncPushStore(false);
+}
+async function connectCloudSyncCode() {
+    const input = document.getElementById('sync-code-input');
+    const key = normalizeCloudSyncKey(input ? input.value : '');
+    if (key.length < 20) {
+        setCloudSyncStatus('error', '同步碼格式不正確');
+        return;
+    }
+    setCloudSyncKey(key);
+    setCloudAutoSync(true);
+    await syncPullStore(false);
+}
+function toggleCloudAutoSync() {
+    setCloudAutoSync(!isCloudAutoSync());
+    if (isCloudAutoSync()) scheduleCloudSync();
+}
+function extractCloudStore(payload) {
+    if (!payload || typeof payload !== 'object') return null;
+    const candidates = [
+        payload.store,
+        payload.data,
+        payload.payload,
+        payload.value,
+        payload
+    ];
+    for (const c of candidates) {
+        if (c && typeof c === 'object' && Array.isArray(c.tables)) return c;
+        if (c && c.store && Array.isArray(c.store.tables)) return c.store;
+    }
+    return null;
+}
+async function cloudSyncRequest(method, key, body) {
+    const url = CLOUD_SYNC_API + '/' + encodeURIComponent(key);
+    const options = {
+        method,
+        mode: 'cors',
+        cache: 'no-store',
+        headers: { 'Content-Type': 'application/json' }
+    };
+    if (body !== undefined) options.body = JSON.stringify(body);
+    const res = await fetch(url, options);
+    if (res.status === 404) return { notFound:true, status:404, data:null };
+    let data = null;
+    const text = await res.text();
+    if (text) {
+        try { data = JSON.parse(text); } catch (e) { data = null; }
+    }
+    if (!res.ok) {
+        const err = new Error((data && (data.error || data.message)) || ('HTTP ' + res.status));
+        err.status = res.status;
+        throw err;
+    }
+    return { status:res.status, data };
+}
+function localStoreSnapshot() {
+    return JSON.parse(JSON.stringify(store));
+}
+async function syncPushStore(silent = true) {
+    const key = getCloudSyncKey();
+    if (!key || cloudSyncBusy) return false;
+    saveCurrent(true);
+    cloudSyncBusy = true;
+    setCloudSyncStatus('busy', '正在上傳雲端…');
+    try {
+        const snapshot = localStoreSnapshot();
+        await cloudSyncRequest('PUT', key, snapshot);
+        cloudSyncLastOk = Date.now();
+        setCloudSyncStatus('ok', '上傳完成 · ' + new Date(cloudSyncLastOk).toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'}));
+        return true;
+    } catch (e) {
+        console.warn('Cloud sync push failed', e);
+        setCloudSyncStatus('error', '雲端上傳失敗：' + (e.message || e));
+        if (!silent) alert('雲端上傳失敗：' + (e.message || e));
+        return false;
+    } finally {
+        cloudSyncBusy = false;
+    }
+}
+function applyMergedStoreToView() {
+    renderTableList();
+    updateHomeRecentCard();
+    const t = store.tables.find(x => x.id === store.currentId);
+    if (!t || !t.data) return;
+    const type = Number(t.data.type) === 2 ? 2 : 1;
+    appData = makeEmptyAppData(type);
+    Object.assign(appData, JSON.parse(JSON.stringify(t.data)));
+    if (!Array.isArray(appData.tools)) appData.tools = [];
+    if (!Array.isArray(appData.tools2)) appData.tools2 = [];
+    if (type === 1) syncA4DerivedFields();
+
+    const mb1 = document.getElementById('mode-btn-1');
+    const mb2 = document.getElementById('mode-btn-2');
+    if (mb1) mb1.classList.toggle('active', type === 1);
+    if (mb2) mb2.classList.toggle('active', type === 2);
+    const osMode1 = document.getElementById('os-mode-1');
+    const osMode2 = document.getElementById('os-mode-2');
+    if (osMode1) osMode1.classList.toggle('active', type === 1);
+    if (osMode2) osMode2.classList.toggle('active', type === 2);
+    const a4 = document.getElementById('a4-wrapper');
+    const a3 = document.getElementById('a3-wrapper');
+    if (a4) a4.classList.toggle('hidden', type !== 1);
+    if (a3) a3.classList.toggle('hidden', type !== 2);
+    updateA4Preview();
+    updateA3Preview();
+    restoreChatView();
+    setTimeout(adjustPreviewScale, 50);
+}
+async function syncPullStore(silent = true) {
+    const key = getCloudSyncKey();
+    if (!key || cloudSyncBusy) return false;
+    cloudSyncBusy = true;
+    setCloudSyncStatus('busy', '正在讀取雲端資料…');
+    try {
+        const result = await cloudSyncRequest('GET', key);
+        if (result.notFound) {
+            if (store.tables.length) {
+                cloudSyncBusy = false;
+                return await syncPushStore(silent);
+            }
+            setCloudSyncStatus('', '雲端尚無資料');
+            return true;
+        }
+        const remote = extractCloudStore(result.data);
+        if (!remote) throw new Error('雲端資料格式無法辨識');
+
+        const merged = mergeStores([store, remote]);
+        cloudSyncApplying = true;
+        store = merged;
+        const snapshot = localStoreSnapshot();
+        const payload = JSON.stringify(snapshot);
+        localStorage.setItem(STORAGE_KEY, payload);
+        localStorage.setItem(STORAGE_BACKUP_KEY, payload);
+        await persistToIDB(snapshot);
+        cloudSyncApplying = false;
+
+        cloudSyncLastOk = Date.now();
+        applyMergedStoreToView();
+        setCloudSyncStatus('ok', '同步完成 · ' + new Date(cloudSyncLastOk).toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'}));
+
+        // 將合併結果回寫，讓手機與電腦收斂成同一份。
+        cloudSyncBusy = false;
+        await syncPushStore(true);
+        return true;
+    } catch (e) {
+        cloudSyncApplying = false;
+        console.warn('Cloud sync pull failed', e);
+        setCloudSyncStatus('error', '雲端同步失敗：' + (e.message || e));
+        if (!silent) alert('雲端同步失敗：' + (e.message || e));
+        return false;
+    } finally {
+        cloudSyncBusy = false;
+    }
+}
+function scheduleCloudSync() {
+    if (!cloudSyncReady || cloudSyncApplying || !isCloudAutoSync() || !getCloudSyncKey()) return;
+    clearTimeout(cloudSyncTimer);
+    cloudSyncTimer = setTimeout(() => { syncPushStore(true); }, 1500);
+}
+async function initCloudSyncOnLoad() {
+    updateCloudSyncUI();
+    const key = getCloudSyncKey();
+    if (!key) {
+        cloudSyncReady = true;
+        return;
+    }
+    await syncPullStore(true);
+    cloudSyncReady = true;
+}
+
 function openToolDB() {
     return new Promise((resolve, reject) => {
         if (!('indexedDB' in window)) { resolve(null); return; }
@@ -8640,6 +9016,7 @@ function persist() {
         localStorage.setItem(STORAGE_KEY, payload);
         localStorage.setItem(STORAGE_BACKUP_KEY, payload);
         persistToIDB(snapshot);
+        scheduleCloudSync();
         return true;
     } catch (e) {
         persistToIDB(snapshot);
@@ -10216,7 +10593,7 @@ function updateA3Preview() {
 }
 
 window.addEventListener('beforeunload', () => { saveCurrent(); saveThreeSettingsToStorage(); });
-window.addEventListener('pagehide', () => { saveCurrent(true); saveThreeSettingsToStorage(); });
+window.addEventListener('pagehide', () => { saveCurrent(true); syncPushStore(true); saveThreeSettingsToStorage(); });
 document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') {
         saveCurrent(true);
@@ -10234,6 +10611,7 @@ window.onload = async () => {
     loadThreeSettings();
     await requestPersistentStorage();
     await loadStore();
+    await initCloudSyncOnLoad();
     loadAvatar();
     loadVoiceSettings();
     loadCustomSounds();
