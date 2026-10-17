@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  雲端服務唯讀驗證:
+  cloud_sync_readonly_check:
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
