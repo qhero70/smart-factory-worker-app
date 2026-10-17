@@ -17,31 +17,31 @@ jobs:
       - name: 檢查刀具表正式網站
         run: |
           set -euo pipefail
-          網址="https://qhero70.github.io/smart-factory-worker-app/tool-change-pwa/"
-          狀態=$(curl --location --silent --show-error --max-time 30 --output /tmp/刀具表.html --write-out '%{http_code}' "$網址")
-          echo "刀具表網站狀態: $狀態"
-          test "$狀態" = "200"
+          SITE_URL="https://qhero70.github.io/smart-factory-worker-app/tool-change-pwa/"
+          HTTP_STATUS=$(curl --location --silent --show-error --max-time 30 --output /tmp/刀具表.html --write-out '%{http_code}' "$SITE_URL")
+          echo "刀具表網站狀態: $HTTP_STATUS"
+          test "$HTTP_STATUS" = "200"
           grep -q '刀具表精靈' /tmp/刀具表.html
 
       - name: 檢查後端同步讀取 API 是否真正存在
         run: |
           set -euo pipefail
-          網址="https://full-giddy-force--qhero70.replit.app/api/store/HealthReadOnlyNoData_20261017_A834E20D"
-          狀態=$(curl --location --silent --show-error --max-time 30 --header 'Accept: application/json' --dump-header /tmp/後端標頭.txt --output /tmp/後端回應.txt --write-out '%{http_code}' "$網址")
-          echo "雲端不存在同步碼讀取回應: $狀態"
+          SITE_URL="https://full-giddy-force--qhero70.replit.app/api/store/HealthReadOnlyNoData_20261017_A834E20D"
+          HTTP_STATUS=$(curl --location --silent --show-error --max-time 30 --header 'Accept: application/json' --dump-header /tmp/後端標頭.txt --output /tmp/後端回應.txt --write-out '%{http_code}' "$SITE_URL")
+          echo "雲端不存在同步碼讀取回應: $HTTP_STATUS"
           echo "回應內容類型:"
           grep -i '^content-type:' /tmp/後端標頭.txt || true
-          test "$狀態" = "404"
+          test "$HTTP_STATUS" = "404"
           grep -iq 'application/json' /tmp/後端標頭.txt
 
       - name: 檢查手機電腦跨來源上傳預檢
         run: |
           set -euo pipefail
-          網址="https://full-giddy-force--qhero70.replit.app/api/store/HealthReadOnlyNoData_20261017_A834E20D"
-          狀態=$(curl --location --silent --show-error --max-time 30 --request OPTIONS --header 'Origin: https://qhero70.github.io' --header 'Access-Control-Request-Method: PUT' --header 'Access-Control-Request-Headers: content-type' --dump-header /tmp/跨來源標頭.txt --output /tmp/跨來源回應.txt --write-out '%{http_code}' "$網址")
-          echo "跨來源預檢狀態: $狀態"
+          SITE_URL="https://full-giddy-force--qhero70.replit.app/api/store/HealthReadOnlyNoData_20261017_A834E20D"
+          HTTP_STATUS=$(curl --location --silent --show-error --max-time 30 --request OPTIONS --header 'Origin: https://qhero70.github.io' --header 'Access-Control-Request-Method: PUT' --header 'Access-Control-Request-Headers: content-type' --dump-header /tmp/跨來源標頭.txt --output /tmp/跨來源回應.txt --write-out '%{http_code}' "$SITE_URL")
+          echo "跨來源預檢狀態: $HTTP_STATUS"
           echo "跨來源允許標頭:"
           grep -iE '^access-control-allow-(origin|methods|headers):' /tmp/跨來源標頭.txt || true
-          test "$狀態" = "200" -o "$狀態" = "204"
+          test "$HTTP_STATUS" = "200" -o "$HTTP_STATUS" = "204"
           grep -iq '^access-control-allow-origin:' /tmp/跨來源標頭.txt
           grep -iq '^access-control-allow-methods:.*PUT' /tmp/跨來源標頭.txt
