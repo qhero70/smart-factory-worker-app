@@ -8860,7 +8860,7 @@ async function syncPullStore(silent = true) {
     }
 }
 function scheduleCloudSync() {
-    if (!cloudSyncReady || cloudSyncApplying || !isCloudAutoSync() || !getCloudSyncKey()) return;
+    if (!cloudSyncReady || cloudSyncApplying || cloudSyncBusy || !isCloudAutoSync() || !getCloudSyncKey()) return;
     clearTimeout(cloudSyncTimer);
     cloudSyncTimer = setTimeout(() => { syncPushStore(true); }, 1500);
 }
