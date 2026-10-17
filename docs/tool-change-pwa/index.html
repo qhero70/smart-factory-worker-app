@@ -8737,50 +8737,99 @@ function extractCloudStore(payload) {
     }
     return null;
 }
+
 async function cloudSyncRequest(method, key, body) {
     const url = CLOUD_SYNC_API + '/' + encodeURIComponent(key);
-    const options = {
-        method,
-        mode: 'cors',
-        cache: 'no-store',
-        headers: { 'Content-Type': 'application/json' }
-    };
-    if (body !== undefined) options.body = JSON.stringify(body);
+    const options = { method, mode: 'cors', cache: 'no-store' };
+    if (body !== undefined) {
+        options.headers = { 'Content-Type': 'application/json' };
+        options.body = JSON.stringify(body);
+    }
     const res = await fetch(url, options);
-    if (res.status === 404) return { notFound:true, status:404, data:null };
+    const 回應文字 = await res.text();
     let data = null;
-    const text = await res.text();
-    if (text) {
-        try { data = JSON.parse(text); } catch (e) { data = null; }
+    if (回應文字) {
+        try { data = JSON.parse(回應文字); }
+        catch (e) {
+            throw new Error('雲端回應不是有效的 JSON（HTTP ' + res.status + '）');
+        }
+    }
+    // 僅讀取 GET 的 404 才表示該同步碼目前沒有儲存資料；
+    // 寫入 PUT 的 404 是 API 故障，絕不可誤判為上傳成功。
+    if (res.status === 404 && method === 'GET') {
+        return { notFound: true, status: 404, data: null };
     }
     if (!res.ok) {
-        const err = new Error((data && (data.error || data.message)) || ('HTTP ' + res.status));
+        const err = new Error((data && (data.error || data.message)) || ('雲端服務 HTTP ' + res.status));
         err.status = res.status;
         throw err;
     }
-    return { status:res.status, data };
+    return { status: res.status, data };
 }
 function localStoreSnapshot() {
     return JSON.parse(JSON.stringify(store));
 }
+
 async function syncPushStore(silent = true) {
     const key = getCloudSyncKey();
     if (!key || cloudSyncBusy) return false;
-    saveCurrent(true);
     cloudSyncBusy = true;
-    setCloudSyncStatus('busy', '正在上傳雲端…');
+    setCloudSyncStatus('busy', '正在檢查雲端並上傳…');
     try {
-        const snapshot = localStoreSnapshot();
-        await cloudSyncRequest('PUT', key, snapshot);
+        // 先保存目前輸入；沒有變更時 saveCurrent 不再重新刷新時間戳。
+        saveCurrent(true);
+        const local = localStoreSnapshot();
+        if (!Array.isArray(local.tables) || local.tables.length === 0) {
+            throw new Error('已阻止上傳：目前裝置沒有任何刀具表，不能用空白資料覆蓋雲端');
+        }
+        // 先讀雲端再合併，不允許整批以本機直接取代遠端資料。
+        const existing = await cloudSyncRequest('GET', key);
+        let planned = local;
+        if (existing.notFound) {
+            // 自動同步不應默默建立全新的空雲端資料集。
+            if (silent) throw new Error('雲端沒有這組同步碼的資料，請在有刀具表的手機按「上傳目前資料」');
+        } else {
+            const remote = extractCloudStore(existing.data);
+            if (!remote) throw new Error('無法解析原有雲端資料，已停止寫入以避免覆蓋');
+            planned = mergeStores([remote, local]);
+            if (planned.tables.length < remote.tables.length || planned.tables.length < local.tables.length) {
+                throw new Error('合併超過系統刀具表上限，已停止寫入以保護原始資料');
+            }
+        }
+        const writeResult = await cloudSyncRequest('PUT', key, planned);
+        if (writeResult.notFound) throw new Error('找不到雲端寫入 API（HTTP 404）');
+
+        // 讀回查核：不可僅靠 HTTP 2xx 就宣告「上傳完成」。
+        const check = await cloudSyncRequest('GET', key);
+        const saved = check.notFound ? null : extractCloudStore(check.data);
+        if (!saved || !Array.isArray(saved.tables)) throw new Error('上傳後讀不到雲端刀具表，不能確認資料已保存');
+        const confirmed = planned.tables.every((t) => {
+            const other = saved.tables.find((x) => x && x.id === t.id);
+            return other && JSON.stringify(other.data) === JSON.stringify(t.data);
+        });
+        if (!confirmed) throw new Error('雲端讀回的刀具資料與上傳內容不一致，請勿清除手機備份');
+
+        // 驗證完畢後才把遠端併入本機，避免手機/電腦資料分叉。
+        if (JSON.stringify(local) !== JSON.stringify(planned)) {
+            cloudSyncApplying = true;
+            store = planned;
+            const payload = JSON.stringify(planned);
+            localStorage.setItem(STORAGE_KEY, payload);
+            localStorage.setItem(STORAGE_BACKUP_KEY, payload);
+            await persistToIDB(planned);
+            applyMergedStoreToView();
+            cloudSyncApplying = false;
+        }
         cloudSyncLastOk = Date.now();
-        setCloudSyncStatus('ok', '上傳完成 · ' + new Date(cloudSyncLastOk).toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'}));
+        setCloudSyncStatus('ok', '已上傳且讀回驗證完成 · ' + new Date(cloudSyncLastOk).toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'}));
         return true;
     } catch (e) {
         console.warn('Cloud sync push failed', e);
-        setCloudSyncStatus('error', '雲端上傳失敗：' + (e.message || e));
-        if (!silent) alert('雲端上傳失敗：' + (e.message || e));
+        setCloudSyncStatus('error', '雲端上傳未完成：' + (e.message || e));
+        if (!silent) alert('雲端上傳未完成：' + (e.message || e));
         return false;
     } finally {
+        cloudSyncApplying = false;
         cloudSyncBusy = false;
     }
 }
@@ -8813,6 +8862,7 @@ function applyMergedStoreToView() {
     restoreChatView();
     setTimeout(adjustPreviewScale, 50);
 }
+
 async function syncPullStore(silent = true) {
     const key = getCloudSyncKey();
     if (!key || cloudSyncBusy) return false;
@@ -8821,17 +8871,14 @@ async function syncPullStore(silent = true) {
     try {
         const result = await cloudSyncRequest('GET', key);
         if (result.notFound) {
-            if (store.tables.length) {
-                cloudSyncBusy = false;
-                return await syncPushStore(silent);
-            }
-            setCloudSyncStatus('', '雲端尚無資料');
-            return true;
+            throw new Error('雲端找不到這組同步碼的刀具資料；請先在有資料的手機上傳並完成驗證');
         }
         const remote = extractCloudStore(result.data);
-        if (!remote) throw new Error('雲端資料格式無法辨識');
-
+        if (!remote) throw new Error('雲端資料格式無法辨識，已保留本機資料');
         const merged = mergeStores([store, remote]);
+        if (merged.tables.length < store.tables.length || merged.tables.length < remote.tables.length) {
+            throw new Error('合併超過系統上限，已保留本機資料，沒有覆寫雲端');
+        }
         cloudSyncApplying = true;
         store = merged;
         const snapshot = localStoreSnapshot();
@@ -8839,23 +8886,19 @@ async function syncPullStore(silent = true) {
         localStorage.setItem(STORAGE_KEY, payload);
         localStorage.setItem(STORAGE_BACKUP_KEY, payload);
         await persistToIDB(snapshot);
-        cloudSyncApplying = false;
-
-        cloudSyncLastOk = Date.now();
         applyMergedStoreToView();
-        setCloudSyncStatus('ok', '同步完成 · ' + new Date(cloudSyncLastOk).toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'}));
-
-        // 將合併結果回寫，讓手機與電腦收斂成同一份。
-        cloudSyncBusy = false;
-        await syncPushStore(true);
+        cloudSyncApplying = false;
+        cloudSyncLastOk = Date.now();
+        // 讀取時不再自動把本機資料回寫雲端，避免空白裝置誤覆蓋。
+        setCloudSyncStatus('ok', '已讀取並合併雲端 · ' + new Date(cloudSyncLastOk).toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'}));
         return true;
     } catch (e) {
-        cloudSyncApplying = false;
         console.warn('Cloud sync pull failed', e);
-        setCloudSyncStatus('error', '雲端同步失敗：' + (e.message || e));
-        if (!silent) alert('雲端同步失敗：' + (e.message || e));
+        setCloudSyncStatus('error', '雲端讀取未完成：' + (e.message || e));
+        if (!silent) alert('雲端讀取未完成：' + (e.message || e));
         return false;
     } finally {
+        cloudSyncApplying = false;
         cloudSyncBusy = false;
     }
 }
@@ -9051,18 +9094,16 @@ function saveCurrent(keepIfEmpty) {
         store.tables.push(t);
         store.currentId = t.id;
     }
-    t.updatedAt = Date.now();
     const typeTag = appData.type === 2 ? '【A3】' : '【A4】';
-    if (appData.type === 2) {
-        t.name = appData.headerTitle
-            ? typeTag + appData.headerTitle + (appData.productNo ? ' · ' + appData.productNo : '')
-            : typeTag + '未命名刀具表';
-    } else {
-        t.name = appData.title
-            ? typeTag + appData.title + (appData.partNo ? ' · ' + appData.partNo : '')
-            : typeTag + '未命名刀具表';
-    }
-    t.data = JSON.parse(JSON.stringify(appData));
+    const 新名稱 = appData.type === 2
+        ? (appData.headerTitle ? typeTag + appData.headerTitle + (appData.productNo ? ' · ' + appData.productNo : '') : typeTag + '未命名刀具表')
+        : (appData.title ? typeTag + appData.title + (appData.partNo ? ' · ' + appData.partNo : '') : typeTag + '未命名刀具表');
+    const 新資料 = JSON.parse(JSON.stringify(appData));
+    // 沒有真正修改時不可刷新更新時間，否則舊裝置會搶先覆蓋新資料。
+    if (t.name === 新名稱 && JSON.stringify(t.data) === JSON.stringify(新資料)) return;
+    t.updatedAt = Date.now();
+    t.name = 新名稱;
+    t.data = 新資料;
     persist();
     renderTableList();
     updateHomeRecentCard();
