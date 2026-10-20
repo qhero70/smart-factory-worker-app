@@ -26,7 +26,7 @@ jobs:
       - name: 檢查後端同步讀取 API 是否真正存在
         run: |
           set -euo pipefail
-          SITE_URL="https://full-giddy-force--qhero70.replit.app/api/store/HealthReadOnlyNoData_20261017_A834E20D"
+          SITE_URL="https://tool-sheet-sync-api.vercel.app/api/store/HealthReadOnlyNoData_20261017_A834E20D"
           HTTP_STATUS=$(curl --location --silent --show-error --max-time 30 --header 'Accept: application/json' --dump-header /tmp/後端標頭.txt --output /tmp/後端回應.txt --write-out '%{http_code}' "$SITE_URL")
           echo "雲端不存在同步碼讀取回應: $HTTP_STATUS"
           echo "回應內容類型:"
@@ -37,7 +37,7 @@ jobs:
       - name: 檢查手機電腦跨來源上傳預檢
         run: |
           set -euo pipefail
-          SITE_URL="https://full-giddy-force--qhero70.replit.app/api/store/HealthReadOnlyNoData_20261017_A834E20D"
+          SITE_URL="https://tool-sheet-sync-api.vercel.app/api/store/HealthReadOnlyNoData_20261017_A834E20D"
           HTTP_STATUS=$(curl --location --silent --show-error --max-time 30 --request OPTIONS --header 'Origin: https://qhero70.github.io' --header 'Access-Control-Request-Method: PUT' --header 'Access-Control-Request-Headers: content-type' --dump-header /tmp/跨來源標頭.txt --output /tmp/跨來源回應.txt --write-out '%{http_code}' "$SITE_URL")
           echo "跨來源預檢狀態: $HTTP_STATUS"
           echo "跨來源允許標頭:"
