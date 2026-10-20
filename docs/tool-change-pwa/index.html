@@ -8907,6 +8907,57 @@ function scheduleCloudSync() {
     clearTimeout(cloudSyncTimer);
     cloudSyncTimer = setTimeout(() => { syncPushStore(true); }, 1500);
 }
+async function consumeCloudSyncPairingFromHash() {
+    let raw = '';
+    try { raw = String(location.hash || '').replace(/^#/, ''); } catch (e) {}
+    if (!raw) return false;
+
+    const params = new URLSearchParams(raw);
+    const key = normalizeCloudSyncKey(params.get('sync') || '');
+    if (key.length < 20) return false;
+
+    setCloudSyncKey(key);
+    setCloudAutoSync(true);
+
+    // 配對碼只存在 fragment；記入本機後立刻從網址列清除，不會送到伺服器或寫入 GitHub。
+    try {
+        history.replaceState(null, document.title, location.pathname + location.search);
+    } catch (e) {}
+
+    setCloudSyncStatus('busy', '正在自動配對手機與電腦…');
+
+    try {
+        const probe = await cloudSyncRequest('GET', key);
+
+        if (probe.notFound) {
+            if (store && Array.isArray(store.tables) && store.tables.length > 0) {
+                const ok = await syncPushStore(false);
+                if (ok) {
+                    cloudSyncLastOk = Date.now();
+                    setCloudSyncStatus('ok', '配對完成：本機資料已建立雲端同步');
+                }
+                return true;
+            }
+            setCloudSyncStatus('error', '這組同步碼尚無雲端資料。請先在有刀具表的手機開啟同一個配對網址。');
+            return true;
+        }
+
+        const ok = await syncPullStore(false);
+        if (ok) {
+            cloudSyncLastOk = Date.now();
+            setCloudSyncStatus('ok', '配對完成：手機與電腦資料已合併');
+        }
+        return true;
+    } catch (e) {
+        console.warn('Cloud pairing failed', e);
+        setCloudSyncStatus('error', '自動配對未完成：' + (e.message || e));
+        return true;
+    } finally {
+        cloudSyncReady = true;
+        updateCloudSyncUI();
+    }
+}
+
 async function initCloudSyncOnLoad() {
     updateCloudSyncUI();
     const key = getCloudSyncKey();
@@ -10652,7 +10703,8 @@ window.onload = async () => {
     loadThreeSettings();
     await requestPersistentStorage();
     await loadStore();
-    await initCloudSyncOnLoad();
+    const pairedFromLink = await consumeCloudSyncPairingFromHash();
+    if (!pairedFromLink) await initCloudSyncOnLoad();
     loadAvatar();
     loadVoiceSettings();
     loadCustomSounds();
