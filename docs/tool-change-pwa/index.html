@@ -4403,6 +4403,46 @@ html, body {
     .sync-code-input { flex-basis:100%; }
 }
 
+/* 刀具表交付中心：手機完成後交由電腦端列印／下載。 */
+.delivery-panel { max-width:560px; }
+.delivery-summary {
+    margin:0 18px 14px; padding:13px 14px; border-radius:15px;
+    background:linear-gradient(135deg,rgba(66,133,244,.12),rgba(52,168,83,.09));
+    border:1px solid rgba(66,133,244,.18); color:var(--ink-2);
+    font-size:.76rem; line-height:1.55;
+}
+.delivery-actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:0 18px 18px; }
+.delivery-btn {
+    min-height:112px; border:1px solid var(--line); border-radius:18px; padding:13px 11px;
+    background:#fff; color:var(--ink); text-align:left; font-family:inherit; cursor:pointer;
+    box-shadow:0 3px 12px rgba(60,64,67,.08); transition:transform .16s,box-shadow .16s;
+}
+.delivery-btn:active { transform:scale(.97); box-shadow:none; }
+.delivery-btn .delivery-icon { display:block; font-size:1.5rem; margin-bottom:6px; }
+.delivery-btn b { display:block; font-size:.83rem; font-weight:900; }
+.delivery-btn small { display:block; margin-top:4px; font-size:.68rem; color:var(--ink-3); line-height:1.42; }
+.delivery-btn.cloud { background:linear-gradient(135deg,#EEF5FF,#F8FBFF); border-color:#B9D5FF; }
+.delivery-btn.share { background:linear-gradient(135deg,#F3EFFF,#FBF9FF); border-color:#D9CBFF; }
+.delivery-btn.download { background:linear-gradient(135deg,#EFFAF2,#F8FFFA); border-color:#BCE4C7; }
+.delivery-btn.print { background:linear-gradient(135deg,#FFF7E8,#FFFDFC); border-color:#F4D49A; }
+.delivery-status {
+    min-height:20px; margin:0 18px 18px; padding:0 2px; color:var(--ink-3);
+    font-size:.72rem; line-height:1.45;
+}
+.delivery-link-card {
+    display:none; margin:0 18px 14px; padding:12px; border-radius:14px;
+    border:1px solid #BCE4C7; background:#F1FBF4;
+}
+.delivery-link-card.show { display:block; }
+.delivery-link-title { font-size:.75rem; font-weight:900; color:#137333; margin-bottom:7px; }
+.delivery-link-row { display:flex; gap:8px; }
+.delivery-link-input {
+    flex:1; min-width:0; border:1px solid #CEEAD6; border-radius:10px; background:#fff;
+    padding:8px 9px; font-size:.68rem !important; color:#3C4043; font-family:ui-monospace,SFMono-Regular,Menlo,monospace !important;
+}
+.delivery-copy-btn { flex:none; border:0; border-radius:10px; padding:8px 10px; background:#34A853; color:#fff; font:800 .7rem inherit; }
+@media(max-width:420px){ .delivery-actions { grid-template-columns:1fr; } .delivery-btn { min-height:82px; } }
+
 </style>
 </head>
 <body class="mobile-view-chat">
@@ -5863,6 +5903,48 @@ html, body {
                 </div>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     刀具表交付中心：暫存、寄信、下載、列印
+     ============================================================ -->
+<div id="delivery-center" class="modal-backdrop" onclick="if(event.target===this) closeDeliveryCenter()">
+    <div class="modal-panel delivery-panel">
+        <div class="modal-handle"></div>
+        <div class="modal-head">
+            <h2>📤 刀具表交付中心<br><span class="ui-en">Save · Email · Download · Print</span></h2>
+            <button class="modal-close" onclick="closeDeliveryCenter()">&times;</button>
+        </div>
+        <div class="delivery-summary">
+            手機完成後，可先暫存雲端並在電腦開啟；也可用手機的分享選單選擇「郵件」、Google Drive、檔案或其他公司雲端。
+        </div>
+        <div id="delivery-link-card" class="delivery-link-card">
+            <div class="delivery-link-title">✅ 已暫存雲端｜請在電腦開啟此連結</div>
+            <div class="delivery-link-row">
+                <input id="delivery-link-input" class="delivery-link-input" readonly aria-label="電腦開啟連結">
+                <button class="delivery-copy-btn" type="button" onclick="copyDeliveryPairingLink()">複製</button>
+            </div>
+        </div>
+        <div class="delivery-actions">
+            <button class="delivery-btn cloud" type="button" onclick="暫存雲端並建立電腦連結_()">
+                <span class="delivery-icon">☁️</span><b>暫存雲端</b>
+                <small>建立手機／電腦同步連結；電腦開啟後即可列印或下載。</small>
+            </button>
+            <button class="delivery-btn share" type="button" onclick="分享目前刀具表檔案_()">
+                <span class="delivery-icon">✉️</span><b>寄到信箱／雲端硬碟</b>
+                <small>開啟手機分享選單，選擇 Mail、Gmail、Drive 或檔案。</small>
+            </button>
+            <button class="delivery-btn download" type="button" onclick="下載目前刀具表Excel_()">
+                <span class="delivery-icon">⬇️</span><b>下載 Excel</b>
+                <small>在電腦開啟後可保存、編輯或列印。</small>
+            </button>
+            <button class="delivery-btn print" type="button" onclick="直接列印或存PDF_()">
+                <span class="delivery-icon">🖨️</span><b>直接列印／存 PDF</b>
+                <small>使用目前瀏覽器的列印功能；適合電腦或 Safari／Chrome。</small>
+            </button>
+        </div>
+        <div id="delivery-status" class="delivery-status" role="status" aria-live="polite">請選擇交付方式。</div>
     </div>
 </div>
 
@@ -9218,7 +9300,127 @@ function changeFormat(type) {
     setTimeout(adjustPreviewScale, 60);
 }
 function doPrint() {
-    saveCurrent();
+    openDeliveryCenter();
+}
+
+function setDeliveryStatus(text, isError = false) {
+    const el = document.getElementById('delivery-status');
+    if (!el) return;
+    el.textContent = text || '';
+    el.style.color = isError ? '#B3261E' : 'var(--ink-3)';
+}
+
+function openDeliveryCenter() {
+    saveCurrent(true);
+    const modal = document.getElementById('delivery-center');
+    const linkCard = document.getElementById('delivery-link-card');
+    if (linkCard) linkCard.classList.remove('show');
+    setDeliveryStatus(isLineInAppBrowser()
+        ? 'LINE 內建瀏覽器建議使用「暫存雲端」或「寄到信箱／雲端硬碟」。'
+        : '請選擇交付方式。');
+    if (modal) modal.classList.add('show');
+}
+
+function closeDeliveryCenter() {
+    const modal = document.getElementById('delivery-center');
+    if (modal) modal.classList.remove('show');
+}
+
+function 建立電腦同步連結_() {
+    const key = getCloudSyncKey();
+    if (!key) throw new Error('尚未建立雲端同步碼');
+    const url = new URL(OFFICIAL_APP_URL);
+    url.hash = 'sync=' + encodeURIComponent(key);
+    return url.toString();
+}
+
+async function copyDeliveryPairingLink() {
+    const input = document.getElementById('delivery-link-input');
+    const url = String(input && input.value || '').trim();
+    if (!url) return;
+    try {
+        await navigator.clipboard.writeText(url);
+        setDeliveryStatus('電腦開啟連結已複製。請貼到電腦的 Safari、Chrome 或 Edge。');
+    } catch (e) {
+        window.prompt('請複製此連結後在電腦開啟：', url);
+    }
+}
+
+async function 暫存雲端並建立電腦連結_() {
+    try {
+        saveCurrent(true);
+        if (!getCloudSyncKey()) {
+            setCloudSyncKey(generateCloudSyncKey());
+            setCloudAutoSync(true);
+        }
+        setDeliveryStatus('正在暫存到雲端並讀回確認…');
+        const ok = await syncPushStore(false);
+        if (!ok) throw new Error('雲端暫存未完成，請確認網路後再試。');
+
+        const url = 建立電腦同步連結_();
+        const input = document.getElementById('delivery-link-input');
+        const card = document.getElementById('delivery-link-card');
+        if (input) input.value = url;
+        if (card) card.classList.add('show');
+        setDeliveryStatus('已暫存且讀回驗證完成。請複製連結到電腦開啟。');
+
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: '刀具表精靈｜電腦開啟連結',
+                    text: '請在電腦瀏覽器開啟此連結，再列印或下載刀具表。',
+                    url
+                });
+            } catch (e) {
+                if (!(e && e.name === 'AbortError')) console.warn('雲端連結分享略過', e);
+            }
+        }
+    } catch (e) {
+        console.warn('雲端暫存失敗', e);
+        setDeliveryStatus('雲端暫存失敗：' + (e.message || e), true);
+    }
+}
+
+function 取得目前刀具表Excel檔_() {
+    return 建立Excel檔_(取得目前匯出表格_());
+}
+
+async function 分享目前刀具表檔案_() {
+    try {
+        const file = 取得目前刀具表Excel檔_();
+        if (navigator.canShare && navigator.share && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+                title: '刀具表精靈匯出檔案',
+                text: '請選擇「郵件」、Google Drive、檔案或公司雲端服務儲存這份刀具表。',
+                files: [file]
+            });
+            setDeliveryStatus('已開啟分享選單。請選擇郵件或雲端硬碟完成儲存。');
+            return;
+        }
+        await 下載檔案_(file);
+        setDeliveryStatus('此瀏覽器不支援檔案分享，已改為下載 Excel。');
+    } catch (e) {
+        if (e && e.name === 'AbortError') {
+            setDeliveryStatus('已取消分享，檔案仍保留在目前刀具表中。');
+            return;
+        }
+        console.warn('分享刀具表失敗', e);
+        setDeliveryStatus('無法開啟分享：' + (e.message || e), true);
+    }
+}
+
+async function 下載目前刀具表Excel_() {
+    try {
+        await 下載檔案_(取得目前刀具表Excel檔_());
+        setDeliveryStatus('已啟動 Excel 下載；LINE 內若無下載視窗，請使用分享選單儲存到檔案。');
+    } catch (e) {
+        setDeliveryStatus('Excel 下載失敗：' + (e.message || e), true);
+    }
+}
+
+function 直接列印或存PDF_() {
+    closeDeliveryCenter();
+    saveCurrent(true);
     setTimeout(() => window.print(), 120);
 }
 
