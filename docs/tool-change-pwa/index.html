@@ -7171,7 +7171,26 @@ function closeSidebarOnMobile() {
 
 
 const OFFICIAL_APP_URL = 'https://qhero70.github.io/smart-factory-worker-app/tool-change-pwa/';
+const LINE_BOT_TOOL_SOURCE = 'LINEBOT_TOOL';
 let lineShareBusy = false;
+
+/*
+ * LINE Bot 入口會附帶 source=LINEBOT_TOOL。
+ * 此參數不是權限判斷依據；它只用來保留既有單一入口的追蹤來源。
+ * 使用者在 LINE 內點「在瀏覽器開啟」時，也必須把來源帶到 Safari / Chrome，
+ * 才不會讓同一段使用流程在外開後中斷。
+ */
+function getOfficialAppUrlForCurrentEntry() {
+    const officialUrl = new URL(OFFICIAL_APP_URL);
+    const currentUrl = new URL(window.location.href);
+    const source = String(currentUrl.searchParams.get('source') || '').trim().toUpperCase();
+
+    if (source === LINE_BOT_TOOL_SOURCE) {
+        officialUrl.searchParams.set('source', LINE_BOT_TOOL_SOURCE);
+    }
+
+    return officialUrl.toString();
+}
 
 function isLineInAppBrowser() {
     const ua = navigator.userAgent || '';
@@ -7202,16 +7221,18 @@ function hideLineBrowserBanner() {
     if (banner) banner.classList.remove('show');
 }
 async function copyOfficialAppUrl() {
+    const targetUrl = getOfficialAppUrlForCurrentEntry();
     try {
-        await navigator.clipboard.writeText(OFFICIAL_APP_URL);
+        await navigator.clipboard.writeText(targetUrl);
         showLineBrowserBanner('正式網址已複製。請貼到 Safari / Chrome 開啟。');
     } catch (e) {
-        window.prompt('請複製網址後到 Safari / Chrome 開啟：', OFFICIAL_APP_URL);
+        window.prompt('請複製網址後到 Safari / Chrome 開啟：', targetUrl);
     }
 }
 async function openSystemBrowserGuide() {
+    const targetUrl = getOfficialAppUrlForCurrentEntry();
     if (/Android/i.test(navigator.userAgent || '')) {
-        const target = OFFICIAL_APP_URL.replace(/^https:\/\//,'');
+        const target = targetUrl.replace(/^https:\/\//,'');
         location.href = 'intent://' + target + '#Intent;scheme=https;package=com.android.chrome;end';
         return;
     }
@@ -7220,7 +7241,7 @@ async function openSystemBrowserGuide() {
             await navigator.share({
                 title: '刀具表精靈・手機版',
                 text: '請使用 Safari / Chrome 開啟',
-                url: OFFICIAL_APP_URL
+                url: targetUrl
             });
             return;
         } catch (e) {

@@ -1,7 +1,7 @@
 {
   "模組": "38_LINE 指令中心 Rich Menu 快捷按鈕優化",
-  "版本": "v1.9.1_LINE內開_PWA_V4_圖片Flex",
-  "目的": "所有 Rich Menu URI 統一維持 LINE Bot 內建瀏覽器開啟；主管與一般員工報工皆使用正式 PWA V4；製造工具圖片 Flex 的 PWA 連結也移除外部瀏覽器參數。",
+  "版本": "v1.9.2_LINE內開_PWA_V4_刀具表精靈v2.1.4",
+  "目的": "所有 Rich Menu URI 統一維持 LINE Bot 內建瀏覽器開啟；主管與一般員工報工皆使用正式 PWA V4；製造工具圖片 Flex 的刀具表精靈固定開啟最新版正式 PWA，並保留 source=LINEBOT_TOOL 來源識別。",
   "圖片": [
     {
       "檔名": "richmenu-supervisor-v190.png",
@@ -43,7 +43,7 @@
     {
       "位置": "右下",
       "功能": "製造工具",
-      "動作": "message: 製造工具 → 75_LINE 圖片 Hero Flex → PWA 於 LINE 內建瀏覽器開啟"
+      "動作": "message: 製造工具 → 75_LINE 圖片 Hero Flex → 刀具表精靈 https://qhero70.github.io/smart-factory-worker-app/tool-change-pwa/?source=LINEBOT_TOOL → PWA 於 LINE 內建瀏覽器開啟"
     }
   ],
   "一般員工入口六宮格": [

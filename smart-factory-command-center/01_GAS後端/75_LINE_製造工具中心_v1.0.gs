@@ -15,7 +15,7 @@
  * 7. 不建立第二個 LINE Bot、不建立第二個 Web App。
  */
 
-var 製造工具75_版本_ = 'v1.4.2_刀具表精靈_v2.1.2';
+var 製造工具75_版本_ = 'v1.4.3_刀具表精靈_PWA_v2.1.4';
 
 var 製造工具75_正式主庫ID_ = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
 var 製造工具75_工作表名稱_ = 'LINE_製造工具中心';
@@ -32,6 +32,9 @@ var 製造工具75_智慧5S預設圖片_ =
 
 var 製造工具75_刀具表精靈網址_ =
   'https://qhero70.github.io/smart-factory-worker-app/tool-change-pwa/';
+
+/* 唯一 LINE Bot → 刀具表精靈入口識別；只作來源追蹤，不作權限判斷。 */
+var 製造工具75_刀具表LINE來源_ = 'LINEBOT_TOOL';
 
 var 製造工具75_水位1064網址_ =
   'https://huaxin-1064-water-team.qhero84.chatgpt.site';
@@ -412,7 +415,7 @@ function 製造工具75_補核心工具資料_() {
 }
 
 
-function 同步75_LINE刀具表精靈_v212() {
+function 同步75_LINE刀具表精靈_v214() {
   var ss = SpreadsheetApp.openById(製造工具75_正式主庫ID_);
   var sh = ss.getSheetByName(製造工具75_工作表名稱_);
   if (!sh) throw new Error('找不到工作表：' + 製造工具75_工作表名稱_);
@@ -433,7 +436,7 @@ function 同步75_LINE刀具表精靈_v212() {
   製造工具75_寫欄位值_(sh, target.__row, '分類', '刀具管理');
   製造工具75_寫欄位值_(sh, target.__row, '啟用', true);
   製造工具75_寫欄位值_(sh, target.__row, '按鈕文字', '開啟最新版');
-  製造工具75_寫欄位值_(sh, target.__row, '備註', '正式 PWA v2.1.2｜RWD／LINE相容／跨裝置雲端同步｜2026/10/20');
+  製造工具75_寫欄位值_(sh, target.__row, '備註', '正式 PWA v2.1.4｜RWD／LINE相容／跨裝置雲端同步／外開保留LINE來源｜2026/10/20');
   製造工具75_寫欄位值_(sh, target.__row, '更新時間', new Date());
 
   製造工具75_清除快取_();
@@ -446,6 +449,11 @@ function 同步75_LINE刀具表精靈_v212() {
     url: 製造工具75_刀具表精靈網址_,
     cacheCleared: true
   };
+}
+
+/* 保留既有 Apps Script 手動執行名稱，避免既有排程或操作說明失效。 */
+function 同步75_LINE刀具表精靈_v212() {
+  return 同步75_LINE刀具表精靈_v214();
 }
 
 
@@ -1601,7 +1609,7 @@ function 製造工具75_LINE內開網址_(url) {
     .replace(/&&+/g, '&');
 
   if (!/[?&]source=/i.test(text)) {
-    text += (text.indexOf('?') >= 0 ? '&' : '?') + 'source=LINEBOT_TOOL';
+    text += (text.indexOf('?') >= 0 ? '&' : '?') + 'source=' + 製造工具75_刀具表LINE來源_;
   }
 
   try {
