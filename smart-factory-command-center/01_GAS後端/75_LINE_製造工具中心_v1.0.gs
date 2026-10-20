@@ -1,6 +1,6 @@
 /**
  * 化新精密｜75_LINE 製造工具中心
- * 版本：v1.4.1
+ * 版本：v1.4.2
  *
  * 功能：
  * 1. 一般使用者只看啟用工具卡並開啟工具。
@@ -15,7 +15,7 @@
  * 7. 不建立第二個 LINE Bot、不建立第二個 Web App。
  */
 
-var 製造工具75_版本_ = 'v1.4.1_效能快取_管理PWA';
+var 製造工具75_版本_ = 'v1.4.2_刀具表精靈_v2.1.2';
 
 var 製造工具75_正式主庫ID_ = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
 var 製造工具75_工作表名稱_ = 'LINE_製造工具中心';
@@ -47,11 +47,11 @@ var 製造工具75_管理密鑰屬性Key_ = 'TOOL75_ADMIN_HMAC_SECRET';
 var 製造工具75_圖片資料夾屬性Key_ = 'TOOL75_ADMIN_IMAGE_FOLDER_ID';
 var 製造工具75_圖片資料夾名稱_ = 'LINE_製造工具卡片圖片';
 
-/* v1.4.1 效能：執行階段只讀快取；正式異動後立即清除。 */
+/* v1.4.2 效能：執行階段只讀快取；正式異動後立即清除。 */
 var 製造工具75_快取秒數_ = 600;
-var 製造工具75_快取Key_啟用工具_ = 'TOOL75_V141_ENABLED';
-var 製造工具75_快取Key_全部工具_ = 'TOOL75_V141_ALL';
-var 製造工具75_快取Key_管理員_ = 'TOOL75_V141_ADMINS';
+var 製造工具75_快取Key_啟用工具_ = 'TOOL75_V142_ENABLED';
+var 製造工具75_快取Key_全部工具_ = 'TOOL75_V142_ALL';
+var 製造工具75_快取Key_管理員_ = 'TOOL75_V142_ADMINS';
 
 var 製造工具75_工具欄位_ = [
   '工具編號',
@@ -292,6 +292,10 @@ function 初始化75_LINE製造工具中心_v141() {
   return 初始化75_LINE製造工具中心_v131();
 }
 
+function 初始化75_LINE製造工具中心_v142() {
+  return 初始化75_LINE製造工具中心_v131();
+}
+
 
 function 製造工具75_確保結構_() {
   製造工具75_清除快取_();
@@ -408,6 +412,43 @@ function 製造工具75_補核心工具資料_() {
 }
 
 
+function 同步75_LINE刀具表精靈_v212() {
+  var ss = SpreadsheetApp.openById(製造工具75_正式主庫ID_);
+  var sh = ss.getSheetByName(製造工具75_工作表名稱_);
+  if (!sh) throw new Error('找不到工作表：' + 製造工具75_工作表名稱_);
+
+  var rows = 製造工具75_讀表物件_(sh);
+  var target = rows.filter(function (r) {
+    var id = String(r.工具編號 || '').trim();
+    var name = String(r.顯示名稱 || '').replace(/\s+/g, '');
+    return id === 'TOOL-CUTTING' || id === 'TOOL-CUTTING-WIZARD' || /刀具表精靈/.test(name);
+  })[0];
+
+  if (!target) throw new Error('找不到刀具表精靈卡片');
+
+  製造工具75_寫欄位值_(sh, target.__row, '工具編號', 'TOOL-CUTTING');
+  製造工具75_寫欄位值_(sh, target.__row, '顯示名稱', '刀具表精靈・手機版');
+  製造工具75_寫欄位值_(sh, target.__row, '說明', 'A4/A3 刀具表、照片、Excel、LINE 相容與手機/電腦雲端同步');
+  製造工具75_寫欄位值_(sh, target.__row, 'PWA網址', 製造工具75_刀具表精靈網址_);
+  製造工具75_寫欄位值_(sh, target.__row, '分類', '刀具管理');
+  製造工具75_寫欄位值_(sh, target.__row, '啟用', true);
+  製造工具75_寫欄位值_(sh, target.__row, '按鈕文字', '開啟最新版');
+  製造工具75_寫欄位值_(sh, target.__row, '備註', '正式 PWA v2.1.2｜RWD／LINE相容／跨裝置雲端同步｜2026/10/20');
+  製造工具75_寫欄位值_(sh, target.__row, '更新時間', new Date());
+
+  製造工具75_清除快取_();
+
+  return {
+    success: true,
+    version: 製造工具75_版本_,
+    toolId: 'TOOL-CUTTING',
+    name: '刀具表精靈・手機版',
+    url: 製造工具75_刀具表精靈網址_,
+    cacheCleared: true
+  };
+}
+
+
 function 製造工具75_同步既有高權限管理員_() {
   var ss = SpreadsheetApp.openById(製造工具75_正式主庫ID_);
   var identitySheet = ss.getSheetByName('33_LINE身份權限');
@@ -465,14 +506,14 @@ function 製造工具75_取得核心工具_() {
       按鈕文字: '立即開啟'
     },
     {
-      工具編號: 'TOOL-CUTTING-WIZARD',
+      工具編號: 'TOOL-CUTTING',
       排序: 20,
-      顯示名稱: '刀具表精靈',
-      說明: '刀具表建立、換刀與現場查詢',
+      顯示名稱: '刀具表精靈・手機版',
+      說明: 'A4/A3 刀具表、照片、Excel、LINE 相容與手機/電腦雲端同步',
       圖片網址: '',
       PWA網址: 製造工具75_刀具表精靈網址_,
       分類: '刀具管理',
-      按鈕文字: '開啟精靈'
+      按鈕文字: '開啟最新版'
     },
     {
       工具編號: 'TOOL-WATER-1064',
