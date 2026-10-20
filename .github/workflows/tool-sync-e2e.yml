@@ -19,10 +19,10 @@ jobs:
         run: |
           set -euo pipefail
           BASE="https://full-giddy-force--qhero70.replit.app/api/store"
-          KEY="ToolSyncE2E_\${GITHUB_RUN_ID}_\${GITHUB_RUN_ATTEMPT}_A834E20D"
+          KEY="ToolSyncE2E_${GITHUB_RUN_ID}_${GITHUB_RUN_ATTEMPT}_A834E20D"
           NOW=$(date +%s%3N)
           cat > /tmp/payload.json <<JSON
-          {"currentId":"E2E-\${GITHUB_RUN_ID}","tables":[{"id":"E2E-\${GITHUB_RUN_ID}","createdAt":\${NOW},"updatedAt":\${NOW},"name":"E2E Tool Sheet","data":{"type":1,"title":"E2E","partName":"E2E","tools":[],"tools2":[]}}]}
+          {"currentId":"E2E-${GITHUB_RUN_ID}","tables":[{"id":"E2E-${GITHUB_RUN_ID}","createdAt":${NOW},"updatedAt":${NOW},"name":"E2E Tool Sheet","data":{"type":1,"title":"E2E","partName":"E2E","tools":[],"tools2":[]}}]}
           JSON
           STATUS=$(curl --silent --show-error --max-time 30 \
             -X PUT "$BASE/$KEY" \
