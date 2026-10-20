@@ -16,6 +16,7 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 
 <style id="dynamic-page-style">@page { size: A4 portrait; margin: 0; }</style>
@@ -5917,7 +5918,7 @@ html, body {
             <button class="modal-close" onclick="closeDeliveryCenter()">&times;</button>
         </div>
         <div class="delivery-summary">
-            手機完成後，可先暫存雲端並在電腦開啟；也可用手機的分享選單選擇「郵件」、Google Drive、檔案或其他公司雲端。
+            目前預覽表可直接轉成高解析圖片：寄到 Mail / Gmail、存 Google Drive／檔案，或在電腦開啟後直接列印。刀具表資料也會同步暫存雲端。
         </div>
         <div id="delivery-link-card" class="delivery-link-card">
             <div class="delivery-link-title">✅ 已暫存雲端｜請在電腦開啟此連結</div>
@@ -5928,20 +5929,20 @@ html, body {
         </div>
         <div class="delivery-actions">
             <button class="delivery-btn cloud" type="button" onclick="暫存雲端並建立電腦連結_()">
-                <span class="delivery-icon">☁️</span><b>暫存雲端</b>
-                <small>建立手機／電腦同步連結；電腦開啟後即可列印或下載。</small>
+                <span class="delivery-icon">☁️</span><b>儲存雲端＋電腦開啟</b>
+                <small>先同步目前刀具表，再產生電腦開啟連結；電腦可直接預覽、列印或下載。</small>
             </button>
-            <button class="delivery-btn share" type="button" onclick="分享目前刀具表檔案_()">
-                <span class="delivery-icon">✉️</span><b>寄到信箱／雲端硬碟</b>
-                <small>開啟手機分享選單，選擇 Mail、Gmail、Drive 或檔案。</small>
+            <button class="delivery-btn share" type="button" onclick="分享目前預覽圖片_()">
+                <span class="delivery-icon">✉️</span><b>寄信／存雲端預覽圖</b>
+                <small>產生和目前預覽一致的高解析 PNG，直接選 Mail、Gmail、Google Drive 或檔案。</small>
             </button>
-            <button class="delivery-btn download" type="button" onclick="下載目前刀具表Excel_()">
-                <span class="delivery-icon">⬇️</span><b>下載 Excel</b>
-                <small>在電腦開啟後可保存、編輯或列印。</small>
+            <button class="delivery-btn download" type="button" onclick="下載目前預覽圖片_()">
+                <span class="delivery-icon">🖼️</span><b>下載預覽圖</b>
+                <small>A4：2480×3508；A3：3508×2480。可直接寄信、存檔或列印。</small>
             </button>
             <button class="delivery-btn print" type="button" onclick="直接列印或存PDF_()">
                 <span class="delivery-icon">🖨️</span><b>直接列印／存 PDF</b>
-                <small>使用目前瀏覽器的列印功能；適合電腦或 Safari／Chrome。</small>
+                <small>使用正式 A4／A3 紙張版面列印，或由系統列印視窗儲存 PDF。</small>
             </button>
         </div>
         <div id="delivery-status" class="delivery-status" role="status" aria-live="polite">請選擇交付方式。</div>
@@ -9316,8 +9317,8 @@ function openDeliveryCenter() {
     const linkCard = document.getElementById('delivery-link-card');
     if (linkCard) linkCard.classList.remove('show');
     setDeliveryStatus(isLineInAppBrowser()
-        ? 'LINE 內建瀏覽器建議使用「暫存雲端」或「寄到信箱／雲端硬碟」。'
-        : '請選擇交付方式。');
+        ? 'LINE 內可直接使用「寄信／存雲端預覽圖」；若分享功能受限，請改用 Safari / Chrome。'
+        : '可寄信預覽圖、存雲端、下載圖片或直接列印。');
     if (modal) modal.classList.add('show');
 }
 
@@ -9381,11 +9382,184 @@ async function 暫存雲端並建立電腦連結_() {
     }
 }
 
+async function 等待預覽影像載入_(root) {
+    if (!root) return;
+    const images = Array.from(root.querySelectorAll('img'));
+    await Promise.all(images.map(img => {
+        if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+        return new Promise(resolve => {
+            const done = () => resolve();
+            img.addEventListener('load', done, { once:true });
+            img.addEventListener('error', done, { once:true });
+            setTimeout(done, 5000);
+        });
+    }));
+    if (document.fonts && document.fonts.ready) {
+        try { await document.fonts.ready; } catch (e) {}
+    }
+}
+
+async function 建立目前預覽圖片檔_() {
+    saveCurrent(true);
+    if (typeof html2canvas === 'undefined') {
+        throw new Error('預覽圖片元件尚未載入，請重新整理後再試。');
+    }
+
+    const isA3 = Number(appData.type) === 2;
+    const wrapper = document.getElementById(isA3 ? 'a3-wrapper' : 'a4-wrapper');
+    const target = document.getElementById(isA3 ? 'a3-document' : 'a4-document');
+    if (!wrapper || !target) throw new Error('找不到目前預覽表。');
+
+    if (isA3) updateA3Preview();
+    else updateA4Preview();
+    await 等待預覽影像載入_(target);
+
+    const prev = {
+        transform: wrapper.style.transform,
+        transformOrigin: wrapper.style.transformOrigin,
+        marginBottom: wrapper.style.marginBottom,
+        targetShadow: target.style.boxShadow
+    };
+
+    wrapper.style.transform = 'none';
+    wrapper.style.transformOrigin = 'top center';
+    wrapper.style.marginBottom = '0';
+    target.style.boxShadow = 'none';
+
+    try {
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+        const cssWidth = target.offsetWidth;
+        const cssHeight = target.offsetHeight;
+        if (!cssWidth || !cssHeight) throw new Error('預覽表尺寸無法取得。');
+
+        const outWidth = isA3 ? 3508 : 2480;
+        const outHeight = isA3 ? 2480 : 3508;
+        const scale = outWidth / cssWidth;
+
+        const canvas = await html2canvas(target, {
+            backgroundColor: '#FFFFFF',
+            scale,
+            useCORS: true,
+            allowTaint: true,
+            logging: false,
+            imageTimeout: 15000,
+            width: cssWidth,
+            height: cssHeight,
+            windowWidth: Math.max(document.documentElement.clientWidth, cssWidth),
+            windowHeight: Math.max(document.documentElement.clientHeight, cssHeight),
+            scrollX: 0,
+            scrollY: 0
+        });
+
+        const output = document.createElement('canvas');
+        output.width = outWidth;
+        output.height = outHeight;
+        const ctx = output.getContext('2d');
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, outWidth, outHeight);
+        ctx.drawImage(canvas, 0, 0, outWidth, outHeight);
+
+        const blob = await new Promise((resolve, reject) => {
+            output.toBlob(b => b ? resolve(b) : reject(new Error('預覽圖片產生失敗。')), 'image/png', 1);
+        });
+
+        const table = 取得目前匯出表格_();
+        const suffix = isA3 ? '_A3_預覽列印圖.png' : '_A4_預覽列印圖.png';
+        return new File([blob], 匯出檔名_(table) + suffix, { type:'image/png' });
+    } finally {
+        wrapper.style.transform = prev.transform;
+        wrapper.style.transformOrigin = prev.transformOrigin;
+        wrapper.style.marginBottom = prev.marginBottom;
+        target.style.boxShadow = prev.targetShadow;
+        setTimeout(adjustPreviewScale, 30);
+    }
+}
+
+async function 確保目前資料已存雲端_() {
+    try {
+        saveCurrent(true);
+        if (!getCloudSyncKey()) {
+            setCloudSyncKey(generateCloudSyncKey());
+            setCloudAutoSync(true);
+        }
+        return await syncPushStore(false);
+    } catch (e) {
+        console.warn('雲端保存略過', e);
+        return false;
+    }
+}
+
+async function 分享目前預覽圖片_() {
+    try {
+        setDeliveryStatus('正在儲存雲端並產生高解析預覽圖…');
+        const cloudOk = await 確保目前資料已存雲端_();
+        const file = await 建立目前預覽圖片檔_();
+
+        if (navigator.canShare && navigator.share && navigator.canShare({ files:[file] })) {
+            await navigator.share({
+                title: '刀具表預覽圖｜可直接列印',
+                text: '附件為目前刀具表的高解析預覽圖，可用 Mail / Gmail 寄送，或存到 Google Drive／檔案後列印。',
+                files:[file]
+            });
+            setDeliveryStatus(cloudOk
+                ? '已開啟分享選單；刀具表資料也已同步到雲端。'
+                : '已開啟分享選單；預覽圖可寄信或存雲端硬碟。');
+            return;
+        }
+
+        await 直接下載檔案_(file);
+        setDeliveryStatus(cloudOk
+            ? '此瀏覽器無法直接附檔寄信；已下載預覽 PNG，刀具表資料已存雲端。'
+            : '此瀏覽器無法直接附檔寄信；已下載預覽 PNG。');
+    } catch (e) {
+        if (e && e.name === 'AbortError') {
+            setDeliveryStatus('已取消分享；刀具表仍保留在目前裝置與雲端同步資料中。');
+            return;
+        }
+        console.warn('分享預覽圖失敗', e);
+        setDeliveryStatus('預覽圖分享失敗：' + (e.message || e), true);
+    }
+}
+
+function 直接下載檔案_(file) {
+    const url = URL.createObjectURL(file);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = file.name;
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2400);
+}
+
+async function 下載目前預覽圖片_() {
+    try {
+        setDeliveryStatus('正在產生高解析預覽圖…');
+        const file = await 建立目前預覽圖片檔_();
+        if (isLineInAppBrowser() && navigator.canShare && navigator.share && navigator.canShare({files:[file]})) {
+            await navigator.share({
+                title:'刀具表預覽圖',
+                text:'請選擇儲存到「檔案」、Google Drive 或寄到郵件。',
+                files:[file]
+            });
+            setDeliveryStatus('已開啟分享／儲存選單。');
+            return;
+        }
+        直接下載檔案_(file);
+        setDeliveryStatus('預覽 PNG 已開始下載，可直接寄信或列印。');
+    } catch (e) {
+        if (e && e.name === 'AbortError') return;
+        setDeliveryStatus('預覽圖下載失敗：' + (e.message || e), true);
+    }
+}
+
 function 取得目前刀具表Excel檔_() {
     return 建立Excel檔_(取得目前匯出表格_());
 }
 
-async function 分享目前刀具表檔案_() {
+async function 分享目前刀具表Excel檔案_() {
     try {
         const file = 取得目前刀具表Excel檔_();
         if (navigator.canShare && navigator.share && navigator.canShare({ files: [file] })) {
