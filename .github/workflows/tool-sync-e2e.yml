@@ -18,7 +18,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          BASE="https://full-giddy-force--qhero70.replit.app/api/store"
+          BASE="https://tool-sheet-sync-api.vercel.app/api/store"
           KEY="ToolSyncE2E_${GITHUB_RUN_ID}_${GITHUB_RUN_ATTEMPT}_A834E20D"
           NOW=$(date +%s%3N)
           cat > /tmp/payload.json <<JSON
@@ -42,7 +42,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          BASE="https://full-giddy-force--qhero70.replit.app/api/store"
+          BASE="https://tool-sheet-sync-api.vercel.app/api/store"
           KEY=$(cat /tmp/sync_key.txt)
           STATUS=$(curl --silent --show-error --max-time 30 \
             "$BASE/$KEY" \
@@ -72,7 +72,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          BASE="https://full-giddy-force--qhero70.replit.app/api/store"
+          BASE="https://tool-sheet-sync-api.vercel.app/api/store"
           KEY=$(cat /tmp/sync_key.txt)
           STATUS=$(curl --silent --show-error --max-time 30 \
             -X OPTIONS "$BASE/$KEY" \
