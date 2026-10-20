@@ -1,0 +1,88 @@
+name: 刀具表同步 E2E
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/tool-sync-e2e.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  tool_sync_e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: PUT 暫存刀具表
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="https://full-giddy-force--qhero70.replit.app/api/store"
+          KEY="ToolSyncE2E_\${GITHUB_RUN_ID}_\${GITHUB_RUN_ATTEMPT}_A834E20D"
+          NOW=$(date +%s%3N)
+          cat > /tmp/payload.json <<JSON
+          {"currentId":"E2E-\${GITHUB_RUN_ID}","tables":[{"id":"E2E-\${GITHUB_RUN_ID}","createdAt":\${NOW},"updatedAt":\${NOW},"name":"E2E Tool Sheet","data":{"type":1,"title":"E2E","partName":"E2E","tools":[],"tools2":[]}}]}
+          JSON
+          STATUS=$(curl --silent --show-error --max-time 30 \
+            -X PUT "$BASE/$KEY" \
+            -H 'Origin: https://qhero70.github.io' \
+            -H 'Content-Type: application/json' \
+            --data-binary @/tmp/payload.json \
+            -D /tmp/put_headers.txt \
+            -o /tmp/put_body.txt \
+            -w '%{http_code}')
+          echo "PUT status: $STATUS"
+          cat /tmp/put_headers.txt
+          cat /tmp/put_body.txt
+          test "$STATUS" = "200" -o "$STATUS" = "201" -o "$STATUS" = "204"
+          echo "$KEY" > /tmp/sync_key.txt
+
+      - name: GET 讀回並比對刀具表
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="https://full-giddy-force--qhero70.replit.app/api/store"
+          KEY=$(cat /tmp/sync_key.txt)
+          STATUS=$(curl --silent --show-error --max-time 30 \
+            "$BASE/$KEY" \
+            -H 'Origin: https://qhero70.github.io' \
+            -H 'Accept: application/json' \
+            -D /tmp/get_headers.txt \
+            -o /tmp/get_body.json \
+            -w '%{http_code}')
+          echo "GET status: $STATUS"
+          cat /tmp/get_headers.txt
+          cat /tmp/get_body.json
+          test "$STATUS" = "200"
+          python3 - <<'PY'
+          import json
+          data=json.load(open('/tmp/get_body.json'))
+          candidates=[data.get('store') if isinstance(data,dict) else None,
+                      data.get('data') if isinstance(data,dict) else None,
+                      data.get('payload') if isinstance(data,dict) else None,
+                      data]
+          store=next((x for x in candidates if isinstance(x,dict) and isinstance(x.get('tables'),list)),None)
+          assert store, 'No store/tables in response'
+          assert any(str(t.get('name'))=='E2E Tool Sheet' for t in store['tables']), 'E2E table missing'
+          print('ROUNDTRIP_OK tables=',len(store['tables']))
+          PY
+
+      - name: OPTIONS CORS
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="https://full-giddy-force--qhero70.replit.app/api/store"
+          KEY=$(cat /tmp/sync_key.txt)
+          STATUS=$(curl --silent --show-error --max-time 30 \
+            -X OPTIONS "$BASE/$KEY" \
+            -H 'Origin: https://qhero70.github.io' \
+            -H 'Access-Control-Request-Method: PUT' \
+            -H 'Access-Control-Request-Headers: content-type' \
+            -D /tmp/options_headers.txt \
+            -o /tmp/options_body.txt \
+            -w '%{http_code}')
+          echo "OPTIONS status: $STATUS"
+          cat /tmp/options_headers.txt
+          test "$STATUS" = "200" -o "$STATUS" = "204"
+          grep -iq '^access-control-allow-origin: https://qhero70.github.io' /tmp/options_headers.txt
