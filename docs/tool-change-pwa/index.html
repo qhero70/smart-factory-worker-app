@@ -9141,6 +9141,7 @@ async function initCloudSyncOnLoad() {
 
 
 const FORMAL_GAS_API_URL = 'https://script.google.com/macros/s/AKfycby2ghuwkxTr1kbt2bU9D3U24O55c6GhcabA1IhDC67OEw86pH6MjS3nnBMASnjEmggw/exec';
+const FORMAL_GAS_PUBLIC_READY = false; // 124/132 目前外部讀取皆被 Google 登入牆阻擋；權限改為「任何人」並驗收 PASS 後切 true。
 const FORMAL_SPREADSHEET_ID = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
 const FORMAL_INDEX_SHEET = '刀具表_索引';
 const FORMAL_DETAIL_SHEET = '刀具表_明細';
@@ -9340,6 +9341,11 @@ function formalToolRows_(data) {
 }
 
 async function saveCurrentToFormalSheets(silent = true) {
+    if (!FORMAL_GAS_PUBLIC_READY) {
+        formalDbStatus_('error', '正式 GAS 目前要求 Google 登入，LINE 尚不能直接寫入。資料已保留本機／跨裝置同步。');
+        if (!silent) alert('正式 Google 試算表目前尚未開放 LINE 匿名存取。\n請先把既有 GAS Web App 的「誰可以存取」調整為「任何人」。');
+        return false;
+    }
     if (formalDbBusy) return false;
     saveCurrent(true);
     if (!hasMeaningfulData()) {
@@ -9461,6 +9467,11 @@ async function saveCurrentToFormalSheets(silent = true) {
 
 async function refreshFormalSheetList(silent = true) {
     const select = document.getElementById('formal-sheet-select');
+    if (!FORMAL_GAS_PUBLIC_READY) {
+        formalDbStatus_('error', '正式 GAS 尚未開放匿名讀取；目前不能從 LINE／外部網頁載入試算表。');
+        if (!silent) alert('正式 GAS Web App 目前需要 Google 登入，尚不能提供 LINE／外部網頁讀取。');
+        return [];
+    }
     if (!select) return [];
     formalDbStatus_('busy', '正在讀取刀具表分頁清單…');
     try {
@@ -11206,6 +11217,7 @@ function renderFinalStep() {
         addBotMessage(`🎉 **恭喜！**\n「${sheetName}」建立完成，已自動暫存。\n正在同步寫入正式 Google 試算表…`);
         saveCurrentToFormalSheets(true).then(ok => {
             if (ok) addBotMessage('✅ **正式試算表已儲存完成。**\n網頁版可從「我的刀具表 → 正式試算表刀具庫」選分頁直接叫出、預覽與列印。');
+            else if (!FORMAL_GAS_PUBLIC_READY) addBotMessage('ℹ️ 本機／跨裝置資料已保留。正式 GAS 目前仍需 Google 登入，因此 LINE 直寫試算表暫時鎖定，避免假成功。');
             else addBotMessage('⚠️ 本機資料已保留，但正式試算表尚未確認寫入。可到「我的刀具表」按「儲存目前刀具表」重試。');
         });
         if (window.innerWidth < 768) setTimeout(() => switchTab('preview'), 1100);
