@@ -9639,7 +9639,6 @@ async function loadSelectedFormalSheet() {
         if (!table) { alert('本機找不到這張刀具表，請重新開啟我的刀具表。'); return; }
         if (!table.data) { alert('這張本機刀具表目前沒有內容，請先填寫資料。'); return; }
         loadTable(id);
-        switchTab('preview');
         formalDbStatus_('ok', '已載入本機刀具表：' + (table.name || id) + '（未代表雲端同步）');
         setTimeout(adjustPreviewScale, 80);
         return;
@@ -10591,7 +10590,7 @@ function loadTable(id) {
     store.currentId = id;
     persist();
 
-    const type = (t.data && t.data.type === 2) ? 2 : 1;
+    const type = (t.data && Number(t.data.type) === 2) ? 2 : 1;
     appData = makeEmptyAppData(type);
     if (t.data) {
         Object.assign(appData, JSON.parse(JSON.stringify(t.data)));
