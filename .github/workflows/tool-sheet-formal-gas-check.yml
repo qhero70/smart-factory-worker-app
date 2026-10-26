@@ -1,5 +1,4 @@
 name: 刀具表正式GAS唯讀檢查
-
 on:
   push:
     branches: [main]
@@ -7,59 +6,28 @@ on:
       - 'docs/tool-change-pwa/**'
       - '.github/workflows/tool-sheet-formal-gas-check.yml'
   workflow_dispatch:
-
 permissions:
   contents: read
-
 jobs:
   check:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: 比對124與132正式部署回應
-        shell: bash
-        env:
-          GAS_124: https://script.google.com/macros/s/AKfycby2ghuwkxTr1kbt2bU9D3U24O55c6GhcabA1IhDC67OEw86pH6MjS3nnBMASnjEmggw/exec
-          GAS_132: https://script.google.com/macros/s/AKfycbzFuaDkPpXRxNltlU2IL7N2iGnFKDIbBvWlUX0dxJCo7IyMSZGD4DrUoXgvWiYczKCX/exec
+      - name: 唯讀核對正式刀具表專用API與JSONP
+        shell: python
         run: |
-          set -euo pipefail
-          for NAME in 124 132; do
-            VAR="GAS_${NAME}"
-            URL="${!VAR}"
-            echo "=== Deployment ${NAME} status ==="
-            curl -L -sS --max-time 40 -w "HTTP=%{http_code} TYPE=%{content_type}\\n" "$URL?action=status" -o "/tmp/b${NAME}.txt" || true
-            head -c 500 "/tmp/b${NAME}.txt" | tr '\\n' ' ' || true
-            echo
-            echo "=== Deployment ${NAME} listSheets ==="
-            curl -L -sS --max-time 40 -w "HTTP=%{http_code} TYPE=%{content_type}\\n" "$URL?action=listSheets" -o "/tmp/bl${NAME}.txt" || true
-            head -c 500 "/tmp/bl${NAME}.txt" | tr '\\n' ' ' || true
-            echo
-          done
-
-      - name: 驗證可用正式部署
-        shell: bash
-        env:
-          GAS_124: https://script.google.com/macros/s/AKfycby2ghuwkxTr1kbt2bU9D3U24O55c6GhcabA1IhDC67OEw86pH6MjS3nnBMASnjEmggw/exec
-          GAS_132: https://script.google.com/macros/s/AKfycbzFuaDkPpXRxNltlU2IL7N2iGnFKDIbBvWlUX0dxJCo7IyMSZGD4DrUoXgvWiYczKCX/exec
-        run: |
-          set -euo pipefail
-          python - <<'PY'
-          import json, subprocess, os
-          candidates=[('124',os.environ['GAS_124']),('132',os.environ['GAS_132'])]
-          good=[]
-          for name,url in candidates:
-              p=subprocess.run(['curl','-L','-sS','--max-time','40',url+'?action=listSheets'],capture_output=True,text=True)
-              try:
-                  data=json.loads(p.stdout)
-              except Exception:
-                  continue
-              if not (data.get('ok') is True or data.get('success') is True):
-                  continue
-              names=[x.get('name') for x in data.get('sheets',[])]
-              if '刀具表_索引' in names and '刀具表_明細' in names:
-                  good.append((name,url))
-          if not good:
-              raise SystemExit('124/132 目前皆無法匿名讀取正式刀具表分頁')
-          print('PASS_DEPLOYMENT='+good[0][0])
-          print('PASS_URL='+good[0][1])
-          PY
+          import json, urllib.parse, urllib.request
+          base='https://script.google.com/macros/s/AKfycbzFuaDkPpXRxNltlU2IL7N2iGnFKDIbBvWlUX0dxJCo7IyMSZGD4DrUoXgvWiYczKCX/exec'
+          for api in ['刀具表_狀態','刀具表_清單']:
+              callback='__toolSheetReadOnlyCheck'
+              url=base+'?'+urllib.parse.urlencode({'api':api,'callback':callback})
+              with urllib.request.urlopen(url,timeout=90) as response:
+                  body=response.read().decode('utf-8-sig').strip()
+                  status=response.status
+              prefix=callback+'('
+              if not body.startswith(prefix) or not body.endswith(');'):
+                  raise SystemExit('FAIL: 正式端點未回傳指定JSONP；不輸出HTML或敏感原文')
+              data=json.loads(body[len(prefix):-2])
+              if status!=200 or data.get('成功') is not True or data.get('版本')!='2.2.2' or data.get('主庫ID')!='19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8':
+                  raise SystemExit('FAIL: 正式回應旗標／版本／主庫識別不符')
+              print(api+': PASS；版本='+data['版本']+'；筆數='+str(len(data.get('資料',[]))))

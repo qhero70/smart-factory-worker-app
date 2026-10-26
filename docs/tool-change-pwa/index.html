@@ -5884,7 +5884,7 @@ html, body {
                     <span class="ui-en inline">Google Sheets Database</span>
                 </div>
                 <div class="tm-db-desc">
-                    LINE／手機完成後會直接寫入正式主資料庫。網頁版可選「品名_OP」分頁，直接映射回 A4／A3 刀具表並列印。
+                    手機與電腦共用正式試算表。儲存後必須讀回核對才顯示成功；可選「品名_OP」分頁載入 A4／A3 預覽及列印。
                 </div>
                 <div class="tm-db-row">
                     <select id="formal-sheet-select" class="tm-db-select" aria-label="試算表分頁名稱">
@@ -9140,8 +9140,8 @@ async function initCloudSyncOnLoad() {
 }
 
 
-const FORMAL_GAS_API_URL = 'https://script.google.com/macros/s/AKfycby2ghuwkxTr1kbt2bU9D3U24O55c6GhcabA1IhDC67OEw86pH6MjS3nnBMASnjEmggw/exec';
-const FORMAL_GAS_PUBLIC_READY = false; // 124/132 目前外部讀取皆被 Google 登入牆阻擋；權限改為「任何人」並驗收 PASS 後切 true。
+const FORMAL_GAS_API_URL = 'https://script.google.com/macros/s/AKfycbzFuaDkPpXRxNltlU2IL7N2iGnFKDIbBvWlUX0dxJCo7IyMSZGD4DrUoXgvWiYczKCX/exec';
+const FORMAL_GAS_PUBLIC_READY = true; // v2.2.2：使用既有 LINE 正式 Web App 的刀具表專用 API；不改 124／125。
 const FORMAL_SPREADSHEET_ID = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
 const FORMAL_INDEX_SHEET = '刀具表_索引';
 const FORMAL_DETAIL_SHEET = '刀具表_明細';
@@ -9186,15 +9186,22 @@ function formalJsonp_(params, timeoutMs = 15000) {
 
         window[callback] = data => {
             cleanup();
-            if (data && (data.ok === false || data.success === false)) {
-                reject(new Error(data.message || data.error || '正式試算表 API 回傳失敗'));
+            if (data && (data.成功 === false || data.ok === false || data.success === false)) {
+                reject(new Error(data.訊息 || data.message || data.error || '正式試算表 API 回傳失敗'));
                 return;
             }
-            resolve(data || {});
+            if (!data || data.成功 !== true || data.主庫ID !== FORMAL_SPREADSHEET_ID) { reject(new Error('正式刀具表回應或主庫識別不符')); return; }
+            resolve(Object.assign({}, data, {rows:Array.isArray(data.資料) ? data.資料 : []}));
         };
 
         const url = new URL(FORMAL_GAS_API_URL);
-        Object.entries(params || {}).forEach(([k,v]) => {
+        const 請求參數 = Object.assign({}, params || {});
+        if (請求參數.action === 'readSheet') {
+            請求參數.api = 請求參數.sheet === FORMAL_INDEX_SHEET ? '刀具表_清單' : '刀具表_載入';
+            請求參數.分頁名稱 = 請求參數.sheet;
+            delete 請求參數.action; delete 請求參數.sheet; delete 請求參數.maxRows;
+        }
+        Object.entries(請求參數).forEach(([k,v]) => {
             if (v !== undefined && v !== null) url.searchParams.set(k, String(v));
         });
         url.searchParams.set('callback', callback);
@@ -9207,50 +9214,26 @@ function formalJsonp_(params, timeoutMs = 15000) {
     });
 }
 
-function formalPostForm_(sheet, rowObj, timeoutMs = 12000) {
-    return new Promise((resolve) => {
-        const token = 'formalPost_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+/* 跨來源 POST 僅負責傳送；必須另行讀回相同修訂碼才宣告儲存成功。 */
+function 送出正式刀具表_(資料, timeoutMs = 15000) {
+    return new Promise(resolve => {
         const iframe = document.createElement('iframe');
-        iframe.name = token;
-        iframe.style.display = 'none';
         const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = FORMAL_GAS_API_URL;
-        form.target = token;
-        form.style.display = 'none';
-
-        const add = (name, value) => {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = name;
-            input.value = String(value == null ? '' : value);
-            form.appendChild(input);
-        };
-        add('action', 'appendRow');
-        add('sheet', sheet);
-        add('row', JSON.stringify(rowObj || {}));
-
-        let submitted = false;
-        let settled = false;
+        iframe.name = 'toolSheetPost_' + Date.now();
+        iframe.hidden = true; form.hidden = true;
+        form.method = 'POST'; form.action = FORMAL_GAS_API_URL; form.target = iframe.name;
+        [['api','刀具表_儲存'],['資料',JSON.stringify(資料)]].forEach(([名稱,值]) => {
+            const input = document.createElement('input'); input.type = 'hidden';
+            input.name = 名稱; input.value = 值; form.appendChild(input);
+        });
+        let settled = false, submitted = false;
         const finish = () => {
-            if (settled) return;
-            settled = true;
-            setTimeout(() => {
-                form.remove();
-                iframe.remove();
-            }, 50);
-            resolve(true);
+            if (settled) return; settled = true;
+            setTimeout(() => { form.remove(); iframe.remove(); }, 50); resolve();
         };
-        iframe.onload = () => {
-            if (!submitted) return;
-            finish();
-        };
-
-        document.body.appendChild(iframe);
-        document.body.appendChild(form);
-        submitted = true;
-        form.submit();
-        setTimeout(finish, timeoutMs);
+        iframe.onload = () => { if (submitted) finish(); };
+        document.body.appendChild(iframe); document.body.appendChild(form);
+        submitted = true; form.submit(); setTimeout(finish,timeoutMs);
     });
 }
 
@@ -9272,7 +9255,7 @@ function formalSheetNameFromData_(data) {
 
 function formalTableId_() {
     saveCurrent(true);
-    return store.currentId || ('T' + Date.now() + Math.random().toString(36).slice(2,6));
+    return appData._formalTableId || store.currentId || ('T' + Date.now() + Math.random().toString(36).slice(2,6));
 }
 
 function formalSafePhoto_(value) {
@@ -9341,137 +9324,48 @@ function formalToolRows_(data) {
 }
 
 async function saveCurrentToFormalSheets(silent = true) {
-    if (!FORMAL_GAS_PUBLIC_READY) {
-        formalDbStatus_('error', '正式 GAS 目前要求 Google 登入，LINE 尚不能直接寫入。資料已保留本機／跨裝置同步。');
-        if (!silent) alert('正式 Google 試算表目前尚未開放 LINE 匿名存取。\n請先把既有 GAS Web App 的「誰可以存取」調整為「任何人」。');
-        return false;
-    }
     if (formalDbBusy) return false;
     saveCurrent(true);
-    if (!hasMeaningfulData()) {
-        if (!silent) alert('目前刀具表沒有可儲存的資料。');
-        return false;
-    }
-
+    if (!hasMeaningfulData()) { if (!silent) alert('目前刀具表沒有可儲存的資料。'); return false; }
     formalDbBusy = true;
-    formalDbStatus_('busy', '正在寫入正式 Google 試算表…');
+    formalDbStatus_('busy', '正在儲存正式刀具表，完成後將讀回核對…');
     try {
         const data = formalSanitizedData_();
         const tableId = formalTableId_();
         const sheetName = formalSheetNameFromData_(data);
-        const basic = formalBasicInfo_(data);
+        data._formalTableId = tableId;
+        data._formalRevision = Date.now().toString(36) + Math.random().toString(36).slice(2);
         const tools = formalToolRows_(appData);
-        const now = new Date().toISOString();
-        const source = formalSource_();
-        const lineUserId = formalLineUserId_();
-        const localTable = store.tables.find(x => x.id === store.currentId);
-        const created = localTable && localTable.createdAt ? new Date(localTable.createdAt).toISOString() : now;
-
-        const indexRow = {
-            刀具表ID: tableId,
-            分頁名稱: sheetName,
-            表格格式: basic.表格格式,
-            品名: basic.品名,
-            工序: basic.工序,
-            機器號碼: basic.機器號碼,
-            客戶品號: basic.客戶品號,
-            產品編號: basic.產品編號,
-            主程式: basic.主程式,
-            加工程式: basic.加工程式,
-            夾持壓力: basic.夾持壓力,
-            加工時間: basic.加工時間,
-            每日數量: basic.每日數量,
-            QR內容: basic.QR內容,
-            製表者: basic.製表者,
-            製表日期: basic.製表日期,
-            來源: source,
-            LINE_USER_ID: lineUserId,
-            建立時間: created,
-            更新時間: now
-        };
-
-        const mainSnapshot = {
-            資料類型: '主檔',
-            刀具表ID: tableId,
-            分頁名稱: sheetName,
-            表格格式: basic.表格格式,
-            品名: basic.品名,
-            工序: basic.工序,
-            機器號碼: basic.機器號碼,
-            客戶品號: basic.客戶品號,
-            產品編號: basic.產品編號,
-            製表者: basic.製表者,
-            製表日期: basic.製表日期,
-            來源: source,
-            更新時間: now,
-            JSON資料: JSON.stringify(data)
-        };
-
-        await formalPostForm_(FORMAL_INDEX_SHEET, indexRow);
-        await sleep_(130);
-        await formalPostForm_(sheetName, mainSnapshot);
-
-        for (let i = 0; i < tools.length; i++) {
-            const t = tools[i];
-            const detailRow = {
-                刀具表ID: tableId,
-                分頁名稱: sheetName,
-                排序: t.排序,
-                N工序: t.N工序,
-                刀具形式: t.刀具形式,
-                刀號: t.刀號,
-                H值: t.H值,
-                G補正X軸: t.G補正X軸,
-                G補正Z軸: t.G補正Z軸,
-                刀具壽命: t.刀具壽命,
-                照片URL: t.照片URL,
-                照片檔名: t.照片檔名,
-                備註: t.備註,
-                建立時間: created,
-                更新時間: now
-            };
-            const sheetToolRow = Object.assign({資料類型:'刀具', 刀具表ID:tableId, 更新時間:now}, t);
-            await formalPostForm_(FORMAL_DETAIL_SHEET, detailRow);
-            await sleep_(90);
-            await formalPostForm_(sheetName, sheetToolRow);
-            await sleep_(90);
+        await 送出正式刀具表_({刀具表ID:tableId,分頁名稱:sheetName,快照:data,明細:tools,基本:formalBasicInfo_(data),來源:formalSource_()});
+        let confirmed = false;
+        for (let 次數 = 0; 次數 < 4; 次數++) {
+            await sleep_(700 + 次數 * 500);
+            try {
+                const verify = await formalJsonp_({action:'readSheet',sheet:sheetName});
+                const 主檔 = verify.rows.find(r => String(r.刀具表ID) === tableId && r.資料類型 === '主檔');
+                const 明細 = verify.rows.filter(r => String(r.刀具表ID) === tableId && r.資料類型 === '刀具');
+                confirmed = !!主檔 && String(主檔.JSON資料) === JSON.stringify(data) && 明細.length === tools.length &&
+                    tools.every((t,i) => ['N工序','刀具形式','刀號','H值','G補正X軸','G補正Z軸','刀具壽命','照片URL','照片檔名'].every(k => String(明細[i][k] ?? '') === String(t[k] ?? '')));
+                if (confirmed) break;
+            } catch (讀回錯誤) { if (次數 === 3) throw 讀回錯誤; }
         }
-
-        // 用 JSONP 讀回指定分頁，確認主檔快照真的已寫入。
-        await sleep_(500);
-        const verify = await formalJsonp_({action:'readSheet', sheet:sheetName, maxRows:5000});
-        const rows = Array.isArray(verify.rows) ? verify.rows : [];
-        const confirmed = rows.some(r => String(r.刀具表ID || '') === tableId && String(r.資料類型 || '') === '主檔');
-        if (!confirmed) throw new Error('寫入後未能讀回確認');
-
+        if (!confirmed) throw new Error('尚未讀回同一修訂的完整主檔與刀具明細，本機資料已保留');
+        appData._formalTableId = tableId;
         formalDbLastSavedId = tableId;
-        formalDbStatus_('ok', '已寫入正式試算表：' + sheetName);
-        refreshFormalSheetList(true).catch(()=>{});
-        if (!silent) {
-            playSound('success');
-            alert('✅ 已儲存到正式 Google 試算表\n分頁：' + sheetName);
-        }
+        saveCurrent(true);
+        formalDbStatus_('ok', '正式存檔與讀回核對完成：' + sheetName);
+        refreshFormalSheetList(true).catch(() => {});
+        if (!silent) { playSound('success'); alert('✅ 正式試算表已儲存並讀回核對\n分頁：' + sheetName); }
         return true;
     } catch (e) {
-        console.error('Formal Sheets save failed', e);
-        formalDbStatus_('error', '試算表儲存失敗：' + (e.message || e));
-        if (!silent) {
-            playSound('error');
-            alert('試算表儲存失敗：' + (e.message || e));
-        }
+        formalDbStatus_('error', '尚未確認正式存檔：' + (e.message || e) + '。本機資料保留。');
+        if (!silent) alert('尚未確認正式存檔：' + (e.message || e));
         return false;
-    } finally {
-        formalDbBusy = false;
-    }
+    } finally { formalDbBusy = false; }
 }
 
 async function refreshFormalSheetList(silent = true) {
     const select = document.getElementById('formal-sheet-select');
-    if (!FORMAL_GAS_PUBLIC_READY) {
-        formalDbStatus_('error', '正式 GAS 尚未開放匿名讀取；目前不能從 LINE／外部網頁載入試算表。');
-        if (!silent) alert('正式 GAS Web App 目前需要 Google 登入，尚不能提供 LINE／外部網頁讀取。');
-        return [];
-    }
     if (!select) return [];
     formalDbStatus_('busy', '正在讀取刀具表分頁清單…');
     try {
@@ -9499,7 +9393,7 @@ async function refreshFormalSheetList(silent = true) {
                 '</option>'
             ).join('');
         if (old && formalSheetCache.some(x => x.name === old)) select.value = old;
-        formalDbStatus_('ok', '已讀取 ' + formalSheetCache.length + ' 個刀具表分頁。');
+        formalDbStatus_('ok', formalSheetCache.length ? '已讀取 ' + formalSheetCache.length + ' 個正式刀具表分頁。' : '已連上正式試算表，目前尚無刀具表；手機或電腦儲存後即可載入。');
         return formalSheetCache;
     } catch (e) {
         console.error(e);
@@ -9576,7 +9470,7 @@ async function loadSelectedFormalSheet() {
         for (let i = rows.length - 1; i >= 0; i--) {
             const r = rows[i] || {};
             if (String(r.資料類型 || '') !== '主檔' || !r.JSON資料) continue;
-            try { snapshot = JSON.parse(r.JSON資料); break; } catch (e) {}
+            try { snapshot = JSON.parse(r.JSON資料); snapshot._formalTableId = String(r.刀具表ID || ''); break; } catch (e) {}
         }
         if (!snapshot) throw new Error('此分頁找不到可映射的刀具表快照');
 
@@ -11214,7 +11108,7 @@ function renderFinalStep() {
         playSound('success');
         inputContainer.innerHTML = '';
         const sheetName = appData.type === 2 ? (appData.headerTitle || '刀具表') : (appData.title || '刀具表');
-        addBotMessage(`🎉 **恭喜！**\n「${sheetName}」建立完成，已自動暫存。\n正在同步寫入正式 Google 試算表…`);
+        addBotMessage(`🎉 **恭喜！**\n「${sheetName}」建立完成，已自動暫存。\n正在儲存正式 Google 試算表並讀回核對…`);
         saveCurrentToFormalSheets(true).then(ok => {
             if (ok) addBotMessage('✅ **正式試算表已儲存完成。**\n網頁版可從「我的刀具表 → 正式試算表刀具庫」選分頁直接叫出、預覽與列印。');
             else if (!FORMAL_GAS_PUBLIC_READY) addBotMessage('ℹ️ 本機／跨裝置資料已保留。正式 GAS 目前仍需 Google 登入，因此 LINE 直寫試算表暫時鎖定，避免假成功。');
@@ -11818,3 +11712,4 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
+
