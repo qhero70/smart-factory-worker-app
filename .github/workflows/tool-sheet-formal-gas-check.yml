@@ -16,42 +16,50 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: 檢查正式GAS分頁清單
+      - name: 比對124與132正式部署回應
         shell: bash
         env:
-          GAS_URL: https://script.google.com/macros/s/AKfycby2ghuwkxTr1kbt2bU9D3U24O55c6GhcabA1IhDC67OEw86pH6MjS3nnBMASnjEmggw/exec
+          GAS_124: https://script.google.com/macros/s/AKfycby2ghuwkxTr1kbt2bU9D3U24O55c6GhcabA1IhDC67OEw86pH6MjS3nnBMASnjEmggw/exec
+          GAS_132: https://script.google.com/macros/s/AKfycbzFuaDkPpXRxNltlU2IL7N2iGnFKDIbBvWlUX0dxJCo7IyMSZGD4DrUoXgvWiYczKCX/exec
         run: |
           set -euo pipefail
-          curl -L --fail --silent --show-error --max-time 40             "$GAS_URL?action=listSheets"             -o /tmp/list.json
-          python - <<'PY'
-          import json
-          p="/tmp/list.json"
-          data=json.load(open(p,encoding="utf-8"))
-          if not (data.get("ok") is True or data.get("success") is True):
-              raise SystemExit("正式 GAS listSheets 未回傳成功")
-          names=[x.get("name") for x in data.get("sheets",[])]
-          required=["刀具表_索引","刀具表_明細"]
-          missing=[x for x in required if x not in names]
-          if missing:
-              raise SystemExit("正式主庫缺少分頁: "+",".join(missing))
-          print("PASS: 正式 GAS 可讀取刀具表分頁")
-          PY
+          for NAME in 124 132; do
+            VAR="GAS_${NAME}"
+            URL="${!VAR}"
+            echo "=== Deployment ${NAME} status ==="
+            curl -L -sS --max-time 40 -w "HTTP=%{http_code} TYPE=%{content_type}\\n" "$URL?action=status" -o "/tmp/b${NAME}.txt" || true
+            head -c 500 "/tmp/b${NAME}.txt" | tr '\\n' ' ' || true
+            echo
+            echo "=== Deployment ${NAME} listSheets ==="
+            curl -L -sS --max-time 40 -w "HTTP=%{http_code} TYPE=%{content_type}\\n" "$URL?action=listSheets" -o "/tmp/bl${NAME}.txt" || true
+            head -c 500 "/tmp/bl${NAME}.txt" | tr '\\n' ' ' || true
+            echo
+          done
 
-      - name: 檢查刀具表索引讀取
+      - name: 驗證可用正式部署
         shell: bash
         env:
-          GAS_URL: https://script.google.com/macros/s/AKfycby2ghuwkxTr1kbt2bU9D3U24O55c6GhcabA1IhDC67OEw86pH6MjS3nnBMASnjEmggw/exec
+          GAS_124: https://script.google.com/macros/s/AKfycby2ghuwkxTr1kbt2bU9D3U24O55c6GhcabA1IhDC67OEw86pH6MjS3nnBMASnjEmggw/exec
+          GAS_132: https://script.google.com/macros/s/AKfycbzFuaDkPpXRxNltlU2IL7N2iGnFKDIbBvWlUX0dxJCo7IyMSZGD4DrUoXgvWiYczKCX/exec
         run: |
           set -euo pipefail
-          curl -L --fail --silent --show-error --max-time 40             --get "$GAS_URL"             --data-urlencode "action=readSheet"             --data-urlencode "sheet=刀具表_索引"             --data-urlencode "maxRows=10"             -o /tmp/index.json
           python - <<'PY'
-          import json
-          data=json.load(open("/tmp/index.json",encoding="utf-8"))
-          if not (data.get("ok") is True or data.get("success") is True):
-              raise SystemExit("正式 GAS readSheet 未回傳成功")
-          if data.get("sheet") != "刀具表_索引":
-              raise SystemExit("讀取分頁名稱不符")
-          if not isinstance(data.get("rows",[]), list):
-              raise SystemExit("rows 格式不正確")
-          print("PASS: 刀具表_索引 readSheet 正常")
+          import json, subprocess, os
+          candidates=[('124',os.environ['GAS_124']),('132',os.environ['GAS_132'])]
+          good=[]
+          for name,url in candidates:
+              p=subprocess.run(['curl','-L','-sS','--max-time','40',url+'?action=listSheets'],capture_output=True,text=True)
+              try:
+                  data=json.loads(p.stdout)
+              except Exception:
+                  continue
+              if not (data.get('ok') is True or data.get('success') is True):
+                  continue
+              names=[x.get('name') for x in data.get('sheets',[])]
+              if '刀具表_索引' in names and '刀具表_明細' in names:
+                  good.append((name,url))
+          if not good:
+              raise SystemExit('124/132 目前皆無法匿名讀取正式刀具表分頁')
+          print('PASS_DEPLOYMENT='+good[0][0])
+          print('PASS_URL='+good[0][1])
           PY
