@@ -4445,6 +4445,56 @@ html, body {
 @media(max-width:420px){ .delivery-actions { grid-template-columns:1fr; } .delivery-btn { min-height:82px; } }
 
 
+/* v2.2.4｜我的刀具表：手機完整捲動、固定標題與可見操作區 */
+#table-manager .modal-panel {
+    min-height: 0;
+    max-height: min(92dvh, 900px);
+}
+#table-manager .tm-manager-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+}
+#table-manager .tm-manager-scroll .tm-body {
+    flex: none;
+    overflow: visible;
+    min-height: 0;
+}
+#table-manager .tm-manager-scroll .tm-footer {
+    flex: none;
+}
+#table-manager .tm-db-card { margin-top: 16px; }
+#table-manager .tm-db-actions { grid-template-columns: repeat(2,minmax(0,1fr)); }
+#table-manager .tm-db-actions .tm-db-btn {
+    white-space: normal;
+    min-width: 0;
+    min-height: 48px;
+    line-height: 1.4;
+    font-size: .79rem !important;
+}
+#table-manager #sheet-source-summary {
+    margin-top: 8px;
+    color: #1967D2;
+    font-size: .74rem;
+    font-weight: 850;
+    line-height: 1.55;
+}
+@media (max-width: 767px) {
+    #table-manager .modal-panel {
+        height: calc(100vh - 8px);
+        height: calc(100dvh - 8px);
+        max-height: calc(100vh - 8px);
+        max-height: calc(100dvh - 8px);
+    }
+    #table-manager .tm-db-actions { grid-template-columns: 1fr; }
+    #table-manager .tm-db-actions .tm-db-btn { min-height: 52px; }
+    #table-manager .tm-db-row { display: flex; flex-direction: column; }
+    #table-manager .tm-db-select { width: 100%; min-height: 48px; flex-basis: auto; font-size: 16px !important; }
+    #table-manager .tm-db-row > .tm-db-btn { width: 100%; min-height: 44px; }
+}
 /* 正式 Google 試算表資料庫 v2.2.0 */
 .tm-db-card {
     margin-top: 12px;
@@ -5911,38 +5961,39 @@ html, body {
             <button class="modal-close" onclick="closeTableManager()">&times;</button>
         </div>
 
+        <div class="tm-manager-scroll" id="tm-manager-scroll">
         <div class="tm-footer" style="border-top:none;padding-top:0;">
             <button class="tm-new" onclick="createNewTable()">＋ 新增刀具表<br><span class="ui-en">New Tool Sheet</span></button>
 
+            <div class="tm-db-card">
+                <div class="tm-db-title">
+                    <span>📗 刀具表選擇與正式試算表</span>
+                    <span class="ui-en inline">Google Sheets Database</span>
+                </div>
+                <div class="tm-db-desc">
+                    下拉可選擇本機暫存及正式試算表的刀具表，來源分開標示。本機資料不代表已同步到雲端；「儲存目前刀具表」只會儲存目前正在編輯的表格，完成後必須讀回核對。
+                </div>
+                <div class="tm-db-row">
+                    <select id="formal-sheet-select" class="tm-db-select" aria-label="選擇本機或正式試算表刀具表">
+                        <option value="">請選擇刀具表 / Select Tool Sheet</option>
+                    </select>
+                    <button class="tm-db-btn" onclick="refreshFormalSheetList(false)">↻ 重新整理</button>
+                </div>
+                <div id="sheet-source-summary" role="status" aria-live="polite">正在整理本機與正式試算表清單…</div>
+                <div class="tm-db-actions">
+                    <button class="tm-db-btn primary" onclick="loadSelectedFormalSheet()">📥 載入選定刀具表預覽</button>
+                    <button class="tm-db-btn green" onclick="saveCurrentToFormalSheets(false)">💾 儲存目前刀具表至正式試算表</button>
+                </div>
+                <div id="formal-db-status" class="tm-db-status">
+                    <span class="dot"></span><span>尚未讀取正式試算表。</span>
+                </div>
+            </div>
             <div class="tm-cloud-grid">
                 <button class="tm-cloud-btn excel" onclick="exportExcelFile()">📊 匯出這張 Excel<br><span class="ui-en">Export This Sheet</span></button>
                 <button class="tm-cloud-btn sound" onclick="openSoundSettings()">🎨 音效設定<br><span class="ui-en">Sound Settings</span></button>
                 <button class="tm-cloud-btn master" onclick="exportMasterExcelFile()">📚 匯出主檔 Excel｜全部表格各一個分頁<br><span class="ui-en">Master Workbook</span></button>
                 <button class="tm-cloud-btn sync" onclick="openCloudSync()">☁️ 跨裝置同步<br><span class="ui-en">Cloud Sync · Phone / PC</span></button>
                 <button class="tm-cloud-btn voice" onclick="openVoiceSettings()">🔊 語音引導設定<br><span class="ui-en">Voice Guide Settings</span></button>
-            </div>
-
-            <div class="tm-db-card">
-                <div class="tm-db-title">
-                    <span>📗 正式試算表刀具庫</span>
-                    <span class="ui-en inline">Google Sheets Database</span>
-                </div>
-                <div class="tm-db-desc">
-                    手機與電腦共用正式試算表。儲存後必須讀回核對才顯示成功；可選「品名_OP」分頁載入 A4／A3 預覽及列印。
-                </div>
-                <div class="tm-db-row">
-                    <select id="formal-sheet-select" class="tm-db-select" aria-label="試算表分頁名稱">
-                        <option value="">請先重新整理分頁 / Refresh first</option>
-                    </select>
-                    <button class="tm-db-btn" onclick="refreshFormalSheetList(false)">↻ 重新整理</button>
-                </div>
-                <div class="tm-db-actions">
-                    <button class="tm-db-btn primary" onclick="loadSelectedFormalSheet()">📥 載入分頁預覽</button>
-                    <button class="tm-db-btn green" onclick="saveCurrentToFormalSheets(false)">💾 儲存目前刀具表</button>
-                </div>
-                <div id="formal-db-status" class="tm-db-status">
-                    <span class="dot"></span><span>尚未讀取正式試算表。</span>
-                </div>
             </div>
         </div>
 
@@ -5954,6 +6005,7 @@ html, body {
                 <span class="ui-en">Up to 10 local sheets · Electronic data saved as Excel spreadsheets only</span>
             </div>
         </div>
+        </div><!-- /.tm-manager-scroll -->
     </div>
 </div>
 
@@ -9191,6 +9243,8 @@ const FORMAL_INDEX_SHEET = '刀具表_索引';
 const FORMAL_DETAIL_SHEET = '刀具表_明細';
 let formalDbBusy = false;
 let formalSheetCache = [];
+let formalDbListLoaded = false;
+let formalDbListLoading = false;
 let formalDbLastSavedId = '';
 
 function formalDbStatus_(state, text) {
@@ -9408,10 +9462,59 @@ async function saveCurrentToFormalSheets(silent = true) {
     } finally { formalDbBusy = false; }
 }
 
+/* v2.2.4｜在同一個選單列出本機與正式試算表，保留資料來源及獨立識別。 */
+function renderUnifiedSheetOptions_() {
+    const select = document.getElementById('formal-sheet-select');
+    if (!select) return;
+    const previousValue = select.value;
+    const localTables = (store && Array.isArray(store.tables) ? store.tables : [])
+        .filter(t => t && t.id);
+    const formalSheets = Array.isArray(formalSheetCache) ? formalSheetCache : [];
+
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = '選擇刀具表 / Select Tool Sheet';
+    const choices = [placeholder];
+
+    const localGroup = document.createElement('optgroup');
+    localGroup.label = '📱 本機暫存（' + localTables.length + ' 張）';
+    localTables.forEach(t => {
+        const option = document.createElement('option');
+        option.value = 'local:' + String(t.id);
+        option.textContent = (t.name || '未命名刀具表') +
+            (t.data ? ' · ' + (Number(t.data.type) === 2 ? 'A3' : 'A4') : ' · 空白表');
+        localGroup.appendChild(option);
+    });
+    choices.push(localGroup);
+
+    const remoteGroup = document.createElement('optgroup');
+    remoteGroup.label = '☁️ 正式試算表（' + formalSheets.length + ' 張）';
+    formalSheets.forEach(t => {
+        const option = document.createElement('option');
+        option.value = 'formal:' + String(t.name);
+        option.textContent = t.name + (t.format ? ' · ' + t.format : '');
+        remoteGroup.appendChild(option);
+    });
+    choices.push(remoteGroup);
+
+    select.replaceChildren(...choices);
+    if (previousValue && Array.from(select.options).some(o => o.value === previousValue)) {
+        select.value = previousValue;
+    }
+
+    const summary = document.getElementById('sheet-source-summary');
+    if (summary) summary.textContent = '📱 本機 ' + localTables.length +
+        ' 張　｜　☁️ 正式試算表 ' + formalSheets.length +
+        (formalDbListLoaded ? ' 張（已讀取）' : ' 張（尚未完成讀取）');
+}
+
 async function refreshFormalSheetList(silent = true) {
     const select = document.getElementById('formal-sheet-select');
     if (!select) return [];
-    formalDbStatus_('busy', '正在讀取刀具表分頁清單…');
+    if (formalDbListLoading) return formalSheetCache;
+    formalDbListLoading = true;
+    renderUnifiedSheetOptions_();
+    formalDbStatus_('busy', '正在讀取正式試算表；本機清單仍可選擇…');
     try {
         const res = await formalJsonp_({action:'readSheet', sheet:FORMAL_INDEX_SHEET, maxRows:5000});
         const rows = Array.isArray(res.rows) ? res.rows : [];
@@ -9429,21 +9532,18 @@ async function refreshFormalSheetList(silent = true) {
             });
         });
         formalSheetCache = Array.from(map.values()).sort((a,b) => b.seq - a.seq);
-        const old = select.value;
-        select.innerHTML = '<option value="">選擇分頁名稱 / Select Sheet</option>' +
-            formalSheetCache.map(x =>
-                '<option value="' + esc(x.name) + '">' +
-                esc(x.name + (x.format ? ' · ' + x.format : '')) +
-                '</option>'
-            ).join('');
-        if (old && formalSheetCache.some(x => x.name === old)) select.value = old;
+        formalDbListLoaded = true;
+        renderUnifiedSheetOptions_();
         formalDbStatus_('ok', formalSheetCache.length ? '已讀取 ' + formalSheetCache.length + ' 個正式刀具表分頁。' : '已連上正式試算表，目前尚無刀具表；手機或電腦儲存後即可載入。');
         return formalSheetCache;
     } catch (e) {
         console.error(e);
         formalDbStatus_('error', '無法讀取正式試算表：' + (e.message || e));
         if (!silent) alert('無法讀取正式試算表：' + (e.message || e));
+        renderUnifiedSheetOptions_();
         return [];
+    } finally {
+        formalDbListLoading = false;
     }
 }
 
@@ -9501,12 +9601,32 @@ function applyFormalAppData_(data, sheetName) {
 
 async function loadSelectedFormalSheet() {
     const select = document.getElementById('formal-sheet-select');
-    const sheetName = String(select && select.value || '').trim();
-    if (!sheetName) {
-        alert('請先選擇試算表分頁名稱。');
+    const selected = String(select && select.value || '').trim();
+    if (!selected) {
+        alert('請先選擇一張本機或正式試算表刀具表。');
         return;
     }
-    formalDbStatus_('busy', '正在載入 ' + sheetName + '…');
+    if (selected.startsWith('local:')) {
+        const id = selected.slice('local:'.length);
+        const table = store.tables.find(t => String(t.id) === id);
+        if (!table) { alert('本機找不到這張刀具表，請重新開啟我的刀具表。'); return; }
+        if (!table.data) { alert('這張本機刀具表目前沒有內容，請先填寫資料。'); return; }
+        loadTable(id);
+        switchTab('preview');
+        formalDbStatus_('ok', '已載入本機刀具表：' + (table.name || id) + '（未代表雲端同步）');
+        setTimeout(adjustPreviewScale, 80);
+        return;
+    }
+    if (!selected.startsWith('formal:')) {
+        alert('無法辨識分頁來源，請重新選擇。');
+        return;
+    }
+    const sheetName = selected.slice('formal:'.length);
+    if (!formalSheetCache.some(t => t.name === sheetName)) {
+        alert('正式試算表清單已變更，請重新整理後選擇。');
+        return;
+    }
+    formalDbStatus_('busy', '正在載入正式試算表：' + sheetName + '…');
     try {
         const res = await formalJsonp_({action:'readSheet', sheet:sheetName, maxRows:5000});
         const rows = Array.isArray(res.rows) ? res.rows : [];
@@ -10336,9 +10456,11 @@ function getBackupTimestamp(date) {
 
 function openTableManager() {
     renderTableList();
+    renderUnifiedSheetOptions_();
     document.getElementById('table-manager').classList.add('show');
-    const sel = document.getElementById('formal-sheet-select');
-    if (sel && sel.options.length <= 1 && !formalDbBusy) refreshFormalSheetList(true);
+    const scroll = document.getElementById('tm-manager-scroll');
+    if (scroll) scroll.scrollTop = 0;
+    if (!formalDbListLoaded && !formalDbListLoading && !formalDbBusy) refreshFormalSheetList(true);
 }
 function closeTableManager() { document.getElementById('table-manager').classList.remove('show'); }
 
@@ -10363,6 +10485,7 @@ function renderTableList() {
     }
     const tmCount = document.getElementById('tm-count');
     if (tmCount) tmCount.textContent = `(${store.tables.length}/${MAX_TABLES})`;
+    renderUnifiedSheetOptions_();
 
     if (!list) return;
     if (store.tables.length === 0) {
