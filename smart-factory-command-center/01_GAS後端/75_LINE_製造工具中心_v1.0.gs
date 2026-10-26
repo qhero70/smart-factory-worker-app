@@ -15,7 +15,7 @@
  * 7. 不建立第二個 LINE Bot、不建立第二個 Web App。
  */
 
-var 製造工具75_版本_ = 'v1.4.4_刀具表精靈_PWA_v2.2.1';
+var 製造工具75_版本_ = 'v1.4.5_刀具表LINE入口精準路由_PWA_v2.2.1';
 
 var 製造工具75_正式主庫ID_ = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
 var 製造工具75_工作表名稱_ = 'LINE_製造工具中心';
@@ -705,7 +705,7 @@ function 製造工具75_取得完整工具清單_() {
           String(r.顯示名稱 || ''),
           String(r.圖片網址 || '')
         ),
-        PWA網址: 製造工具75_LINE內開網址_(String(r.PWA網址 || '')),
+        PWA網址: 製造工具75_LINE內開網址_(String(r.PWA網址 || ''), r.工具編號, r.顯示名稱),
         分類: String(r.分類 || '製造工具').trim(),
         按鈕文字: String(r.按鈕文字 || '立即開啟').trim()
       };
@@ -884,7 +884,7 @@ function 製造工具75_建立Bubble_(工具) {
           action: {
             type: 'uri',
             label: String(工具.按鈕文字 || '立即開啟').substring(0, 20),
-            uri: 製造工具75_LINE內開網址_(工具.PWA網址)
+            uri: 製造工具75_LINE內開網址_(工具.PWA網址, 工具.工具編號, 工具.顯示名稱)
           }
         }
       ]
@@ -900,7 +900,7 @@ function 製造工具75_建立Bubble_(工具) {
       aspectMode: 'cover',
       action: {
         type: 'uri',
-        uri: 製造工具75_LINE內開網址_(工具.PWA網址)
+        uri: 製造工具75_LINE內開網址_(工具.PWA網址, 工具.工具編號, 工具.顯示名稱)
       }
     };
   }
@@ -1600,8 +1600,27 @@ function 製造工具75_產生工具編號_(name) {
  * URI / 圖片 / Token / Reply
  * ============================================================ */
 
-function 製造工具75_LINE內開網址_(url) {
+/**
+ * LINE 工具卡片網址：
+ * 只有「刀具表精靈」使用固定正式 PWA 與 LINEBOT_TOOL 來源參數。
+ * 其他工具原有網址及來源保留，僅沿用既有的 LINE 內開處理。
+ * 工具編號與名稱用於修正歷史卡片的舊網址，不新增第二套工具。
+ */
+function 製造工具75_LINE內開網址_(url, 工具編號, 顯示名稱) {
   var text = String(url || '').trim();
+  var 編號 = String(工具編號 || '').trim();
+  var 名稱 = String(顯示名稱 || '').replace(/\s+/g, '');
+
+  var 是刀具表精靈 =
+    /^(TOOL-CUTTING|TOOL-CUTTING-WIZARD)$/i.test(編號) ||
+    /刀具表精靈/.test(名稱) ||
+    /^https:\/\/qhero70\.github\.io\/smart-factory-worker-app\/tool-change-pwa(?:\/|[?#]|$)/i.test(text);
+
+  if (是刀具表精靈) {
+    return 製造工具75_刀具表精靈網址_ +
+      '?source=' + 製造工具75_刀具表LINE來源_;
+  }
+
   if (!text || !/^https:\/\//i.test(text)) return text;
 
   text = text
@@ -1611,10 +1630,6 @@ function 製造工具75_LINE內開網址_(url) {
     .replace(/[?&]$/, '')
     .replace(/\?&/, '?')
     .replace(/&&+/g, '&');
-
-  if (!/[?&]source=/i.test(text)) {
-    text += (text.indexOf('?') >= 0 ? '&' : '?') + 'source=' + 製造工具75_刀具表LINE來源_;
-  }
 
   try {
     return encodeURI(text);
