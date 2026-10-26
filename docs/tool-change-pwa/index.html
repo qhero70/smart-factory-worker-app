@@ -4444,6 +4444,47 @@ html, body {
 .delivery-copy-btn { flex:none; border:0; border-radius:10px; padding:8px 10px; background:#34A853; color:#fff; font:800 .7rem inherit; }
 @media(max-width:420px){ .delivery-actions { grid-template-columns:1fr; } .delivery-btn { min-height:82px; } }
 
+
+/* 正式 Google 試算表資料庫 v2.2.0 */
+.tm-db-card {
+    margin-top: 12px;
+    padding: 13px;
+    border: 1px solid rgba(66,133,244,.22);
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(232,240,254,.82), rgba(255,255,255,.92));
+}
+.tm-db-title {
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+    font-size:.82rem; font-weight:900; color:#174EA6; margin-bottom:5px;
+}
+.tm-db-desc { font-size:.68rem; line-height:1.55; color:var(--ink-3); margin-bottom:9px; }
+.tm-db-row { display:flex; gap:7px; align-items:stretch; }
+.tm-db-select {
+    flex:1; min-width:0; min-height:42px; border:1.5px solid #AECBFA; border-radius:11px;
+    background:#fff; padding:8px 10px; font-family:inherit; font-size:13px !important;
+    font-weight:700; color:var(--ink);
+}
+.tm-db-btn {
+    min-height:42px; border:none; border-radius:11px; padding:8px 11px;
+    font-family:inherit; font-size:.70rem !important; font-weight:850; cursor:pointer;
+    background:#E8F0FE; color:#1967D2;
+}
+.tm-db-btn.primary { background:#1A73E8; color:#fff; }
+.tm-db-btn.green { background:#E6F4EA; color:#137333; }
+.tm-db-actions { display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-top:8px; }
+.tm-db-status {
+    display:flex; gap:7px; align-items:flex-start; margin-top:8px; min-height:18px;
+    font-size:.66rem; line-height:1.45; color:var(--ink-3);
+}
+.tm-db-status .dot { width:8px;height:8px;border-radius:50%;background:#9AA0A6;flex:none;margin-top:4px; }
+.tm-db-status.ok .dot { background:#34A853; }
+.tm-db-status.busy .dot { background:#FBBC04; }
+.tm-db-status.error .dot { background:#EA4335; }
+@media(max-width:420px){
+    .tm-db-row { flex-wrap:wrap; }
+    .tm-db-select { flex-basis:100%; }
+}
+
 </style>
 </head>
 <body class="mobile-view-chat">
@@ -5836,6 +5877,29 @@ html, body {
                 <button class="tm-cloud-btn sync" onclick="openCloudSync()">☁️ 跨裝置同步<br><span class="ui-en">Cloud Sync · Phone / PC</span></button>
                 <button class="tm-cloud-btn voice" onclick="openVoiceSettings()">🔊 語音引導設定<br><span class="ui-en">Voice Guide Settings</span></button>
             </div>
+
+            <div class="tm-db-card">
+                <div class="tm-db-title">
+                    <span>📗 正式試算表刀具庫</span>
+                    <span class="ui-en inline">Google Sheets Database</span>
+                </div>
+                <div class="tm-db-desc">
+                    LINE／手機完成後會直接寫入正式主資料庫。網頁版可選「品名_OP」分頁，直接映射回 A4／A3 刀具表並列印。
+                </div>
+                <div class="tm-db-row">
+                    <select id="formal-sheet-select" class="tm-db-select" aria-label="試算表分頁名稱">
+                        <option value="">請先重新整理分頁 / Refresh first</option>
+                    </select>
+                    <button class="tm-db-btn" onclick="refreshFormalSheetList(false)">↻ 重新整理</button>
+                </div>
+                <div class="tm-db-actions">
+                    <button class="tm-db-btn primary" onclick="loadSelectedFormalSheet()">📥 載入分頁預覽</button>
+                    <button class="tm-db-btn green" onclick="saveCurrentToFormalSheets(false)">💾 儲存目前刀具表</button>
+                </div>
+                <div id="formal-db-status" class="tm-db-status">
+                    <span class="dot"></span><span>尚未讀取正式試算表。</span>
+                </div>
+            </div>
         </div>
 
         <div id="tm-list" class="tm-body"></div>
@@ -6171,6 +6235,8 @@ html, body {
                 <ul>
                     <li>本機最多 10 張。</li>
                     <li>自動存於 localStorage 與 IndexedDB 雙重備份。</li>
+                    <li><b>正式 Google 試算表</b>：建立完成後會同步寫入「刀具表_索引」「刀具表_明細」與「品名_OP」分頁。</li>
+                    <li><b>網頁版叫回</b>：到「我的刀具表」選試算表分頁名稱，即可映射回 A4/A3 預覽並列印。</li>
                     <li><b>跨裝置雲端同步</b>：手機與電腦使用同一組同步碼，可合併同一批刀具表。</li>
                     <li>LINE 內建瀏覽器不能可靠選資料夾，但仍可使用雲端同步。</li>
                     <li>清除瀏覽器資料前，建議先確認雲端同步完成或匯出 Excel。</li>
@@ -9073,6 +9139,448 @@ async function initCloudSyncOnLoad() {
     cloudSyncReady = true;
 }
 
+
+const FORMAL_GAS_API_URL = 'https://script.google.com/macros/s/AKfycby2ghuwkxTr1kbt2bU9D3U24O55c6GhcabA1IhDC67OEw86pH6MjS3nnBMASnjEmggw/exec';
+const FORMAL_SPREADSHEET_ID = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
+const FORMAL_INDEX_SHEET = '刀具表_索引';
+const FORMAL_DETAIL_SHEET = '刀具表_明細';
+let formalDbBusy = false;
+let formalSheetCache = [];
+let formalDbLastSavedId = '';
+
+function formalDbStatus_(state, text) {
+    const el = document.getElementById('formal-db-status');
+    if (!el) return;
+    el.className = 'tm-db-status' + (state ? ' ' + state : '');
+    const span = el.querySelector('span:last-child');
+    if (span) span.textContent = text || '';
+}
+
+function formalSource_() {
+    const p = new URLSearchParams(location.search || '');
+    const source = String(p.get('source') || '').trim();
+    if (isLineInAppBrowser() || /LINEBOT/i.test(source)) return 'LINE BOT';
+    return '網頁版 PWA';
+}
+
+function formalLineUserId_() {
+    const p = new URLSearchParams(location.search || '');
+    return String(p.get('lineUserId') || p.get('userId') || p.get('uid') || '').trim();
+}
+
+function formalJsonp_(params, timeoutMs = 15000) {
+    return new Promise((resolve, reject) => {
+        const callback = '__toolSheetJsonp_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+        const script = document.createElement('script');
+        const timer = setTimeout(() => {
+            cleanup();
+            reject(new Error('正式試算表讀取逾時'));
+        }, timeoutMs);
+
+        const cleanup = () => {
+            clearTimeout(timer);
+            try { delete window[callback]; } catch (e) { window[callback] = undefined; }
+            if (script.parentNode) script.parentNode.removeChild(script);
+        };
+
+        window[callback] = data => {
+            cleanup();
+            if (data && (data.ok === false || data.success === false)) {
+                reject(new Error(data.message || data.error || '正式試算表 API 回傳失敗'));
+                return;
+            }
+            resolve(data || {});
+        };
+
+        const url = new URL(FORMAL_GAS_API_URL);
+        Object.entries(params || {}).forEach(([k,v]) => {
+            if (v !== undefined && v !== null) url.searchParams.set(k, String(v));
+        });
+        url.searchParams.set('callback', callback);
+        script.onerror = () => {
+            cleanup();
+            reject(new Error('無法連線正式 GAS API'));
+        };
+        script.src = url.toString();
+        document.head.appendChild(script);
+    });
+}
+
+function formalPostForm_(sheet, rowObj, timeoutMs = 12000) {
+    return new Promise((resolve) => {
+        const token = 'formalPost_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+        const iframe = document.createElement('iframe');
+        iframe.name = token;
+        iframe.style.display = 'none';
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = FORMAL_GAS_API_URL;
+        form.target = token;
+        form.style.display = 'none';
+
+        const add = (name, value) => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = name;
+            input.value = String(value == null ? '' : value);
+            form.appendChild(input);
+        };
+        add('action', 'appendRow');
+        add('sheet', sheet);
+        add('row', JSON.stringify(rowObj || {}));
+
+        let submitted = false;
+        let settled = false;
+        const finish = () => {
+            if (settled) return;
+            settled = true;
+            setTimeout(() => {
+                form.remove();
+                iframe.remove();
+            }, 50);
+            resolve(true);
+        };
+        iframe.onload = () => {
+            if (!submitted) return;
+            finish();
+        };
+
+        document.body.appendChild(iframe);
+        document.body.appendChild(form);
+        submitted = true;
+        form.submit();
+        setTimeout(finish, timeoutMs);
+    });
+}
+
+function sleep_(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function formalSheetNameFromData_(data) {
+    data = data || appData;
+    const isA3 = Number(data.type) === 2;
+    const part = String(isA3 ? (data.productName || '') : (data.partName || '')).trim() || '未命名';
+    let process = isA3
+        ? ((String(data.headerTitle || '').match(/OP\s*\d+/i) || [])[0] || '')
+        : String(data.processCode || '').trim();
+    process = process.replace(/\s+/g, '').toUpperCase();
+    let name = [part, process].filter(Boolean).join('_');
+    name = name.replace(/[\\\/\?\*\[\]\:]/g, '_').replace(/\s+/g, ' ').trim();
+    if (!name) name = '未命名刀具表';
+    return name.slice(0, 31);
+}
+
+function formalTableId_() {
+    saveCurrent(true);
+    return store.currentId || ('T' + Date.now() + Math.random().toString(36).slice(2,6));
+}
+
+function formalSafePhoto_(value) {
+    const s = String(value || '');
+    if (!s) return '';
+    if (/^https?:\/\//i.test(s)) return s;
+    // Google Sheets 單格有長度限制；壓縮後足夠小才保留內嵌圖片。
+    if (s.startsWith('data:image/') && s.length <= 45000) return s;
+    return '';
+}
+
+function formalSanitizedData_() {
+    const d = JSON.parse(JSON.stringify(appData));
+    [d.tools, d.tools2].forEach(list => {
+        if (!Array.isArray(list)) return;
+        list.forEach(t => {
+            if (!t) return;
+            if (t.t_photo) t.t_photo = formalSafePhoto_(t.t_photo);
+            if (t.t_image) t.t_image = formalSafePhoto_(t.t_image);
+        });
+    });
+    return d;
+}
+
+function formalBasicInfo_(data) {
+    const isA3 = Number(data.type) === 2;
+    const title = isA3 ? (data.headerTitle || '') : (data.title || '');
+    const process = isA3
+        ? (((String(title).match(/OP\s*\d+/i) || [])[0] || '').replace(/\s+/g,'').toUpperCase())
+        : (data.processCode || '');
+    return {
+        品名: isA3 ? (data.productName || '') : (data.partName || ''),
+        工序: process,
+        機器號碼: isA3 ? '' : (data.machineNo || ''),
+        客戶品號: isA3 ? (data.productNo || '') : (data.partNo || ''),
+        產品編號: isA3 ? (data.customerNo1 || '') : (data.customerNo || ''),
+        主程式: isA3 ? '' : (data.mainProgram || ''),
+        加工程式: isA3 ? (data.headerSubtitle || '') : (data.machiningProgram || ''),
+        夾持壓力: isA3 ? '' : (data.pressure || ''),
+        加工時間: isA3 ? (data.processTime2 || '') : (data.processTime || ''),
+        每日數量: isA3 ? (data.dailyQty2 || '') : (data.dailyQty || ''),
+        QR內容: data.qrContent || '',
+        製表者: data.creator || '',
+        製表日期: data.date || '',
+        表格格式: isA3 ? 'A3' : 'A4'
+    };
+}
+
+function formalToolRows_(data) {
+    const list = Number(data.type) === 2 ? (data.tools2 || []) : (data.tools || []);
+    return (Array.isArray(list) ? list : []).map((t, index) => ({
+        排序: index + 1,
+        N工序: t.t_seq || '',
+        刀具形式: [t.t_type || '', t.t_typeDesc || ''].filter(Boolean).join(' / '),
+        刀號: t.t_no || '',
+        H值: t.t_h || '',
+        G補正X軸: t.t_gx || '',
+        G補正Z軸: t.t_gz || '',
+        刀具壽命: t.t_remark || '',
+        照片URL: formalSafePhoto_(t.t_photo || t.t_image || ''),
+        照片檔名: t.t_imageName || '',
+        備註: Number(data.type) === 2 && t.t_len ? ('刀長=' + t.t_len) : ''
+    }));
+}
+
+async function saveCurrentToFormalSheets(silent = true) {
+    if (formalDbBusy) return false;
+    saveCurrent(true);
+    if (!hasMeaningfulData()) {
+        if (!silent) alert('目前刀具表沒有可儲存的資料。');
+        return false;
+    }
+
+    formalDbBusy = true;
+    formalDbStatus_('busy', '正在寫入正式 Google 試算表…');
+    try {
+        const data = formalSanitizedData_();
+        const tableId = formalTableId_();
+        const sheetName = formalSheetNameFromData_(data);
+        const basic = formalBasicInfo_(data);
+        const tools = formalToolRows_(data);
+        const now = new Date().toISOString();
+        const source = formalSource_();
+        const lineUserId = formalLineUserId_();
+        const localTable = store.tables.find(x => x.id === store.currentId);
+        const created = localTable && localTable.createdAt ? new Date(localTable.createdAt).toISOString() : now;
+
+        const indexRow = {
+            刀具表ID: tableId,
+            分頁名稱: sheetName,
+            表格格式: basic.表格格式,
+            品名: basic.品名,
+            工序: basic.工序,
+            機器號碼: basic.機器號碼,
+            客戶品號: basic.客戶品號,
+            產品編號: basic.產品編號,
+            主程式: basic.主程式,
+            加工程式: basic.加工程式,
+            夾持壓力: basic.夾持壓力,
+            加工時間: basic.加工時間,
+            每日數量: basic.每日數量,
+            QR內容: basic.QR內容,
+            製表者: basic.製表者,
+            製表日期: basic.製表日期,
+            來源: source,
+            LINE_USER_ID: lineUserId,
+            建立時間: created,
+            更新時間: now
+        };
+
+        const mainSnapshot = {
+            資料類型: '主檔',
+            刀具表ID: tableId,
+            分頁名稱: sheetName,
+            表格格式: basic.表格格式,
+            品名: basic.品名,
+            工序: basic.工序,
+            機器號碼: basic.機器號碼,
+            客戶品號: basic.客戶品號,
+            產品編號: basic.產品編號,
+            製表者: basic.製表者,
+            製表日期: basic.製表日期,
+            來源: source,
+            更新時間: now,
+            JSON資料: JSON.stringify(data)
+        };
+
+        await formalPostForm_(FORMAL_INDEX_SHEET, indexRow);
+        await sleep_(130);
+        await formalPostForm_(sheetName, mainSnapshot);
+
+        for (let i = 0; i < tools.length; i++) {
+            const t = tools[i];
+            const detailRow = {
+                刀具表ID: tableId,
+                分頁名稱: sheetName,
+                排序: t.排序,
+                N工序: t.N工序,
+                刀具形式: t.刀具形式,
+                刀號: t.刀號,
+                H值: t.H值,
+                G補正X軸: t.G補正X軸,
+                G補正Z軸: t.G補正Z軸,
+                刀具壽命: t.刀具壽命,
+                照片URL: t.照片URL,
+                照片檔名: t.照片檔名,
+                備註: t.備註,
+                建立時間: created,
+                更新時間: now
+            };
+            const sheetToolRow = Object.assign({資料類型:'刀具', 刀具表ID:tableId, 更新時間:now}, t);
+            await formalPostForm_(FORMAL_DETAIL_SHEET, detailRow);
+            await sleep_(90);
+            await formalPostForm_(sheetName, sheetToolRow);
+            await sleep_(90);
+        }
+
+        // 用 JSONP 讀回指定分頁，確認主檔快照真的已寫入。
+        await sleep_(500);
+        const verify = await formalJsonp_({action:'readSheet', sheet:sheetName, maxRows:5000});
+        const rows = Array.isArray(verify.rows) ? verify.rows : [];
+        const confirmed = rows.some(r => String(r.刀具表ID || '') === tableId && String(r.資料類型 || '') === '主檔');
+        if (!confirmed) throw new Error('寫入後未能讀回確認');
+
+        formalDbLastSavedId = tableId;
+        formalDbStatus_('ok', '已寫入正式試算表：' + sheetName);
+        refreshFormalSheetList(true).catch(()=>{});
+        if (!silent) {
+            playSound('success');
+            alert('✅ 已儲存到正式 Google 試算表\n分頁：' + sheetName);
+        }
+        return true;
+    } catch (e) {
+        console.error('Formal Sheets save failed', e);
+        formalDbStatus_('error', '試算表儲存失敗：' + (e.message || e));
+        if (!silent) {
+            playSound('error');
+            alert('試算表儲存失敗：' + (e.message || e));
+        }
+        return false;
+    } finally {
+        formalDbBusy = false;
+    }
+}
+
+async function refreshFormalSheetList(silent = true) {
+    const select = document.getElementById('formal-sheet-select');
+    if (!select) return [];
+    formalDbStatus_('busy', '正在讀取刀具表分頁清單…');
+    try {
+        const res = await formalJsonp_({action:'readSheet', sheet:FORMAL_INDEX_SHEET, maxRows:5000});
+        const rows = Array.isArray(res.rows) ? res.rows : [];
+        const map = new Map();
+        rows.forEach((r, i) => {
+            const name = String(r.分頁名稱 || '').trim();
+            if (!name) return;
+            map.set(name, {
+                name,
+                part: r.品名 || '',
+                process: r.工序 || '',
+                format: r.表格格式 || '',
+                updated: r.更新時間 || '',
+                seq:i
+            });
+        });
+        formalSheetCache = Array.from(map.values()).sort((a,b) => b.seq - a.seq);
+        const old = select.value;
+        select.innerHTML = '<option value="">選擇分頁名稱 / Select Sheet</option>' +
+            formalSheetCache.map(x =>
+                '<option value="' + esc(x.name) + '">' +
+                esc(x.name + (x.format ? ' · ' + x.format : '')) +
+                '</option>'
+            ).join('');
+        if (old && formalSheetCache.some(x => x.name === old)) select.value = old;
+        formalDbStatus_('ok', '已讀取 ' + formalSheetCache.length + ' 個刀具表分頁。');
+        return formalSheetCache;
+    } catch (e) {
+        console.error(e);
+        formalDbStatus_('error', '無法讀取正式試算表：' + (e.message || e));
+        if (!silent) alert('無法讀取正式試算表：' + (e.message || e));
+        return [];
+    }
+}
+
+function applyFormalAppData_(data, sheetName) {
+    const type = Number(data && data.type) === 2 ? 2 : 1;
+    appData = makeEmptyAppData(type);
+    Object.assign(appData, JSON.parse(JSON.stringify(data || {})));
+    if (!Array.isArray(appData.tools)) appData.tools = [];
+    if (!Array.isArray(appData.tools2)) appData.tools2 = [];
+    appData._formalSheetName = sheetName || '';
+    if (type === 1) syncA4DerivedFields();
+
+    let t = store.tables.find(x => x.data && x.data._formalSheetName === sheetName);
+    if (!t && store.tables.length < MAX_TABLES) {
+        t = {
+            id:'GS' + Date.now() + Math.random().toString(36).slice(2,5),
+            createdAt:Date.now(), updatedAt:Date.now(),
+            name:(type===2?'【A3】':'【A4】') + (sheetName || '試算表刀具表'),
+            data:null
+        };
+        store.tables.push(t);
+    }
+    if (t) {
+        store.currentId = t.id;
+        t.updatedAt = Date.now();
+        t.data = JSON.parse(JSON.stringify(appData));
+        t.name = (type===2?'【A3】':'【A4】') + (sheetName || '試算表刀具表');
+        persist();
+    }
+
+    const mb1 = document.getElementById('mode-btn-1');
+    const mb2 = document.getElementById('mode-btn-2');
+    if (mb1) mb1.classList.toggle('active', type === 1);
+    if (mb2) mb2.classList.toggle('active', type === 2);
+    const osMode1 = document.getElementById('os-mode-1');
+    const osMode2 = document.getElementById('os-mode-2');
+    if (osMode1) osMode1.classList.toggle('active', type === 1);
+    if (osMode2) osMode2.classList.toggle('active', type === 2);
+
+    document.getElementById('a4-wrapper').classList.toggle('hidden', type !== 1);
+    document.getElementById('a3-wrapper').classList.toggle('hidden', type !== 2);
+    document.getElementById('print-btn-label').textContent = type === 2
+        ? '列印 / 存為 PDF（A3 橫向單頁）'
+        : '列印 / 存為 PDF（A4 單頁）';
+    document.getElementById('dynamic-page-style').textContent = type === 2
+        ? '@page { size: A3 landscape; margin: 0; }'
+        : '@page { size: A4 portrait; margin: 0; }';
+
+    updateA4Preview();
+    updateA3Preview();
+    renderTableList();
+    updateHomeRecentCard();
+    restoreChatView();
+}
+
+async function loadSelectedFormalSheet() {
+    const select = document.getElementById('formal-sheet-select');
+    const sheetName = String(select && select.value || '').trim();
+    if (!sheetName) {
+        alert('請先選擇試算表分頁名稱。');
+        return;
+    }
+    formalDbStatus_('busy', '正在載入 ' + sheetName + '…');
+    try {
+        const res = await formalJsonp_({action:'readSheet', sheet:sheetName, maxRows:5000});
+        const rows = Array.isArray(res.rows) ? res.rows : [];
+        let snapshot = null;
+        for (let i = rows.length - 1; i >= 0; i--) {
+            const r = rows[i] || {};
+            if (String(r.資料類型 || '') !== '主檔' || !r.JSON資料) continue;
+            try { snapshot = JSON.parse(r.JSON資料); break; } catch (e) {}
+        }
+        if (!snapshot) throw new Error('此分頁找不到可映射的刀具表快照');
+
+        applyFormalAppData_(snapshot, sheetName);
+        formalDbStatus_('ok', '已載入：' + sheetName);
+        closeTableManager();
+        switchTab('preview');
+        playSound('success');
+        setTimeout(adjustPreviewScale, 80);
+    } catch (e) {
+        console.error(e);
+        formalDbStatus_('error', '載入失敗：' + (e.message || e));
+        playSound('error');
+        alert('載入試算表刀具表失敗：' + (e.message || e));
+    }
+}
+
 function openToolDB() {
     return new Promise((resolve, reject) => {
         if (!('indexedDB' in window)) { resolve(null); return; }
@@ -9857,6 +10365,8 @@ function getBackupTimestamp(date) {
 function openTableManager() {
     renderTableList();
     document.getElementById('table-manager').classList.add('show');
+    const sel = document.getElementById('formal-sheet-select');
+    if (sel && sel.options.length <= 1 && !formalDbBusy) refreshFormalSheetList(true);
 }
 function closeTableManager() { document.getElementById('table-manager').classList.remove('show'); }
 
@@ -10670,7 +11180,11 @@ function renderFinalStep() {
         playSound('success');
         inputContainer.innerHTML = '';
         const sheetName = appData.type === 2 ? (appData.headerTitle || '刀具表') : (appData.title || '刀具表');
-        addBotMessage(`🎉 **恭喜！**\n「${sheetName}」建立完成，已自動暫存。\n您現在可以切到「預覽報表」檢視成果，或按「匯出 Excel」保存資料。`);
+        addBotMessage(`🎉 **恭喜！**\n「${sheetName}」建立完成，已自動暫存。\n正在同步寫入正式 Google 試算表…`);
+        saveCurrentToFormalSheets(true).then(ok => {
+            if (ok) addBotMessage('✅ **正式試算表已儲存完成。**\n網頁版可從「我的刀具表 → 正式試算表刀具庫」選分頁直接叫出、預覽與列印。');
+            else addBotMessage('⚠️ 本機資料已保留，但正式試算表尚未確認寫入。可到「我的刀具表」按「儲存目前刀具表」重試。');
+        });
         if (window.innerWidth < 768) setTimeout(() => switchTab('preview'), 1100);
     };
     sendBtn.onclick = () => finishProcess(inputEl.value);
