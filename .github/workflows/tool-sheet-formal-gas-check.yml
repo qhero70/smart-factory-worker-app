@@ -1,0 +1,57 @@
+name: 刀具表正式GAS唯讀檢查
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/tool-change-pwa/**'
+      - '.github/workflows/tool-sheet-formal-gas-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: 檢查正式GAS分頁清單
+        shell: bash
+        env:
+          GAS_URL: https://script.google.com/macros/s/AKfycby2ghuwkxTr1kbt2bU9D3U24O55c6GhcabA1IhDC67OEw86pH6MjS3nnBMASnjEmggw/exec
+        run: |
+          set -euo pipefail
+          curl -L --fail --silent --show-error --max-time 40             "$GAS_URL?action=listSheets"             -o /tmp/list.json
+          python - <<'PY'
+          import json
+          p="/tmp/list.json"
+          data=json.load(open(p,encoding="utf-8"))
+          if not (data.get("ok") is True or data.get("success") is True):
+              raise SystemExit("正式 GAS listSheets 未回傳成功")
+          names=[x.get("name") for x in data.get("sheets",[])]
+          required=["刀具表_索引","刀具表_明細"]
+          missing=[x for x in required if x not in names]
+          if missing:
+              raise SystemExit("正式主庫缺少分頁: "+",".join(missing))
+          print("PASS: 正式 GAS 可讀取刀具表分頁")
+          PY
+
+      - name: 檢查刀具表索引讀取
+        shell: bash
+        env:
+          GAS_URL: https://script.google.com/macros/s/AKfycby2ghuwkxTr1kbt2bU9D3U24O55c6GhcabA1IhDC67OEw86pH6MjS3nnBMASnjEmggw/exec
+        run: |
+          set -euo pipefail
+          curl -L --fail --silent --show-error --max-time 40             --get "$GAS_URL"             --data-urlencode "action=readSheet"             --data-urlencode "sheet=刀具表_索引"             --data-urlencode "maxRows=10"             -o /tmp/index.json
+          python - <<'PY'
+          import json
+          data=json.load(open("/tmp/index.json",encoding="utf-8"))
+          if not (data.get("ok") is True or data.get("success") is True):
+              raise SystemExit("正式 GAS readSheet 未回傳成功")
+          if data.get("sheet") != "刀具表_索引":
+              raise SystemExit("讀取分頁名稱不符")
+          if not isinstance(data.get("rows",[]), list):
+              raise SystemExit("rows 格式不正確")
+          print("PASS: 刀具表_索引 readSheet 正常")
+          PY
