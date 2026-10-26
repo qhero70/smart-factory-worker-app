@@ -4485,9 +4485,53 @@ html, body {
     .tm-db-select { flex-basis:100%; }
 }
 
+
+/* v2.2.3｜刀具表精靈全域按鈕浮起回饋，不覆寫原本 transform。 */
+:where(button, a[href], a[onclick], [role="button"], input[type="button"], input[type="submit"]):not(:disabled):not([aria-disabled="true"]) { -webkit-tap-highlight-color: transparent; }
+:where(button, a[href], a[onclick], [role="button"], input[type="button"], input[type="submit"]):not(:disabled):not([aria-disabled="true"]):active { translate: 0 -2px; }
+.tool-action-rise { animation: tool-action-rise-keyframe .46s cubic-bezier(.22, 1, .36, 1); }
+@keyframes tool-action-rise-keyframe {
+    0% { translate: 0 0; } 42% { translate: 0 -6px; }
+    70% { translate: 0 -3px; } 100% { translate: 0 0; }
+}
+#tool-action-toast {
+    position: fixed; z-index: 2147483000; left: 50%;
+    bottom: calc(22px + env(safe-area-inset-bottom, 0px));
+    display: flex; align-items: center; gap: 11px;
+    max-width: calc(100vw - 32px); padding: 12px 18px;
+    border: 1px solid rgba(255,255,255,.2); border-radius: 999px;
+    color: #fff; background: rgba(28,38,58,.94);
+    box-shadow: 0 14px 40px rgba(24,36,56,.26), 0 2px 8px rgba(0,0,0,.15);
+    backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    opacity: 0; visibility: hidden; transform: translate(-50%,16px) scale(.96);
+    transition: opacity .18s ease, transform .25s cubic-bezier(.22,1,.36,1), visibility .18s;
+    pointer-events: none; white-space: nowrap; font-size: 13px !important; font-weight: 800;
+}
+#tool-action-toast.tool-action-toast-visible {
+    opacity: 1; visibility: visible; transform: translate(-50%,0) scale(1);
+}
+#tool-action-toast .tool-action-spinner {
+    display: block; width: 17px; height: 17px; flex: 0 0 17px;
+    border: 2px solid rgba(255,255,255,.27); border-top-color: #8ab4f8;
+    border-radius: 50%; animation: tool-action-spin .75s linear infinite;
+}
+@keyframes tool-action-spin { to { rotate: 360deg; } }
+#tool-action-toast-text {
+    overflow: hidden; text-overflow: ellipsis; min-width: 0; max-width: min(65vw,220px);
+}
+@media (prefers-reduced-motion: reduce) {
+    .tool-action-rise, #tool-action-toast .tool-action-spinner { animation: none !important; }
+    #tool-action-toast { transition: none !important; }
+    :where(button, a[href], a[onclick], [role="button"]):active { translate: none; }
+}
+
 </style>
 </head>
 <body class="mobile-view-chat">
+<div id="tool-action-toast" role="status" aria-live="off" aria-hidden="true">
+    <span class="tool-action-spinner" aria-hidden="true"></span>
+    <span id="tool-action-toast-text">請稍候…</span>
+</div>
 <div id="line-browser-banner" role="status" aria-live="polite">
     <div class="line-banner-row">
         <div class="line-banner-icon">💬</div>
@@ -11699,6 +11743,51 @@ window.onload = async () => {
     }
     maybeAskVoice();
 };
+</script>
+
+<script id="tool-button-feedback-script">
+/* v2.2.3：含動態按鈕的事件代理，保留既有 onclick / LINE / PWA 功能。 */
+(() => {
+    'use strict';
+    const selector = 'button, a[href], a[onclick], [role="button"], input[type="button"], input[type="submit"], [onclick]';
+    const notice = document.getElementById('tool-action-toast');
+    const noticeText = document.getElementById('tool-action-toast-text');
+    const riseTimers = new WeakMap();
+    let noticeTimer = null;
+
+    function clickFeedback(event) {
+        if (!(event.target instanceof Element)) return;
+        const action = event.target.closest(selector);
+        if (!action || action.disabled ||
+            action.matches('[disabled], [aria-disabled="true"]') ||
+            action.closest('[inert], #tool-action-toast')) return;
+        if (action.matches('.os-backdrop, [class*="backdrop"], [class*="overlay"]') &&
+            !action.matches('button, [role="button"]')) return;
+
+        action.classList.remove('tool-action-rise');
+        void action.offsetWidth;
+        action.classList.add('tool-action-rise');
+        clearTimeout(riseTimers.get(action));
+        riseTimers.set(action, setTimeout(() => action.classList.remove('tool-action-rise'), 480));
+
+        // 短暫等待提示，不將視覺動畫誤當成完成狀態。
+        const caption = String(action.getAttribute('data-action-label') ||
+            action.getAttribute('aria-label') || action.getAttribute('title') ||
+            action.innerText || action.textContent || action.value || '')
+            .replace(/\s+/g, ' ').trim().slice(0, 16);
+        noticeText.textContent = caption ? caption + ' · 請稍候' : '處理中，請稍候…';
+        notice.setAttribute('aria-hidden', 'false');
+        notice.classList.add('tool-action-toast-visible');
+        clearTimeout(noticeTimer);
+        noticeTimer = setTimeout(() => {
+            notice.classList.remove('tool-action-toast-visible');
+            notice.setAttribute('aria-hidden', 'true');
+        }, 900);
+    }
+
+    // capture 只提供回饋；不 preventDefault、不 stopPropagation、不阻擋操作。
+    document.addEventListener('click', clickFeedback, true);
+})();
 </script>
 
 <script>
