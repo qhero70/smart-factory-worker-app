@@ -1,6 +1,6 @@
 {
   "模組": "38_LINE 指令中心 Rich Menu 快捷按鈕優化",
-  "版本": "v1.9.2_LINE內開_PWA_V4_刀具表精靈v2.1.4",
+  "版本": "v1.9.3_LINE內開_PWA_V4_刀具表精靈v2.2.1",
   "目的": "所有 Rich Menu URI 統一維持 LINE Bot 內建瀏覽器開啟；主管與一般員工報工皆使用正式 PWA V4；製造工具圖片 Flex 的刀具表精靈固定開啟最新版正式 PWA，並保留 source=LINEBOT_TOOL 來源識別。",
   "圖片": [
     {
