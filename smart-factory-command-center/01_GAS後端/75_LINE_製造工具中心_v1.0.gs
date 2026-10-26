@@ -15,7 +15,7 @@
  * 7. 不建立第二個 LINE Bot、不建立第二個 Web App。
  */
 
-var 製造工具75_版本_ = 'v1.4.3_刀具表精靈_PWA_v2.1.4';
+var 製造工具75_版本_ = 'v1.4.4_刀具表精靈_PWA_v2.2.1';
 
 var 製造工具75_正式主庫ID_ = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
 var 製造工具75_工作表名稱_ = 'LINE_製造工具中心';
@@ -415,7 +415,7 @@ function 製造工具75_補核心工具資料_() {
 }
 
 
-function 同步75_LINE刀具表精靈_v214() {
+function 同步75_LINE刀具表精靈_v221() {
   var ss = SpreadsheetApp.openById(製造工具75_正式主庫ID_);
   var sh = ss.getSheetByName(製造工具75_工作表名稱_);
   if (!sh) throw new Error('找不到工作表：' + 製造工具75_工作表名稱_);
@@ -436,7 +436,7 @@ function 同步75_LINE刀具表精靈_v214() {
   製造工具75_寫欄位值_(sh, target.__row, '分類', '刀具管理');
   製造工具75_寫欄位值_(sh, target.__row, '啟用', true);
   製造工具75_寫欄位值_(sh, target.__row, '按鈕文字', '開啟最新版');
-  製造工具75_寫欄位值_(sh, target.__row, '備註', '正式 PWA v2.1.4｜RWD／LINE相容／跨裝置雲端同步／外開保留LINE來源｜2026/10/20');
+  製造工具75_寫欄位值_(sh, target.__row, '備註', '正式 PWA v2.2.1｜RWD／LINE相容／跨裝置雲端同步／外開保留LINE來源｜2026/10/27');
   製造工具75_寫欄位值_(sh, target.__row, '更新時間', new Date());
 
   製造工具75_清除快取_();
@@ -452,8 +452,12 @@ function 同步75_LINE刀具表精靈_v214() {
 }
 
 /* 保留既有 Apps Script 手動執行名稱，避免既有排程或操作說明失效。 */
+function 同步75_LINE刀具表精靈_v214() {
+  return 同步75_LINE刀具表精靈_v221();
+}
+
 function 同步75_LINE刀具表精靈_v212() {
-  return 同步75_LINE刀具表精靈_v214();
+  return 同步75_LINE刀具表精靈_v221();
 }
 
 
