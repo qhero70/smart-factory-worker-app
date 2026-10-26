@@ -4445,6 +4445,24 @@ html, body {
 @media(max-width:420px){ .delivery-actions { grid-template-columns:1fr; } .delivery-btn { min-height:82px; } }
 
 
+/* v2.2.5｜預覽與刀具表選擇明確對應，切換後立即可核對。 */
+#preview-active-sheet {
+    width: 100%; max-width: 420mm;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 10px; flex-wrap: wrap; box-sizing: border-box;
+    padding: 10px 13px; margin: 0 0 10px;
+    border: 1px solid rgba(66,133,244,.24); border-radius: 14px;
+    background: rgba(232,240,254,.92); color: #174EA6;
+    font: 800 13px/1.5 inherit;
+    box-shadow: 0 3px 12px rgba(60,64,67,.07);
+}
+#preview-active-sheet-name { flex:1; min-width:0; overflow-wrap:anywhere; }
+.preview-change-sheet {
+    flex:none; padding:8px 12px; border:1px solid #AECBFA;
+    border-radius:10px; background:#fff; color:#1967D2;
+    font:800 13px/1.3 inherit; cursor:pointer;
+}
+@media print { #preview-active-sheet { display:none !important; } }
 /* v2.2.4｜我的刀具表：手機完整捲動、固定標題與可見操作區 */
 #table-manager .modal-panel {
     min-height: 0;
@@ -5183,6 +5201,10 @@ html, body {
 
     <main id="preview-container" class="no-scrollbar">
 
+        <div id="preview-active-sheet" role="status" aria-live="polite">
+            <span id="preview-active-sheet-name">尚未選擇刀具表</span>
+            <button type="button" class="preview-change-sheet" onclick="openTableManager()">切換刀具表</button>
+        </div>
         <div id="print-btn-container">
             <button class="btn-print" onclick="doPrint()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -9126,6 +9148,7 @@ function applyMergedStoreToView() {
     updateA4Preview();
     updateA3Preview();
     restoreChatView();
+    updatePreviewIdentity_();
     setTimeout(adjustPreviewScale, 50);
 }
 
@@ -9554,7 +9577,10 @@ function applyFormalAppData_(data, sheetName) {
     if (!Array.isArray(appData.tools)) appData.tools = [];
     if (!Array.isArray(appData.tools2)) appData.tools2 = [];
     appData._formalSheetName = sheetName || '';
-    if (type === 1) syncA4DerivedFields();
+    if (type === 1) {
+        hydrateLegacyA4PreviewData_();
+        syncA4DerivedFields();
+    }
 
     let t = store.tables.find(x => x.data && x.data._formalSheetName === sheetName);
     if (!t && store.tables.length < MAX_TABLES) {
@@ -9597,6 +9623,7 @@ function applyFormalAppData_(data, sheetName) {
     renderTableList();
     updateHomeRecentCard();
     restoreChatView();
+    updatePreviewIdentity_();
 }
 
 async function loadSelectedFormalSheet() {
@@ -10557,6 +10584,7 @@ function createNewTable() {
 }
 
 function loadTable(id) {
+    // 先保存目前的編輯，再將指定本機表格載入 appData；不要從另一個瀏覽器讀取。
     saveCurrent();
     const t = store.tables.find(x => x.id === id);
     if (!t) return;
@@ -10569,6 +10597,7 @@ function loadTable(id) {
         Object.assign(appData, JSON.parse(JSON.stringify(t.data)));
         if (!Array.isArray(appData.tools)) appData.tools = [];
         if (!Array.isArray(appData.tools2)) appData.tools2 = [];
+        if (type === 1) hydrateLegacyA4PreviewData_();
     }
 
     const mb1 = document.getElementById('mode-btn-1');
@@ -10593,7 +10622,8 @@ function loadTable(id) {
     updateA3Preview();
     closeTableManager();
     restoreChatView();
-    switchTab('chat');
+    // 既有版停留在對話輸入，容易誤以為預覽仍是上一張；載入成功立即進入預覽。
+    switchTab('preview');
     playSound('success');
     updateHomeRecentCard();
     setTimeout(adjustPreviewScale, 60);
@@ -10626,6 +10656,32 @@ function deleteTable(id) {
     }
 }
 
+/* 從舊版僅有 title 的 A4 快照回填基本欄位，避免刷新預覽時清空抬頭。 */
+function hydrateLegacyA4PreviewData_() {
+    if (Number(appData.type) !== 1 || appData.partName || !appData.title) return;
+    const title = String(appData.title).trim();
+    const suffix = title.match(/^(.*?)\s+(OP[0-9A-Z.-]+)$/i);
+    appData.partName = suffix ? suffix[1].trim() : title;
+    if (!appData.processCode) appData.processCode = suffix ? suffix[2].toUpperCase() : '';
+}
+function updatePreviewIdentity_() {
+    const label = document.getElementById('preview-active-sheet-name');
+    if (!label) return;
+    const type = Number(appData.type) === 2 ? 'A3' : 'A4';
+    const active = store.tables.find(t => t && t.id === store.currentId);
+    const title = Number(appData.type) === 2
+        ? (appData.headerTitle || appData.productName || '')
+        : (appData.title || appData.partName || '');
+    const items = Number(appData.type) === 2 ? appData.tools2 : appData.tools;
+    const count = Array.isArray(items) ? items.length : 0;
+    const browser = isLineInAppBrowser() ? 'LINE 內建瀏覽器' : '目前瀏覽器';
+    const name = String(title || (active && active.name) || '未命名刀具表').trim();
+    label.textContent = '📋 目前預覽：' + name + ' · ' + type + ' · ' + count +
+        ' 把刀具（' + browser + '本機）';
+    label.dataset.tableId = String(store.currentId || '');
+}
+
+/* 顯示目前在「這一個瀏覽器」編輯的表格；LINE 與 Safari 本機資料不自動共用。 */
 function switchTab(tabName) {
     const navChat = document.getElementById('nav-chat');
     const navPreview = document.getElementById('nav-preview');
@@ -10649,6 +10705,7 @@ function switchTab(tabName) {
     else {
         updateA4Preview();
         updateA3Preview();
+        updatePreviewIdentity_();
         const preview = document.getElementById('preview-container');
         if (preview) preview.scrollTop = 0;
         setTimeout(adjustPreviewScale, 30);
@@ -11299,7 +11356,7 @@ function restoreChatView() {
     toolStepIndex = 0;
     currentTool = {};
 
-    const count = (app.type === 2) ? appData.tools2.length : appData.tools.length;
+    const count = (Number(appData.type) === 2) ? appData.tools2.length : appData.tools.length;
     const name = (appData.type === 2) ? (appData.headerTitle || '未命名') : (appData.title || '未命名');
     addBotMessage(`📂 已載入刀具表：「${name}」\n目前共 **${count} 把刀具**。\n您可以繼續新增刀具，或重新填寫基本資料。`);
     showResumeOptions();
