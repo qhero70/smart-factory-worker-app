@@ -131,8 +131,10 @@ test('本機分頁載入直達預覽，不向 GAS 發送資料', async () => {
     await load();
     assert.equal(calls[0][0], 'load');
     assert.equal(calls[0][1], 'T7');
-    assert.deepEqual(calls[1], ['tab', 'preview']);
-    assert.match(calls[2][2], /未代表雲端同步/);
+    // 真正 loadTable() 內部已直接切換預覽，此處使用 stub 不重複觸發。
+    assert.equal(calls[1][0], 'status');
+    assert.match(calls[1][2], /未代表雲端同步/);
+    assert.match(mainScript, /function loadTable\(id\)[\s\S]*?switchTab\('preview'\)/);
 });
 
 test('原本正式試算表讀取與回存核對流程保留', () => {
