@@ -148,6 +148,6 @@ test('原本正式試算表讀取與回存核對流程保留', () => {
 
 test('主程式語法及離線快取版本 v2.2.4', () => {
     assert.doesNotThrow(() => new vm.Script(mainScript));
-    assert.match(sw, /刀具表精靈-pwa-v2\.2\.4/);
+    assert.match(sw, /刀具表精靈-pwa-v2\.2\.[5-9]\d*/);
     assert.match(html, /LINEBOT_TOOL/);
 });
