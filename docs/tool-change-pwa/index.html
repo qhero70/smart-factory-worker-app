@@ -9285,12 +9285,14 @@ function formalSafePhoto_(value) {
 
 function formalSanitizedData_() {
     const d = JSON.parse(JSON.stringify(appData));
+    // 主檔 JSON 不塞圖片，避免 Google Sheets 單格 50,000 字元上限。
+    // 圖片改存在每把刀具自己的明細列，載入時再依排序合併回來。
     [d.tools, d.tools2].forEach(list => {
         if (!Array.isArray(list)) return;
         list.forEach(t => {
             if (!t) return;
-            if (t.t_photo) t.t_photo = formalSafePhoto_(t.t_photo);
-            if (t.t_image) t.t_image = formalSafePhoto_(t.t_image);
+            if ('t_photo' in t) t.t_photo = '';
+            if ('t_image' in t) t.t_image = '';
         });
     });
     return d;
@@ -9352,7 +9354,7 @@ async function saveCurrentToFormalSheets(silent = true) {
         const tableId = formalTableId_();
         const sheetName = formalSheetNameFromData_(data);
         const basic = formalBasicInfo_(data);
-        const tools = formalToolRows_(data);
+        const tools = formalToolRows_(appData);
         const now = new Date().toISOString();
         const source = formalSource_();
         const lineUserId = formalLineUserId_();
@@ -9566,6 +9568,27 @@ async function loadSelectedFormalSheet() {
             try { snapshot = JSON.parse(r.JSON資料); break; } catch (e) {}
         }
         if (!snapshot) throw new Error('此分頁找不到可映射的刀具表快照');
+
+        const remoteTools = rows
+            .filter(r => String(r.資料類型 || '') === '刀具')
+            .sort((a,b) => Number(a.排序 || 0) - Number(b.排序 || 0));
+        const targetTools = Number(snapshot.type) === 2 ? (snapshot.tools2 || []) : (snapshot.tools || []);
+        remoteTools.forEach((r, i) => {
+            const idx = Math.max(0, Number(r.排序 || (i + 1)) - 1);
+            while (targetTools.length <= idx) targetTools.push({});
+            const t = targetTools[idx] || (targetTools[idx] = {});
+            if (r.N工序 !== undefined) t.t_seq = r.N工序 || '';
+            if (r.刀具形式 !== undefined && !t.t_type) t.t_type = r.刀具形式 || '';
+            if (r.刀號 !== undefined) t.t_no = r.刀號 || '';
+            if (r.H值 !== undefined) t.t_h = r.H值 || '';
+            if (r.G補正X軸 !== undefined) t.t_gx = r.G補正X軸 || '';
+            if (r.G補正Z軸 !== undefined) t.t_gz = r.G補正Z軸 || '';
+            if (r.刀具壽命 !== undefined) t.t_remark = r.刀具壽命 || '';
+            if (r.照片URL) t.t_photo = r.照片URL;
+            if (r.照片檔名) t.t_imageName = r.照片檔名;
+        });
+        if (Number(snapshot.type) === 2) snapshot.tools2 = targetTools;
+        else snapshot.tools = targetTools;
 
         applyFormalAppData_(snapshot, sheetName);
         formalDbStatus_('ok', '已載入：' + sheetName);
