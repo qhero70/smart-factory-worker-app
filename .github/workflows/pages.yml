@@ -21,6 +21,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: 驗證刀具表精靈 LINE 入口
+        run: node --test 'tests/刀具表精靈LINE入口驗收.cjs'
+
       - name: 檢查智慧5S核心語法
         run: |
           mapfile -d '' js_files < <(find docs/5s -maxdepth 1 -type f -name '*.js' -print0 | sort -z)
@@ -57,7 +60,9 @@ jobs:
           test -s 'docs/line/richmenu-supervisor-v189.png'
           test -s 'docs/line/richmenu-supervisor-v190.png'
           test -f 'smart-factory-command-center/01_GAS後端/75_LINE_製造工具中心_v1.0.gs'
-          grep -q "v1.4.1_效能快取_管理PWA" 'smart-factory-command-center/01_GAS後端/75_LINE_製造工具中心_v1.0.gs'
+          # 使用實際功能標記，避免舊版固定字串阻擋已升級的正式工具中心。
+          grep -q '製造工具75_快取秒數_' 'smart-factory-command-center/01_GAS後端/75_LINE_製造工具中心_v1.0.gs'
+          grep -q '製造工具75_刀具表LINE來源_' 'smart-factory-command-center/01_GAS後端/75_LINE_製造工具中心_v1.0.gs'
           grep -q "LINE製造工具75_嘗試處理Webhook_" 'smart-factory-command-center/01_GAS後端/75_LINE_製造工具中心_v1.0.gs'
           grep -q "LINE製造工具75_PWA_接收_" 'smart-factory-command-center/01_GAS後端/75_LINE_製造工具中心_v1.0.gs'
           grep -q "預熱75_LINE製造工具快取_v141" 'smart-factory-command-center/01_GAS後端/75_LINE_製造工具中心_v1.0.gs'
