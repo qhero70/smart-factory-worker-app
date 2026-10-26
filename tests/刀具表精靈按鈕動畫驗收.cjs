@@ -120,6 +120,6 @@ test('等待泡泡不阻擋操作，並提供減少動態效果與最新離線�
     assert.match(html, /pointer-events:\s*none/);
     assert.match(html, /prefers-reduced-motion:\s*reduce/);
     assert.match(html, /@keyframes tool-action-spin/);
-    assert.match(sw, /刀具表精靈-pwa-v2\.2\.3/);
+    assert.match(sw, /刀具表精靈-pwa-v2\.2\.[4-9]\d*/);
     assert.match(html, /register\('\.\/service-worker\.js'\)/);
 });
