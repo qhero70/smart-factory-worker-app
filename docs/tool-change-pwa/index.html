@@ -10825,7 +10825,8 @@ function loadTable(id) {
     setTimeout(adjustPreviewScale, 60);
 }
 
-async function deleteTable(id) {
+function deleteTable(id) {
+    return (async () => {
     const t = store.tables.find(x=>x.id===id);
     if(!t) return false;
     const 正式分頁 = String(t.data?._formalSheetName||'');
@@ -10845,6 +10846,7 @@ async function deleteTable(id) {
     if(getCloudSyncKey()) setTimeout(()=>syncPushStore(true),1800);
     formalDbStatus_('ok','本機刪除已記錄；跨裝置刪除仍須雲端讀回核對。正式試算表未修改。');
     return true;
+    })();
 }
 
 /* 從舊版僅有 title 的 A4 快照回填基本欄位，避免刷新預覽時清空抬頭。 */
