@@ -19,7 +19,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 
-<style id="dynamic-page-style">@page { size: A4 portrait; margin: 0; }</style>
+<style id="dynamic-page-style">@page { size: A4 portrait; margin: 5mm; }</style>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -4593,6 +4593,86 @@ html, body {
     :where(button, a[href], a[onclick], [role="button"]):active { translate: none; }
 }
 
+/* v2.2.6｜維持預覽切換可點；列印工具列在滑動時不可壓住選表入口。 */
+#table-manager.show { z-index:10000; }
+#preview-active-sheet { position:relative; z-index:21; }
+#preview-active-sheet .preview-change-sheet {
+    min-height:44px; touch-action:manipulation;
+}
+.btn-switch-table {
+    flex:none; min-width:70px; border:1px solid #AECBFA;
+    border-radius:15px; padding:10px 9px;
+    background:#E8F0FE; color:#174EA6; font-weight:900;
+    cursor:pointer; touch-action:manipulation;
+}
+@media (max-width:767px) {
+    #print-btn-container { gap:7px; flex-wrap:nowrap; }
+    #print-btn-container .btn-print { min-width:0; padding:12px 7px; font-size:.77rem !important; }
+    #print-btn-container .btn-fs { width:44px; min-width:44px; }
+    #print-btn-container .btn-switch-table { min-width:60px; font-size:12px; }
+}
+/* v2.2.6｜A4/A3 單頁列印；排除固定提示、修正頁面裁切與照片撐高表格。 */
+@media print {
+    html, body {
+        width:auto !important; height:auto !important; min-height:0 !important;
+        max-width:none !important; max-height:none !important;
+        overflow:visible !important; background:#fff !important;
+        margin:0 !important; padding:0 !important;
+    }
+    #app {
+        width:100% !important; height:auto !important; max-height:none !important;
+        overflow:visible !important; display:block !important;
+        position:static !important; margin:0 !important; padding:0 !important;
+    }
+    #tool-action-toast, #line-browser-banner, #delivery-center, #preview-active-sheet,
+    #print-btn-container, #export-btn-container, #edit-hint, #mobile-nav, #table-manager,
+    #options-sidebar, #options-backdrop, #sidebar,
+    #home-screen, #home-nav, #welcome-screen, #voice-invite,
+    #voice-settings, #sound-settings, #manual-screen, #avatar-picker {
+        display:none !important;
+        visibility:hidden !important;
+    }
+    #preview-container {
+        display:block !important; position:static !important;
+        width:100% !important; height:auto !important;
+        min-height:0 !important; max-height:none !important;
+        overflow:visible !important; background:#fff !important;
+        margin:0 !important; padding:0 !important;
+    }
+    #a4-wrapper, #a3-wrapper {
+        transform:none !important; transform-origin:top left !important;
+        margin:0 auto !important; padding:0 !important;
+        width:max-content !important; height:auto !important;
+        page-break-inside:avoid !important; break-inside:avoid !important;
+    }
+    #a4-wrapper.hidden, #a3-wrapper.hidden { display:none !important; }
+    .a4-preview {
+        box-sizing:border-box !important;
+        width:200mm !important; height:285mm !important;
+        max-width:200mm !important; max-height:285mm !important;
+        margin:0 auto !important; box-shadow:none !important;
+        overflow:hidden !important;
+    }
+    .a3-preview {
+        box-sizing:border-box !important;
+        width:405mm !important; height:285mm !important;
+        max-width:405mm !important; max-height:285mm !important;
+        margin:0 auto !important; box-shadow:none !important;
+        overflow:hidden !important;
+    }
+    .a4-preview .tool-row,
+    .a4-preview .tool-row td {
+        height:62px !important; max-height:62px !important;
+        overflow:hidden !important;
+    }
+    .a4-preview .tool-photo-img {
+        max-height:54px !important; max-width:100% !important;
+        width:auto !important; object-fit:contain !important;
+    }
+    .a4-bottom-info { min-height:0 !important; }
+    .a4-preview .a4-footer { flex:none !important; }
+}
+
 </style>
 </head>
 <body class="mobile-view-chat">
@@ -5203,9 +5283,10 @@ html, body {
 
         <div id="preview-active-sheet" role="status" aria-live="polite">
             <span id="preview-active-sheet-name">尚未選擇刀具表</span>
-            <button type="button" class="preview-change-sheet" onclick="openTableManager()">切換刀具表</button>
+            <button type="button" class="preview-change-sheet" onclick="openTableManagerFromPreview_()">切換刀具表</button>
         </div>
         <div id="print-btn-container">
+            <button class="btn-switch-table" type="button" onclick="openTableManagerFromPreview_()" aria-label="切換刀具表" title="切換刀具表">📁 <span>切換</span></button>
             <button class="btn-print" onclick="doPrint()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
@@ -6648,6 +6729,8 @@ let qrcodeInstance3 = null;
 let machineQrcodeInstance = null;
 
 let store = { currentId: null, tables: [] };
+// 使用者手動切換表格時遞增；非同步雲端作業不得重新顯示舊表。
+let tableSelectionRevision = 0;
 
 let botAvatar = '🤖';
 const AVATAR_EMOJIS = ['🤖','🦾','⚙️','🔧','🛠️','👷','👨‍🔧','🧑‍🏭','🏭','📋','🎯','🚀','🐱','🐶','🦊','🐼','🐯','🌟','💡','🔥'];
@@ -9067,6 +9150,7 @@ async function syncPushStore(silent = true) {
         // 先保存目前輸入；沒有變更時 saveCurrent 不再重新刷新時間戳。
         saveCurrent(true);
         const local = localStoreSnapshot();
+        const initialSelectionRevision = tableSelectionRevision;
         if (!Array.isArray(local.tables) || local.tables.length === 0) {
             throw new Error('已阻止上傳：目前裝置沒有任何刀具表，不能用空白資料覆蓋雲端');
         }
@@ -9079,10 +9163,14 @@ async function syncPushStore(silent = true) {
         } else {
             const remote = extractCloudStore(existing.data);
             if (!remote) throw new Error('無法解析原有雲端資料，已停止寫入以避免覆蓋');
-            planned = mergeStores([remote, local]);
+            planned = mergeStores([remote, local], local.currentId);
             if (planned.tables.length < remote.tables.length || planned.tables.length < local.tables.length) {
                 throw new Error('合併超過系統刀具表上限，已停止寫入以保護原始資料');
             }
+        }
+        // 等候 GET 時若已切換刀具表，不得把過期畫面／選擇上傳後再覆寫現場。
+        if (initialSelectionRevision !== tableSelectionRevision) {
+            throw new Error('同步期間已切換刀具表，已略過本次過期上傳；新表仍保留在本機');
         }
         const writeResult = await cloudSyncRequest('PUT', key, planned);
         if (writeResult.notFound) throw new Error('找不到雲端寫入 API（HTTP 404）');
@@ -9100,12 +9188,16 @@ async function syncPushStore(silent = true) {
         // 驗證完畢後才把遠端併入本機，避免手機/電腦資料分叉。
         if (JSON.stringify(local) !== JSON.stringify(planned)) {
             cloudSyncApplying = true;
-            store = planned;
-            const payload = JSON.stringify(planned);
+            // POST 或讀回期間可能已切換表格／修改資料，合併當前狀態並保留新選擇。
+            const now = localStoreSnapshot();
+            const finalStore = mergeStores([planned, now], now.currentId);
+            store = finalStore;
+            const payload = JSON.stringify(finalStore);
             localStorage.setItem(STORAGE_KEY, payload);
             localStorage.setItem(STORAGE_BACKUP_KEY, payload);
-            await persistToIDB(planned);
-            applyMergedStoreToView();
+            // 先刷新畫面，再進行非同步 IDB；避免晚到的 await 回呼重置預覽。
+            if (initialSelectionRevision === tableSelectionRevision) applyMergedStoreToView();
+            await persistToIDB(finalStore);
             cloudSyncApplying = false;
         }
         cloudSyncLastOk = Date.now();
@@ -9131,7 +9223,10 @@ function applyMergedStoreToView() {
     Object.assign(appData, JSON.parse(JSON.stringify(t.data)));
     if (!Array.isArray(appData.tools)) appData.tools = [];
     if (!Array.isArray(appData.tools2)) appData.tools2 = [];
-    if (type === 1) syncA4DerivedFields();
+    if (type === 1) {
+        hydrateLegacyA4PreviewData_();
+        syncA4DerivedFields();
+    }
 
     const mb1 = document.getElementById('mode-btn-1');
     const mb2 = document.getElementById('mode-btn-2');
@@ -9164,7 +9259,9 @@ async function syncPullStore(silent = true) {
         }
         const remote = extractCloudStore(result.data);
         if (!remote) throw new Error('雲端資料格式無法辨識，已保留本機資料');
-        const merged = mergeStores([store, remote]);
+        // 以網路回應抵達當下的本機選擇為主；不要採用雲端舊 currentId。
+        const currentLocal = localStoreSnapshot();
+        const merged = mergeStores([currentLocal, remote], currentLocal.currentId);
         if (merged.tables.length < store.tables.length || merged.tables.length < remote.tables.length) {
             throw new Error('合併超過系統上限，已保留本機資料，沒有覆寫雲端');
         }
@@ -9174,8 +9271,9 @@ async function syncPullStore(silent = true) {
         const payload = JSON.stringify(snapshot);
         localStorage.setItem(STORAGE_KEY, payload);
         localStorage.setItem(STORAGE_BACKUP_KEY, payload);
-        await persistToIDB(snapshot);
+        // 同步畫面更新不可延遲到 IDB 完成之後，否則會覆蓋使用者剛切換的表格。
         applyMergedStoreToView();
+        await persistToIDB(snapshot);
         cloudSyncApplying = false;
         cloudSyncLastOk = Date.now();
         // 讀取時不再自動把本機資料回寫雲端，避免空白裝置誤覆蓋。
@@ -9571,6 +9669,7 @@ async function refreshFormalSheetList(silent = true) {
 }
 
 function applyFormalAppData_(data, sheetName) {
+    tableSelectionRevision++;
     const type = Number(data && data.type) === 2 ? 2 : 1;
     appData = makeEmptyAppData(type);
     Object.assign(appData, JSON.parse(JSON.stringify(data || {})));
@@ -9615,8 +9714,8 @@ function applyFormalAppData_(data, sheetName) {
         ? '列印 / 存為 PDF（A3 橫向單頁）'
         : '列印 / 存為 PDF（A4 單頁）';
     document.getElementById('dynamic-page-style').textContent = type === 2
-        ? '@page { size: A3 landscape; margin: 0; }'
-        : '@page { size: A4 portrait; margin: 0; }';
+        ? '@page { size: A3 landscape; margin: 5mm; }'
+        : '@page { size: A4 portrait; margin: 5mm; }';
 
     updateA4Preview();
     updateA3Preview();
@@ -9766,7 +9865,7 @@ function storeScore(candidate) {
     candidate.tables.forEach(t => { newest = Math.max(newest, Number(t.updatedAt || t.createdAt || 0)); });
     return newest + candidate.tables.length;
 }
-function mergeStores(candidates) {
+function mergeStores(candidates, preferredCurrentId = '') {
     const valid = candidates.filter(x => x && Array.isArray(x.tables));
     if (!valid.length) return { currentId: null, tables: [] };
     const map = new Map();
@@ -9781,7 +9880,11 @@ function mergeStores(candidates) {
     });
     const best = valid.slice().sort((a,b) => storeScore(b)-storeScore(a))[0];
     const tables = Array.from(map.values()).sort((a,b)=>Number(b.updatedAt||0)-Number(a.updatedAt||0)).slice(0, MAX_TABLES);
-    const currentId = tables.some(t => t.id === best.currentId) ? best.currentId : (tables[0] ? tables[0].id : null);
+    // v2.2.6：使用者手動選擇的表格優先，雲端快照的舊 currentId 不得搶回畫面。
+    const selectedId = String(preferredCurrentId || '');
+    const currentId = selectedId && tables.some(t => t.id === selectedId)
+        ? selectedId
+        : (tables.some(t => t.id === best.currentId) ? best.currentId : (tables[0] ? tables[0].id : null));
     return { currentId, tables };
 }
 async function loadStore() {
@@ -9915,8 +10018,8 @@ function changeFormat(type) {
         ? '列印 / 存為 PDF（A3 橫向單頁）'
         : '列印 / 存為 PDF（A4 單頁）';
     document.getElementById('dynamic-page-style').textContent = type === 2
-        ? '@page { size: A3 landscape; margin: 0; }'
-        : '@page { size: A4 portrait; margin: 0; }';
+        ? '@page { size: A3 landscape; margin: 5mm; }'
+        : '@page { size: A4 portrait; margin: 5mm; }';
 
     updateA4Preview();
     updateA3Preview();
@@ -10218,11 +10321,25 @@ async function 下載目前刀具表Excel_() {
     }
 }
 
-function 直接列印或存PDF_() {
+async function 直接列印或存PDF_() {
     closeDeliveryCenter();
     saveCurrent(true);
-    setTimeout(() => window.print(), 120);
+    // 不讓剛點擊產生的「請稍候」浮動泡泡被列印進紙張與 PDF。
+    隱藏刀具表等待泡泡_();
+    if (Number(appData.type) === 2) updateA3Preview();
+    else updateA4Preview();
+    const target = document.getElementById(Number(appData.type) === 2 ? 'a3-document' : 'a4-document');
+    if (target) await 等待預覽影像載入_(target);
+    隱藏刀具表等待泡泡_();
+    window.print();
 }
+function 隱藏刀具表等待泡泡_() {
+    const toast = document.getElementById('tool-action-toast');
+    if (!toast) return;
+    toast.classList.remove('tool-action-toast-visible');
+    toast.setAttribute('aria-hidden', 'true');
+}
+window.addEventListener('beforeprint', 隱藏刀具表等待泡泡_);
 
 function 清理單格_(v) {
     if (v == null) return '';
@@ -10480,15 +10597,30 @@ function getBackupTimestamp(date) {
         + '_' + pad(d.getHours()) + pad(d.getMinutes()) + pad(d.getSeconds());
 }
 
+function openTableManagerFromPreview_() {
+    // 確保列印交付視窗不蓋住表格切換；直接把選表視窗提升至最上層。
+    closeDeliveryCenter();
+    const modal = document.getElementById('table-manager');
+    if (modal) modal.style.zIndex = '10000';
+    openTableManager();
+    if (modal) {
+        modal.setAttribute('aria-hidden', 'false');
+        requestAnimationFrame(() => { const list = document.getElementById('tm-manager-scroll'); if (list) list.scrollTop = 0; });
+    }
+}
 function openTableManager() {
     renderTableList();
     renderUnifiedSheetOptions_();
     document.getElementById('table-manager').classList.add('show');
+    document.getElementById('table-manager').setAttribute('aria-hidden', 'false');
     const scroll = document.getElementById('tm-manager-scroll');
     if (scroll) scroll.scrollTop = 0;
     if (!formalDbListLoaded && !formalDbListLoading && !formalDbBusy) refreshFormalSheetList(true);
 }
-function closeTableManager() { document.getElementById('table-manager').classList.remove('show'); }
+function closeTableManager() {
+    const modal = document.getElementById('table-manager');
+    if (modal) { modal.classList.remove('show'); modal.setAttribute('aria-hidden', 'true'); }
+}
 
 function renderTableList() {
     const list = document.getElementById('tm-list');
@@ -10551,6 +10683,7 @@ function renderTableList() {
 
 function createNewTable() {
     saveCurrent();
+    tableSelectionRevision++;
     if (store.tables.length >= MAX_TABLES) {
         playSound('error');
         alert(`已達 ${MAX_TABLES} 張，請先刪除不需要的表格。`);
@@ -10587,6 +10720,7 @@ function loadTable(id) {
     saveCurrent();
     const t = store.tables.find(x => x.id === id);
     if (!t) return;
+    tableSelectionRevision++;
     store.currentId = id;
     persist();
 
@@ -10614,8 +10748,8 @@ function loadTable(id) {
         ? '列印 / 存為 PDF（A3 橫向單頁）'
         : '列印 / 存為 PDF（A4 單頁）';
     document.getElementById('dynamic-page-style').textContent = type === 2
-        ? '@page { size: A3 landscape; margin: 0; }'
-        : '@page { size: A4 portrait; margin: 0; }';
+        ? '@page { size: A3 landscape; margin: 5mm; }'
+        : '@page { size: A4 portrait; margin: 5mm; }';
 
     updateA4Preview();
     updateA3Preview();
@@ -10716,7 +10850,7 @@ function adjustPreviewScale() {
     if (!container) return;
     const viewport = currentViewportSize_();
     const isMobile = viewport.width < 768;
-    const wrapper = appData.type === 2
+    const wrapper = Number(appData.type) === 2
         ? document.getElementById('a3-wrapper')
         : document.getElementById('a4-wrapper');
     if (!wrapper) return;
@@ -10725,7 +10859,7 @@ function adjustPreviewScale() {
         const rect = container.getBoundingClientRect();
         const sideGap = Math.max(8, Math.min(20, viewport.width * 0.035));
         const targetWidth = Math.max(280, Math.min(rect.width || container.clientWidth, viewport.width) - sideGap);
-        const docWidthPx = appData.type === 2 ? 1587 : 794;
+        const docWidthPx = Number(appData.type) === 2 ? 1587 : 794;
         const docHeightPx = 1123;
         const scale = Math.min(1, Math.max(0.20, targetWidth / docWidthPx));
         wrapper.style.transformOrigin = 'top center';
@@ -11874,8 +12008,8 @@ window.onload = async () => {
                 ? '列印 / 存為 PDF（A3 橫向單頁）'
                 : '列印 / 存為 PDF（A4 單頁）';
             document.getElementById('dynamic-page-style').textContent = type === 2
-                ? '@page { size: A3 landscape; margin: 0; }'
-                : '@page { size: A4 portrait; margin: 0; }';
+                ? '@page { size: A3 landscape; margin: 5mm; }'
+                : '@page { size: A4 portrait; margin: 5mm; }';
 
             updateA4Preview();
             updateA3Preview();
