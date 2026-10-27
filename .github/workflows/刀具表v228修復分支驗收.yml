@@ -1,0 +1,28 @@
+name: 刀具表 v228 修復分支唯讀驗收
+on:
+  push:
+    branches:
+      - fix/tool-sheet-cloud-authority-20261028
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: 讀取現有儲存庫
+        uses: actions/checkout@v4
+      - name: 檢查修復 JS 與離線服務語法
+        run: |
+          node --check 'docs/tool-change-pwa/刀具表精靈_雲端一致性.js'
+          node --check 'docs/tool-change-pwa/service-worker.js'
+      - name: 原有刀具表功能與新版 10 項防復活驗收
+        run: |
+          node --test tests/刀具表精靈*.cjs
+      - name: 保護正式 GAS 路由與正式資料
+        run: |
+          grep -q "刀具表連線版本_ = '2.2.7'" 'smart-factory-command-center/01_GAS後端/刀具表正式資料連線.gs'
+          grep -q "刀具表精靈-pwa-v2.2.8" 'docs/tool-change-pwa/service-worker.js'
+          test -s 'docs/tool-change-pwa/刀具表精靈_介面優化.css'
+          test -s 'docs/tool-change-pwa/刀具表精靈_雲端一致性.js'
