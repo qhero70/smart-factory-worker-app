@@ -9206,7 +9206,7 @@ async function syncPushStore(silent = true) {
         saveCurrent(true);
         const local = localStoreSnapshot();
         const initialSelectionRevision = tableSelectionRevision;
-        if (!Array.isArray(local.tables) || local.tables.length === 0) {
+        if (!Array.isArray(local.tables) || (local.tables.length === 0 && !Object.keys(local.deleted || {}).length)) {
             throw new Error('已阻止上傳：目前裝置沒有任何刀具表，不能用空白資料覆蓋雲端');
         }
         // 先讀雲端再合併，不允許整批以本機直接取代遠端資料。
