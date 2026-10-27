@@ -23,7 +23,7 @@ const 選單原始碼 = 檔案.readFileSync(
   'utf8'
 );
 const 正式網址 = 'https://qhero70.github.io/smart-factory-worker-app/tool-change-pwa/';
-const 正式LINE網址 = 正式網址 + '?source=LINEBOT_TOOL';
+const 正式LINE網址 = 正式網址 + '?source=LINEBOT_TOOL&v=227';
 
 function 取得函數(名稱, 背景) {
   const 起點 = 後端原始碼.indexOf('function ' + 名稱 + '(');

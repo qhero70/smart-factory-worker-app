@@ -15,7 +15,7 @@
  * 7. 不建立第二個 LINE Bot、不建立第二個 Web App。
  */
 
-var 製造工具75_版本_ = 'v1.4.5_刀具表LINE入口精準路由_PWA_v2.2.1';
+var 製造工具75_版本_ = 'v1.4.6_刀具表LINE入口精準路由_PWA_v2.2.7';
 
 var 製造工具75_正式主庫ID_ = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
 var 製造工具75_工作表名稱_ = 'LINE_製造工具中心';
@@ -415,7 +415,7 @@ function 製造工具75_補核心工具資料_() {
 }
 
 
-function 同步75_LINE刀具表精靈_v221() {
+function 同步75_LINE刀具表精靈_v227() {
   var ss = SpreadsheetApp.openById(製造工具75_正式主庫ID_);
   var sh = ss.getSheetByName(製造工具75_工作表名稱_);
   if (!sh) throw new Error('找不到工作表：' + 製造工具75_工作表名稱_);
@@ -431,12 +431,12 @@ function 同步75_LINE刀具表精靈_v221() {
 
   製造工具75_寫欄位值_(sh, target.__row, '工具編號', 'TOOL-CUTTING');
   製造工具75_寫欄位值_(sh, target.__row, '顯示名稱', '刀具表精靈・手機版');
-  製造工具75_寫欄位值_(sh, target.__row, '說明', 'A4/A3 刀具表、照片、Excel、LINE 相容與手機/電腦雲端同步');
+  製造工具75_寫欄位值_(sh, target.__row, '說明', 'A4/A3 刀具表、大圖照片、高低壓、注意事項、Excel 與跨裝置同步');
   製造工具75_寫欄位值_(sh, target.__row, 'PWA網址', 製造工具75_刀具表精靈網址_);
   製造工具75_寫欄位值_(sh, target.__row, '分類', '刀具管理');
   製造工具75_寫欄位值_(sh, target.__row, '啟用', true);
   製造工具75_寫欄位值_(sh, target.__row, '按鈕文字', '開啟最新版');
-  製造工具75_寫欄位值_(sh, target.__row, '備註', '正式 PWA v2.2.1｜RWD／LINE相容／跨裝置雲端同步／外開保留LINE來源｜2026/10/27');
+  製造工具75_寫欄位值_(sh, target.__row, '備註', '正式 PWA v2.2.7｜大圖雙列／高低壓／注意事項／舊資料相容｜2026/10/27');
   製造工具75_寫欄位值_(sh, target.__row, '更新時間', new Date());
 
   製造工具75_清除快取_();
@@ -453,11 +453,15 @@ function 同步75_LINE刀具表精靈_v221() {
 
 /* 保留既有 Apps Script 手動執行名稱，避免既有排程或操作說明失效。 */
 function 同步75_LINE刀具表精靈_v214() {
-  return 同步75_LINE刀具表精靈_v221();
+  return 同步75_LINE刀具表精靈_v227();
 }
 
 function 同步75_LINE刀具表精靈_v212() {
-  return 同步75_LINE刀具表精靈_v221();
+  return 同步75_LINE刀具表精靈_v227();
+}
+
+function 同步75_LINE刀具表精靈_v221() {
+  return 同步75_LINE刀具表精靈_v227();
 }
 
 
@@ -1618,7 +1622,7 @@ function 製造工具75_LINE內開網址_(url, 工具編號, 顯示名稱) {
 
   if (是刀具表精靈) {
     return 製造工具75_刀具表精靈網址_ +
-      '?source=' + 製造工具75_刀具表LINE來源_;
+      '?source=' + 製造工具75_刀具表LINE來源_ + '&v=227';
   }
 
   if (!text || !/^https:\/\//i.test(text)) return text;

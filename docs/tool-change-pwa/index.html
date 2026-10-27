@@ -2238,11 +2238,42 @@ body.is-fullscreen .a3-preview {
     height: 48px;
 }
 
-.tool-row { height: 62px; max-height: 62px; }
-.a4-preview .tool-row td { height: 62px; max-height: 62px; overflow:hidden; }
+.a4-preview .tool-row-main,
+.a4-preview .tool-row-sub { height: auto; }
+.a4-preview .tool-row-main td,
+.a4-preview .tool-row-sub td { overflow:hidden; }
+.a4-preview #out-tool-body[data-density="large"] .tool-row-main { height: 28px; }
+.a4-preview #out-tool-body[data-density="large"] .tool-row-sub { height: 76px; }
+.a4-preview #out-tool-body[data-density="medium"] .tool-row-main { height: 24px; }
+.a4-preview #out-tool-body[data-density="medium"] .tool-row-sub { height: 60px; }
+.a4-preview #out-tool-body[data-density="compact"] .tool-row-main { height: 22px; }
+.a4-preview #out-tool-body[data-density="compact"] .tool-row-sub { height: 40px; }
+.a4-preview .a4-offset-label {
+    padding:2px 3px; background:#F8F9FA; color:#5F6368;
+    font-size:.68rem; font-weight:900; line-height:1;
+}
+.a4-preview .a4-offset-value { padding:2px 3px; font-size:1rem; font-weight:800; }
+.a4-preview .a4-photo-cell { padding:2px; }
+.a4-preview #out-tool-body[data-density="large"] .tool-photo-img { max-height:100px; }
+.a4-preview #out-tool-body[data-density="medium"] .tool-photo-img { max-height:78px; }
+.a4-preview #out-tool-body[data-density="compact"] .tool-photo-img { max-height:56px; }
 .a4-preview .ed-cell:empty::before { content: '' !important; }
 .a4-preview .bi-en { font-size: .58em; line-height: 1; margin-top:1px; }
-.a4-bottom-info { flex: 1 1 auto; min-height: 250px; overflow:hidden; }
+.a4-pressure-notes {
+    display:grid; grid-template-columns:42% 58%;
+    min-height:92px; border-left:4px solid #000; border-right:4px solid #000;
+    border-bottom:4px solid #000; background:#fff; flex:none;
+}
+.a4-pressure-box, .a4-notes-box {
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    min-width:0; padding:6px 10px; text-align:center;
+}
+.a4-notes-box { align-items:stretch; border-left:4px solid #000; text-align:left; }
+.a4-pressure-title, .a4-notes-title { font-size:1rem; font-weight:900; line-height:1.15; }
+.a4-pressure-values { display:flex; justify-content:center; gap:14px; margin-top:7px; font-size:1.05rem; font-weight:900; }
+.a4-pressure-values b { color:#174EA6; }
+.a4-notes-value { flex:1; margin-top:5px; min-height:42px; white-space:pre-line; font-size:.88rem; line-height:1.3; font-weight:700; }
+.a4-bottom-info { flex: 1 1 auto; min-height: 205px; overflow:hidden; }
 .a4-bottom-info .excel-table td { padding-top:5px; padding-bottom:5px; }
 .a4-footer { height:30px; min-height:30px; }
 
@@ -4611,7 +4642,7 @@ html, body {
     #print-btn-container .btn-fs { width:44px; min-width:44px; }
     #print-btn-container .btn-switch-table { min-width:60px; font-size:12px; }
 }
-/* v2.2.6｜A4/A3 單頁列印；排除固定提示、修正頁面裁切與照片撐高表格。 */
+/* v2.2.7｜A4 大圖雙列、高低壓與注意事項；A4/A3 維持單頁列印。 */
 @media print {
     html, body {
         width:auto !important; height:auto !important; min-height:0 !important;
@@ -4660,15 +4691,14 @@ html, body {
         margin:0 auto !important; box-shadow:none !important;
         overflow:hidden !important;
     }
-    .a4-preview .tool-row,
-    .a4-preview .tool-row td {
-        height:62px !important; max-height:62px !important;
-        overflow:hidden !important;
-    }
     .a4-preview .tool-photo-img {
-        max-height:54px !important; max-width:100% !important;
+        max-width:100% !important;
         width:auto !important; object-fit:contain !important;
     }
+    .a4-preview #out-tool-body[data-density="large"] .tool-photo-img { max-height:100px !important; }
+    .a4-preview #out-tool-body[data-density="medium"] .tool-photo-img { max-height:78px !important; }
+    .a4-preview #out-tool-body[data-density="compact"] .tool-photo-img { max-height:56px !important; }
+    .a4-pressure-notes { min-height:88px !important; }
     .a4-bottom-info { min-height:0 !important; }
     .a4-preview .a4-footer { flex:none !important; }
 }
@@ -5336,9 +5366,18 @@ html, body {
                     <tbody id="out-tool-body"></tbody>
                 </table>
 
-                <div class="w-full border-b-4 border-black border-x-4 border-t-0 text-center py-1 font-bold text-xl shrink-0 bg-white">
-                    夾頭壓力設定<span class="bi-en">Chuck Pressure</span><br>
-                    <span id="out-pressure" class="text-2xl text-blue-800 tracking-wider"></span>
+                <div class="a4-pressure-notes">
+                    <section class="a4-pressure-box" aria-label="夾頭壓力設定">
+                        <div class="a4-pressure-title">夾頭壓力設定<span class="bi-en">Chuck Pressure</span></div>
+                        <div class="a4-pressure-values">
+                            <span>高壓：<b id="out-pressure-high"></b></span>
+                            <span>低壓：<b id="out-pressure-low"></b></span>
+                        </div>
+                    </section>
+                    <section class="a4-notes-box" aria-label="注意事項">
+                        <div class="a4-notes-title">注意事項<span class="bi-en">Notes</span></div>
+                        <div id="out-notes" class="a4-notes-value"></div>
+                    </section>
                 </div>
 
                 <div class="a4-bottom-info flex border-x-4 border-b-4 border-black bg-white min-h-0">
@@ -6704,7 +6743,7 @@ function makeEmptyAppData(type) {
     return {
         type: type || 1,
         title: '', subtitle: '', processCode: '', machineNo: '', mainProgram: '', machiningProgram: '',
-        pressure: '', partName: '', partNo: '',
+        pressure: '', pressureHigh: '', pressureLow: '', notes: '', partName: '', partNo: '',
         customerNo: '', processTime: '', dailyQty: '', date: '', creator: '',
         qrContent: '', tools: [],
         headerTitle: '', headerSubtitle: '',
@@ -6993,7 +7032,9 @@ const flowType1 = [
     { id: 'machiningProgram', type: 'prefix', prefix: 'O', q: '副標題 2：【加工程式 / Machining Program】\n只填程式編號，系統會自動加上 O。\n例：輸入 0001 → 顯示 O0001', placeholder: '0001', optional: true },
     { id: 'date', type: 'date', q: '請確認【製表日期 / Date】\n系統已帶入今天，可直接修改。' },
     { id: 'creator', type: 'text', q: '請輸入【製表者 / 代碼 / Prepared By】\n可填姓名或工號。', placeholder: '王小明 / A1234' },
-    { id: 'pressure', type: 'unit', suffix: 'KG', q: '請輸入【夾頭壓力 / Chuck Pressure】\n只填數字，單位固定為 KG。\n例：輸入 18 → 顯示 18KG', placeholder: '18' },
+    { id: 'pressureHigh', type: 'unit', suffix: 'KG', q: '請輸入【夾頭高壓 / Chuck High Pressure】\n只填數字，單位固定為 KG。\n例：輸入 10 → 顯示 10KG', placeholder: '10' },
+    { id: 'pressureLow', type: 'unit', suffix: 'KG', q: '請輸入【夾頭低壓 / Chuck Low Pressure】\n只填數字，單位固定為 KG。\n例：輸入 4 → 顯示 4KG', placeholder: '4', optional: true },
+    { id: 'notes', type: 'textarea', q: '請輸入【注意事項 / Notes】\n可填加工提醒、安全提示或補充說明；不需要時可略過。', placeholder: '注意事項（可留白）', optional: true },
     { id: 'partNo', type: 'text', q: '請輸入【客戶品號 / Customer P/N】\n例：248-22103', placeholder: '248-22103' },
     { id: 'customerNo', type: 'text', q: '請輸入【產品編號 / Product No.】\n例：Z705800000', placeholder: 'Z705800000', optional: true },
     { id: 'processTime', type: 'timepair', q: '請輸入【加工時間 / Cycle Time】\n請分別填寫「分」與「秒」，系統會自動組成 3:00 格式。', optional: true },
@@ -7834,12 +7875,23 @@ function normalizePressure(value) {
     const v = String(value == null ? '' : value).replace(/KG/ig, '').trim();
     return v ? (v + 'KG') : '';
 }
+function normalizeA4PressureFields_(data) {
+    const target = data || appData;
+    if (!target || Number(target.type) !== 1) return target;
+    const legacy = normalizePressure(target.pressure || '');
+    target.pressureHigh = normalizePressure(target.pressureHigh || legacy);
+    target.pressureLow = normalizePressure(target.pressureLow || '');
+    target.pressure = target.pressureHigh;
+    target.notes = String(target.notes || '');
+    return target;
+}
 function normalizeDailyQty(value) {
     const v = String(value == null ? '' : value).replace(/PCS/ig, '').trim();
     return v ? (v + ' PCS') : '';
 }
 function syncA4DerivedFields() {
     if (Number(appData.type) !== 1) return;
+    normalizeA4PressureFields_(appData);
     const part = String(appData.partName || '').trim();
     const process = normalizeA4ProcessCode(appData.processCode || '');
     appData.processCode = process;
@@ -9515,7 +9567,10 @@ function formalBasicInfo_(data) {
         產品編號: isA3 ? (data.customerNo1 || '') : (data.customerNo || ''),
         主程式: isA3 ? '' : (data.mainProgram || ''),
         加工程式: isA3 ? (data.headerSubtitle || '') : (data.machiningProgram || ''),
-        夾持壓力: isA3 ? '' : (data.pressure || ''),
+        夾持壓力: isA3 ? '' : (data.pressureHigh || data.pressure || ''),
+        夾持高壓: isA3 ? '' : (data.pressureHigh || data.pressure || ''),
+        夾持低壓: isA3 ? '' : (data.pressureLow || ''),
+        注意事項: isA3 ? '' : (data.notes || ''),
         加工時間: isA3 ? (data.processTime2 || '') : (data.processTime || ''),
         每日數量: isA3 ? (data.dailyQty2 || '') : (data.dailyQty || ''),
         QR內容: data.qrContent || '',
@@ -9923,6 +9978,7 @@ async function loadStore() {
             });
         }
         if (t.data && Number(t.data.type) === 1) {
+            normalizeA4PressureFields_(t.data);
             if (!('processCode' in t.data)) {
                 const m = String(t.data.title || '').match(/\b(OP[0-9A-Z.-]+)\b/i);
                 t.data.processCode = m ? m[1].toUpperCase() : 'OP';
@@ -10390,7 +10446,9 @@ function 取得匯出資料_(table) {
         ['主題 / Title', 清理單格_(d.title)],
         ['副標題 / Subtitle', 清理單格_(d.subtitle)],
         ['機器號碼 / Machine No.', 清理單格_(d.machineNo)],
-        ['夾頭壓力 / Chuck Pressure', 清理單格_(d.pressure)],
+        ['夾頭高壓 / Chuck High Pressure', 清理單格_(d.pressureHigh || d.pressure)],
+        ['夾頭低壓 / Chuck Low Pressure', 清理單格_(d.pressureLow)],
+        ['注意事項 / Notes', 清理單格_(d.notes)],
         ['品名 / Part Name', 清理單格_(d.partName)],
         ['客戶品號 / Customer P/N', 清理單格_(d.partNo)],
         ['產品編號 / Product No.', 清理單格_(d.customerNo)],
@@ -11384,7 +11442,12 @@ function handleSubmission(val, isImage = false) {
             else if (stepId === 'machineNo') appData.machineNo = String(val || '').trim();
             else if (stepId === 'mainProgram') appData.mainProgram = normalizeProgramNo(val);
             else if (stepId === 'machiningProgram') appData.machiningProgram = normalizeProgramNo(val);
-            else if (stepId === 'pressure') appData.pressure = normalizePressure(val);
+            else if (stepId === 'pressureHigh') {
+                appData.pressureHigh = normalizePressure(val);
+                appData.pressure = appData.pressureHigh;
+            }
+            else if (stepId === 'pressureLow') appData.pressureLow = normalizePressure(val);
+            else if (stepId === 'notes') appData.notes = String(val || '');
             else if (stepId === 'dailyQty') appData.dailyQty = normalizeDailyQty(val);
             else appData[stepId] = val;
             syncA4DerivedFields();
@@ -11545,7 +11608,9 @@ function restartChat() {
 
 const EDIT_MAP = {
     'out-machine-no': 'machineNo',
-    'out-pressure': 'pressure',
+    'out-pressure-high': 'pressureHigh',
+    'out-pressure-low': 'pressureLow',
+    'out-notes': 'notes',
     'out-part-name': 'partName',
     'out-part-no': 'partNo',
     'out-customer-no': 'customerNo',
@@ -11573,7 +11638,7 @@ const EDIT_MAP = {
     'out3-creator': 'creator'
 };
 
-const MULTILINE_FIELDS = new Set(['reminderText', 'machineTips']);
+const MULTILINE_FIELDS = new Set(['notes', 'reminderText', 'machineTips']);
 
 function initEditablePreview() {
     Object.keys(EDIT_MAP).forEach(id => {
@@ -11639,6 +11704,10 @@ function onEditableBlur(e) {
         const d2 = document.getElementById('out3-date');
         if (d1) d1.textContent = show;
         if (d2) d2.textContent = show;
+    } else if (field === 'pressureHigh' || field === 'pressureLow') {
+        appData[field] = normalizePressure(v);
+        if (field === 'pressureHigh') appData.pressure = appData.pressureHigh;
+        el.textContent = appData[field];
     } else {
         appData[field] = v;
     }
@@ -11738,7 +11807,10 @@ function updateA4Preview() {
     document.getElementById('out-subtitle').textContent = appData.subtitle || '';
     const machineEl = document.getElementById('out-machine-no');
     if (machineEl) machineEl.textContent = appData.machineNo || '';
-    document.getElementById('out-pressure').textContent = appData.pressure || '';
+    normalizeA4PressureFields_(appData);
+    document.getElementById('out-pressure-high').textContent = appData.pressureHigh || '';
+    document.getElementById('out-pressure-low').textContent = appData.pressureLow || '';
+    document.getElementById('out-notes').textContent = appData.notes || '';
     document.getElementById('out-part-name').textContent = appData.partName || '';
     document.getElementById('out-part-no').textContent = appData.partNo || '';
     document.getElementById('out-customer-no').textContent = appData.customerNo || '';
@@ -11750,45 +11822,49 @@ function updateA4Preview() {
 
     const tbody = document.getElementById('out-tool-body');
     tbody.innerHTML = '';
-    const TOTAL_ROWS = 8;
     const tools = appData.tools || [];
+    const TOTAL_ROWS = Math.max(3, Math.min(8, Math.max(1, tools.length)));
+    const density = TOTAL_ROWS <= 4 ? 'large' : (TOTAL_ROWS <= 6 ? 'medium' : 'compact');
+    tbody.dataset.density = density;
 
     for (let i = 0; i < TOTAL_ROWS; i++) {
         const tool = tools[i] || {};
-        const tr = document.createElement('tr');
-        tr.className = 'tool-row';
-        tr.innerHTML = `
-            <td class="font-bold text-lg bg-[#f2f2f2]">
+        const mainRow = document.createElement('tr');
+        mainRow.className = 'tool-row-main';
+        mainRow.innerHTML = `
+            <td rowspan="2" class="font-bold text-lg bg-[#f2f2f2]">
                 <div class="ed-cell" role="button" tabindex="0" data-process-picker="${i}" title="選擇 N工序">${esc(tool.t_seq || '')}</div>
             </td>
-            <td class="font-bold text-lg">
+            <td rowspan="2" class="font-bold text-lg">
                 <div class="ed-cell" role="button" tabindex="0" data-tooltype-picker="${i}" title="點擊選擇刀具形式">${esc(tool.t_type || '')}</div>
             </td>
-            <td class="font-bold text-lg">
+            <td rowspan="2" class="font-bold text-lg">
                 <div class="ed-cell" role="button" tabindex="0" data-toolno-picker="${i}" title="選擇刀號">${esc(tool.t_no || '')}</div>
             </td>
-            <td class="font-medium text-lg">
+            <td rowspan="2" class="font-medium text-lg">
                 <div class="ed-cell" contenteditable="true" spellcheck="false" data-tool="a4" data-row="${i}" data-key="t_h">${esc(tool.t_h || '')}</div>
             </td>
-            <td class="font-medium text-base">
-                <div class="ed-cell" contenteditable="true" spellcheck="false" data-tool="a4" data-row="${i}" data-key="t_gx">${esc(tool.t_gx || '')}</div>
-            </td>
-            <td class="font-medium text-base">
-                <div class="ed-cell" contenteditable="true" spellcheck="false" data-tool="a4" data-row="${i}" data-key="t_gz">${esc(tool.t_gz || '')}</div>
-            </td>
-            <td class="text-left p-1">
+            <td class="a4-offset-label">X 軸補正</td>
+            <td class="a4-offset-label">Z 軸補正</td>
+            <td rowspan="2" class="text-left p-1">
                 <div class="ed-cell font-medium text-sm pl-2 leading-tight" contenteditable="true" spellcheck="false"
                      data-tool="a4" data-row="${i}" data-key="t_remark" data-multiline="1"
                      style="min-height:1.2em;white-space:pre-line;">${esc(tool.t_remark || '')}</div>
             </td>
-            <td class="p-1">
+            <td rowspan="2" class="a4-photo-cell">
                 <div class="ed-cell" contenteditable="true" spellcheck="false"
                      data-tool="a4" data-row="${i}" data-key="t_photo"
-                     style="min-height:1.2em;display:flex;align-items:center;justify-content:center;">
+                     style="height:100%;min-height:1.2em;display:flex;align-items:center;justify-content:center;">
                      ${tool.t_photo ? `<img src="${tool.t_photo}" class="tool-photo-img">` : ''}
                 </div>
             </td>`;
-        tbody.appendChild(tr);
+        const subRow = document.createElement('tr');
+        subRow.className = 'tool-row-sub';
+        subRow.innerHTML = `
+            <td class="a4-offset-value"><div class="ed-cell" contenteditable="true" spellcheck="false" data-tool="a4" data-row="${i}" data-key="t_gx">${esc(tool.t_gx || '')}</div></td>
+            <td class="a4-offset-value"><div class="ed-cell" contenteditable="true" spellcheck="false" data-tool="a4" data-row="${i}" data-key="t_gz">${esc(tool.t_gz || '')}</div></td>`;
+        tbody.appendChild(mainRow);
+        tbody.appendChild(subRow);
     }
 
     const qrContainer = document.getElementById('out-qrcode');
@@ -12037,6 +12113,9 @@ window.onload = async () => {
     appData.machiningProgram = 'O';
     appData.machineNo = '';
     appData.pressure = '';
+    appData.pressureHigh = '';
+    appData.pressureLow = '';
+    appData.notes = '';
     appData.processTime = '';
     appData.dailyQty = '';
     syncA4DerivedFields();

@@ -66,7 +66,7 @@ test('A4/A3 列印保留 5mm 邊距且容納完整頁面，隱藏等待浮框',(
     assert.match(html,/width:200mm !important; height:285mm !important/);
     assert.match(html,/width:405mm !important; height:285mm !important/);
     assert.match(html,/#tool-action-toast, #line-browser-banner, #delivery-center, #preview-active-sheet/);
-    assert.match(html,/\.a4-preview \.tool-photo-img \{\s*max-height:54px !important/);
+    assert.match(html,/#out-tool-body\[data-density="large"\] \.tool-photo-img \{ max-height:100px !important/);
     assert.match(html,/overflow:visible !important/);
 });
 
@@ -89,8 +89,8 @@ test('直接列印在圖片準備好後執行，先關掉等待浮框',async()=>
     assert.equal(updated,true);
 });
 
-test('完整主程式可編譯且快取更新為 2.2.6',()=>{
+test('完整主程式可編譯且快取更新為 2.2.7',()=>{
     assert.doesNotThrow(()=>new vm.Script(main));
-    assert.match(sw,/刀具表精靈-pwa-v2\.2\.6/);
+    assert.match(sw,/刀具表精靈-pwa-v2\.2\.7/);
     assert.match(html,/LINEBOT_TOOL/);
 });
