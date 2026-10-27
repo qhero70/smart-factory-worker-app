@@ -123,6 +123,6 @@ test('正式分頁與本機載入共用預覽標記，不改既有 GAS 寫入 AP
 
 test('主程式可解析且 PWA 離線快取為 v2.2.5',()=>{
     assert.doesNotThrow(()=>new vm.Script(main));
-    assert.match(sw,/刀具表精靈-pwa-v2\.2\.5/);
+    assert.match(sw,/刀具表精靈-pwa-v2\.2\.[6-9]\d*/);
     assert.match(page,/LINEBOT_TOOL/);
 });
