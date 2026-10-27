@@ -51,7 +51,7 @@ function harness(tables, firstId) {
         adjustPreviewScale:()=>{}
     };
     const factory = new Function('env',`
-        let appData = env.appData, store = env.store;
+        let appData = env.appData, store = env.store, tableSelectionRevision = 0;
         const {document, isLineInAppBrowser, makeEmptyAppData,
             saveCurrent,persist,updateA4Preview,updateA3Preview,
             closeTableManager,restoreChatView,playSound,
