@@ -6125,7 +6125,7 @@ html, body {
                 <div id="sheet-source-summary" role="status" aria-live="polite">正在整理本機與正式試算表清單…</div>
                 <div class="tm-db-actions">
                     <button class="tm-db-btn primary" onclick="loadSelectedFormalSheet()">📥 載入選定刀具表預覽</button>
-                    <button class="tm-db-btn danger" onclick="刪除選定正式分頁_()">🗑️ 刪除選定刀具表</button>
+                    <button class="tm-db-btn danger" onclick="刪除選定正式分頁_()">🗑️ 正式刪除（需授權）</button>
                     <button class="tm-db-btn green" onclick="saveCurrentToFormalSheets(false)">💾 儲存目前刀具表至正式試算表</button>
                 </div>
                 <div id="formal-db-status" class="tm-db-status">
@@ -9608,6 +9608,7 @@ async function saveCurrentToFormalSheets(silent = true) {
     formalDbBusy = true;
     formalDbStatus_('busy', '正在儲存正式刀具表，完成後將讀回核對…');
     try {
+        const 儲存開始表ID = String(store.currentId || '');
         const data = formalSanitizedData_();
         const tableId = formalTableId_();
         const sheetName = formalSheetNameFromData_(data);
@@ -9628,6 +9629,7 @@ async function saveCurrentToFormalSheets(silent = true) {
             } catch (讀回錯誤) { if (次數 === 3) throw 讀回錯誤; }
         }
         if (!confirmed) throw new Error('尚未讀回同一修訂的完整主檔與刀具明細，本機資料已保留');
+        if (String(store.currentId || '') !== 儲存開始表ID) throw new Error('正式儲存已寫入但期間已切換表格，禁止把上一張表 ID 套到新表；請重新整理清單確認');
         appData._formalTableId = tableId;
         formalDbLastSavedId = tableId;
         saveCurrent(true);
@@ -9811,8 +9813,10 @@ async function loadSelectedFormalSheet() {
         return;
     }
     formalDbStatus_('busy', '正在載入正式試算表：' + sheetName + '…');
+    const 載入起始切換版本 = tableSelectionRevision;
     try {
         const res = await formalJsonp_({action:'readSheet', sheet:sheetName, maxRows:5000});
+        if (tableSelectionRevision !== 載入起始切換版本) throw new Error('等待試算表回應期間已切換表格，舊載入結果已取消');
         const rows = Array.isArray(res.rows) ? res.rows : [];
         let snapshot = null;
         for (let i = rows.length - 1; i >= 0; i--) {
