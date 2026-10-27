@@ -59,9 +59,9 @@ const 全刪 = {currentId:null,tables:[],deleted:{甲:400,乙:401}};
   斷言.equal(Object.keys(r.deleted).length,2);
   斷言.match(來源,/local\.tables\.length === 0 && !Object\.keys\(local\.deleted \|\| \{\}\)\.length/);
 });
-測試('先刪後修訂，只有較新的修改時間可以超越墓碑',()=>{
+測試('刪除墓碑不受不同裝置時鐘偏差影響，舊 ID 一律不得復活',()=>{
   const 新版={currentId:'甲',tables:[{...甲,updatedAt:500}]};
-  斷言.equal(合併([新版,已刪]).tables.find(x=>x.id==='甲').updatedAt,500);
+  斷言.equal(合併([新版,已刪]).tables.some(x=>x.id==='甲'),false);
 });
 測試('正式刀具表編輯後自動儲存並核對，保留同一分頁名稱',()=>{
   斷言.match(增強,/window\.saveCurrentToFormalSheets = async function/);
