@@ -1,0 +1,50 @@
+/* 刀具表精靈 v2.2.8：正式分頁管理、整齊排列與按鈕微光 */
+#table-manager .modal-panel{width:min(96vw,760px);max-width:760px}
+#table-manager .modal-head{padding:18px 22px;background:linear-gradient(135deg,#f5f8ff,#fff);border-bottom:1px solid #e2e8f0}
+#table-manager .tm-db-card{background:#f8faff;border-radius:20px;border:1px solid #dbe4f1;padding:16px;margin:8px 0 16px}
+#table-manager .tm-db-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:stretch}
+#table-manager .tm-db-select{width:100%;min-height:54px;background:#fff;border:1px solid #9bb8ef;border-radius:14px;color:#142b49;font-weight:700;padding:10px;overflow:hidden;text-overflow:ellipsis}
+#table-manager .tm-db-actions,#table-manager .tm-cloud-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+#table-manager .tm-db-btn,#table-manager .tm-cloud-btn,#table-manager .tm-new{display:flex;align-items:center;justify-content:center;min-height:54px;max-height:none;line-height:1.45;border-radius:14px;font-size:14px!important;text-align:center;padding:12px 10px;white-space:normal;transition:transform .18s,box-shadow .18s;background:linear-gradient(145deg,#1d293d,#101827);color:#f7faff;border:1px solid rgba(255,255,255,.12);box-shadow:0 6px 13px #0e294127}
+#table-manager .tm-db-btn.primary{background:linear-gradient(135deg,#357feb,#1b5dc8);color:#fff}
+#table-manager .tm-db-btn.green{background:linear-gradient(135deg,#21866b,#126950);color:#fff}
+#table-manager .tm-db-btn.danger{background:#fff3f4;color:#b4232f;border:1px solid #ffbec3}
+#table-manager .tm-cloud-grid .tm-cloud-btn{background:linear-gradient(140deg,#263248,#151e30);color:#f8fafc;border:1px solid #34445e}
+#table-manager .tm-cloud-btn.master{grid-column:span 2}
+#table-manager .tm-cloud-btn .ui-en{color:#b5c5da!important;font-size:11px}
+#table-manager button:active{transform:scale(.97);box-shadow:0 0 16px #60a5fa99}
+#table-manager button:focus-visible{outline:3px solid #4c93ed;outline-offset:2px}
+#table-manager .tm-new{width:100%;margin-bottom:12px;background:#eaf2ff;color:#145cc5;border:1px solid #c6dcff}
+#table-manager .刀具明細操作區{margin:8px 14px 16px;padding:14px;border:1px solid #dbe4f2;background:#fff;border-radius:16px}
+#table-manager .刀具明細操作區 strong{font-size:17px;color:#192a41}
+#table-manager .刀具明細操作區 p{font-size:12px;color:#64748b;margin:6px 0 12px}
+#table-manager .刀具明細快捷{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+#table-manager .刀具明細快捷 button,.刀具明細刪除{min-height:46px;border-radius:12px;border:1px solid #c7daf8;background:#eaf3ff;color:#1555a4;font-weight:700;padding:9px}
+#table-manager .刀具明細列{display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid #e2e8f0;padding:11px 0;font-size:14px;min-width:0}
+#table-manager .刀具明細列>span{min-width:0;overflow-wrap:anywhere;color:#334155}
+#table-manager .刀具明細刪除{min-height:42px;flex:none;color:#b4232f;background:#fff2f3;border-color:#ffc7ce}
+#舊版本機清單{border:1px dashed #c6d0e0;border-radius:16px;margin:12px 14px 22px;background:#f8fafc;overflow:hidden}
+#舊版本機清單>summary{cursor:pointer;padding:14px;font-weight:700;color:#53657c;list-style-position:inside}
+#舊版本機清單 .tm-body{padding:5px 10px 18px}
+#舊版本機清單 .tm-item{display:grid;grid-template-columns:50px minmax(0,1fr) auto auto;gap:8px;align-items:center;padding:10px;border:1px solid #e0e7ef;border-radius:14px;margin:10px 0;background:#fff}
+#舊版本機清單 .tm-info{min-width:0}
+#舊版本機清單 .tm-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#舊版本機清單 .tm-btn{min-width:55px;min-height:44px;padding:6px;font-size:13px!important}
+#正式操作確認框{position:fixed;inset:0;background:#0f172acb;display:none;align-items:center;justify-content:center;z-index:30000;padding:18px}
+#正式操作確認框.開啟{display:flex}
+#正式操作確認框 .確認內容{width:min(96vw,440px);background:#fff;border-radius:24px;padding:26px;box-shadow:0 30px 75px #0006;color:#19283b}
+#正式操作確認框 h3{font-size:20px;font-weight:900;margin:0 0 12px}
+#正式操作確認框 p{line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere;margin-bottom:18px}
+#正式操作確認框 .確認按鈕列{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#正式操作確認框 button{min-height:52px;border-radius:13px;border:1px solid #cbd5e1;background:#f1f5f9;color:#334155;font-weight:800}
+#正式操作確認框 .主確認{background:#2468d9;color:#fff;border-color:#2468d9}
+#正式操作確認框 .主確認.危險{background:#b42332;border-color:#b42332}
+@media(max-width:450px){
+ #table-manager .tm-db-actions,#table-manager .tm-cloud-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #table-manager .tm-db-actions .tm-db-btn{font-size:13px!important}
+ #舊版本機清單 .tm-item{grid-template-columns:42px minmax(0,1fr) auto auto;gap:5px}
+ #舊版本機清單 .tm-tag{width:42px;height:42px}
+ #舊版本機清單 .tm-btn{min-width:42px}
+ #table-manager .tm-db-card{padding:12px}
+}
+@media(prefers-reduced-motion:reduce){#table-manager button{transition:none}}

@@ -4704,6 +4704,7 @@ html, body {
 }
 
 </style>
+<link rel="stylesheet" href="./刀具表精靈_介面優化.css?版本=228">
 </head>
 <body class="mobile-view-chat">
 <div id="tool-action-toast" role="status" aria-live="off" aria-hidden="true">
@@ -4873,7 +4874,7 @@ html, body {
             <button class="os-btn" onclick="openTableManager(); closeSidebarOnMobile();">
                 <span class="os-btn-ic">📁</span>
                 <span class="os-btn-label">我的刀具表
-                    <small>My Tool Sheets · 本機暫存</small>
+                    <small>My Tool Sheets · 正式試算表</small>
                 </span>
                 <span class="os-badge" id="os-table-count">0/10</span>
             </button>
@@ -5554,17 +5555,17 @@ html, body {
             <span>預覽報表<span class="ui-en">Preview</span></span>
         </button>
         <div class="nav-fab-slot">
-            <button id="nav-add-tool-fab" class="nav-add-fab" onclick="addMoreToolsFromNav()" aria-label="新增刀具">＋</button>
-            <div class="nav-add-label">新增刀具<span class="ui-en">Add Tools</span></div>
+            <button id="nav-add-tool-fab" class="nav-add-fab" onclick="createNewTable()" aria-label="新增刀具表">＋</button>
+            <div class="nav-add-label">新增刀具表<span class="ui-en">New Sheet</span></div>
         </div>
         <button class="nav-btn" onclick="openTableManager()">
             <span class="nav-icon">📁</span>
             <span>我的表格<span class="ui-en">My Sheets</span></span>
             <span id="nav-table-dot" class="nav-dot" style="display:none;">0</span>
         </button>
-        <button class="nav-btn" onclick="openSidebar()">
-            <span class="nav-icon">☰</span>
-            <span>選項<span class="ui-en">Options</span></span>
+        <button class="nav-btn" onclick="addMoreToolsFromNav()">
+            <span class="nav-icon">➕</span>
+            <span>增加刀具<span class="ui-en">Add Tool</span></span>
         </button>
     </nav>
 
@@ -6113,7 +6114,7 @@ html, body {
                     <span class="ui-en inline">Google Sheets Database</span>
                 </div>
                 <div class="tm-db-desc">
-                    下拉可選擇本機暫存及正式試算表的刀具表，來源分開標示。本機資料不代表已同步到雲端；「儲存目前刀具表」只會儲存目前正在編輯的表格，完成後必須讀回核對。
+                    選擇正式試算表分頁即可載入編輯；所有雲端儲存皆須讀回核對。未完成草稿只保留本機防斷線復原，不能視為正式存檔。
                 </div>
                 <div class="tm-db-row">
                     <select id="formal-sheet-select" class="tm-db-select" aria-label="選擇本機或正式試算表刀具表">
@@ -6124,6 +6125,7 @@ html, body {
                 <div id="sheet-source-summary" role="status" aria-live="polite">正在整理本機與正式試算表清單…</div>
                 <div class="tm-db-actions">
                     <button class="tm-db-btn primary" onclick="loadSelectedFormalSheet()">📥 載入選定刀具表預覽</button>
+                    <button class="tm-db-btn danger" onclick="刪除選定正式分頁_()">🗑️ 正式刪除（需授權）</button>
                     <button class="tm-db-btn green" onclick="saveCurrentToFormalSheets(false)">💾 儲存目前刀具表至正式試算表</button>
                 </div>
                 <div id="formal-db-status" class="tm-db-status">
@@ -6139,11 +6141,12 @@ html, body {
             </div>
         </div>
 
-        <div id="tm-list" class="tm-body"></div>
+        <div id="刀具明細操作區" class="刀具明細操作區"><strong>✏️ 已載入刀具表 · 編輯刀具</strong><p>新增／刪除刀具後，將同步正式試算表並讀回核對。</p><div class="刀具明細快捷"><button type="button" onclick="closeTableManager();addMoreToolsFromNav()">＋ 增加刀具</button><button type="button" onclick="saveCurrentToFormalSheets(false)">💾 立即同步</button></div><div id="刀具明細清單"></div></div>
+<details id="舊版本機清單"><summary>舊版本機測試資料 · 展開清理</summary><div id="tm-list" class="tm-body"></div></details>
 
         <div class="tm-footer">
             <div class="tm-note">
-                💾 本機自動暫存最多 <b>10 張</b>；電子資料只以 <b>Excel 試算表</b> 格式保存<br>
+                💾 正式 Google 試算表為主資料。本機快照僅供斷線復原，刪除正式資料必須完成後端授權與讀回驗證<br>
                 <span class="ui-en">Up to 10 local sheets · Electronic data saved as Excel spreadsheets only</span>
             </div>
         </div>
@@ -9203,7 +9206,7 @@ async function syncPushStore(silent = true) {
         saveCurrent(true);
         const local = localStoreSnapshot();
         const initialSelectionRevision = tableSelectionRevision;
-        if (!Array.isArray(local.tables) || local.tables.length === 0) {
+        if (!Array.isArray(local.tables) || (local.tables.length === 0 && !Object.keys(local.deleted || {}).length)) {
             throw new Error('已阻止上傳：目前裝置沒有任何刀具表，不能用空白資料覆蓋雲端');
         }
         // 先讀雲端再合併，不允許整批以本機直接取代遠端資料。
@@ -9216,7 +9219,7 @@ async function syncPushStore(silent = true) {
             const remote = extractCloudStore(existing.data);
             if (!remote) throw new Error('無法解析原有雲端資料，已停止寫入以避免覆蓋');
             planned = mergeStores([remote, local], local.currentId);
-            if (planned.tables.length < remote.tables.length || planned.tables.length < local.tables.length) {
+            if (planned.tables.length < remote.tables.length && !Object.keys(planned.deleted || {}).length) {
                 throw new Error('合併超過系統刀具表上限，已停止寫入以保護原始資料');
             }
         }
@@ -9236,6 +9239,7 @@ async function syncPushStore(silent = true) {
             return other && JSON.stringify(other.data) === JSON.stringify(t.data);
         });
         if (!confirmed) throw new Error('雲端讀回的刀具資料與上傳內容不一致，請勿清除手機備份');
+        if (Object.entries(planned.deleted || {}).some(([id,ts])=>Number((saved.deleted||{})[id]||0)<Number(ts))) throw new Error('雲端未確認刪除紀錄');
 
         // 驗證完畢後才把遠端併入本機，避免手機/電腦資料分叉。
         if (JSON.stringify(local) !== JSON.stringify(planned)) {
@@ -9314,7 +9318,7 @@ async function syncPullStore(silent = true) {
         // 以網路回應抵達當下的本機選擇為主；不要採用雲端舊 currentId。
         const currentLocal = localStoreSnapshot();
         const merged = mergeStores([currentLocal, remote], currentLocal.currentId);
-        if (merged.tables.length < store.tables.length || merged.tables.length < remote.tables.length) {
+        if (merged.tables.length < store.tables.length && !Object.keys(merged.deleted || {}).length) {
             throw new Error('合併超過系統上限，已保留本機資料，沒有覆寫雲端');
         }
         cloudSyncApplying = true;
@@ -9604,6 +9608,7 @@ async function saveCurrentToFormalSheets(silent = true) {
     formalDbBusy = true;
     formalDbStatus_('busy', '正在儲存正式刀具表，完成後將讀回核對…');
     try {
+        const 儲存開始表ID = String(store.currentId || '');
         const data = formalSanitizedData_();
         const tableId = formalTableId_();
         const sheetName = formalSheetNameFromData_(data);
@@ -9624,6 +9629,7 @@ async function saveCurrentToFormalSheets(silent = true) {
             } catch (讀回錯誤) { if (次數 === 3) throw 讀回錯誤; }
         }
         if (!confirmed) throw new Error('尚未讀回同一修訂的完整主檔與刀具明細，本機資料已保留');
+        if (String(store.currentId || '') !== 儲存開始表ID) throw new Error('正式儲存已寫入但期間已切換表格，禁止把上一張表 ID 套到新表；請重新整理清單確認');
         appData._formalTableId = tableId;
         formalDbLastSavedId = tableId;
         saveCurrent(true);
@@ -9807,8 +9813,10 @@ async function loadSelectedFormalSheet() {
         return;
     }
     formalDbStatus_('busy', '正在載入正式試算表：' + sheetName + '…');
+    const 載入起始切換版本 = tableSelectionRevision;
     try {
         const res = await formalJsonp_({action:'readSheet', sheet:sheetName, maxRows:5000});
+        if (tableSelectionRevision !== 載入起始切換版本) throw new Error('等待試算表回應期間已切換表格，舊載入結果已取消');
         const rows = Array.isArray(res.rows) ? res.rows : [];
         let snapshot = null;
         for (let i = rows.length - 1; i >= 0; i--) {
@@ -9922,25 +9930,26 @@ function storeScore(candidate) {
 }
 function mergeStores(candidates, preferredCurrentId = '') {
     const valid = candidates.filter(x => x && Array.isArray(x.tables));
-    if (!valid.length) return { currentId: null, tables: [] };
+    if (!valid.length) return { currentId:null, tables:[], deleted:{} };
+    const deleted = {};
+    valid.forEach(src => Object.entries(src.deleted || {}).forEach(([id,ts])=>{
+        deleted[id] = Math.max(Number(deleted[id]||0), Number(ts)||0);
+    }));
     const map = new Map();
-    valid.forEach(src => {
-        src.tables.forEach(t => {
-            if (!t || !t.id) return;
-            const old = map.get(t.id);
-            if (!old || Number(t.updatedAt || 0) >= Number(old.updatedAt || 0)) {
-                map.set(t.id, JSON.parse(JSON.stringify(t)));
-            }
-        });
-    });
-    const best = valid.slice().sort((a,b) => storeScore(b)-storeScore(a))[0];
-    const tables = Array.from(map.values()).sort((a,b)=>Number(b.updatedAt||0)-Number(a.updatedAt||0)).slice(0, MAX_TABLES);
-    // v2.2.6：使用者手動選擇的表格優先，雲端快照的舊 currentId 不得搶回畫面。
-    const selectedId = String(preferredCurrentId || '');
-    const currentId = selectedId && tables.some(t => t.id === selectedId)
-        ? selectedId
-        : (tables.some(t => t.id === best.currentId) ? best.currentId : (tables[0] ? tables[0].id : null));
-    return { currentId, tables };
+    valid.forEach(src => src.tables.forEach(t=>{
+        if(!t || !t.id) return;
+        const modified=Number(t.updatedAt||t.createdAt||0);
+        if (Object.prototype.hasOwnProperty.call(deleted,t.id)) return;
+        const old=map.get(t.id);
+        if(!old || modified>=Number(old.updatedAt||old.createdAt||0))
+            map.set(t.id,JSON.parse(JSON.stringify(t)));
+    }));
+    const best=valid.slice().sort((a,b)=>storeScore(b)-storeScore(a))[0];
+    const tables=Array.from(map.values()).sort((a,b)=>Number(b.updatedAt||0)-Number(a.updatedAt||0)).slice(0,MAX_TABLES);
+    const selectedId=String(preferredCurrentId||'');
+    const currentId=selectedId&&tables.some(t=>t.id===selectedId)?selectedId:
+        (tables.some(t=>t.id===best.currentId)?best.currentId:(tables[0]?tables[0].id:null));
+    return {currentId,tables,deleted};
 }
 async function loadStore() {
     let primary = null, backup = null, legacyPrimary = null, legacyBackup = null;
@@ -10706,7 +10715,7 @@ function renderTableList() {
     if (!list) return;
     if (store.tables.length === 0) {
         list.innerHTML = `<div style="text-align:center;color:var(--ink-4);padding:44px 16px;font-size:.86rem;line-height:1.9;">
-            尚無暫存表格<br>
+            目前沒有舊版本機資料<br>
             <span style="font-size:.76rem;">按上方「＋ 新增刀具表」開始建立</span>
         </div>`;
         return;
@@ -10821,30 +10830,27 @@ function loadTable(id) {
 }
 
 function deleteTable(id) {
-    const t = store.tables.find(x => x.id === id);
-    if (!t) return;
-    if (!confirm(`確定要刪除「${t.name || '未命名刀具表'}」嗎？\n\n刪除後無法復原。`)) return;
-
-    const wasCurrent = (store.currentId === id);
-    store.tables = store.tables.filter(x => x.id !== id);
-
-    if (wasCurrent) {
-        store.currentId = null;
-        const type = appData.type;
-        appData = makeEmptyAppData(type);
-        appData.date = new Date().toISOString().split('T')[0];
-        persist();
-        renderTableList();
-        updateHomeRecentCard();
-        updateA4Preview();
-        updateA3Preview();
-        restartChat();
-        addBotMessage('🗑 目前編輯的表格已刪除\n已為您開啟空白表格。');
-    } else {
-        persist();
-        renderTableList();
-        updateHomeRecentCard();
+    return (async () => {
+    const t = store.tables.find(x=>x.id===id);
+    if(!t) return false;
+    const 正式分頁 = String(t.data?._formalSheetName||'');
+    if (正式分頁 && formalSheetCache.some(x=>x.name===正式分頁)) return 安全刪除正式分頁_(正式分頁);
+    const 同意=await 確認操作_('刪除舊版本機刀具表','確認刪除「'+(t.name||id)+'」？將保留刪除紀錄，避免舊的本機、IndexedDB 或跨裝置快照重新出現。','確認刪除',true);
+    if(!同意) return false;
+    store.deleted=store.deleted||{};
+    store.deleted[id]=Math.max(Date.now(),Number(t.updatedAt||0)+1);
+    store.tables=store.tables.filter(x=>x.id!==id);
+    if(store.currentId===id){
+       tableSelectionRevision++;store.currentId=null;
+       const type=Number(appData.type)===2?2:1;
+       appData=makeEmptyAppData(type);appData.date=new Date().toISOString().slice(0,10);
+       updateA4Preview();updateA3Preview();restartChat();
     }
+    persist();renderTableList();updateHomeRecentCard();
+    if(getCloudSyncKey()) setTimeout(()=>syncPushStore(true),1800);
+    formalDbStatus_('ok','本機刪除已記錄；跨裝置刪除仍須雲端讀回核對。正式試算表未修改。');
+    return true;
+    })();
 }
 
 /* 從舊版僅有 title 的 A4 快照回填基本欄位，避免刷新預覽時清空抬頭。 */
@@ -11489,7 +11495,7 @@ function handleSubmission(val, isImage = false) {
 
 function promptAddAnotherTool() {
     const count = (appData.type === 2) ? appData.tools2.length : appData.tools.length;
-    addBotMessage(`✅ **第 ${count} 把刀具已加入！**\n要再新增刀具，可按下方中央的藍色「＋」按鈕。\n若已設定Data完成，請按下方「結束刀具設定」。`);
+    addBotMessage(`✅ **第 ${count} 把刀具已加入！**\n要再新增刀具，請按底部「增加刀具」。\n若已設定Data完成，請按下方「結束刀具設定」。`);
 
     const btnNo = document.createElement('button');
     btnNo.textContent = '🛑 結束刀具設定 / Finish Tool Setup';
@@ -11528,7 +11534,7 @@ function renderFinalStep() {
         playSound('success');
         inputContainer.innerHTML = '';
         const sheetName = appData.type === 2 ? (appData.headerTitle || '刀具表') : (appData.title || '刀具表');
-        addBotMessage(`🎉 **恭喜！**\n「${sheetName}」建立完成，已自動暫存。\n正在儲存正式 Google 試算表並讀回核對…`);
+        addBotMessage(`🎉 **恭喜！**\n「${sheetName}」建立完成，已完成編輯。\n正在儲存正式 Google 試算表並讀回核對…`);
         saveCurrentToFormalSheets(true).then(ok => {
             if (ok) addBotMessage('✅ **正式試算表已儲存完成。**\n網頁版可從「我的刀具表 → 正式試算表刀具庫」選分頁直接叫出、預覽與列印。');
             else if (!FORMAL_GAS_PUBLIC_READY) addBotMessage('ℹ️ 本機／跨裝置資料已保留。正式 GAS 目前仍需 Google 登入，因此 LINE 直寫試算表暫時鎖定，避免假成功。');
@@ -11581,7 +11587,7 @@ function showResumeOptions() {
     inputContainer.innerHTML = '';
     const note = document.createElement('div');
     note.style.cssText = 'text-align:center;color:var(--ink-4);font-size:.78rem;line-height:1.7;padding:5px 4px 8px;';
-    note.innerHTML = '新增刀具請按下方中央「＋」';
+    note.innerHTML = '底部「增加刀具」可繼續新增；中央「＋」為建立新表';
     const b2 = document.createElement('button');
     b2.textContent = '✏️ 重新填寫基本資料';
     b2.className = 'btn btn-slate';
@@ -12137,6 +12143,8 @@ window.onload = async () => {
 };
 </script>
 
+<div id="正式操作確認框" role="dialog" aria-modal="true" aria-labelledby="確認標題" aria-hidden="true"><div class="確認內容"><h3 id="確認標題">確認操作</h3><p id="確認說明"></p><div class="確認按鈕列"><button type="button" id="取消操作">取消</button><button type="button" class="主確認" id="確認執行">確定</button></div></div></div>
+<script src="./刀具表精靈_雲端一致性.js?版本=228"></script>
 <script id="tool-button-feedback-script">
 /* v2.2.3：含動態按鈕的事件代理，保留既有 onclick / LINE / PWA 功能。 */
 (() => {
