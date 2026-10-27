@@ -9935,7 +9935,7 @@ function mergeStores(candidates, preferredCurrentId = '') {
     valid.forEach(src => src.tables.forEach(t=>{
         if(!t || !t.id) return;
         const modified=Number(t.updatedAt||t.createdAt||0);
-        if(Number(deleted[t.id]||0)>=modified) return;
+        if (Object.prototype.hasOwnProperty.call(deleted,t.id)) return;
         const old=map.get(t.id);
         if(!old || modified>=Number(old.updatedAt||old.createdAt||0))
             map.set(t.id,JSON.parse(JSON.stringify(t)));
