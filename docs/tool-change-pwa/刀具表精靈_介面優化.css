@@ -24,7 +24,7 @@
 #table-manager .tm-db-card{padding:8px!important;margin:4px 0!important}
 #table-manager .tm-db-actions,#table-manager .tm-cloud-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important;margin-top:6px!important}
 #table-manager .tm-db-btn,#table-manager .tm-cloud-btn,#table-manager .tm-new{min-height:44px!important;padding:6px!important;font-size:12px!important;border-radius:10px!important;line-height:1.2!important}
-#table-manager .tm-cloud-btn.master{grid-column:auto!important}
+#table-manager .tm-cloud-btn{grid-column:auto!important}
 #table-manager .tm-db-select{min-height:44px!important;font-size:13px;padding:6px!important}
 #table-manager .刀具明細操作區{margin:4px 12px!important;padding:8px!important}
 #table-manager .刀具明細操作區 p{display:none}

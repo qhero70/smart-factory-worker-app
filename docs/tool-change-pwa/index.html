@@ -5074,7 +5074,7 @@ html, body {
                 <div class="hs-offer-title">對話式引導，免手動排版</div>
                 <div class="hs-offer-desc">回答精靈問題，即時生成可列印表格</div>
             </div>
-            <button class="hs-mini-code" onclick="startFromWelcome()" title="開始對話建表">
+            <button class="hs-mini-code" onclick="startFromWelcome()" title="製作刀具表單">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="9" y="3" width="6" height="12" rx="3"/>
                     <path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"/>
@@ -7925,6 +7925,8 @@ function hasMeaningfulData() {
 }
 
 function showWelcome() {
+    closeSidebar();
+    hideHomeScreen();
     document.getElementById('welcome-screen').classList.add('show');
     startWelcomeHero3D();
 }
@@ -8025,7 +8027,11 @@ function initWelcomeHero3D() {
     wsHeroCamera.position.set(0, 0.6, 9.5);
     wsHeroCamera.lookAt(0, 0, 0);
 
-    wsHeroRenderer = createConfiguredRenderer(W, H);
+    try { wsHeroRenderer = createConfiguredRenderer(W, H); }
+    catch (錯誤) {
+        container.innerHTML = '<svg viewBox="0 0 500 140" role="img" aria-label="CNC 刀具示意" style="width:100%;height:100%"><defs><linearGradient id="tool-metal"><stop stop-color="#98b5d4"/><stop offset=".5" stop-color="#eef6ff"/><stop offset="1" stop-color="#284f78"/></linearGradient></defs><rect x="160" y="45" width="230" height="50" rx="8" fill="url(#tool-metal)"/><rect x="380" y="35" width="30" height="70" rx="6" fill="#204f85"/><path d="M70 45H170V95H70Z" fill="#3478db"/><path d="M70 45L100 95M95 45L125 95M120 45L150 95M145 45L170 85" stroke="#82d7bb" stroke-width="9"/><path d="M60 115H420" stroke="#94b2d6" stroke-width="2"/></svg>';
+        return;
+    }
     container.appendChild(wsHeroRenderer.domElement);
 
     buildThreePointLighting(wsHeroScene, wsHeroLights);
@@ -8635,9 +8641,9 @@ function initHome3DBackground() {
     hsBgCamera = new THREE.PerspectiveCamera(55, W / H, 0.1, 200);
     hsBgCamera.position.set(0, 0, 18);
 
-    hsBgRenderer = new THREE.WebGLRenderer({
+    try { hsBgRenderer = new THREE.WebGLRenderer({
         antialias: threeSettings.antialias > 0, alpha: true
-    });
+    }); } catch (錯誤) { return; }
     hsBgRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     hsBgRenderer.setSize(W, H);
     hsBgRenderer.setClearColor(0x000000, 0);
@@ -12034,7 +12040,7 @@ window.onload = async () => {
             if (vm && vm.classList.contains('show')) closeVideoModal();
             const hs = document.getElementById('home-screen');
             if (hs && hs.classList.contains('show')) hideHomeScreen();
-            if (window.innerWidth < 1024) closeSidebar();
+            closeSidebar();
         }
     });
 
@@ -12048,12 +12054,7 @@ window.onload = async () => {
         }
     }
 
-    if (window.innerWidth >= 1024) {
-        document.getElementById('options-sidebar').classList.add('open');
-        document.getElementById('options-backdrop').classList.remove('show');
-    } else {
-        document.getElementById('options-sidebar').classList.remove('open');
-    }
+    closeSidebar();
 
     if (store.currentId) {
         const t = store.tables.find(x => x.id === store.currentId);

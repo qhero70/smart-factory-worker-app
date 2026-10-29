@@ -69,6 +69,8 @@ window.renderUnifiedSheetOptions_ = function() {
     選單.replaceChildren(提示, 分類);
     if (目前選擇 && Array.from(選單.options).some(x => x.value === 目前選擇)) 選單.value = 目前選擇;
     const 顯示 = document.getElementById('sheet-source-summary');
+    const 數量 = document.getElementById('tm-count');
+    if (數量) 數量.textContent = '正式表格 ' + formalSheetCache.length + ' 張';
     if (顯示) 顯示.textContent = '正式試算表 ' + formalSheetCache.length +
         (formalDbListLoaded ? ' 張 · 讀取完成' : ' 張 · 等待讀取') +
         '　｜　舊版本機 ' + store.tables.length + ' 張（下方可清理）';
@@ -99,11 +101,9 @@ async function 刪除單把刀具_(序號) {
     const 清單 = Number(appData.type) === 2 ? appData.tools2 : appData.tools;
     const 目標 = 清單?.[序號];
     if (!目標) return false;
-    const 允許 = await 確認操作_('刪除單把刀具',
-        '確定從目前刀具表刪除「' + (目標.t_no || '第 ' + (序號 + 1) + ' 把刀具') +
-        '」？已載入的正式刀具表會於修改後自動同步並進行讀回核對。',
-        '刪除這把',true);
-    if (!允許) return false;
+    const 密碼 = await 輸入刪除密碼_(目標.t_no || '第 ' + (序號 + 1) + ' 把刀具');
+    if (密碼 === null) return false;
+    if (密碼 !== '1234') { formalDbStatus_('error','刪除密碼錯誤，未刪除任何資料。'); return false; }
     清單.splice(序號,1);
     updateA4Preview(); updateA3Preview(); saveCurrent(); 更新刀具明細操作區_();
     if (!appData._formalTableId) {
