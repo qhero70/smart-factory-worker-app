@@ -9856,6 +9856,9 @@ async function loadSelectedFormalSheet() {
         applyFormalAppData_(snapshot, sheetName);
         formalDbStatus_('ok', '已載入：' + sheetName);
         closeTableManager();
+        hideWelcome();
+        hideHomeScreen();
+        closeSidebar();
         switchTab('preview');
         playSound('success');
         setTimeout(adjustPreviewScale, 80);
@@ -10880,8 +10883,9 @@ function updatePreviewIdentity_() {
     const count = Array.isArray(items) ? items.length : 0;
     const browser = isLineInAppBrowser() ? 'LINE 內建瀏覽器' : '目前瀏覽器';
     const name = String(title || (active && active.name) || '未命名刀具表').trim();
+    const 來源 = appData._formalSheetName ? '正式試算表：' + appData._formalSheetName : browser + '本機';
     label.textContent = '📋 目前預覽：' + name + ' · ' + type + ' · ' + count +
-        ' 把刀具（' + browser + '本機）';
+        ' 把刀具（' + 來源 + '）';
     label.dataset.tableId = String(store.currentId || '');
 }
 
