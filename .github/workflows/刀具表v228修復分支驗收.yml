@@ -22,7 +22,7 @@ jobs:
           node --test tests/刀具表精靈*.cjs
       - name: 保護正式 GAS 路由與正式資料
         run: |
-          grep -q "刀具表連線版本_ = '2.2.7'" 'smart-factory-command-center/01_GAS後端/刀具表正式資料連線.gs'
-          grep -q "刀具表精靈-pwa-v2.2.8" 'docs/tool-change-pwa/service-worker.js'
+          grep -q "刀具表連線版本_ = '2.2.9'" 'smart-factory-command-center/01_GAS後端/刀具表正式資料連線.gs'
+          grep -q "刀具表精靈-pwa-v2.2.9" 'docs/tool-change-pwa/service-worker.js'
           test -s 'docs/tool-change-pwa/刀具表精靈_介面優化.css'
           test -s 'docs/tool-change-pwa/刀具表精靈_雲端一致性.js'

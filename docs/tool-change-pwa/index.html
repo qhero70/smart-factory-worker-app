@@ -4704,7 +4704,7 @@ html, body {
 }
 
 </style>
-<link rel="stylesheet" href="./刀具表精靈_介面優化.css?版本=228">
+<link rel="stylesheet" href="./刀具表精靈_介面優化.css?版本=229">
 </head>
 <body class="mobile-view-chat">
 <div id="tool-action-toast" role="status" aria-live="off" aria-hidden="true">
@@ -4715,7 +4715,7 @@ html, body {
     <div class="line-banner-row">
         <div class="line-banner-icon">💬</div>
         <div class="line-banner-copy">
-            LINE 內建瀏覽器功能受限
+            Roar 事件通知
             <small id="line-browser-message">檔案儲存、全螢幕與 PWA 安裝建議改用 Safari / Chrome。</small>
         </div>
         <button class="line-banner-close" type="button" onclick="hideLineBrowserBanner()">×</button>
@@ -4951,7 +4951,7 @@ html, body {
 
     <div class="os-foot">
         化新精密 · 智慧製造<br>
-        <span style="color:var(--g-blue);">Tool Sheet Wizard v7.0 · Glass Edition</span>
+        <span style="color:var(--g-blue);">Tool Sheet Wizard v2.2.9</span>
     </div>
 </aside>
 
@@ -4994,8 +4994,8 @@ html, body {
             <div class="ws-visual-desc">毛玻璃質感介面 · 電影級 3D 場景 · 支援語音對話</div>
 
             <div class="ws-welcome-actions">
-                <button class="ws-btn-white" type="button" onclick="startFromWelcome()">
-                    開始製作刀具表　→
+                <button class="ws-btn-white" type="button" onclick="hideWelcome();showHomeScreen();closeSidebar()">
+                    進入首頁　→
                 </button>
 
                 <button class="ws-btn-video" type="button" onclick="openVideoModal()">
@@ -5183,7 +5183,7 @@ html, body {
                 <rect x="9" y="3" width="6" height="12" rx="3"/>
                 <path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"/>
             </svg>
-            對話建表
+            製作刀具表單
         </button>
         <button class="home-nav-item" type="button" onclick="openTableManager()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
@@ -10835,8 +10835,9 @@ function deleteTable(id) {
     if(!t) return false;
     const 正式分頁 = String(t.data?._formalSheetName||'');
     if (正式分頁 && formalSheetCache.some(x=>x.name===正式分頁)) return 安全刪除正式分頁_(正式分頁);
-    const 同意=await 確認操作_('刪除舊版本機刀具表','確認刪除「'+(t.name||id)+'」？將保留刪除紀錄，避免舊的本機、IndexedDB 或跨裝置快照重新出現。','確認刪除',true);
-    if(!同意) return false;
+    const 刪除密碼=await 輸入刪除密碼_(t.name||id);
+    if(刪除密碼===null) return false;
+    if(刪除密碼!=='1234'){formalDbStatus_('error','刪除密碼錯誤，未刪除任何資料。');return false;}
     store.deleted=store.deleted||{};
     store.deleted[id]=Math.max(Date.now(),Number(t.updatedAt||0)+1);
     store.tables=store.tables.filter(x=>x.id!==id);
@@ -12144,7 +12145,7 @@ window.onload = async () => {
 </script>
 
 <div id="正式操作確認框" role="dialog" aria-modal="true" aria-labelledby="確認標題" aria-hidden="true"><div class="確認內容"><h3 id="確認標題">確認操作</h3><p id="確認說明"></p><div class="確認按鈕列"><button type="button" id="取消操作">取消</button><button type="button" class="主確認" id="確認執行">確定</button></div></div></div>
-<script src="./刀具表精靈_雲端一致性.js?版本=228"></script>
+<script src="./刀具表精靈_雲端一致性.js?版本=229"></script>
 <script id="tool-button-feedback-script">
 /* v2.2.3：含動態按鈕的事件代理，保留既有 onclick / LINE / PWA 功能。 */
 (() => {
@@ -12198,6 +12199,22 @@ if ('serviceWorker' in navigator) {
         });
     });
 }
+</script>
+<script>
+// 分類標題支援滑鼠、觸控及鍵盤收合。
+document.querySelectorAll('.os-group-title').forEach(標題 => {
+    標題.setAttribute('role','button');
+    標題.tabIndex = 0;
+    標題.setAttribute('aria-expanded','true');
+    const 切換 = () => {
+        const 收合 = 標題.parentElement.classList.toggle('收合');
+        標題.setAttribute('aria-expanded',String(!收合));
+    };
+    標題.addEventListener('click',切換);
+    標題.addEventListener('keydown',事件 => {
+        if(事件.key === 'Enter' || 事件.key === ' ') {事件.preventDefault();切換();}
+    });
+});
 </script>
 </body>
 </html>

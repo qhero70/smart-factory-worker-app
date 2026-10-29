@@ -20,12 +20,28 @@ function 環境() {
   }
   const 主庫={getSheetByName:n=>分頁.get(n)||null,insertSheet(n){const s=new 表格(n,[['']]);分頁.set(n,s);return s;},deleteSheet:s=>分頁.delete(s.名)};
   const 上下文={console,SpreadsheetApp:{openById(id){斷言.equal(id,'19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8');return 主庫;},flush(){}},LockService:{getScriptLock:()=>({tryLock:()=>true,releaseLock(){}})},ContentService:{MimeType:{JSON:'json',JAVASCRIPT:'js'},createTextOutput(字){return {字,setMimeType(){return this;},getContent(){return this.字;}};}}};
+  const 設定 = new Map(), 暫存 = new Map();
+  上下文.PropertiesService={getScriptProperties:()=>({getProperty:k=>設定.get(k)||null,setProperty:(k,v)=>設定.set(k,v),deleteProperty:k=>設定.delete(k)})};
+  上下文.CacheService={getScriptCache:()=>({get:k=>暫存.get(k)||null,put:(k,v)=>暫存.set(k,v),remove:k=>暫存.delete(k)})};
   虛擬機.createContext(上下文);虛擬機.runInContext(程式,上下文);
   分頁.set('刀具表_索引',new 表格('刀具表_索引',[Array.from(上下文.刀具表索引欄位_)]));
   分頁.set('刀具表_明細',new 表格('刀具表_明細',[Array.from(上下文.刀具表明細欄位_)]));
   return {上下文,分頁,故障(n){故障表=n;},呼叫(api,方法='GET',資料={}){return JSON.parse(上下文.刀具表正式接收_({parameter:{api,...資料}},方法).getContent());}};
 }
 function 資料(修改={}){return {刀具表ID:'T123',分頁名稱:'5279_OP10',快照:{type:1,partName:'5279',tools:[],_formalRevision:'R1'},基本:{品名:'5279'},明細:[{刀號:'T01',N工序:'N1',照片URL:''}],...修改};}
+測試('密碼刪除拒絕 GET 與錯誤密碼，正確密碼刪除後阻止復活且原始資料可復原',()=>{
+ const e=環境();e.上下文.刀具表正式儲存_(資料());
+ const p={密碼:'wrong',分頁名稱:'5279_OP10',請求碼:'test-request-123456789012345'};
+ 斷言.equal(e.呼叫('刀具表_刪除','GET',p).成功,false);
+ 斷言.equal(e.呼叫('刀具表_刪除','POST',p).成功,false);
+ 斷言.equal(e.呼叫('刀具表_清單').資料.length,1);
+ 斷言.equal(e.呼叫('刀具表_刪除','POST',{...p,密碼:'1234'}).成功,true);
+ 斷言.equal(e.呼叫('刀具表_清單').資料.length,0);
+ 斷言.equal(e.呼叫('刀具表_載入','GET',p).成功,false);
+ 斷言.throws(()=>e.上下文.刀具表正式儲存_(資料()),/已刪除/);
+ 斷言.equal(e.分頁.has('5279_OP10'),true);
+ 斷言.equal(e.呼叫('刀具表_刪除結果','GET',p).成功,true);
+});
 測試('一般 LINE／報工請求不被接手；GET 不可寫入',()=>{const e=環境();斷言.equal(e.上下文.刀具表正式接收_({parameter:{action:'appendRow'}},'POST'),null);斷言.equal(e.呼叫('刀具表_儲存').成功,false);斷言.equal(e.分頁.size,2);});
 測試('空庫成功回傳零筆；僅載入已登記刀具表',()=>{const e=環境();斷言.equal(e.呼叫('刀具表_清單').資料.length,0);斷言.equal(e.呼叫('刀具表_載入','GET',{分頁名稱:'01_人員主檔'}).成功,false);});
 測試('同一刀具表重送與修改只保留一筆索引及最新明細',()=>{const e=環境();e.上下文.刀具表正式儲存_(資料());e.上下文.刀具表正式儲存_(資料({明細:[{刀號:'T02'}]}));斷言.equal(e.呼叫('刀具表_清單').資料.length,1);const r=e.呼叫('刀具表_載入','GET',{分頁名稱:'5279_OP10'});斷言.equal(r.資料.length,2);斷言.equal(r.資料[1].刀號,'T02');});

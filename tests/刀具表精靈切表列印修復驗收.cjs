@@ -91,6 +91,6 @@ test('直接列印在圖片準備好後執行，先關掉等待浮框',async()=>
 
 test('完整主程式可編譯且快取更新為 2.2.7',()=>{
     assert.doesNotThrow(()=>new vm.Script(main));
-    assert.match(sw,/刀具表精靈-pwa-v2\.2\.(7|8)/);
+    assert.match(sw,/刀具表精靈-pwa-v2\.2\.(7|8|9)/);
     assert.match(html,/LINEBOT_TOOL/);
 });

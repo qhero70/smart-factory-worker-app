@@ -30,6 +30,6 @@ jobs:
               if not body.startswith(prefix) or not body.endswith(');'):
                   raise SystemExit('FAIL: 正式端點未回傳指定JSONP；不輸出HTML或敏感原文')
               data=json.loads(body[len(prefix):-2])
-              if status!=200 or data.get('成功') is not True or data.get('版本')!='2.2.7' or data.get('主庫ID')!='19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8':
+              if status!=200 or data.get('成功') is not True or data.get('版本')!='2.2.9' or data.get('主庫ID')!='19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8':
                   raise SystemExit('FAIL: 正式回應旗標／版本／主庫識別不符')
               print(api+': PASS；版本='+data['版本']+'；筆數='+str(len(data.get('資料',[]))))

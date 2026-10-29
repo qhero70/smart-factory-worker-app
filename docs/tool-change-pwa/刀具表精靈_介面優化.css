@@ -1,4 +1,41 @@
-/* 刀具表精靈 v2.2.8：正式分頁管理、整齊排列與按鈕微光 */
+/* 發表版：可收合導覽、精簡操作及滿版歡迎畫面。 */
+#options-sidebar:not(.open){transform:translateX(-110%)!important;visibility:hidden;pointer-events:none}
+#options-sidebar.open{transform:translateX(0)!important;visibility:visible}
+#options-sidebar .os-close{display:flex!important;min-width:44px;min-height:44px}
+#options-sidebar .os-group-title{cursor:pointer;min-height:44px;display:flex;align-items:center}
+#options-sidebar .os-group-title::after{content:'⌄';margin-left:auto}
+#options-sidebar .os-group.收合>:not(.os-group-title){display:none}
+#options-sidebar .os-group.收合 .os-group-title::after{content:'›'}
+#welcome-screen{width:100vw;height:100dvh;max-width:none;background:radial-gradient(ellipse at 75% 25%,#d8e8ff,transparent 60%),linear-gradient(145deg,#f8fbff,#e8edf8)}
+#welcome-screen .ws-scroll{height:100%;padding:clamp(12px,2vh,28px);box-sizing:border-box}
+#welcome-screen .ws-inner{width:100%;max-width:1100px;min-height:100%;margin:auto;display:flex;flex-direction:column;justify-content:center;gap:8px}
+#welcome-screen .ws-main-title{font-size:clamp(28px,5vh,56px);line-height:1.15;margin:0}
+#welcome-screen .ws-hero-visual{height:clamp(100px,23dvh,280px);min-height:0;margin:0}
+#welcome-screen .ws-welcome-actions{width:100%;max-width:660px;margin:0 auto;gap:8px}
+#welcome-screen .ws-welcome-actions>button{min-height:44px;padding:10px;font-size:clamp(15px,2vh,20px)}
+#welcome-screen .ws-quick-btn{padding:8px;min-height:44px;font-size:14px}
+#welcome-screen .ws-visual-desc{display:none}
+#table-manager .modal-panel{height:calc(100dvh - 16px);display:flex;flex-direction:column;overflow:hidden}
+#table-manager .modal-head{flex:none;padding:10px 14px!important}
+#table-manager .modal-head h2{font-size:18px;margin:0}
+#table-manager .ui-en,#table-manager .tm-db-desc,#table-manager .tm-note{display:none!important}
+#table-manager .tm-manager-scroll{min-height:0;flex:1;overflow:auto;overscroll-behavior:contain}
+#table-manager .tm-footer{padding:8px 12px}
+#table-manager .tm-db-card{padding:8px!important;margin:4px 0!important}
+#table-manager .tm-db-actions,#table-manager .tm-cloud-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important;margin-top:6px!important}
+#table-manager .tm-db-btn,#table-manager .tm-cloud-btn,#table-manager .tm-new{min-height:44px!important;padding:6px!important;font-size:12px!important;border-radius:10px!important;line-height:1.2!important}
+#table-manager .tm-cloud-btn.master{grid-column:auto!important}
+#table-manager .tm-db-select{min-height:44px!important;font-size:13px;padding:6px!important}
+#table-manager .刀具明細操作區{margin:4px 12px!important;padding:8px!important}
+#table-manager .刀具明細操作區 p{display:none}
+#table-manager #刀具明細清單{max-height:22dvh;overflow:auto}
+@media (orientation:landscape) and (max-height:600px){
+ #welcome-screen .ws-inner{display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;align-content:center}
+ #welcome-screen .ws-company-row,#welcome-screen .ws-hero-title,#welcome-screen .ws-hero-visual{grid-column:1}
+ #welcome-screen .ws-welcome-actions{grid-column:2;grid-row:1/5}
+ #welcome-screen .ws-dim-legend,#welcome-screen .ws-visual-note{display:none}
+ #table-manager .tm-manager-scroll{display:grid;grid-template-columns:1fr 1fr;align-content:start}
+}
 #table-manager .modal-panel{width:min(96vw,760px);max-width:760px}
 #table-manager .modal-head{padding:18px 22px;background:linear-gradient(135deg,#f5f8ff,#fff);border-bottom:1px solid #e2e8f0}
 #table-manager .tm-db-card{background:#f8faff;border-radius:20px;border:1px solid #dbe4f1;padding:16px;margin:8px 0 16px}

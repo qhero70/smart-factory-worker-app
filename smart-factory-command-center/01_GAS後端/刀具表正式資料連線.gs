@@ -1,5 +1,5 @@
 /** 化新精密｜刀具表正式資料連線 v2.2.7；沿用唯一主庫及原 Web App。 */
-var 刀具表連線版本_ = '2.2.7';
+var 刀具表連線版本_ = '2.2.9';
 var 刀具表正式庫_ = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
 var 刀具表索引欄位_ = ['刀具表ID','分頁名稱','表格格式','品名','工序','機器號碼','客戶品號','產品編號','主程式','加工程式','夾持壓力','夾持高壓','夾持低壓','注意事項','加工時間','每日數量','QR內容','製表者','製表日期','來源','LINE_USER_ID','建立時間','更新時間'];
 var 刀具表明細欄位_ = ['刀具表ID','分頁名稱','排序','N工序','刀具形式','刀號','H值','G補正X軸','G補正Z軸','刀具壽命','照片URL','照片檔名','備註','建立時間','更新時間'];
@@ -21,7 +21,13 @@ function 刀具表正式接收_(請求, 方法) {
   var 結果;
   try {
     if (參數.callback && !/^[A-Za-z_$][A-Za-z0-9_$]{0,119}$/.test(String(參數.callback))) throw new Error('回呼名稱不合法');
-    if (動作 === '刀具表_儲存') {
+    if (動作 === '刀具表_刪除') {
+      if (方法 !== 'POST') throw new Error('刪除只接受 POST');
+      結果 = 刀具表密碼刪除_(參數);
+    } else if (動作 === '刀具表_刪除結果') {
+      var 收據 = PropertiesService.getScriptProperties().getProperty('刀具刪除收據_' + String(參數.請求碼 || ''));
+      結果 = 收據 ? JSON.parse(收據) : {成功:false,訊息:'尚未完成刪除，或密碼錯誤'};
+    } else if (動作 === '刀具表_儲存') {
       if (方法 !== 'POST') throw new Error('儲存只接受 POST');
       結果 = 刀具表正式儲存_(JSON.parse(String(參數.資料 || '{}')));
     } else {
@@ -43,6 +49,47 @@ function 刀具表正式接收_(請求, 方法) {
   return 刀具表正式輸出_(結果, /^[A-Za-z_$][A-Za-z0-9_$]{0,119}$/.test(String(參數.callback || '')) ? 參數 : {});
 }
 
+// 可復原刪除：保留原始主檔與明細，讀取及儲存均遵守刪除標記。
+function 刀具表已刪除_(名稱) {
+  return !!PropertiesService.getScriptProperties().getProperty('刀具已刪除_' + String(名稱 || ''));
+}
+function 刀具表密碼刪除_(參數) {
+  var 設定 = PropertiesService.getScriptProperties();
+  var 請求碼 = String(參數.請求碼 || '');
+  if (!/^[a-zA-Z0-9-]{20,80}$/.test(請求碼)) throw new Error('刪除請求碼不合法');
+  var 鎖 = LockService.getScriptLock();
+  if (!鎖.tryLock(20000)) throw new Error('資料使用中，請稍後重試');
+  try {
+    var 密碼 = 設定.getProperty('刀具表刪除密碼') || '1234';
+    var 暫存 = CacheService.getScriptCache();
+    var 錯誤次數 = Number(暫存.get('刀具刪除錯誤次數') || 0);
+    if (錯誤次數 >= 10) throw new Error('密碼錯誤過多，請十五分鐘後重試');
+    if (String(參數.密碼 || '') !== 密碼) {
+      暫存.put('刀具刪除錯誤次數',String(錯誤次數+1),900);
+      throw new Error('刪除密碼錯誤');
+    }
+    暫存.remove('刀具刪除錯誤次數');
+    var 名稱 = String(參數.分頁名稱 || '').trim();
+    var 索引 = 刀具表讀表_(SpreadsheetApp.openById(刀具表正式庫_).getSheetByName('刀具表_索引'));
+    if (!名稱 || !索引.some(function(列){return String(列.分頁名稱) === 名稱;})) throw new Error('找不到正式刀具表');
+    設定.setProperty('刀具已刪除_' + 名稱, JSON.stringify({時間:new Date().toISOString(),請求碼:請求碼}));
+    var 結果 = {成功:刀具表已刪除_(名稱),分頁名稱:名稱,可復原:true};
+    設定.setProperty('刀具刪除收據_' + 請求碼,JSON.stringify(結果));
+    return 結果;
+  } finally {鎖.releaseLock();}
+}
+// 僅供專案擁有者從試算表提示框復原，不開放公開 GET 復原。
+function 復原已刪除刀具表() {
+  var 介面 = SpreadsheetApp.getUi();
+  var 回答 = 介面.prompt('復原刀具表','請輸入要復原的完整分頁名稱',介面.ButtonSet.OK_CANCEL);
+  if (回答.getSelectedButton() !== 介面.Button.OK) return;
+  var 名稱 = 回答.getResponseText().trim();
+  if (!刀具表已刪除_(名稱)) throw new Error('此分頁沒有刪除紀錄');
+  var 鎖 = LockService.getScriptLock(); 鎖.waitLock(20000);
+  try {PropertiesService.getScriptProperties().deleteProperty('刀具已刪除_' + 名稱);}
+  finally {鎖.releaseLock();}
+  介面.alert('已復原：' + 名稱);
+}
 function 刀具表讀表_(表) {
   if (!表) throw new Error('找不到正式刀具表分頁');
   var 值 = 表.getDataRange().getValues();
@@ -54,7 +101,7 @@ function 刀具表讀表_(表) {
 
 function 刀具表正式讀取_(動作,參數) {
   var 主庫 = SpreadsheetApp.openById(刀具表正式庫_);
-  var 索引 = 刀具表讀表_(主庫.getSheetByName('刀具表_索引'));
+  var 索引 = 刀具表讀表_(主庫.getSheetByName('刀具表_索引')).filter(function(列){return !刀具表已刪除_(列.分頁名稱);});
   if (動作 === '刀具表_清單') return {成功:true,資料:索引};
   var 名稱 = String(參數.分頁名稱 || '').trim();
   var 登記 = 索引.filter(function(列){return String(列.分頁名稱) === 名稱;});
@@ -80,6 +127,7 @@ function 刀具表寫整表_(表,欄,資料) {
 }
 
 function 刀具表正式儲存_(資料) {
+  if (刀具表已刪除_(資料.分頁名稱)) throw new Error('此刀具表已刪除，不能由舊裝置重新覆寫；請建立新名稱');
   var 編號 = String(資料.刀具表ID || '').trim();
   var 名稱 = String(資料.分頁名稱 || '').trim();
   var 快照 = 資料.快照;
@@ -100,6 +148,7 @@ function 刀具表正式儲存_(資料) {
   if (!鎖.tryLock(20000)) throw new Error('另一張刀具表正在儲存，請稍後重試');
   var 備份 = [], 新表 = null;
   try {
+    if (刀具表已刪除_(名稱)) throw new Error('此刀具表已刪除，禁止舊資料同步復活');
     var 主庫 = SpreadsheetApp.openById(刀具表正式庫_);
     var 索引表 = 主庫.getSheetByName('刀具表_索引'), 明細表 = 主庫.getSheetByName('刀具表_明細');
     var 索引 = 刀具表讀表_(索引表), 所有明細 = 刀具表讀表_(明細表);
