@@ -4723,7 +4723,7 @@ html, body {
 }
 
 </style>
-<link rel="stylesheet" href="./刀具表精靈_介面優化.css?版本=229">
+<link rel="stylesheet" href="./刀具表精靈_介面優化.css?版本=230">
 </head>
 <body class="mobile-view-chat">
 <div id="tool-action-toast" role="status" aria-live="off" aria-hidden="true">
@@ -4749,9 +4749,9 @@ html, body {
 <!-- ============================================================
      側邊欄（選項面板）
      ============================================================ -->
-<div id="options-backdrop" class="os-backdrop" onclick="closeSidebar()"></div>
+<div id="options-backdrop" class="os-backdrop" aria-hidden="true" onclick="closeSidebar()"></div>
 
-<aside id="options-sidebar" class="open">
+<aside id="options-sidebar" aria-label="刀具表精靈選項面板" aria-hidden="true" inert>
     <div class="os-head">
         <div class="os-mark">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -4763,7 +4763,7 @@ html, body {
             <div class="os-head-title">選項面板</div>
             <div class="os-head-sub">OPTIONS · 刀具表精靈</div>
         </div>
-        <button class="os-close" onclick="closeSidebar()" aria-label="關閉側邊欄">&times;</button>
+        <button type="button" class="os-close" onclick="closeSidebar()" aria-label="關閉側邊欄">&times;</button>
     </div>
 
     <div class="os-scroll">
@@ -5068,7 +5068,7 @@ html, body {
                 <div class="hs-head-name">刀具表精靈</div>
                 <div class="hs-head-note">化新精密 · 智慧製造</div>
             </div>
-            <button class="hs-icon-circle" onclick="openSidebar()" title="開啟選項面板">
+            <button class="hs-icon-circle" data-sidebar-toggle aria-controls="options-sidebar" aria-expanded="false" aria-label="展開選項面板" onclick="toggleSidebar()" title="開啟選項面板">
                 <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="4" y1="6" x2="20" y2="6"/>
                     <line x1="4" y1="12" x2="20" y2="12"/>
@@ -5211,7 +5211,7 @@ html, body {
             </svg>
             我的表格
         </button>
-        <button class="home-nav-item" type="button" onclick="openSidebar()">
+        <button class="home-nav-item" type="button" data-sidebar-toggle aria-controls="options-sidebar" aria-expanded="false" aria-label="展開選項面板" onclick="toggleSidebar()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="4" y1="6" x2="20" y2="6"/>
                 <line x1="4" y1="12" x2="20" y2="12"/>
@@ -5235,7 +5235,7 @@ html, body {
 
             <div class="app-header-row1">
                 <div class="header-row1-inner">
-                    <button class="hamburger-btn" onclick="openSidebar()" title="開啟選項面板" aria-label="開啟選項面板">☰</button>
+                    <button class="hamburger-btn" data-sidebar-toggle aria-controls="options-sidebar" aria-expanded="false" aria-label="展開選項面板" onclick="toggleSidebar()" title="開啟選項面板" aria-label="開啟選項面板">☰</button>
                     <div class="brand">
                         <span class="logo-dot" id="brand-avatar" title="點擊更換頭像" onclick="openAvatarPicker()">🤖</span>
                         <span class="brand-title">
@@ -7524,18 +7524,34 @@ function declineVoiceGuide() {
     closeVoiceInvite();
 }
 
+/* 選項面板唯一狀態控制：iPhone、LINE 內建瀏覽器與電腦共用。 */
+function 設定側邊欄狀態(是否開啟) {
+    const 面板 = document.getElementById('options-sidebar');
+    const 遮罩 = document.getElementById('options-backdrop');
+    if (!面板 || !遮罩) return;
+    const 開啟 = Boolean(是否開啟);
+    面板.classList.toggle('open', 開啟);
+    面板.inert = !開啟;
+    面板.setAttribute('aria-hidden', String(!開啟));
+    遮罩.classList.toggle('show', 開啟);
+    document.querySelectorAll('[data-sidebar-toggle]').forEach(按鈕 => {
+        按鈕.setAttribute('aria-expanded', String(開啟));
+        按鈕.setAttribute('aria-label', 開啟 ? '收合選項面板' : '展開選項面板');
+    });
+}
 function openSidebar() {
-    document.getElementById('options-sidebar').classList.add('open');
-    if (window.innerWidth < 1024) {
-        document.getElementById('options-backdrop').classList.add('show');
-    }
+    設定側邊欄狀態(true);
 }
 function closeSidebar() {
-    document.getElementById('options-sidebar').classList.remove('open');
-    document.getElementById('options-backdrop').classList.remove('show');
+    設定側邊欄狀態(false);
 }
+function toggleSidebar() {
+    const 面板 = document.getElementById('options-sidebar');
+    設定側邊欄狀態(!面板 || !面板.classList.contains('open'));
+}
+/* 舊函數名稱保留相容；選取功能後手機與電腦均可收合。 */
 function closeSidebarOnMobile() {
-    if (window.innerWidth < 1024) closeSidebar();
+    closeSidebar();
 }
 
 
@@ -12177,6 +12193,12 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 <script>
+/* 雲端初始化未完成時仍可用 Escape 關閉側邊欄。 */
+document.addEventListener('keydown', 事件 => {
+    if (事件.key === 'Escape' && document.getElementById('options-sidebar')?.classList.contains('open')) {
+        closeSidebar();
+    }
+});
 // 分類標題支援滑鼠、觸控及鍵盤收合。
 document.querySelectorAll('.os-group-title').forEach(標題 => {
     標題.setAttribute('role','button');

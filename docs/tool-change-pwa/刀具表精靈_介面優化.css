@@ -85,3 +85,19 @@
  #table-manager .tm-db-card{padding:12px}
 }
 @media(prefers-reduced-motion:reduce){#table-manager button{transition:none}}
+
+/* v2.3.0：側邊欄三條線選項按鈕與全裝置收合修復。 */
+#options-sidebar {
+  z-index: 125;
+  height: 100dvh;
+  overscroll-behavior: contain;
+}
+#options-backdrop {
+  z-index: 124;
+  touch-action: manipulation;
+}
+#options-sidebar.open { pointer-events: auto; }
+#options-sidebar:not(.open) { pointer-events: none; visibility: hidden; }
+[data-sidebar-toggle] { min-width: 44px; min-height: 44px; touch-action: manipulation; cursor: pointer; }
+#options-sidebar .os-close { min-width: 48px; min-height: 48px; touch-action: manipulation; cursor: pointer; }
+#options-sidebar .os-group-title:focus-visible { outline: 3px solid #4285f4; outline-offset: -2px; border-radius: 8px; }
