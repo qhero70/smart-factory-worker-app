@@ -4723,7 +4723,7 @@ html, body {
 }
 
 </style>
-<link rel="stylesheet" href="./刀具表精靈_介面優化.css?版本=230">
+<link rel="stylesheet" href="./刀具表精靈_介面優化.css?版本=231">
 </head>
 <body class="mobile-view-chat">
 <div id="tool-action-toast" role="status" aria-live="off" aria-hidden="true">
@@ -4768,7 +4768,7 @@ html, body {
 
     <div class="os-scroll">
 
-        <div class="os-group">
+        <div class="os-group 收合">
             <div class="os-group-title"><span class="dot"></span>01 · 刀具表格式 / Format</div>
             <button class="os-btn active" id="os-mode-1" onclick="changeFormat(1); closeSidebarOnMobile();">
                 <span class="os-btn-ic">📐</span>
@@ -4786,7 +4786,7 @@ html, body {
 
         <div class="os-divider"></div>
 
-        <div class="os-group">
+        <div class="os-group 收合">
             <div class="os-group-title"><span class="dot"></span>02 · 檢視切換 / View</div>
             <button class="os-btn active" id="os-view-chat" onclick="switchTab('chat'); closeSidebarOnMobile();">
                 <span class="os-btn-ic">💬</span>
@@ -4804,7 +4804,7 @@ html, body {
 
         <div class="os-divider"></div>
 
-        <div class="os-group">
+        <div class="os-group 收合">
             <div class="os-group-title"><span class="dot"></span>03 · 語音與音效 / Voice &amp; Sound</div>
             <button class="os-btn" id="os-voice-toggle" onclick="toggleVoiceQuick();">
                 <span class="os-btn-ic red">🔊</span>
@@ -4828,7 +4828,7 @@ html, body {
 
         <div class="os-divider"></div>
 
-        <div class="os-group">
+        <div class="os-group 收合">
             <div class="os-group-title"><span class="dot"></span>04 · 3D 場景 / WebGL</div>
             <button class="os-btn" onclick="openThreeControls(); closeSidebarOnMobile();">
                 <span class="os-btn-ic purple">🎬</span>
@@ -4846,7 +4846,7 @@ html, body {
 
         <div class="os-divider"></div>
 
-        <div class="os-group">
+        <div class="os-group 收合">
             <div class="os-group-title"><span class="dot"></span>05 · 建表動作 / Actions</div>
             <button class="os-btn" onclick="startFromWelcome(); closeSidebarOnMobile();">
                 <span class="os-btn-ic">🚀</span>
@@ -4870,7 +4870,7 @@ html, body {
 
         <div class="os-divider"></div>
 
-        <div class="os-group">
+        <div class="os-group 收合">
             <div class="os-group-title"><span class="dot"></span>06 · 匯出 / Export</div>
             <button class="os-btn" onclick="exportExcelFile();">
                 <span class="os-btn-ic amber">📊</span>
@@ -4888,7 +4888,7 @@ html, body {
 
         <div class="os-divider"></div>
 
-        <div class="os-group">
+        <div class="os-group 收合">
             <div class="os-group-title"><span class="dot"></span>07 · 我的資料 / My Data</div>
             <button class="os-btn" onclick="openTableManager(); closeSidebarOnMobile();">
                 <span class="os-btn-ic">📁</span>
@@ -4914,7 +4914,7 @@ html, body {
 
         <div class="os-divider"></div>
 
-        <div class="os-group">
+        <div class="os-group 收合">
             <div class="os-group-title"><span class="dot"></span>08 · 工具 / Tools</div>
             <button class="os-btn" onclick="toggleFullscreen();">
                 <span class="os-btn-ic dark">⛶</span>
@@ -4944,7 +4944,7 @@ html, body {
 
         <div class="os-divider"></div>
 
-        <div class="os-group">
+        <div class="os-group 收合">
             <div class="os-group-title"><span class="dot"></span>09 · 頁面切換 / Navigate</div>
             <button class="os-btn" onclick="showHomeScreen(); closeSidebarOnMobile();">
                 <span class="os-btn-ic dark">🏠</span>
@@ -7524,12 +7524,20 @@ function declineVoiceGuide() {
     closeVoiceInvite();
 }
 
+/* 每次從收合狀態開啟選項面板時，九個章節都從收合開始。 */
+function 全部收合側邊欄章節() {
+    document.querySelectorAll('#options-sidebar .os-group-title').forEach(標題 => {
+        標題.parentElement.classList.add('收合');
+        標題.setAttribute('aria-expanded', 'false');
+    });
+}
 /* 選項面板唯一狀態控制：iPhone、LINE 內建瀏覽器與電腦共用。 */
 function 設定側邊欄狀態(是否開啟) {
     const 面板 = document.getElementById('options-sidebar');
     const 遮罩 = document.getElementById('options-backdrop');
     if (!面板 || !遮罩) return;
     const 開啟 = Boolean(是否開啟);
+    if (開啟 && !面板.classList.contains('open')) 全部收合側邊欄章節();
     面板.classList.toggle('open', 開啟);
     面板.inert = !開啟;
     面板.setAttribute('aria-hidden', String(!開啟));
@@ -12203,7 +12211,8 @@ document.addEventListener('keydown', 事件 => {
 document.querySelectorAll('.os-group-title').forEach(標題 => {
     標題.setAttribute('role','button');
     標題.tabIndex = 0;
-    標題.setAttribute('aria-expanded','true');
+    標題.parentElement.classList.add('收合');
+    標題.setAttribute('aria-expanded','false');
     const 切換 = () => {
         const 收合 = 標題.parentElement.classList.toggle('收合');
         標題.setAttribute('aria-expanded',String(!收合));

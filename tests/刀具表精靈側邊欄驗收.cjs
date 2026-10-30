@@ -35,11 +35,16 @@ function 建立驗證環境() {
     const 面板 = 建立元素();
     const 遮罩 = 建立元素();
     const 三線按鈕 = Array.from({ length: 3 }, 建立元素);
+    const 章節 = Array.from({ length: 9 }, () => {
+        const 父層 = 建立元素();
+        父層.classList.add('收合');
+        return { ...建立元素(), parentElement: 父層 };
+    });
     const 元素 = { 'options-sidebar': 面板, 'options-backdrop': 遮罩 };
     const 環境 = {
         document: {
             getElementById: 名稱 => 元素[名稱] || null,
-            querySelectorAll: 選擇器 => 選擇器 === '[data-sidebar-toggle]' ? 三線按鈕 : []
+            querySelectorAll: 選擇器 => 選擇器 === '[data-sidebar-toggle]' ? 三線按鈕 : (選擇器 === '#options-sidebar .os-group-title' ? 章節 : [])
         },
         window: { innerWidth: 390 }
     };
@@ -48,7 +53,7 @@ function 建立驗證環境() {
     斷言.ok(開頭 > 0 && 結尾 > 開頭, '應存在獨立控制函數');
     虛擬機.createContext(環境);
     虛擬機.runInContext(網頁.slice(開頭, 結尾), 環境);
-    return { 環境, 面板, 遮罩, 三線按鈕 };
+    return { 環境, 面板, 遮罩, 三線按鈕, 章節 };
 }
 
 測試('三處選項按鈕均能切換展開與收合，且首頁/工作區共用', () => {
@@ -88,10 +93,35 @@ function 建立驗證環境() {
 測試('新版 CSS、離線快取及所有內嵌腳本語法正確', () => {
     斷言.ok(樣式.includes('#options-sidebar:not(.open)'));
     斷言.ok(樣式.includes('#options-sidebar .os-close { min-width: 48px;'));
-    斷言.ok(網頁.includes('刀具表精靈_介面優化.css?版本=230'));
-    斷言.ok(離線服務.includes('殼層-r6'));
-    斷言.ok(離線服務.includes('刀具表精靈_介面優化.css?版本=230'));
+    斷言.ok(網頁.includes('刀具表精靈_介面優化.css?版本=231'));
+    斷言.ok(離線服務.includes('殼層-r7'));
+    斷言.ok(離線服務.includes('刀具表精靈_介面優化.css?版本=231'));
     for (const 配對 of 網頁.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)) {
         if (配對[1].trim()) new 虛擬機.Script(配對[1]);
     }
+});
+
+測試('九個側欄章節首次全部收合，展開重新進入後復原全收合', () => {
+    const 區塊 = 網頁.slice(網頁.indexOf('<aside id="options-sidebar"'), 網頁.indexOf('</aside>'));
+    斷言.equal((區塊.match(/class="os-group 收合"/g) || []).length, 9);
+    斷言.ok(網頁.includes("標題.setAttribute('aria-expanded','false')"));
+    斷言.ok(網頁.includes("標題.addEventListener('click',切換)"));
+    斷言.ok(網頁.includes("標題.addEventListener('keydown',事件 =>"));
+    const { 環境, 章節 } = 建立驗證環境();
+    虛擬機.runInContext('openSidebar()', 環境);
+    斷言.ok(章節.every(標題 => 標題.parentElement.classList.contains('收合')));
+    斷言.ok(章節.every(標題 => 標題.getAttribute('aria-expanded') === 'false'));
+    章節[2].parentElement.classList.remove('收合');
+    章節[2].setAttribute('aria-expanded','true');
+    虛擬機.runInContext('closeSidebar(); openSidebar()', 環境);
+    斷言.ok(章節.every(標題 => 標題.parentElement.classList.contains('收合')));
+    斷言.ok(章節.every(標題 => 標題.getAttribute('aria-expanded') === 'false'));
+});
+測試('側邊欄大標題為黑色粗體字，頂部為藍色漸層且可見', () => {
+    斷言.match(樣式, /#options-sidebar \.os-head \{[\s\S]*?background: linear-gradient\(112deg, #dbeafe/);
+    斷言.match(樣式, /#options-sidebar \.os-head-title \{[\s\S]*?color: #0b1220;/);
+    斷言.match(樣式, /#options-sidebar \.os-group-title \{[\s\S]*?color: #101114 !important;/);
+    斷言.match(樣式, /#options-sidebar \.os-group-title \{[\s\S]*?font-size: 16px !important;/);
+    斷言.match(樣式, /#options-sidebar \.os-group-title \{[\s\S]*?font-weight: 900 !important;/);
+    斷言.ok(樣式.includes('#options-sidebar .os-group.收合 > :not(.os-group-title) { display: none !important; }'));
 });
