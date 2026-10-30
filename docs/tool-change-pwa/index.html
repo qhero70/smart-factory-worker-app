@@ -3098,6 +3098,23 @@ body.is-fullscreen .a3-preview {
     border: 0;
     display: block;
 }
+/* 明確指定播放器尺寸，避免 iOS 百分比高度使 Drive 影像偏移與裁切。 */
+#video-modal { box-sizing: border-box; height: 100%; height: 100dvh; padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)); }
+#video-modal .vm-panel { margin: auto; width: min(100%, 780px); max-height: 100%; min-height: 0; }
+#video-modal .vm-body { min-height: 0; padding: 14px; overflow-x: hidden; }
+#video-modal .vm-video-wrap { display: block; height: 0; padding-bottom: 56.25%; aspect-ratio: auto; flex: none; margin: 0 auto 12px; border-radius: 12px; background: #000; }
+#video-modal .vm-video-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; min-width: 0; min-height: 0; margin: 0; padding: 0; }
+#vm-current-title { text-align: center; font-weight: 700; margin: 8px 0; }
+#vm-external-link { display: block; text-align: center; color: #1967d2; padding: 8px; }
+.教學章節選擇區 { display: grid; gap: 6px; margin: 10px 0; }
+.教學章節選擇區 label { font-weight: 700; }
+#教學章節選單 { box-sizing: border-box; width: 100%; min-width: 0; min-height: 48px; padding: 10px 12px; border: 1px solid #b8c9e8; border-radius: 12px; background: #edf3ff; color: #172b4d; font-size: 16px; }
+@media (max-width: 600px) {
+    #video-modal .vm-head { padding: 10px 14px; }
+    #video-modal .vm-head h3 { font-size: 18px; }
+    #video-modal .vm-body > p { font-size: 14px; line-height: 1.5; }
+    #video-modal .vm-foot { margin-top: 10px; }
+}
 .vm-placeholder {
     position: absolute;
     inset: 0;
@@ -5578,7 +5595,7 @@ html, body {
 <div id="video-modal" onclick="if(event.target===this) closeVideoModal()">
     <div class="vm-panel">
         <div class="vm-head">
-            <h3>🎥 教學影片 <span class="vm-badge">Video Tutorial</span></h3>
+            <h3>🎥 教學影片 <span class="vm-badge">操作教學</span></h3>
             <button class="modal-close" onclick="closeVideoModal()">&times;</button>
         </div>
         <div class="vm-body">
@@ -5600,28 +5617,10 @@ html, body {
             </div>
 
 <p id="vm-current-title" aria-live="polite">完整教學</p><p>影片需連線播放；部分畫面為舊版介面。第 14、15 章待補齊。</p><a id="vm-external-link" target="_blank" rel="noopener noreferrer">在新視窗觀看</a>
-<div class="vm-chapters" id="vm-chapters">
-<button type="button" class="vm-chapter" data-chapter="0" style="width:100%;text-align:left"><span class="num">00</span><span class="info"><span class="t">完整教學｜4 分 08 秒 · 720p</span><span class="d">完整教學</span></span></button>
-<button type="button" class="vm-chapter" data-chapter="1" style="width:100%;text-align:left"><span class="num">01</span><span class="info"><span class="t">電影級3D開場</span><span class="d" style="display:block">獨立章節</span></span></button>
-<button type="button" class="vm-chapter" data-chapter="2" style="width:100%;text-align:left"><span class="num">02</span><span class="info"><span class="t">LINEBOT開啟刀具表精靈</span><span class="d" style="display:block">獨立章節</span></span></button>
-<button type="button" class="vm-chapter" data-chapter="3" style="width:100%;text-align:left"><span class="num">03</span><span class="info"><span class="t">A4A3手指操作教學</span><span class="d" style="display:block">獨立章節</span></span></button>
-<button type="button" class="vm-chapter" data-chapter="4" style="width:100%;text-align:left"><span class="num">04</span><span class="info"><span class="t">新增刀具表</span><span class="d" style="display:block">獨立章節</span></span></button>
-<button type="button" class="vm-chapter" data-chapter="5" style="width:100%;text-align:left"><span class="num">05</span><span class="info"><span class="t">對話式填寫基本資料</span><span class="d" style="display:block">獨立章節</span></span></button>
-<button type="button" class="vm-chapter" data-chapter="6" style="width:100%;text-align:left"><span class="num">06</span><span class="info"><span class="t">工序與程式編號</span><span class="d" style="display:block">獨立章節</span></span></button>
-<button type="button" class="vm-chapter" data-chapter="7" style="width:100%;text-align:left"><span class="num">07</span><span class="info"><span class="t">新增刀具與刀具形式</span><span class="d" style="display:block">獨立章節</span></span></button>
-<button type="button" class="vm-chapter" data-chapter="8" style="width:100%;text-align:left"><span class="num">08</span><span class="info"><span class="t">H值G補正與刀具壽命</span><span class="d" style="display:block">獨立章節</span></span></button>
-<button type="button" class="vm-chapter" data-chapter="9" style="width:100%;text-align:left"><span class="num">09</span><span class="info"><span class="t">加入刀具照片</span><span class="d" style="display:block">獨立章節</span></span></button>
-<button type="button" class="vm-chapter" data-chapter="10" style="width:100%;text-align:left"><span class="num">10</span><span class="info"><span class="t">A4A3預覽報表</span><span class="d" style="display:block">獨立章節</span></span></button>
-<button type="button" class="vm-chapter" data-chapter="11" style="width:100%;text-align:left"><span class="num">11</span><span class="info"><span class="t">我的刀具表</span><span class="d" style="display:block">獨立章節</span></span></button>
-<button type="button" class="vm-chapter" data-chapter="12" style="width:100%;text-align:left"><span class="num">12</span><span class="info"><span class="t">刀具表載入切換與核對</span><span class="d" style="display:block">獨立章節</span></span></button>
-<button type="button" class="vm-chapter" data-chapter="13" style="width:100%;text-align:left"><span class="num">13</span><span class="info"><span class="t">資料保存與復原</span><span class="d" style="display:block">獨立章節</span></span></button>
-<button type="button" class="vm-chapter" data-chapter="16" style="width:100%;text-align:left"><span class="num">16</span><span class="info"><span class="t">LINE與Safari使用差異</span><span class="d" style="display:block">獨立章節</span></span></button>
-<button type="button" class="vm-chapter" data-chapter="17" style="width:100%;text-align:left"><span class="num">17</span><span class="info"><span class="t">Excel匯出與主檔Excel</span><span class="d" style="display:block">獨立章節</span></span></button>
-<button type="button" class="vm-chapter" data-chapter="18" style="width:100%;text-align:left"><span class="num">18</span><span class="info"><span class="t">PDF列印與電影結尾</span><span class="d" style="display:block">獨立章節</span></span></button>
-</div>
+<div class="教學章節選擇區"><label for="教學章節選單">選擇教學章節</label><select id="教學章節選單"><option value="0">00｜完整教學｜4 分 08 秒 · 720p</option><option value="1">01｜電影級3D開場</option><option value="2">02｜LINEBOT開啟刀具表精靈</option><option value="3">03｜A4A3手指操作教學</option><option value="4">04｜新增刀具表</option><option value="5">05｜對話式填寫基本資料</option><option value="6">06｜工序與程式編號</option><option value="7">07｜新增刀具與刀具形式</option><option value="8">08｜H值G補正與刀具壽命</option><option value="9">09｜加入刀具照片</option><option value="10">10｜A4A3預覽報表</option><option value="11">11｜我的刀具表</option><option value="12">12｜刀具表載入切換與核對</option><option value="13">13｜資料保存與復原</option><option value="16">16｜LINE與Safari使用差異</option><option value="17">17｜Excel匯出與主檔Excel</option><option value="18">18｜PDF列印與電影結尾</option></select></div>
             <div class="vm-foot">
-                <button class="vm-close" onclick="closeVideoModal()">✅ 我了解了 / Got it</button>
-                <button class="vm-cancel" onclick="closeVideoModal()">關閉 / Close</button>
+                <button class="vm-close" onclick="closeVideoModal()">✅ 我了解了</button>
+                <button class="vm-cancel" onclick="closeVideoModal()">關閉</button>
             </div>
         </div>
     </div>
@@ -7727,6 +7726,7 @@ function openVideoModal() {
     if (!modal) return;
     modal.classList.add('show');
 
+    document.getElementById('教學章節選單').value = '0';
     document.getElementById('vm-current-title').textContent = '完整教學｜4 分 08 秒 · 720p';
     /* 開啟時顯示完整教學，使用者自行按播放。 */
     const firstUrl = VIDEO_SOURCES[0] || VIDEO_FALLBACK;
@@ -7758,36 +7758,17 @@ function closeVideoModal() {
 }
 
 /* 章節點擊事件綁定 */
+function 切換教學章節() {
+    const 選單 = document.getElementById('教學章節選單');
+    if (!選單) return;
+    const 網址 = VIDEO_SOURCES[Number(選單.value)];
+    if (!網址) return;
+    document.getElementById('vm-current-title').textContent = 選單.options[選單.selectedIndex].textContent;
+    playYouTubeVideo(網址);
+}
 function bindVideoChapters() {
-    document.querySelectorAll('.vm-chapter').forEach(ch => {
-        ch.addEventListener('click', () => {
-            const idx = Number(ch.dataset.chapter);
-            const url = VIDEO_SOURCES[idx] || VIDEO_FALLBACK;
-
-            if (!url) {
-                const placeholder = document.getElementById('vm-placeholder');
-                const frame = document.getElementById('vm-video-frame');
-                if (placeholder) {
-                    placeholder.hidden = false;
-                    const t = placeholder.querySelector('.vm-title');
-                    const s = placeholder.querySelector('.vm-sub');
-                    if (t) t.textContent = ch.querySelector('.t').textContent;
-                    if (s) s.innerHTML = ch.querySelector('.d').textContent
-                        + '<br><br><span style="color:#FBBC04;">（尚未設定影片）</span>';
-                }
-                if (frame) {
-                    frame.style.display = 'none';
-                    frame.src = 'about:blank';
-                }
-                playSound('success');
-                return;
-            }
-
-            document.getElementById('vm-current-title').textContent = ch.querySelector('.t').textContent;
-            playYouTubeVideo(url);
-            playSound('success');
-        });
-    });
+    const 選單 = document.getElementById('教學章節選單');
+    if (選單) 選單.addEventListener('change', 切換教學章節);
 }
 
 function openCoreFeatures() { document.getElementById('core-features-modal').classList.add('show'); }

@@ -11,7 +11,7 @@ test('教學中心每個章節連到獨立影片，缺片不冒用其他影片',
   assert.deepEqual(catalog.unavailable, [14, 15]);
   for (const c of catalog.chapters) {
     assert.ok(html.includes(c.id + '/preview'));
-    assert.ok(html.includes(`data-chapter="${c.number}"`));
+    assert.ok(html.includes(`<option value="${c.number}">`));
   }
   assert.ok(!html.includes('u35FoFQAqD4'));
   assert.ok(html.includes('在新視窗觀看'));
