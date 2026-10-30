@@ -5573,7 +5573,7 @@ html, body {
 
 <!-- ============================================================
      ★★★ 教學影片彈窗（已整合您的 YouTube 影片）★★★
-     影片 ID: u35FoFQAqD4
+     影片索引：tutorial-catalog.json
      ============================================================ -->
 <div id="video-modal" onclick="if(event.target===this) closeVideoModal()">
     <div class="vm-panel">
@@ -5599,57 +5599,26 @@ html, body {
                 </iframe>
             </div>
 
-            <div class="vm-chapters" id="vm-chapters">
-                <div class="vm-chapter" data-chapter="0">
-                    <div class="num">01</div>
-                    <div class="info">
-                        <div class="t">認識介面與選項面板</div>
-                        <div class="d">兩排式導覽列、側邊欄、快捷按鈕位置說明</div>
-                    </div>
-                    <div class="time">0:00</div>
-                </div>
-                <div class="vm-chapter" data-chapter="1">
-                    <div class="num">02</div>
-                    <div class="info">
-                        <div class="t">選擇 A4 / A3 版型</div>
-                        <div class="d">兩種格式差異與適用情境</div>
-                    </div>
-                    <div class="time">0:30</div>
-                </div>
-                <div class="vm-chapter" data-chapter="2">
-                    <div class="num">03</div>
-                    <div class="info">
-                        <div class="t">基本資料填寫流程</div>
-                        <div class="d">品名、工序、機器號碼、夾頭壓力⋯等</div>
-                    </div>
-                    <div class="time">1:00</div>
-                </div>
-                <div class="vm-chapter" data-chapter="3">
-                    <div class="num">04</div>
-                    <div class="info">
-                        <div class="t">新增刀具與 G 補正負值</div>
-                        <div class="d">G 補正 X / Z 軸負值輸入技巧</div>
-                    </div>
-                    <div class="time">1:30</div>
-                </div>
-                <div class="vm-chapter" data-chapter="4">
-                    <div class="num">05</div>
-                    <div class="info">
-                        <div class="t">語音引導與語音輸入</div>
-                        <div class="d">啟用語音、持續聆聽、說「發送」自動送出</div>
-                    </div>
-                    <div class="time">2:00</div>
-                </div>
-                <div class="vm-chapter" data-chapter="5">
-                    <div class="num">06</div>
-                    <div class="info">
-                        <div class="t">預覽編輯、列印與匯出</div>
-                        <div class="d">所見即所得編輯、列印 PDF、匯出 Excel</div>
-                    </div>
-                    <div class="time">2:30</div>
-                </div>
-            </div>
-
+<p id="vm-current-title" aria-live="polite">完整教學</p><p>影片需連線播放；部分畫面為舊版介面。第 14、15 章待補齊。</p><a id="vm-external-link" target="_blank" rel="noopener noreferrer">在新視窗觀看</a>
+<div class="vm-chapters" id="vm-chapters">
+<button type="button" class="vm-chapter" data-chapter="0" style="width:100%;text-align:left"><span class="num">00</span><span class="info"><span class="t">完整教學｜4 分 08 秒 · 720p</span><span class="d">完整教學</span></span></button>
+<button type="button" class="vm-chapter" data-chapter="1" style="width:100%;text-align:left"><span class="num">01</span><span class="info"><span class="t">電影級3D開場</span><span class="d" style="display:block">獨立章節</span></span></button>
+<button type="button" class="vm-chapter" data-chapter="2" style="width:100%;text-align:left"><span class="num">02</span><span class="info"><span class="t">LINEBOT開啟刀具表精靈</span><span class="d" style="display:block">獨立章節</span></span></button>
+<button type="button" class="vm-chapter" data-chapter="3" style="width:100%;text-align:left"><span class="num">03</span><span class="info"><span class="t">A4A3手指操作教學</span><span class="d" style="display:block">獨立章節</span></span></button>
+<button type="button" class="vm-chapter" data-chapter="4" style="width:100%;text-align:left"><span class="num">04</span><span class="info"><span class="t">新增刀具表</span><span class="d" style="display:block">獨立章節</span></span></button>
+<button type="button" class="vm-chapter" data-chapter="5" style="width:100%;text-align:left"><span class="num">05</span><span class="info"><span class="t">對話式填寫基本資料</span><span class="d" style="display:block">獨立章節</span></span></button>
+<button type="button" class="vm-chapter" data-chapter="6" style="width:100%;text-align:left"><span class="num">06</span><span class="info"><span class="t">工序與程式編號</span><span class="d" style="display:block">獨立章節</span></span></button>
+<button type="button" class="vm-chapter" data-chapter="7" style="width:100%;text-align:left"><span class="num">07</span><span class="info"><span class="t">新增刀具與刀具形式</span><span class="d" style="display:block">獨立章節</span></span></button>
+<button type="button" class="vm-chapter" data-chapter="8" style="width:100%;text-align:left"><span class="num">08</span><span class="info"><span class="t">H值G補正與刀具壽命</span><span class="d" style="display:block">獨立章節</span></span></button>
+<button type="button" class="vm-chapter" data-chapter="9" style="width:100%;text-align:left"><span class="num">09</span><span class="info"><span class="t">加入刀具照片</span><span class="d" style="display:block">獨立章節</span></span></button>
+<button type="button" class="vm-chapter" data-chapter="10" style="width:100%;text-align:left"><span class="num">10</span><span class="info"><span class="t">A4A3預覽報表</span><span class="d" style="display:block">獨立章節</span></span></button>
+<button type="button" class="vm-chapter" data-chapter="11" style="width:100%;text-align:left"><span class="num">11</span><span class="info"><span class="t">我的刀具表</span><span class="d" style="display:block">獨立章節</span></span></button>
+<button type="button" class="vm-chapter" data-chapter="12" style="width:100%;text-align:left"><span class="num">12</span><span class="info"><span class="t">刀具表載入切換與核對</span><span class="d" style="display:block">獨立章節</span></span></button>
+<button type="button" class="vm-chapter" data-chapter="13" style="width:100%;text-align:left"><span class="num">13</span><span class="info"><span class="t">資料保存與復原</span><span class="d" style="display:block">獨立章節</span></span></button>
+<button type="button" class="vm-chapter" data-chapter="16" style="width:100%;text-align:left"><span class="num">16</span><span class="info"><span class="t">LINE與Safari使用差異</span><span class="d" style="display:block">獨立章節</span></span></button>
+<button type="button" class="vm-chapter" data-chapter="17" style="width:100%;text-align:left"><span class="num">17</span><span class="info"><span class="t">Excel匯出與主檔Excel</span><span class="d" style="display:block">獨立章節</span></span></button>
+<button type="button" class="vm-chapter" data-chapter="18" style="width:100%;text-align:left"><span class="num">18</span><span class="info"><span class="t">PDF列印與電影結尾</span><span class="d" style="display:block">獨立章節</span></span></button>
+</div>
             <div class="vm-foot">
                 <button class="vm-close" onclick="closeVideoModal()">✅ 我了解了 / Got it</button>
                 <button class="vm-cancel" onclick="closeVideoModal()">關閉 / Close</button>
@@ -6719,22 +6688,27 @@ const VIDEO_SHOWN_KEY = 'cnc_video_shown_v6';
 const MAX_TABLES = 10;
 const EXCEL_CELL_LIMIT = 32000;
 
-/* ============================================================
-   ★★★ 教學影片來源設定 ★★★
-   您的 YouTube Shorts 影片 ID：u35FoFQAqD4
-   支援 youtube.com/watch?v=、youtu.be/、youtube.com/shorts/ 三種網址
-   ============================================================ */
+// 已核對公開存取權限的教學素材；未完成章節不套用替代影片。
 const VIDEO_SOURCES = {
-    0: 'https://youtube.com/shorts/u35FoFQAqD4',   // 01 認識介面與選項面板
-    1: 'https://youtube.com/shorts/u35FoFQAqD4',   // 02 選擇 A4 / A3 版型
-    2: 'https://youtube.com/shorts/u35FoFQAqD4',   // 03 基本資料填寫流程
-    3: 'https://youtube.com/shorts/u35FoFQAqD4',   // 04 新增刀具與 G 補正負值
-    4: 'https://youtube.com/shorts/u35FoFQAqD4',   // 05 語音引導與語音輸入
-    5: 'https://youtube.com/shorts/u35FoFQAqD4'    // 06 預覽編輯、列印與匯出
+    "0": "https://drive.google.com/file/d/1ofPjtQdYMgewTYseFnZa7BpACwdUnRM3/preview",
+    "1": "https://drive.google.com/file/d/1FIOdkQ0gd6HA5ZUzD7K0_R050e-p182u/preview",
+    "2": "https://drive.google.com/file/d/10o1MnEQnECwcPMgTCunzwhhLzCozFKL3/preview",
+    "3": "https://drive.google.com/file/d/10dYcoFTyey7OluMpS34yxPgVpsyd4vsK/preview",
+    "4": "https://drive.google.com/file/d/1V2AgFmk8hJRv4yqnNdO1HPy4R_fKWg_Z/preview",
+    "5": "https://drive.google.com/file/d/1LdGdAYdiDtb93BscG8nbRIc0NXVKO6CB/preview",
+    "6": "https://drive.google.com/file/d/1PCQ_u_3oA3_y8iJO57aGMZiP3NW2mxYH/preview",
+    "7": "https://drive.google.com/file/d/1vLXBTeDDFjsCX2MaUBJqtdxzPlUhNhFk/preview",
+    "8": "https://drive.google.com/file/d/11KxGAxqLkSzyFDm8Z4k_Q8krM8dyOXR5/preview",
+    "9": "https://drive.google.com/file/d/1lisqNG3WVKdFnIPCLMztypaWASK8cjku/preview",
+    "10": "https://drive.google.com/file/d/1Szdjs0ILGvRI6zHWL0R7eoxT-6jd5fOi/preview",
+    "11": "https://drive.google.com/file/d/1HDVnzJ2U-Qo1vkTiBXScjk4fau1QkbSl/preview",
+    "12": "https://drive.google.com/file/d/1YlowpeVGOJcQ_lavPIfAlbfVDTeyzRyp/preview",
+    "13": "https://drive.google.com/file/d/1FcRuop8n7er6p0u9fg_Vf5yfyeFGrdXF/preview",
+    "16": "https://drive.google.com/file/d/1yEheUUt5__gOAwPM9IVQ4rW3bVcii0QP/preview",
+    "17": "https://drive.google.com/file/d/1re-Swr9guJWuaMgXdz4dSBzoeJeojuOz/preview",
+    "18": "https://drive.google.com/file/d/1IYXZmv0WnTRqmPwchIERmcQBYyVugDFx/preview"
 };
-
-/* 若有單獨一支總覽影片，可填這裡（會覆蓋所有章節） */
-const VIDEO_FALLBACK = 'https://youtube.com/shorts/u35FoFQAqD4';
+const VIDEO_FALLBACK = "";
 
 const VOICE_START_COMMANDS = [
     '製作刀具表', '製作刀具', '開始製作', '開始建表',
@@ -7693,7 +7667,7 @@ document.addEventListener('msfullscreenchange', onFullscreenChange);
 
 /* ============================================================
    ★★★ 教學影片彈窗 — YouTube 整合 ★★★
-   影片 ID: u35FoFQAqD4
+   影片索引：tutorial-catalog.json
    ============================================================ */
 
 /* 從各種 YouTube 網址格式解析影片 ID */
@@ -7719,6 +7693,18 @@ function playYouTubeVideo(url) {
     const frame = document.getElementById('vm-video-frame');
     if (!placeholder || !frame) return;
 
+    const drive = String(url || '').match(/^https:\/\/drive\.google\.com\/file\/d\/([\w-]+)\/preview$/);
+    const external = document.getElementById('vm-external-link');
+    if (external) {
+        external.href = drive ? 'https://drive.google.com/file/d/' + drive[1] + '/view' : url;
+        external.hidden = !url;
+    }
+    if (drive) {
+        placeholder.hidden = true;
+        frame.style.display = 'block';
+        frame.src = url;
+        return;
+    }
     const id = extractYouTubeId(url);
 
     if (!id) {
@@ -7741,10 +7727,11 @@ function openVideoModal() {
     if (!modal) return;
     modal.classList.add('show');
 
-    /* 開啟彈窗時自動播放第 1 章（idx 0）的影片 */
+    document.getElementById('vm-current-title').textContent = '完整教學｜4 分 08 秒 · 720p';
+    /* 開啟時顯示完整教學，使用者自行按播放。 */
     const firstUrl = VIDEO_SOURCES[0] || VIDEO_FALLBACK;
     if (firstUrl) {
-        setTimeout(() => { playYouTubeVideo(firstUrl); }, 220);
+        playYouTubeVideo(firstUrl);
     }
 }
 
@@ -7796,6 +7783,7 @@ function bindVideoChapters() {
                 return;
             }
 
+            document.getElementById('vm-current-title').textContent = ch.querySelector('.t').textContent;
             playYouTubeVideo(url);
             playSound('success');
         });
