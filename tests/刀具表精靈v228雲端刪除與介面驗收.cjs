@@ -30,7 +30,7 @@ const 全刪 = {currentId:null,tables:[],deleted:{甲:400,乙:401}};
 測試('中間新增刀具表、右側增加刀具，原選項仍可由頂部側欄開啟',()=>{
   斷言.match(來源,/id="nav-add-tool-fab"[^>]*onclick="createNewTable\(\)"/);
   斷言.match(來源,/<span>增加刀具<span class="ui-en">Add Tool<\/span>/);
-  斷言.match(來源,/class="hamburger-btn" onclick="openSidebar\(\)"/);
+  斷言.match(來源,/class="hamburger-btn"[^>]*data-sidebar-toggle[^>]*onclick="toggleSidebar\(\)"/);
 });
 測試('正式試算表選單、確認視窗、儲存與 Excel 功能保留',()=>{
   for (const s of ['formal-sheet-select','刪除選定正式分頁_()','loadSelectedFormalSheet()',
@@ -74,9 +74,9 @@ const 全刪 = {currentId:null,tables:[],deleted:{甲:400,乙:401}};
   斷言.match(樣式,/min-height:54px/);
   斷言.match(樣式,/@media\(max-width:450px\)/);
 });
-測試('PWA v2.2.8 預載新 CSS／JS；正式 GAS v2.2.7 未改動',()=>{
+測試('PWA 最新 CSS／JS 預載正確；正式 GAS v2.2.7 未改動',()=>{
   斷言.match(離線,/刀具表精靈-pwa-v2\.2\.9/);
-  斷言.match(離線,/刀具表精靈_介面優化\.css\?版本=229/);
+  斷言.match(離線,/刀具表精靈_介面優化\.css\?版本=230/);
   斷言.match(離線,/刀具表精靈_雲端一致性\.js\?版本=229/);
   斷言.match(後端,/刀具表連線版本_ = '2\.2\.9'/);
 });
