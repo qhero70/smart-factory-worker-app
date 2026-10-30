@@ -16,6 +16,12 @@ test('教學中心每個章節連到獨立影片，缺片不冒用其他影片',
   assert.ok(!html.includes('u35FoFQAqD4'));
   assert.ok(html.includes('在新視窗觀看'));
 });
+test('影片播放層在隱藏時不能遮擋播放器，維持 16:9 並綁定章節切換', () => {
+  assert.ok(html.includes('#video-modal .vm-placeholder[hidden] { display: none !important; }'));
+  assert.match(html, /#video-modal \.vm-video-wrap \{[^}]*padding-bottom:\s*56\.25%/);
+  assert.ok(html.includes("選單.addEventListener('change', 切換教學章節)"));
+  assert.ok(html.includes("frame.src = 'about:blank'"));
+});
 test('所有內嵌 JavaScript 可解析', () => {
   for (const match of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)) {
     if (match[1].trim()) new (require('node:vm').Script)(match[1]);
