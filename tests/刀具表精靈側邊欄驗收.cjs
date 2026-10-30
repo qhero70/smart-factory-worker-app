@@ -48,7 +48,7 @@ function 建立驗證環境() {
         },
         window: { innerWidth: 390 }
     };
-    const 開頭 = 網頁.indexOf('function 設定側邊欄狀態(');
+    const 開頭 = 網頁.indexOf('function 全部收合側邊欄章節(');
     const 結尾 = 網頁.indexOf('const OFFICIAL_APP_URL', 開頭);
     斷言.ok(開頭 > 0 && 結尾 > 開頭, '應存在獨立控制函數');
     虛擬機.createContext(環境);
