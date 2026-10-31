@@ -65,21 +65,14 @@ function makePicker() {
     return {select, summary, render};
 }
 
-test('手機版：操作按鈕位於可捲動視窗內且排在次要選項之前', () => {
-    const start = html.indexOf('<div id="table-manager"');
-    const end = html.indexOf('<div id="cloud-sync-modal"', start);
-    const modal = html.slice(start, end);
-    for (const key of ['tm-manager-scroll', 'formal-sheet-select',
-        'loadSelectedFormalSheet()', 'saveCurrentToFormalSheets(false)', 'tm-list']) {
-        assert.ok(modal.includes(key), '缺少 ' + key);
-    }
-    assert.ok(modal.indexOf('tm-db-actions') < modal.indexOf('tm-cloud-grid'),
-        '載入與存檔按鈕應位於次要功能之前');
-    assert.ok(modal.indexOf('tm-manager-scroll') < modal.indexOf('tm-db-actions'));
-    assert.ok(modal.indexOf('tm-db-actions') < modal.indexOf('tm-list'));
-    assert.match(html, /#table-manager \.tm-manager-scroll\s*\{[\s\S]*?overflow-y:\s*auto/);
-    assert.match(html, /#table-manager \.tm-db-actions\s*\{\s*grid-template-columns:\s*1fr/);
-    assert.match(html, /height:\s*calc\(100dvh - 8px\)/);
+test('手機版：我的刀具表所有操作固定於最上方，資料內容獨立捲動', () => {
+ const start=html.indexOf('<div id="table-manager"'),end=html.indexOf('<div id="cloud-sync-modal"',start);
+ const modal=html.slice(start,end),toolbar=modal.indexOf('id="tm-top-toolbar"'),scroll=modal.indexOf('id="tm-manager-scroll"');
+ assert.ok(toolbar>=0 && toolbar<scroll);
+ assert.ok(modal.indexOf('tm-top-primary')<modal.indexOf('tm-top-secondary'));
+ assert.ok(modal.indexOf('tm-top-secondary')<modal.indexOf('tm-list'));
+ assert.match(html, /#table-manager \.tm-manager-scroll\s*\{[\s\S]*?overflow-y:\s*auto/);
+ assert.match(html, /height:\s*calc\(100dvh - 8px\)/);
 });
 
 test('本機 7 張及正式試算表 2 張同時顯示，來源有分組', () => {

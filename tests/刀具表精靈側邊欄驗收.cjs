@@ -35,7 +35,7 @@ function 建立驗證環境() {
     const 面板 = 建立元素();
     const 遮罩 = 建立元素();
     const 三線按鈕 = Array.from({ length: 3 }, 建立元素);
-    const 章節 = Array.from({ length: 9 }, () => {
+    const 章節 = Array.from({ length: 8 }, () => {
         const 父層 = 建立元素();
         父層.classList.add('收合');
         return { ...建立元素(), parentElement: 父層 };
@@ -93,17 +93,17 @@ function 建立驗證環境() {
 測試('新版 CSS、離線快取及所有內嵌腳本語法正確', () => {
     斷言.ok(樣式.includes('#options-sidebar:not(.open)'));
     斷言.ok(樣式.includes('#options-sidebar .os-close { min-width: 48px;'));
-    斷言.ok(網頁.includes('刀具表精靈_介面優化.css?版本=231'));
-    斷言.ok(離線服務.includes('殼層-r7'));
-    斷言.ok(離線服務.includes('刀具表精靈_介面優化.css?版本=231'));
+    斷言.ok(網頁.includes('刀具表精靈_介面優化.css?版本=232'));
+    斷言.ok(離線服務.includes('殼層-r8'));
+    斷言.ok(離線服務.includes('刀具表精靈_介面優化.css?版本=232'));
     for (const 配對 of 網頁.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)) {
         if (配對[1].trim()) new 虛擬機.Script(配對[1]);
     }
 });
 
-測試('九個側欄章節首次全部收合，展開重新進入後復原全收合', () => {
+測試('八個側欄章節首次全部收合，展開重新進入後復原全收合', () => {
     const 區塊 = 網頁.slice(網頁.indexOf('<aside id="options-sidebar"'), 網頁.indexOf('</aside>'));
-    斷言.equal((區塊.match(/class="os-group 收合"/g) || []).length, 9);
+    斷言.equal((區塊.match(/class="os-group 收合"/g) || []).length, 8);
     斷言.ok(網頁.includes("標題.setAttribute('aria-expanded','false')"));
     斷言.ok(網頁.includes("標題.addEventListener('click',切換)"));
     斷言.ok(網頁.includes("標題.addEventListener('keydown',事件 =>"));
@@ -124,4 +124,29 @@ function 建立驗證環境() {
     斷言.match(樣式, /#options-sidebar \.os-group-title \{[\s\S]*?font-size: 16px !important;/);
     斷言.match(樣式, /#options-sidebar \.os-group-title \{[\s\S]*?font-weight: 900 !important;/);
     斷言.ok(樣式.includes('#options-sidebar .os-group.收合 > :not(.os-group-title) { display: none !important; }'));
+});
+
+測試('側邊欄頂部為我的刀具表，設定獨立收合且包含四項指定功能', () => {
+ const start=網頁.indexOf('<aside id="options-sidebar"'),end=網頁.indexOf('</aside>',start);
+ const sidebar=網頁.slice(start,end);
+ 斷言.ok(sidebar.indexOf('id="os-my-sheets-top"') < sidebar.indexOf('class="os-scroll"'));
+ 斷言.equal((sidebar.match(/id="os-table-count"/g)||[]).length,1);
+ const setting=sidebar.slice(sidebar.indexOf('id="os-settings-group"'));
+ for (const label of ['音效設定','語音引導設定','匯出這張 Excel','匯出主檔 Excel']) {
+   斷言.ok(setting.includes(label),label);
+   斷言.equal((sidebar.match(new RegExp(label,'g'))||[]).length,1,label);
+ }
+ 斷言.equal((sidebar.match(/class="os-group 收合"/g)||[]).length,8);
+ 斷言.ok(樣式.includes('width:44px!important;height:44px!important;'));
+});
+測試('我的刀具表視窗：按鈕集中在捲動區上方，四個設定鈕不再重複', () => {
+ const start=網頁.indexOf('<div id="table-manager"'),end=網頁.indexOf('<div id="cloud-sync-modal"',start);
+ const modal=網頁.slice(start,end),top=modal.indexOf('id="tm-top-toolbar"'),scroll=modal.indexOf('id="tm-manager-scroll"');
+ 斷言.ok(top>=0 && top < scroll);
+ const head=modal.slice(top,scroll);
+ for(const key of ['formal-sheet-select','createNewTable()','refreshFormalSheetList(false)',
+ 'loadSelectedFormalSheet()','saveCurrentToFormalSheets(false)','刪除選定正式分頁_()','addMoreToolsFromNav()','openCloudSync()']) 斷言.ok(head.includes(key),key);
+ for(const key of ['openSoundSettings()','openVoiceSettings()','exportExcelFile()','exportMasterExcelFile()']) 斷言.ok(!modal.includes(key),key);
+ 斷言.ok(modal.includes('id="刀具明細清單"'));
+ 斷言.ok(樣式.includes('#table-manager .tm-top-toolbar'));
 });

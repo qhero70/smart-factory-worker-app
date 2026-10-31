@@ -183,3 +183,73 @@
 @media (prefers-reduced-motion: reduce) {
   #options-sidebar, #options-sidebar .os-group-title { transition: none; }
 }
+
+/* v2.3.2｜我的刀具表置頂、設定集中、側欄關閉圖示校正 */
+#options-sidebar .os-head { gap: 10px; padding-right: 12px; }
+#options-sidebar .os-head-info { flex: 1 1 auto; min-width: 0; }
+#options-sidebar .os-head .os-close {
+ box-sizing:border-box!important;display:flex!important;align-items:center!important;justify-content:center!important;
+ width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;
+ max-width:44px!important;max-height:44px!important;flex:0 0 44px!important;align-self:center;
+ margin:0!important;padding:0!important;border:1px solid #91aed3!important;border-radius:50%!important;
+ background:#fff!important;color:#15345b!important;font-size:24px!important;font-weight:500;line-height:1!important;
+ box-shadow:0 2px 6px #174ea61c;position:relative;z-index:2;cursor:pointer;
+ -webkit-appearance:none;appearance:none;
+}
+#options-sidebar .os-head .os-close>span { display:block;width:24px;height:28px;line-height:26px;text-align:center;pointer-events:none; }
+#options-sidebar .os-pinned-tools {flex:none;padding:12px 12px 10px;background:#e8f1ff;border-bottom:1px solid #bed4f4;}
+#options-sidebar .os-main-entry {
+ display:flex;align-items:center;gap:8px;width:100%;min-width:0;min-height:55px;padding:9px 11px;
+ border-radius:14px;border:1px solid #9fbeed;background:linear-gradient(120deg,#fff 0%,#ecf4ff 100%);
+ color:#101827;font-size:16px!important;font-weight:900;box-shadow:0 3px 10px #2563eb15;
+ cursor:pointer;touch-action:manipulation;
+}
+#options-sidebar .os-main-entry-icon {flex:none;font-size:22px;}
+#options-sidebar .os-main-entry-label {flex:1;min-width:0;text-align:left;}
+#options-sidebar .os-main-entry-count {
+ flex:none;background:#dbeafe;color:#174ea6;border-radius:999px;padding:4px 7px;
+ font-size:12px;font-weight:900;white-space:nowrap;
+}
+#options-sidebar .os-main-entry-arrow {flex:none;color:#1d4ed8;font-size:25px;line-height:1;}
+#options-sidebar .os-scroll {min-height:0;overscroll-behavior:contain;}
+#options-sidebar .os-group-title {overflow-wrap:anywhere;}
+/* 刀具表視窗頂部工具列固定；資料清單獨立捲動 */
+#table-manager .modal-panel {
+ display:flex;flex-direction:column;min-height:0;
+ height:min(calc(100dvh - 12px),950px);max-height:calc(100dvh - 12px);overflow:hidden;
+}
+#table-manager .modal-head {flex:none;padding:10px 15px!important;min-height:48px;}
+#table-manager .tm-top-toolbar {
+ flex:none;position:relative;z-index:3;display:grid;grid-template-columns:minmax(0,1fr);
+ gap:8px;padding:10px 12px 12px;border-bottom:1px solid #ceddf3;
+ background:#f1f7ff;box-shadow:0 3px 9px #142f5312;
+}
+#table-manager .tm-top-toolbar .tm-db-row {display:grid!important;grid-template-columns:minmax(0,1fr) 88px;gap:7px;align-items:stretch;}
+#table-manager .tm-top-toolbar #formal-sheet-select {
+ min-width:0;width:100%;min-height:46px;max-height:50px;padding:8px 9px;
+ font-size:16px!important;border:1px solid #94b6ea;
+}
+#table-manager .tm-top-toolbar .tm-db-row button {min-height:46px;padding:6px 4px!important;font-size:12px!important;white-space:nowrap;}
+#table-manager .tm-top-primary,#table-manager .tm-top-secondary {
+ display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;
+}
+#table-manager .tm-top-toolbar .tm-new,#table-manager .tm-top-toolbar .tm-db-btn {
+ box-sizing:border-box;display:flex;align-items:center;justify-content:center;
+ min-width:0;width:100%;min-height:46px;max-height:none;margin:0;padding:8px 5px!important;
+ border-radius:12px;font-size:12px!important;font-weight:900;text-align:center;line-height:1.35;white-space:normal;
+}
+#table-manager .tm-top-primary .tm-new {background:#176bc9;color:#fff;border:1px solid #176bc9;}
+#table-manager .tm-top-secondary .tm-db-btn.danger {background:#fff1f2;color:#b42332;border-color:#ffb8c2;}
+#table-manager .tm-top-secondary .tm-db-btn:not(.danger) {background:#e4efff;color:#164e91;border-color:#b9d2f4;}
+#table-manager .tm-manager-scroll {min-height:0;flex:1 1 auto;overflow-y:auto;overscroll-behavior:contain;}
+#table-manager .tm-db-card {margin-top:8px!important;}
+#table-manager .tm-db-title {font-size:13px!important;}
+@media(max-width:767px){
+ #table-manager .tm-top-toolbar {gap:6px;padding:8px 10px 9px;}
+ #table-manager .tm-top-primary,#table-manager .tm-top-secondary {gap:6px;}
+ #table-manager .tm-top-toolbar .tm-db-btn,#table-manager .tm-top-toolbar .tm-new {min-height:46px;font-size:12px!important;}
+}
+@media(max-height:650px){
+ #table-manager .tm-top-toolbar {gap:5px;padding:6px 9px;}
+ #table-manager .tm-top-toolbar .tm-db-btn,#table-manager .tm-top-toolbar .tm-new {min-height:42px;}
+}

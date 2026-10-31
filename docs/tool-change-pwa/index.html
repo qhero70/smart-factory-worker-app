@@ -4723,7 +4723,7 @@ html, body {
 }
 
 </style>
-<link rel="stylesheet" href="./刀具表精靈_介面優化.css?版本=231">
+<link rel="stylesheet" href="./刀具表精靈_介面優化.css?版本=232">
 </head>
 <body class="mobile-view-chat">
 <div id="tool-action-toast" role="status" aria-live="off" aria-hidden="true">
@@ -4763,7 +4763,15 @@ html, body {
             <div class="os-head-title">選項面板</div>
             <div class="os-head-sub">OPTIONS · 刀具表精靈</div>
         </div>
-        <button type="button" class="os-close" onclick="closeSidebar()" aria-label="關閉側邊欄">&times;</button>
+        <button type="button" class="os-close" onclick="closeSidebar()" aria-label="關閉側邊欄"><span aria-hidden="true">×</span></button>
+    </div>
+
+    <div class="os-pinned-tools">
+        <button type="button" id="os-my-sheets-top" class="os-main-entry" onclick="openTableManager(); closeSidebarOnMobile();" aria-label="開啟我的刀具表">
+            <span class="os-main-entry-icon">📁</span><span class="os-main-entry-label">我的刀具表</span>
+            <span class="os-main-entry-count" id="os-table-count">0/10</span>
+            <span class="os-main-entry-arrow" aria-hidden="true">›</span>
+        </button>
     </div>
 
     <div class="os-scroll">
@@ -4805,31 +4813,7 @@ html, body {
         <div class="os-divider"></div>
 
         <div class="os-group 收合">
-            <div class="os-group-title"><span class="dot"></span>03 · 語音與音效 / Voice &amp; Sound</div>
-            <button class="os-btn" id="os-voice-toggle" onclick="toggleVoiceQuick();">
-                <span class="os-btn-ic red">🔊</span>
-                <span class="os-btn-label">語音引導開關
-                    <small id="os-voice-state">目前：關閉</small>
-                </span>
-            </button>
-            <button class="os-btn" onclick="openVoiceSettings(); closeSidebarOnMobile();">
-                <span class="os-btn-ic pink">⚙️</span>
-                <span class="os-btn-label">語音引導設定
-                    <small>角色 · 語速 · 音調 · 音量 · 麥克風</small>
-                </span>
-            </button>
-            <button class="os-btn" onclick="openSoundSettings(); closeSidebarOnMobile();">
-                <span class="os-btn-ic amber">🎨</span>
-                <span class="os-btn-label">音效設定
-                    <small>錄音提示 · 錯誤警報 · 發送成功</small>
-                </span>
-            </button>
-        </div>
-
-        <div class="os-divider"></div>
-
-        <div class="os-group 收合">
-            <div class="os-group-title"><span class="dot"></span>04 · 3D 場景 / WebGL</div>
+            <div class="os-group-title"><span class="dot"></span>03 · 3D 場景 / WebGL</div>
             <button class="os-btn" onclick="openThreeControls(); closeSidebarOnMobile();">
                 <span class="os-btn-ic purple">🎬</span>
                 <span class="os-btn-label">3D 控制面板
@@ -4847,7 +4831,7 @@ html, body {
         <div class="os-divider"></div>
 
         <div class="os-group 收合">
-            <div class="os-group-title"><span class="dot"></span>05 · 建表動作 / Actions</div>
+            <div class="os-group-title"><span class="dot"></span>04 · 建表動作 / Actions</div>
             <button class="os-btn" onclick="startFromWelcome(); closeSidebarOnMobile();">
                 <span class="os-btn-ic">🚀</span>
                 <span class="os-btn-label">開始製作刀具表
@@ -4871,32 +4855,8 @@ html, body {
         <div class="os-divider"></div>
 
         <div class="os-group 收合">
-            <div class="os-group-title"><span class="dot"></span>06 · 匯出 / Export</div>
-            <button class="os-btn" onclick="exportExcelFile();">
-                <span class="os-btn-ic amber">📊</span>
-                <span class="os-btn-label">匯出這張 Excel
-                    <small>Export Current Sheet</small>
-                </span>
-            </button>
-            <button class="os-btn" onclick="exportMasterExcelFile();">
-                <span class="os-btn-ic pink">📚</span>
-                <span class="os-btn-label">匯出主檔 Excel
-                    <small>Master Workbook · 全部表格各一個分頁</small>
-                </span>
-            </button>
-        </div>
+            <div class="os-group-title"><span class="dot"></span>05 · 我的資料 / My Data</div>
 
-        <div class="os-divider"></div>
-
-        <div class="os-group 收合">
-            <div class="os-group-title"><span class="dot"></span>07 · 我的資料 / My Data</div>
-            <button class="os-btn" onclick="openTableManager(); closeSidebarOnMobile();">
-                <span class="os-btn-ic">📁</span>
-                <span class="os-btn-label">我的刀具表
-                    <small>My Tool Sheets · 正式試算表</small>
-                </span>
-                <span class="os-badge" id="os-table-count">0/10</span>
-            </button>
             <button class="os-btn" onclick="openCloudSync(); closeSidebarOnMobile();">
                 <span class="os-btn-ic green">☁️</span>
                 <span class="os-btn-label">跨裝置雲端同步
@@ -4915,7 +4875,7 @@ html, body {
         <div class="os-divider"></div>
 
         <div class="os-group 收合">
-            <div class="os-group-title"><span class="dot"></span>08 · 工具 / Tools</div>
+            <div class="os-group-title"><span class="dot"></span>06 · 工具 / Tools</div>
             <button class="os-btn" onclick="toggleFullscreen();">
                 <span class="os-btn-ic dark">⛶</span>
                 <span class="os-btn-label">全螢幕預覽
@@ -4945,7 +4905,7 @@ html, body {
         <div class="os-divider"></div>
 
         <div class="os-group 收合">
-            <div class="os-group-title"><span class="dot"></span>09 · 頁面切換 / Navigate</div>
+            <div class="os-group-title"><span class="dot"></span>07 · 頁面切換 / Navigate</div>
             <button class="os-btn" onclick="showHomeScreen(); closeSidebarOnMobile();">
                 <span class="os-btn-ic dark">🏠</span>
                 <span class="os-btn-label">回到功能首頁
@@ -4962,6 +4922,42 @@ html, body {
                 <span class="os-btn-ic pink">🎙️</span>
                 <span class="os-btn-label">語音引導邀請
                     <small>Voice Guide Invite</small>
+                </span>
+            </button>
+        </div>
+
+        <div class="os-divider"></div>
+
+        <div class="os-group 收合" id="os-settings-group">
+            <div class="os-group-title"><span class="dot"></span>08 · 設定</div>
+            <button class="os-btn" id="os-voice-toggle" onclick="toggleVoiceQuick();">
+                <span class="os-btn-ic red">🔊</span>
+                <span class="os-btn-label">語音引導開關
+                    <small id="os-voice-state">目前：關閉</small>
+                </span>
+            </button>
+            <button class="os-btn" onclick="openVoiceSettings(); closeSidebarOnMobile();">
+                <span class="os-btn-ic pink">⚙️</span>
+                <span class="os-btn-label">語音引導設定
+                    <small>角色 · 語速 · 音調 · 音量 · 麥克風</small>
+                </span>
+            </button>
+            <button class="os-btn" onclick="openSoundSettings(); closeSidebarOnMobile();">
+                <span class="os-btn-ic amber">🎨</span>
+                <span class="os-btn-label">音效設定
+                    <small>錄音提示 · 錯誤警報 · 發送成功</small>
+                </span>
+            </button>
+            <button class="os-btn" onclick="exportExcelFile(); closeSidebarOnMobile();">
+                <span class="os-btn-ic amber">📊</span>
+                <span class="os-btn-label">匯出這張 Excel
+                    <small>Export Current Sheet</small>
+                </span>
+            </button>
+            <button class="os-btn" onclick="exportMasterExcelFile(); closeSidebarOnMobile();">
+                <span class="os-btn-ic pink">📚</span>
+                <span class="os-btn-label">匯出主檔 Excel
+                    <small>Master Workbook · 全部表格各一個分頁</small>
                 </span>
             </button>
         </div>
@@ -5294,14 +5290,6 @@ html, body {
 
                     <button class="social-btn" aria-label="語音引導開關" id="voice-cta-btn" onclick="toggleVoiceQuick()" title="語音引導開關">
                         <svg viewBox="0 0 24 24" id="voice-cta-svg"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
-                    </button>
-
-                    <button class="social-btn" aria-label="音效設定" onclick="openSoundSettings()" title="音效設定">
-                        <svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
-                    </button>
-
-                    <button class="social-btn" aria-label="語音設定" onclick="openVoiceSettings()" title="語音設定">
-                        <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
                     </button>
 
                     <div class="cta-bar-spacer"></div>
@@ -6074,9 +6062,27 @@ html, body {
             <button class="modal-close" onclick="closeTableManager()">&times;</button>
         </div>
 
+        <div class="tm-top-toolbar" id="tm-top-toolbar" aria-label="我的刀具表頂部操作區">
+                <div class="tm-db-row">
+                    <select id="formal-sheet-select" class="tm-db-select" aria-label="選擇本機或正式試算表刀具表">
+                        <option value="">請選擇刀具表 / Select Tool Sheet</option>
+                    </select>
+                    <button class="tm-db-btn" onclick="refreshFormalSheetList(false)">↻ 重新整理</button>
+                </div>
+            <div class="tm-top-primary">
+                            <button class="tm-new" onclick="createNewTable()">＋ 新增刀具表</button>
+                <button type="button" class="tm-db-btn primary" onclick="loadSelectedFormalSheet()">📥 載入預覽</button>
+                <button type="button" class="tm-db-btn green" onclick="saveCurrentToFormalSheets(false)">💾 儲存</button>
+            </div>
+            <div class="tm-top-secondary">
+                <button type="button" class="tm-db-btn danger" onclick="刪除選定正式分頁_()">🗑 正式刪除</button>
+                <button type="button" class="tm-db-btn" onclick="closeTableManager();addMoreToolsFromNav()">＋ 增加刀具</button>
+                <button type="button" class="tm-db-btn" onclick="openCloudSync()">☁️ 雲端同步</button>
+            </div>
+        </div>
         <div class="tm-manager-scroll" id="tm-manager-scroll">
         <div class="tm-footer" style="border-top:none;padding-top:0;">
-            <button class="tm-new" onclick="createNewTable()">＋ 新增刀具表<br><span class="ui-en">New Tool Sheet</span></button>
+
 
             <div class="tm-db-card">
                 <div class="tm-db-title">
@@ -6086,32 +6092,17 @@ html, body {
                 <div class="tm-db-desc">
                     選擇正式試算表分頁即可載入編輯；所有雲端儲存皆須讀回核對。未完成草稿只保留本機防斷線復原，不能視為正式存檔。
                 </div>
-                <div class="tm-db-row">
-                    <select id="formal-sheet-select" class="tm-db-select" aria-label="選擇本機或正式試算表刀具表">
-                        <option value="">請選擇刀具表 / Select Tool Sheet</option>
-                    </select>
-                    <button class="tm-db-btn" onclick="refreshFormalSheetList(false)">↻ 重新整理</button>
-                </div>
+
                 <div id="sheet-source-summary" role="status" aria-live="polite">正在整理本機與正式試算表清單…</div>
-                <div class="tm-db-actions">
-                    <button class="tm-db-btn primary" onclick="loadSelectedFormalSheet()">📥 載入選定刀具表預覽</button>
-                    <button class="tm-db-btn danger" onclick="刪除選定正式分頁_()">🗑️ 正式刪除（需授權）</button>
-                    <button class="tm-db-btn green" onclick="saveCurrentToFormalSheets(false)">💾 儲存目前刀具表至正式試算表</button>
-                </div>
+
                 <div id="formal-db-status" class="tm-db-status">
                     <span class="dot"></span><span>尚未讀取正式試算表。</span>
                 </div>
             </div>
-            <div class="tm-cloud-grid">
-                <button class="tm-cloud-btn excel" onclick="exportExcelFile()">📊 匯出這張 Excel<br><span class="ui-en">Export This Sheet</span></button>
-                <button class="tm-cloud-btn sound" onclick="openSoundSettings()">🎨 音效設定<br><span class="ui-en">Sound Settings</span></button>
-                <button class="tm-cloud-btn master" onclick="exportMasterExcelFile()">📚 匯出主檔 Excel｜全部表格各一個分頁<br><span class="ui-en">Master Workbook</span></button>
-                <button class="tm-cloud-btn sync" onclick="openCloudSync()">☁️ 跨裝置同步<br><span class="ui-en">Cloud Sync · Phone / PC</span></button>
-                <button class="tm-cloud-btn voice" onclick="openVoiceSettings()">🔊 語音引導設定<br><span class="ui-en">Voice Guide Settings</span></button>
-            </div>
+
         </div>
 
-        <div id="刀具明細操作區" class="刀具明細操作區"><strong>✏️ 已載入刀具表 · 編輯刀具</strong><p>新增／刪除刀具後，將同步正式試算表並讀回核對。</p><div class="刀具明細快捷"><button type="button" onclick="closeTableManager();addMoreToolsFromNav()">＋ 增加刀具</button><button type="button" onclick="saveCurrentToFormalSheets(false)">💾 立即同步</button></div><div id="刀具明細清單"></div></div>
+        <div id="刀具明細操作區" class="刀具明細操作區"><strong>✏️ 已載入刀具表 · 編輯刀具</strong><p>新增與儲存已移至頂部；刪除刀具後仍同步正式試算表並讀回核對。</p><div id="刀具明細清單"></div></div>
 <details id="舊版本機清單"><summary>舊版本機測試資料 · 展開清理</summary><div id="tm-list" class="tm-body"></div></details>
 
         <div class="tm-footer">
