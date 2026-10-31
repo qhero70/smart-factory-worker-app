@@ -48,6 +48,6 @@ test('YouTube 嵌入播放器使用單一影片 ID，保留 LINE/Safari 外開�
   assert.ok(html.includes('playYouTubeVideo(網址)'));
   assert.ok(html.includes('vm-external-link'));
   const sw = fs.readFileSync(path.join(root, 'service-worker.js'), 'utf8');
-  assert.ok(sw.includes('殼層-r10'));
-  assert.ok(sw.includes('介面優化.css?版本=234'));
+  assert.ok(sw.includes('殼層-r11'));
+  assert.ok(sw.includes('介面優化.css?版本=235'));
 });

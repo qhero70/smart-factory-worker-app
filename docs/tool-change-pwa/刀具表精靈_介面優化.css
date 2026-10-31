@@ -326,3 +326,52 @@
   outline: 3px solid #4285f4;
   outline-offset: -2px;
 }
+
+/* v2.3.5｜首頁左側雙快捷鍵及刀具表頂部雲端同步入口 */
+#home-screen .hs-top-head {
+  display:flex;align-items:center;justify-content:flex-start;
+  gap:clamp(5px,1.6vw,10px);padding-inline:clamp(8px,2.4vw,20px);
+}
+#home-screen .hs-left-actions {
+  display:flex;align-items:center;justify-content:flex-start;flex:0 0 auto;gap:6px;min-width:0;
+}
+#home-screen .hs-left-actions .hs-icon-circle {
+  display:grid;place-items:center;box-sizing:border-box;
+  flex:0 0 44px;width:44px;height:44px;min-width:44px;min-height:44px;
+  margin:0;border:1px solid #b7d0ed;border-radius:13px;color:#1f3858;
+  background:rgba(255,255,255,.88);touch-action:manipulation;
+}
+#home-screen .hs-left-actions .hs-icon-circle:focus-visible { outline:3px solid #2563eb;outline-offset:2px; }
+#home-screen .hs-app-mark { flex:0 0 46px;width:46px;height:46px; }
+#home-screen .hs-head-info { flex:1 1 auto;min-width:0;margin-left:2px; }
+#home-screen .hs-head-name {
+  font-size:clamp(15px,3.7vw,19px)!important;
+  overflow-wrap:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+#home-screen .hs-head-note {
+  font-size:clamp(10px,2.55vw,11px)!important;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+@media(max-width:370px){
+  #home-screen .hs-top-head {gap:5px;padding-inline:7px;}
+  #home-screen .hs-left-actions {gap:4px;}
+  #home-screen .hs-left-actions .hs-icon-circle {
+    width:40px;min-width:40px;flex-basis:40px;height:44px;min-height:44px;
+  }
+  #home-screen .hs-app-mark {flex-basis:40px;width:40px;height:40px;}
+  #home-screen .hs-head-name {font-size:15px!important;}
+}
+#table-manager .tm-top-secondary {grid-template-columns:repeat(2,minmax(0,1fr));}
+#table-manager .tm-sync-entry {
+  display:flex;align-items:center;gap:10px;width:100%;box-sizing:border-box;
+  min-height:54px;margin:0;padding:8px 12px;background:linear-gradient(110deg,#e7f4ff,#f5faff);
+  border:1px solid #9cc6e9;border-radius:12px;color:#184169;cursor:pointer;
+  touch-action:manipulation;text-align:left;font-family:inherit;
+}
+#table-manager .tm-sync-icon {flex:none;font-size:23px;line-height:1;}
+#table-manager .tm-sync-text {flex:1 1 auto;min-width:0;display:grid;gap:2px;}
+#table-manager .tm-sync-text strong {font-size:14px;font-weight:900;line-height:1.25;white-space:nowrap;}
+#table-manager .tm-sync-text small {font-size:11px;font-weight:700;line-height:1.2;color:#36648d;overflow-wrap:anywhere;}
+#table-manager .tm-sync-entry .sync-status-dot {flex:0 0 10px;width:10px;height:10px;margin:0;}
+#table-manager .tm-sync-arrow {color:#1d4ed8;font-size:23px;font-weight:800;line-height:1;}
+#table-manager .tm-sync-entry:focus-visible {outline:3px solid #2563eb;outline-offset:2px;}

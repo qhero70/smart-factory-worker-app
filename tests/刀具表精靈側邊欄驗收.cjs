@@ -93,9 +93,9 @@ function 建立驗證環境() {
 測試('新版 CSS、離線快取及所有內嵌腳本語法正確', () => {
     斷言.ok(樣式.includes('#options-sidebar:not(.open)'));
     斷言.ok(樣式.includes('#options-sidebar .os-close { min-width: 48px;'));
-    斷言.ok(網頁.includes('刀具表精靈_介面優化.css?版本=234'));
-    斷言.ok(離線服務.includes('殼層-r10'));
-    斷言.ok(離線服務.includes('刀具表精靈_介面優化.css?版本=234'));
+    斷言.ok(網頁.includes('刀具表精靈_介面優化.css?版本=235'));
+    斷言.ok(離線服務.includes('殼層-r11'));
+    斷言.ok(離線服務.includes('刀具表精靈_介面優化.css?版本=235'));
     for (const 配對 of 網頁.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)) {
         if (配對[1].trim()) new 虛擬機.Script(配對[1]);
     }
@@ -165,10 +165,10 @@ function 建立驗證環境() {
     斷言.ok(設定.indexOf('id="os-data-settings"')>0);
     for(const 關鍵 of ['3D 場景 / WebGL','我的資料 / My Data','更換精靈頭像',
       'Change Avatar','openThreeControls()','resetThreeControls()',
-      'openCloudSync()','openAvatarPicker()']) {
+      'openAvatarPicker()']) {
         斷言.ok(設定.includes(關鍵),關鍵);
     }
-    斷言.equal((側欄.match(/id="os-sync-dot"/g)||[]).length,1);
+    斷言.equal((側欄.match(/id="os-sync-dot"/g)||[]).length,0);
     斷言.equal((側欄.match(/onclick="openAvatarPicker\(\); closeSidebarOnMobile\(\);"/g)||[]).length,1);
     斷言.ok(樣式.includes('.os-subgroup.收合 > .os-subgroup-items { display: none !important; }'));
 });
@@ -177,5 +177,37 @@ function 建立驗證環境() {
     斷言.ok(網頁.includes("'#options-sidebar .os-group-title, #options-sidebar .os-subgroup-title'"));
     斷言.ok(網頁.includes("標題.addEventListener('keydown',事件 =>"));
     斷言.ok(網頁.includes("標題.setAttribute('aria-expanded','false')"));
-    斷言.ok(離線服務.includes('殼層-r10'));
+    斷言.ok(離線服務.includes('殼層-r11'));
+});
+
+測試('首頁兩顆操作鈕移至左側，齒輪按鈕開啟設定', () => {
+    const start=網頁.indexOf('<div class="hs-top-head">');
+    const end=網頁.indexOf('<div class="hs-welcome">',start);
+    const head=網頁.slice(start,end);
+    斷言.ok(head.indexOf('class="hs-left-actions"') < head.indexOf('class="hs-app-mark"'));
+    斷言.equal((head.match(/class="hs-icon-circle"/g)||[]).length,2);
+    斷言.ok(head.includes('onclick="toggleSidebar()"'));
+    斷言.ok(head.includes('onclick="開啟設定側邊欄()"'));
+    斷言.ok(head.includes('aria-label="開啟設定"'));
+    斷言.ok(網頁.includes("設定.classList.remove('收合')"));
+    斷言.ok(樣式.includes('#home-screen .hs-left-actions'));
+});
+測試('同步功能移至我的刀具表頂部，保留狀態指示與實際開啟函數', () => {
+    const start=網頁.indexOf('<aside id="options-sidebar"'),end=網頁.indexOf('</aside>',start);
+    const sidebar=網頁.slice(start,end);
+    斷言.ok(!sidebar.includes('onclick="openCloudSync()'));
+    斷言.ok(!sidebar.includes('id="os-sync-dot"'));
+    斷言.ok(sidebar.includes('openAvatarPicker()'));
+    const a=網頁.indexOf('<div id="table-manager"'),b=網頁.indexOf('<div id="cloud-sync-modal"',a);
+    const modal=網頁.slice(a,b),top=modal.indexOf('id="tm-top-toolbar"'),scroll=modal.indexOf('id="tm-manager-scroll"');
+    斷言.ok(top>0 && top<scroll);
+    const toolbar=modal.slice(top,scroll);
+    斷言.ok(toolbar.includes('id="tm-sync-entry"'));
+    斷言.ok(toolbar.includes('跨裝置雲端同步'));
+    斷言.ok(toolbar.includes('Cloud Sync · 手機／電腦共用'));
+    斷言.ok(toolbar.includes('id="os-sync-dot"'));
+    斷言.ok(toolbar.includes('onclick="openCloudSync()"'));
+    斷言.ok(網頁.includes("document.getElementById('os-sync-dot')"));
+    斷言.ok(樣式.includes('#table-manager .tm-sync-entry'));
+    斷言.ok(離線服務.includes('殼層-r11'));
 });

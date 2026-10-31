@@ -4723,7 +4723,7 @@ html, body {
 }
 
 </style>
-<link rel="stylesheet" href="./刀具表精靈_介面優化.css?版本=234">
+<link rel="stylesheet" href="./刀具表精靈_介面優化.css?版本=235">
 </head>
 <body class="mobile-view-chat">
 <div id="tool-action-toast" role="status" aria-live="off" aria-hidden="true">
@@ -4943,13 +4943,7 @@ html, body {
             <div class="os-subgroup 收合" id="os-data-settings">
                 <div class="os-subgroup-title"><span class="os-subgroup-dot"></span>我的資料 / My Data</div>
                 <div class="os-subgroup-items">
-            <button class="os-btn" onclick="openCloudSync(); closeSidebarOnMobile();">
-                <span class="os-btn-ic green">☁️</span>
-                <span class="os-btn-label">跨裝置雲端同步
-                    <small>Cloud Sync · 手機 / 電腦共用</small>
-                </span>
-                <span class="sync-status-dot" id="os-sync-dot"></span>
-            </button>
+
             <button class="os-btn" onclick="openAvatarPicker(); closeSidebarOnMobile();">
                 <span class="os-btn-ic purple">🎨</span>
                 <span class="os-btn-label">更換精靈頭像
@@ -5052,6 +5046,21 @@ html, body {
     <div class="hs-scroll">
 
         <div class="hs-top-head">
+            <div class="hs-left-actions" role="group" aria-label="首頁快速選項">
+            <button class="hs-icon-circle" data-sidebar-toggle aria-controls="options-sidebar" aria-expanded="false" aria-label="展開選項面板" onclick="toggleSidebar()" title="開啟選項面板">
+                <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="4" y1="6" x2="20" y2="6"/>
+                    <line x1="4" y1="12" x2="20" y2="12"/>
+                    <line x1="4" y1="18" x2="20" y2="18"/>
+                </svg>
+            </button>
+            <button class="hs-icon-circle" onclick="開啟設定側邊欄()" title="開啟設定" aria-label="開啟設定">
+                <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3.5"/>
+                    <path d="M12 3l1.7 1 2-.4 1.2 2 .7 1.2 2.4.7v2.3l-1.5 1.6.4 2.3-1.9 1.3-1.5 1.2-.5 2.7h-2.3l-1.3-1.8-2.3.4-1.6-1.7-1.4-1.2-2.4-.4V11l1.7-1.3-.4-2.6 1.7-1.3 1.4-1.2 2.5-.3L12 3Z"/>
+                </svg>
+            </button>
+            </div>
             <div class="hs-app-mark">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="3" y="4" width="18" height="16" rx="2"/>
@@ -5062,19 +5071,7 @@ html, body {
                 <div class="hs-head-name">刀具表精靈</div>
                 <div class="hs-head-note">化新精密 · 智慧製造</div>
             </div>
-            <button class="hs-icon-circle" data-sidebar-toggle aria-controls="options-sidebar" aria-expanded="false" aria-label="展開選項面板" onclick="toggleSidebar()" title="開啟選項面板">
-                <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="4" y1="6" x2="20" y2="6"/>
-                    <line x1="4" y1="12" x2="20" y2="12"/>
-                    <line x1="4" y1="18" x2="20" y2="18"/>
-                </svg>
-            </button>
-            <button class="hs-icon-circle" onclick="openManual()" title="使用說明">
-                <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="3.5"/>
-                    <path d="M12 3l1.7 1 2-.4 1.2 2 .7 1.2 2.4.7v2.3l-1.5 1.6.4 2.3-1.9 1.3-1.5 1.2-.5 2.7h-2.3l-1.3-1.8-2.3.4-1.6-1.7-1.4-1.2-2.4-.4V11l1.7-1.3-.4-2.6 1.7-1.3 1.4-1.2 2.5-.3L12 3Z"/>
-                </svg>
-            </button>
+
         </div>
 
         <div class="hs-welcome">
@@ -6078,8 +6075,14 @@ html, body {
             <div class="tm-top-secondary">
                 <button type="button" class="tm-db-btn danger" onclick="刪除選定正式分頁_()">🗑 正式刪除</button>
                 <button type="button" class="tm-db-btn" onclick="closeTableManager();addMoreToolsFromNav()">＋ 增加刀具</button>
-                <button type="button" class="tm-db-btn" onclick="openCloudSync()">☁️ 雲端同步</button>
+
             </div>
+            <button type="button" class="tm-sync-entry" id="tm-sync-entry" onclick="openCloudSync()" aria-label="跨裝置雲端同步，手機與電腦共用">
+                <span class="tm-sync-icon" aria-hidden="true">☁️</span>
+                <span class="tm-sync-text"><strong>跨裝置雲端同步</strong><small>Cloud Sync · 手機／電腦共用</small></span>
+                <span class="sync-status-dot" id="os-sync-dot" aria-hidden="true"></span>
+                <span class="tm-sync-arrow" aria-hidden="true">›</span>
+            </button>
         </div>
         <div class="tm-manager-scroll" id="tm-manager-scroll">
         <div class="tm-footer" style="border-top:none;padding-top:0;">
@@ -7549,6 +7552,17 @@ function closeSidebar() {
 function toggleSidebar() {
     const 面板 = document.getElementById('options-sidebar');
     設定側邊欄狀態(!面板 || !面板.classList.contains('open'));
+}
+/* 首頁齒輪按鈕直接進入設定，不再誤開使用說明。 */
+function 開啟設定側邊欄() {
+    openSidebar();
+    const 設定 = document.getElementById('os-settings-group');
+    if (!設定) return;
+    設定.classList.remove('收合');
+    const 標題 = 設定.querySelector('.os-group-title');
+    if (標題) 標題.setAttribute('aria-expanded','true');
+    const 捲動區 = document.querySelector('#options-sidebar .os-scroll');
+    if (捲動區) 捲動區.scrollTop = 捲動區.scrollHeight;
 }
 /* 舊函數名稱保留相容；選取功能後手機與電腦均可收合。 */
 function closeSidebarOnMobile() {
