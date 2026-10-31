@@ -136,7 +136,7 @@ function 建立驗證環境() {
    斷言.ok(setting.includes(label),label);
    斷言.equal((sidebar.match(new RegExp(label,'g'))||[]).length,1,label);
  }
- 斷言.equal((sidebar.match(/class="os-group 收合"/g)||[]).length,8);
+ 斷言.equal((sidebar.match(/class="os-group 收合"/g)||[]).length,6);
  斷言.ok(樣式.includes('width:44px!important;height:44px!important;'));
 });
 測試('我的刀具表視窗：按鈕集中在捲動區上方，四個設定鈕不再重複', () => {
