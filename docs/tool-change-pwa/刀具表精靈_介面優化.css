@@ -253,3 +253,19 @@
  #table-manager .tm-top-toolbar {gap:5px;padding:6px 9px;}
  #table-manager .tm-top-toolbar .tm-db-btn,#table-manager .tm-top-toolbar .tm-new {min-height:42px;}
 }
+
+/* v2.3.3｜YouTube 操作教學的外部觀看入口與手機相容設定。 */
+#video-modal #vm-external-link {
+  display: flex; align-items: center; justify-content: center;
+  width: min(100%, 360px); box-sizing: border-box;
+  margin: 10px auto 12px; padding: 12px 16px; min-height: 48px;
+  border-radius: 14px; background: #e62117; color: #fff;
+  font-size: 15px !important; font-weight: 900; line-height: 1.35;
+  text-align: center; text-decoration: none; touch-action: manipulation;
+}
+#video-modal #vm-external-link[hidden] { display: none !important; }
+#video-modal #vm-playback-note {
+  font-size: 13px !important; text-align: center; line-height: 1.55;
+  margin: 8px auto; color: #475569;
+}
+#video-modal .vm-video-wrap iframe { aspect-ratio: 16 / 9; }

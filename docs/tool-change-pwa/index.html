@@ -4723,7 +4723,7 @@ html, body {
 }
 
 </style>
-<link rel="stylesheet" href="./刀具表精靈_介面優化.css?版本=232">
+<link rel="stylesheet" href="./刀具表精靈_介面優化.css?版本=233">
 </head>
 <body class="mobile-view-chat">
 <div id="tool-action-toast" role="status" aria-live="off" aria-hidden="true">
@@ -5598,7 +5598,8 @@ html, body {
                 <!-- ★ 您的 YouTube 影片 iframe ★ -->
                 <iframe id="vm-video-frame"
                         src="about:blank"
-                        title="刀具表精靈教學影片"
+                        title="刀具表精靈 YouTube 教學影片"
+                        referrerpolicy="strict-origin-when-cross-origin"
                         frameborder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                         allowfullscreen
@@ -5606,8 +5607,10 @@ html, body {
                 </iframe>
             </div>
 
-<p id="vm-current-title" aria-live="polite">完整教學</p><p>影片需連線播放；部分畫面為舊版介面。第 14、15 章待補齊。</p><a id="vm-external-link" target="_blank" rel="noopener noreferrer">在新視窗觀看</a>
-<div class="教學章節選擇區"><label for="教學章節選單">選擇教學章節</label><select id="教學章節選單"><option value="0">00｜完整教學｜4 分 08 秒 · 720p</option><option value="1">01｜電影級3D開場</option><option value="2">02｜LINEBOT開啟刀具表精靈</option><option value="3">03｜A4A3手指操作教學</option><option value="4">04｜新增刀具表</option><option value="5">05｜對話式填寫基本資料</option><option value="6">06｜工序與程式編號</option><option value="7">07｜新增刀具與刀具形式</option><option value="8">08｜H值G補正與刀具壽命</option><option value="9">09｜加入刀具照片</option><option value="10">10｜A4A3預覽報表</option><option value="11">11｜我的刀具表</option><option value="12">12｜刀具表載入切換與核對</option><option value="13">13｜資料保存與復原</option><option value="16">16｜LINE與Safari使用差異</option><option value="17">17｜Excel匯出與主檔Excel</option><option value="18">18｜PDF列印與電影結尾</option></select></div>
+<p id="vm-current-title" aria-live="polite">YouTube｜刀具表精靈完整教學</p>
+            <p id="vm-playback-note">完整教學使用 YouTube 播放，需連線觀看；原有獨立章節仍使用 Google Drive。第 14、15 章尚未提供。</p>
+            <a id="vm-external-link" target="_blank" rel="noopener noreferrer" href="https://www.youtube.com/watch?v=CHQHmjifBKs">▶ 前往 YouTube 觀看</a>
+<div class="教學章節選擇區"><label for="教學章節選單">選擇教學章節</label><select id="教學章節選單"><option value="0">00｜YouTube 完整教學</option><option value="1">01｜電影級3D開場</option><option value="2">02｜LINEBOT開啟刀具表精靈</option><option value="3">03｜A4A3手指操作教學</option><option value="4">04｜新增刀具表</option><option value="5">05｜對話式填寫基本資料</option><option value="6">06｜工序與程式編號</option><option value="7">07｜新增刀具與刀具形式</option><option value="8">08｜H值G補正與刀具壽命</option><option value="9">09｜加入刀具照片</option><option value="10">10｜A4A3預覽報表</option><option value="11">11｜我的刀具表</option><option value="12">12｜刀具表載入切換與核對</option><option value="13">13｜資料保存與復原</option><option value="16">16｜LINE與Safari使用差異</option><option value="17">17｜Excel匯出與主檔Excel</option><option value="18">18｜PDF列印與電影結尾</option></select></div>
             <div class="vm-foot">
                 <button class="vm-close" onclick="closeVideoModal()">✅ 我了解了</button>
                 <button class="vm-cancel" onclick="closeVideoModal()">關閉</button>
@@ -6680,9 +6683,9 @@ const VIDEO_SHOWN_KEY = 'cnc_video_shown_v6';
 const MAX_TABLES = 10;
 const EXCEL_CELL_LIMIT = 32000;
 
-// 已核對公開存取權限的教學素材；未完成章節不套用替代影片。
+// 完整教學改用 YouTube，原獨立章節保留 Google Drive；缺片不冒用。
 const VIDEO_SOURCES = {
-    "0": "https://drive.google.com/file/d/1ofPjtQdYMgewTYseFnZa7BpACwdUnRM3/preview",
+    "0": "https://www.youtube.com/watch?v=CHQHmjifBKs",
     "1": "https://drive.google.com/file/d/1FIOdkQ0gd6HA5ZUzD7K0_R050e-p182u/preview",
     "2": "https://drive.google.com/file/d/10o1MnEQnECwcPMgTCunzwhhLzCozFKL3/preview",
     "3": "https://drive.google.com/file/d/10dYcoFTyey7OluMpS34yxPgVpsyd4vsK/preview",
@@ -7714,6 +7717,14 @@ function playYouTubeVideo(url) {
     if (external) {
         external.href = drive ? 'https://drive.google.com/file/d/' + drive[1] + '/view' : url;
         external.hidden = !url;
+        external.textContent = drive ? '↗ 在新視窗觀看分章影片' : '▶ 前往 YouTube 觀看';
+        external.setAttribute('aria-label', drive ? '在新視窗開啟分章教學影片' : '在 YouTube 開啟完整教學影片');
+    }
+    const 提示 = document.getElementById('vm-playback-note');
+    if (提示) {
+        提示.textContent = drive
+            ? '此章節使用 Google Drive 分章影片，需連線觀看；若無法內嵌，請點下方「在新視窗觀看」。'
+            : '此影片由 YouTube 提供，需連線觀看；若 LINE 或 Safari 無法內嵌播放，請點下方 YouTube 按鈕。';
     }
     if (drive) {
         placeholder.hidden = true;
@@ -7732,10 +7743,9 @@ function playYouTubeVideo(url) {
 
     placeholder.hidden = true;
     frame.style.display = 'block';
-    /* 使用 youtube-nocookie.com：隱私模式，不追蹤使用者 */
-    /* autoplay=1 於部分瀏覽器會被阻擋，使用者手動按播放即可 */
+    /* YouTube 隱私增強嵌入；手機需點擊播放，避免 iOS/LINE 自動播放限制。 */
     frame.src = 'https://www.youtube-nocookie.com/embed/' + id
-              + '?rel=0&modestbranding=1&autoplay=1&playsinline=1';
+              + '?rel=0&playsinline=1';
 }
 
 function openVideoModal() {
@@ -7744,7 +7754,7 @@ function openVideoModal() {
     modal.classList.add('show');
 
     document.getElementById('教學章節選單').value = '0';
-    document.getElementById('vm-current-title').textContent = '完整教學｜4 分 08 秒 · 720p';
+    document.getElementById('vm-current-title').textContent = 'YouTube｜刀具表精靈完整教學';
     /* 開啟時顯示完整教學，使用者自行按播放。 */
     const firstUrl = VIDEO_SOURCES[0] || VIDEO_FALLBACK;
     if (firstUrl) {
