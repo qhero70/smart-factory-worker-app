@@ -4723,7 +4723,7 @@ html, body {
 }
 
 </style>
-<link rel="stylesheet" href="./刀具表精靈_介面優化.css?版本=235">
+<link rel="stylesheet" href="./刀具表精靈_介面優化.css?版本=236">
 </head>
 <body class="mobile-view-chat">
 <div id="tool-action-toast" role="status" aria-live="off" aria-hidden="true">
@@ -6122,7 +6122,7 @@ html, body {
 <!-- ============================================================
      跨裝置雲端同步
      ============================================================ -->
-<div id="cloud-sync-modal" class="modal-backdrop" onclick="if(event.target===this) closeCloudSync()">
+<div id="cloud-sync-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-label="跨裝置雲端同步" aria-hidden="true" onclick="if(event.target===this) closeCloudSync()">
     <div class="modal-panel" style="max-width:560px;">
         <div class="modal-handle"></div>
         <div class="modal-head">
@@ -9119,14 +9119,35 @@ function updateCloudSyncUI() {
     else if (cloudSyncLastOk) setCloudSyncStatus('ok', '已連線 · 最近同步 ' + new Date(cloudSyncLastOk).toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'}));
     else setCloudSyncStatus('', '已設定同步碼，尚未同步');
 }
+/* 修復雲端同步視窗被「我的刀具表」遮住：維持表格視窗狀態，不重新建立、不修改資料。 */
 function openCloudSync() {
-    const modal = document.getElementById('cloud-sync-modal');
-    if (modal) modal.classList.add('show');
+    const 同步視窗 = document.getElementById('cloud-sync-modal');
+    const 刀具表視窗 = document.getElementById('table-manager');
+    if (!同步視窗) return;
+
+    // 既有報表預覽流程可能將刀具表視窗提高至 z-index:10000；
+    // 同步視窗使用獨立的 11000 層級，開啟期間停用背景操作。
+    if (刀具表視窗 && 刀具表視窗.classList.contains('show')) {
+        刀具表視窗.inert = true;
+        刀具表視窗.setAttribute('aria-hidden', 'true');
+    }
+    同步視窗.classList.add('show');
+    同步視窗.setAttribute('aria-hidden', 'false');
     updateCloudSyncUI();
 }
 function closeCloudSync() {
-    const modal = document.getElementById('cloud-sync-modal');
-    if (modal) modal.classList.remove('show');
+    const 同步視窗 = document.getElementById('cloud-sync-modal');
+    if (同步視窗) {
+        同步視窗.classList.remove('show');
+        同步視窗.setAttribute('aria-hidden', 'true');
+    }
+
+    // 返回原本的刀具表選取畫面，保留選表、捲動及未存資料。
+    const 刀具表視窗 = document.getElementById('table-manager');
+    if (刀具表視窗 && 刀具表視窗.classList.contains('show')) {
+        刀具表視窗.inert = false;
+        刀具表視窗.setAttribute('aria-hidden', 'false');
+    }
 }
 async function copyCloudSyncCode() {
     const key = getCloudSyncKey();

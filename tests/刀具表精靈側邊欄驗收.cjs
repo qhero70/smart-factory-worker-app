@@ -93,9 +93,9 @@ function 建立驗證環境() {
 測試('新版 CSS、離線快取及所有內嵌腳本語法正確', () => {
     斷言.ok(樣式.includes('#options-sidebar:not(.open)'));
     斷言.ok(樣式.includes('#options-sidebar .os-close { min-width: 48px;'));
-    斷言.ok(網頁.includes('刀具表精靈_介面優化.css?版本=235'));
-    斷言.ok(離線服務.includes('殼層-r11'));
-    斷言.ok(離線服務.includes('刀具表精靈_介面優化.css?版本=235'));
+    斷言.ok(網頁.includes('刀具表精靈_介面優化.css?版本=236'));
+    斷言.ok(離線服務.includes('殼層-r12'));
+    斷言.ok(離線服務.includes('刀具表精靈_介面優化.css?版本=236'));
     for (const 配對 of 網頁.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)) {
         if (配對[1].trim()) new 虛擬機.Script(配對[1]);
     }
@@ -177,7 +177,7 @@ function 建立驗證環境() {
     斷言.ok(網頁.includes("'#options-sidebar .os-group-title, #options-sidebar .os-subgroup-title'"));
     斷言.ok(網頁.includes("標題.addEventListener('keydown',事件 =>"));
     斷言.ok(網頁.includes("標題.setAttribute('aria-expanded','false')"));
-    斷言.ok(離線服務.includes('殼層-r11'));
+    斷言.ok(離線服務.includes('殼層-r12'));
 });
 
 測試('首頁兩顆操作鈕移至左側，齒輪按鈕開啟設定', () => {
@@ -209,5 +209,5 @@ function 建立驗證環境() {
     斷言.ok(toolbar.includes('onclick="openCloudSync()"'));
     斷言.ok(網頁.includes("document.getElementById('os-sync-dot')"));
     斷言.ok(樣式.includes('#table-manager .tm-sync-entry'));
-    斷言.ok(離線服務.includes('殼層-r11'));
+    斷言.ok(離線服務.includes('殼層-r12'));
 });

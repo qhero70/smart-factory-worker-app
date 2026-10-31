@@ -375,3 +375,27 @@
 #table-manager .tm-sync-entry .sync-status-dot {flex:0 0 10px;width:10px;height:10px;margin:0;}
 #table-manager .tm-sync-arrow {color:#1d4ed8;font-size:23px;font-weight:800;line-height:1;}
 #table-manager .tm-sync-entry:focus-visible {outline:3px solid #2563eb;outline-offset:2px;}
+
+/* v2.3.6｜雲端同步覆蓋視窗的堆疊修復。
+ * 既有預覽切表流程會將 #table-manager 提升至 z-index:10000，
+ * 因此同步視窗必須高於它，避免 LINE／Safari 點擊後看不到內容。
+ */
+#cloud-sync-modal.show {
+  z-index: 11000 !important;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  pointer-events: auto;
+}
+#cloud-sync-modal.show > .modal-panel {
+  position: relative;
+  z-index: 1;
+  min-height: 0;
+  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 16px);
+}
+#cloud-sync-modal .sync-panel-body {
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
