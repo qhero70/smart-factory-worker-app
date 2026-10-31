@@ -4723,7 +4723,7 @@ html, body {
 }
 
 </style>
-<link rel="stylesheet" href="./刀具表精靈_介面優化.css?版本=233">
+<link rel="stylesheet" href="./刀具表精靈_介面優化.css?版本=234">
 </head>
 <body class="mobile-view-chat">
 <div id="tool-action-toast" role="status" aria-live="off" aria-hidden="true">
@@ -4813,25 +4813,7 @@ html, body {
         <div class="os-divider"></div>
 
         <div class="os-group 收合">
-            <div class="os-group-title"><span class="dot"></span>03 · 3D 場景 / WebGL</div>
-            <button class="os-btn" onclick="openThreeControls(); closeSidebarOnMobile();">
-                <span class="os-btn-ic purple">🎬</span>
-                <span class="os-btn-label">3D 控制面板
-                    <small>曝光 · 色調 · 陰影 · 三點打光 · 網格</small>
-                </span>
-            </button>
-            <button class="os-btn" onclick="resetThreeControls();">
-                <span class="os-btn-ic red">↺</span>
-                <span class="os-btn-label">重設 3D 場景
-                    <small>Reset 3D Scene</small>
-                </span>
-            </button>
-        </div>
-
-        <div class="os-divider"></div>
-
-        <div class="os-group 收合">
-            <div class="os-group-title"><span class="dot"></span>04 · 建表動作 / Actions</div>
+            <div class="os-group-title"><span class="dot"></span>03 · 建表動作 / Actions</div>
             <button class="os-btn" onclick="startFromWelcome(); closeSidebarOnMobile();">
                 <span class="os-btn-ic">🚀</span>
                 <span class="os-btn-label">開始製作刀具表
@@ -4855,27 +4837,7 @@ html, body {
         <div class="os-divider"></div>
 
         <div class="os-group 收合">
-            <div class="os-group-title"><span class="dot"></span>05 · 我的資料 / My Data</div>
-
-            <button class="os-btn" onclick="openCloudSync(); closeSidebarOnMobile();">
-                <span class="os-btn-ic green">☁️</span>
-                <span class="os-btn-label">跨裝置雲端同步
-                    <small>Cloud Sync · 手機 / 電腦共用</small>
-                </span>
-                <span class="sync-status-dot" id="os-sync-dot"></span>
-            </button>
-            <button class="os-btn" onclick="openAvatarPicker(); closeSidebarOnMobile();">
-                <span class="os-btn-ic purple">🎨</span>
-                <span class="os-btn-label">更換精靈頭像
-                    <small>Change Avatar</small>
-                </span>
-            </button>
-        </div>
-
-        <div class="os-divider"></div>
-
-        <div class="os-group 收合">
-            <div class="os-group-title"><span class="dot"></span>06 · 工具 / Tools</div>
+            <div class="os-group-title"><span class="dot"></span>04 · 工具 / Tools</div>
             <button class="os-btn" onclick="toggleFullscreen();">
                 <span class="os-btn-ic dark">⛶</span>
                 <span class="os-btn-label">全螢幕預覽
@@ -4905,7 +4867,7 @@ html, body {
         <div class="os-divider"></div>
 
         <div class="os-group 收合">
-            <div class="os-group-title"><span class="dot"></span>07 · 頁面切換 / Navigate</div>
+            <div class="os-group-title"><span class="dot"></span>05 · 頁面切換 / Navigate</div>
             <button class="os-btn" onclick="showHomeScreen(); closeSidebarOnMobile();">
                 <span class="os-btn-ic dark">🏠</span>
                 <span class="os-btn-label">回到功能首頁
@@ -4929,7 +4891,7 @@ html, body {
         <div class="os-divider"></div>
 
         <div class="os-group 收合" id="os-settings-group">
-            <div class="os-group-title"><span class="dot"></span>08 · 設定</div>
+            <div class="os-group-title"><span class="dot"></span>06 · 設定</div>
             <button class="os-btn" id="os-voice-toggle" onclick="toggleVoiceQuick();">
                 <span class="os-btn-ic red">🔊</span>
                 <span class="os-btn-label">語音引導開關
@@ -4960,6 +4922,42 @@ html, body {
                     <small>Master Workbook · 全部表格各一個分頁</small>
                 </span>
             </button>
+            <div class="os-settings-section-label">進階設定與外觀</div>
+            <div class="os-subgroup 收合" id="os-3d-settings">
+                <div class="os-subgroup-title"><span class="os-subgroup-dot"></span>3D 場景 / WebGL</div>
+                <div class="os-subgroup-items">
+            <button class="os-btn" onclick="openThreeControls(); closeSidebarOnMobile();">
+                <span class="os-btn-ic purple">🎬</span>
+                <span class="os-btn-label">3D 控制面板
+                    <small>曝光 · 色調 · 陰影 · 三點打光 · 網格</small>
+                </span>
+            </button>
+            <button class="os-btn" onclick="resetThreeControls();">
+                <span class="os-btn-ic red">↺</span>
+                <span class="os-btn-label">重設 3D 場景
+                    <small>Reset 3D Scene</small>
+                </span>
+            </button>
+                </div>
+            </div>
+            <div class="os-subgroup 收合" id="os-data-settings">
+                <div class="os-subgroup-title"><span class="os-subgroup-dot"></span>我的資料 / My Data</div>
+                <div class="os-subgroup-items">
+            <button class="os-btn" onclick="openCloudSync(); closeSidebarOnMobile();">
+                <span class="os-btn-ic green">☁️</span>
+                <span class="os-btn-label">跨裝置雲端同步
+                    <small>Cloud Sync · 手機 / 電腦共用</small>
+                </span>
+                <span class="sync-status-dot" id="os-sync-dot"></span>
+            </button>
+            <button class="os-btn" onclick="openAvatarPicker(); closeSidebarOnMobile();">
+                <span class="os-btn-ic purple">🎨</span>
+                <span class="os-btn-label">更換精靈頭像
+                    <small>Change Avatar</small>
+                </span>
+            </button>
+                </div>
+            </div>
         </div>
 
     </div>
@@ -7520,7 +7518,8 @@ function declineVoiceGuide() {
 
 /* 每次從收合狀態開啟選項面板時，九個章節都從收合開始。 */
 function 全部收合側邊欄章節() {
-    document.querySelectorAll('#options-sidebar .os-group-title').forEach(標題 => {
+    // 主章節與設定內的子章節每次重新開啟側欄時，都回到全收合。
+    document.querySelectorAll('#options-sidebar .os-group-title, #options-sidebar .os-subgroup-title').forEach(標題 => {
         標題.parentElement.classList.add('收合');
         標題.setAttribute('aria-expanded', 'false');
     });
@@ -12208,8 +12207,8 @@ document.addEventListener('keydown', 事件 => {
         closeSidebar();
     }
 });
-// 分類標題支援滑鼠、觸控及鍵盤收合。
-document.querySelectorAll('.os-group-title').forEach(標題 => {
+// 主章節與設定子章節皆支援滑鼠、觸控、Enter 及空白鍵。
+document.querySelectorAll('.os-group-title, .os-subgroup-title').forEach(標題 => {
     標題.setAttribute('role','button');
     標題.tabIndex = 0;
     標題.parentElement.classList.add('收合');

@@ -35,7 +35,7 @@ function 建立驗證環境() {
     const 面板 = 建立元素();
     const 遮罩 = 建立元素();
     const 三線按鈕 = Array.from({ length: 3 }, 建立元素);
-    const 章節 = Array.from({ length: 8 }, () => {
+    const 章節 = Array.from({ length: 6 }, () => {
         const 父層 = 建立元素();
         父層.classList.add('收合');
         return { ...建立元素(), parentElement: 父層 };
@@ -44,7 +44,7 @@ function 建立驗證環境() {
     const 環境 = {
         document: {
             getElementById: 名稱 => 元素[名稱] || null,
-            querySelectorAll: 選擇器 => 選擇器 === '[data-sidebar-toggle]' ? 三線按鈕 : (選擇器 === '#options-sidebar .os-group-title' ? 章節 : [])
+            querySelectorAll: 選擇器 => 選擇器 === '[data-sidebar-toggle]' ? 三線按鈕 : (選擇器.includes('.os-group-title') ? 章節 : [])
         },
         window: { innerWidth: 390 }
     };
@@ -93,17 +93,17 @@ function 建立驗證環境() {
 測試('新版 CSS、離線快取及所有內嵌腳本語法正確', () => {
     斷言.ok(樣式.includes('#options-sidebar:not(.open)'));
     斷言.ok(樣式.includes('#options-sidebar .os-close { min-width: 48px;'));
-    斷言.ok(網頁.includes('刀具表精靈_介面優化.css?版本=233'));
-    斷言.ok(離線服務.includes('殼層-r9'));
-    斷言.ok(離線服務.includes('刀具表精靈_介面優化.css?版本=233'));
+    斷言.ok(網頁.includes('刀具表精靈_介面優化.css?版本=234'));
+    斷言.ok(離線服務.includes('殼層-r10'));
+    斷言.ok(離線服務.includes('刀具表精靈_介面優化.css?版本=234'));
     for (const 配對 of 網頁.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)) {
         if (配對[1].trim()) new 虛擬機.Script(配對[1]);
     }
 });
 
-測試('八個側欄章節首次全部收合，展開重新進入後復原全收合', () => {
+測試('六個側欄章節首次全部收合，展開重新進入後復原全收合', () => {
     const 區塊 = 網頁.slice(網頁.indexOf('<aside id="options-sidebar"'), 網頁.indexOf('</aside>'));
-    斷言.equal((區塊.match(/class="os-group 收合"/g) || []).length, 8);
+    斷言.equal((區塊.match(/class="os-group 收合"/g) || []).length, 6);
     斷言.ok(網頁.includes("標題.setAttribute('aria-expanded','false')"));
     斷言.ok(網頁.includes("標題.addEventListener('click',切換)"));
     斷言.ok(網頁.includes("標題.addEventListener('keydown',事件 =>"));
@@ -149,4 +149,33 @@ function 建立驗證環境() {
  for(const key of ['openSoundSettings()','openVoiceSettings()','exportExcelFile()','exportMasterExcelFile()']) 斷言.ok(!modal.includes(key),key);
  斷言.ok(modal.includes('id="刀具明細清單"'));
  斷言.ok(樣式.includes('#table-manager .tm-top-toolbar'));
+});
+
+測試('3D 場景與我的資料已合併到設定內，首頁不再有獨立章節', () => {
+    const 開始 = 網頁.indexOf('<aside id="options-sidebar"');
+    const 結束 = 網頁.indexOf('</aside>',開始);
+    const 側欄 = 網頁.slice(開始,結束);
+    const 主標題 = [...側欄.matchAll(/class="os-group-title"[^>]*>([\s\S]*?)<\/div>/g)]
+        .map(x=>x[1].replace(/<[^>]+>/g,'').trim());
+    斷言.equal(主標題.length,6);
+    斷言.ok(主標題.some(x=>x.includes('06 · 設定')));
+    斷言.ok(!主標題.some(x=>x.includes('3D 場景')||x.includes('我的資料')));
+    const 設定 = 側欄.slice(側欄.indexOf('id="os-settings-group"'));
+    斷言.ok(設定.indexOf('id="os-3d-settings"')>0);
+    斷言.ok(設定.indexOf('id="os-data-settings"')>0);
+    for(const 關鍵 of ['3D 場景 / WebGL','我的資料 / My Data','更換精靈頭像',
+      'Change Avatar','openThreeControls()','resetThreeControls()',
+      'openCloudSync()','openAvatarPicker()']) {
+        斷言.ok(設定.includes(關鍵),關鍵);
+    }
+    斷言.equal((側欄.match(/id="os-sync-dot"/g)||[]).length,1);
+    斷言.equal((側欄.match(/onclick="openAvatarPicker\(\); closeSidebarOnMobile\(\);"/g)||[]).length,1);
+    斷言.ok(樣式.includes('.os-subgroup.收合 > .os-subgroup-items { display: none !important; }'));
+});
+測試('設定中 3D 與我的資料可用觸控與鍵盤獨立收合', () => {
+    斷言.ok(網頁.includes("document.querySelectorAll('.os-group-title, .os-subgroup-title')"));
+    斷言.ok(網頁.includes("'#options-sidebar .os-group-title, #options-sidebar .os-subgroup-title'"));
+    斷言.ok(網頁.includes("標題.addEventListener('keydown',事件 =>"));
+    斷言.ok(網頁.includes("標題.setAttribute('aria-expanded','false')"));
+    斷言.ok(離線服務.includes('殼層-r10'));
 });
