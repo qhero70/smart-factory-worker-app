@@ -93,9 +93,9 @@ function 建立驗證環境() {
 測試('新版 CSS、離線快取及所有內嵌腳本語法正確', () => {
     斷言.ok(樣式.includes('#options-sidebar:not(.open)'));
     斷言.ok(樣式.includes('#options-sidebar .os-close { min-width: 48px;'));
-    斷言.ok(網頁.includes('刀具表精靈_介面優化.css?版本=232'));
-    斷言.ok(離線服務.includes('殼層-r8'));
-    斷言.ok(離線服務.includes('刀具表精靈_介面優化.css?版本=232'));
+    斷言.ok(網頁.includes('刀具表精靈_介面優化.css?版本=233'));
+    斷言.ok(離線服務.includes('殼層-r9'));
+    斷言.ok(離線服務.includes('刀具表精靈_介面優化.css?版本=233'));
     for (const 配對 of 網頁.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)) {
         if (配對[1].trim()) new 虛擬機.Script(配對[1]);
     }
