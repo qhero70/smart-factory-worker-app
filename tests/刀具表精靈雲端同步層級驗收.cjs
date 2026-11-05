@@ -85,6 +85,6 @@ function 測試環境(刀具表原本展開) {
     斷言.ok(樣式.includes('#cloud-sync-modal .sync-panel-body'));
     斷言.ok(網頁.includes('async function createCloudSyncCode()'));
     斷言.ok(網頁.includes('async function syncPullStore('));
-    斷言.ok(離線.includes('殼層-r14'));
-    斷言.ok(離線.includes('介面優化.css?版本=237'));
+    斷言.ok(離線.includes('殼層-r16'));
+    斷言.ok(離線.includes('介面優化.css?版本=239'));
 });

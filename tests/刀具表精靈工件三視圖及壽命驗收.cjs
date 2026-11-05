@@ -22,14 +22,15 @@ const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
  斷言.ok(html.includes("confirm.onclick=()=>"));
  斷言.equal(new Set(Array.from({length:300},(_,i)=>String(i+1).padStart(2,'0'))).size,300);
 });
-測試('刀具壽命三個欄位獨立、範例 #534+1=300 與結束數量30',()=>{
- for(const key of ['t_life_register','t_life','t_life_end']){
-  斷言.equal((html.match(new RegExp("id:'"+key+"',type:'number'","g"))||[]).length,2,key);
+測試('刀具壽命只需填結束數量、使用趟數固定0',()=>{
+ for(const name of ['t_life_register','t_life_end']){
+  斷言.equal((html.match(new RegExp("id:'"+name+"',type:'number'","g"))||[]).length,2,name);
  }
- 斷言.ok(html.includes("currentTool.t_life_register||'534'"));
- 斷言.ok(html.includes('const 結束=currentTool.t_life_end||趟數;'));
- const output=(n,trips,qty)=>'#'+n+'+1='+trips+' 使用趟數\nTOOL LIFE（結束數量）='+qty;
- 斷言.equal(output(534,300,30),'#534+1=300 使用趟數\nTOOL LIFE（結束數量）=30');
+ 斷言.equal((html.match(/id:'t_life',type:'number'/g)||[]).length,0);
+ 斷言.ok(html.includes("currentTool.t_life='0'"));
+ 斷言.ok(html.includes("const 結束=currentTool.t_life_end||'';"));
+ const formatted=(reg,qty)=>'#'+reg+'+1=0 使用趟數'+String.fromCharCode(10)+'TOOL LIFE（結束數量）='+qty;
+ 斷言.equal(formatted(534,30),'#534+1=0 使用趟數'+String.fromCharCode(10)+'TOOL LIFE（結束數量）=30');
 });
 測試('三視圖位於預覽頂欄，能拍攝、重拍及放大',()=>{
  for(const id of ['out-workpiece-views-a4','out-workpiece-views-a3','工件三視圖視窗','工件三視圖大圖視窗','工件三視圖大圖圖片'])
@@ -53,6 +54,6 @@ const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
  斷言.ok(html.includes("String(store.currentId||'')!==originalId"));
  斷言.ok(html.includes('appData.工件三視圖=JSON.parse(JSON.stringify(prev.工件三視圖'));
  斷言.ok(html.includes('渲染工件三視圖_();'));
- 斷言.ok(sw.includes('殼層-r14'));
- 斷言.ok(sw.includes('介面優化.css?版本=237'));
+ 斷言.ok(sw.includes('殼層-r16'));
+ 斷言.ok(sw.includes('介面優化.css?版本=239'));
 });
