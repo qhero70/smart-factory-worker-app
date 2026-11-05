@@ -475,3 +475,13 @@
  #preview-container .工件三視圖頂欄 {border-radius:0;break-inside:avoid;}
  #preview-container .工件三視圖編輯鈕 {color:#111!important;}
 }
+
+/* v238 現場 G 補正大字輸入及預覽正式存檔 */
+.G補正大字輸入 {font-size:clamp(30px,7vw,48px)!important;font-weight:900!important;letter-spacing:.02em!important;min-height:76px!important;font-variant-numeric:tabular-nums!important;}
+.G補正大按鍵 {display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px!important;}
+.G補正大按鍵 button {min-height:58px!important;font-size:clamp(16px,3.5vw,24px)!important;font-weight:900!important;padding:8px 3px!important;}
+.預覽正式儲存列 {display:flex;flex-direction:column;gap:5px;align-items:center;padding:8px 10px;background:#eef7ff;border-bottom:1px solid #bfd6ff;}
+.預覽正式儲存按鈕 {width:min(100%,600px);min-height:52px;border:0;border-radius:14px;background:#147d45;color:white;font-size:clamp(15px,3.5vw,21px)!important;font-weight:900;box-shadow:0 3px 12px #147d4530;}
+#預覽正式儲存狀態 {font-size:12px!important;color:#334155;text-align:center;line-height:1.4;}
+#預覽正式儲存狀態[data-success="1"] {color:#08753a;font-weight:800;}
+@media print {.預覽正式儲存列{display:none!important;}}

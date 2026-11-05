@@ -4725,7 +4725,7 @@ html, body {
 }
 
 </style>
-<link rel="stylesheet" href="./刀具表精靈_介面優化.css?版本=237">
+<link rel="stylesheet" href="./刀具表精靈_介面優化.css?版本=238">
 </head>
 <body class="mobile-view-chat">
 <div id="tool-action-toast" role="status" aria-live="off" aria-hidden="true">
@@ -5319,6 +5319,10 @@ html, body {
         <div id="preview-active-sheet" role="status" aria-live="polite">
             <span id="preview-active-sheet-name">尚未選擇刀具表</span>
             <button type="button" class="preview-change-sheet" onclick="openTableManagerFromPreview_()">切換刀具表</button>
+        </div>
+        <div class="預覽正式儲存列">
+            <button type="button" class="預覽正式儲存按鈕" onclick="saveCurrentToFormalSheets(false)">💾 儲存目前刀具表至正式試算表</button>
+            <span id="預覽正式儲存狀態" role="status" aria-live="polite">新建／載入的表單皆可儲存；成功後會讀回核對。</span>
         </div>
         <div id="print-btn-container">
             <button class="btn-switch-table" type="button" onclick="openTableManagerFromPreview_()" aria-label="切換刀具表" title="切換刀具表">📁 <span>切換</span></button>
@@ -7061,8 +7065,7 @@ const toolFlowType1 = [
     { id: 't_gx', type: 'signed', q: '請輸入【G補正 X軸 / G Offset X】\n只填數字，系統會自動加上 X。\n★ 可使用下方「+ / −」按鈕切換正負號\n例：-0.020 → 顯示 X-0.020', placeholder: '-0.020', optional: true },
     { id: 't_gz', type: 'signed', q: '請輸入【G補正 Z軸 / G Offset Z】\n只填數字，系統會自動加上 Z。\n★ 可使用下方「+ / −」按鈕切換正負號\n例：-0.030 → 顯示 Z-0.030', placeholder: '-0.030', optional: true },
     { id:'t_life_register',type:'number',q:'請對話輸入【刀具壽命 # 變數編號】\n例如 534，會顯示 #534；不填採預設 534。',placeholder:'534',prefill:'534',optional:true,step:'1' },
-    { id:'t_life',type:'number',q:'請輸入【使用趟數】\n例如 300，會顯示 #534+1=300 使用趟數。',placeholder:'300',optional:true,step:'1' },
-    { id:'t_life_end',type:'number',q:'請輸入【TOOL LIFE 結束數量】\n可與使用趟數不同，例如 30。',placeholder:'30',optional:true,step:'1' },
+    { id:'t_life_end',type:'number',q:'請輸入【刀具壽命／TOOL LIFE 結束數量】\n例如輸入 30；使用趟數固定為 0，不必填寫。',placeholder:'30',optional:true,step:'1' },
     { id: 't_photo', type: 'photo', q: '請上傳或拍攝【刀具照片 / Tool Photo】\n可選擇拍照或從相簿上傳圖片。', optional: true }
 ];
 
@@ -7099,8 +7102,7 @@ const toolFlowType2 = [
     { id: 't_gx', type: 'signed', q: '請輸入此 N工序的【G補正 X軸 / G Offset X】\n★ 可使用下方「+ / −」按鈕切換正負號\n例：-0.02 → 顯示 X-0.02', placeholder: '-0.02', optional: true },
     { id: 't_gz', type: 'signed', q: '請輸入此 N工序的【G補正 Z軸 / G Offset Z】\n★ 可使用下方「+ / −」按鈕切換正負號\n例：+0.03 → 顯示 Z+0.03', placeholder: '+0.03', optional: true },
     { id:'t_life_register',type:'number',q:'請對話輸入【刀具壽命 # 變數編號】\n例如 534，會顯示 #534；不填採預設 534。',placeholder:'534',prefill:'534',optional:true,step:'1' },
-    { id:'t_life',type:'number',q:'請輸入【使用趟數】\n例如 300，會顯示 #534+1=300 使用趟數。',placeholder:'300',optional:true,step:'1' },
-    { id:'t_life_end',type:'number',q:'請輸入【TOOL LIFE 結束數量】\n可與使用趟數不同，例如 30。',placeholder:'30',optional:true,step:'1' },
+    { id:'t_life_end',type:'number',q:'請輸入【刀具壽命／TOOL LIFE 結束數量】\n例如輸入 30；使用趟數固定為 0，不必填寫。',placeholder:'30',optional:true,step:'1' },
     { id: 't_photo', type: 'photo', q: '請上傳或拍攝【刀具照片 / Tool Photo】\n可選擇拍照或從相簿上傳圖片。', optional: true }
 ];
 
@@ -9503,6 +9505,11 @@ let formalDbListLoaded = false;
 let formalDbListLoading = false;
 let formalDbLastSavedId = '';
 
+function 更新預覽正式儲存狀態_(文字,成功){
+    const el=document.getElementById('預覽正式儲存狀態');
+    if(el){el.textContent=文字;el.dataset.success=成功?'1':'0';}
+}
+
 function formalDbStatus_(state, text) {
     const el = document.getElementById('formal-db-status');
     if (!el) return;
@@ -9687,6 +9694,7 @@ async function saveCurrentToFormalSheets(silent = true) {
     if (!hasMeaningfulData()) { if (!silent) alert('目前刀具表沒有可儲存的資料。'); return false; }
     formalDbBusy = true;
     formalDbStatus_('busy', '正在儲存正式刀具表，完成後將讀回核對…');
+    更新預覽正式儲存狀態_('正在儲存與讀回核對…',false);
     try {
         const 儲存開始表ID = String(store.currentId || '');
         const data = formalSanitizedData_();
@@ -9714,11 +9722,13 @@ async function saveCurrentToFormalSheets(silent = true) {
         formalDbLastSavedId = tableId;
         saveCurrent(true);
         formalDbStatus_('ok', '正式存檔與讀回核對完成：' + sheetName);
+        更新預覽正式儲存狀態_('✅ 已存入正式試算表並讀回核對：'+sheetName,true);
         refreshFormalSheetList(true).catch(() => {});
         if (!silent) { playSound('success'); alert('✅ 正式試算表已儲存並讀回核對\n分頁：' + sheetName); }
         return true;
     } catch (e) {
         formalDbStatus_('error', '尚未確認正式存檔：' + (e.message || e) + '。本機資料保留。');
+        更新預覽正式儲存狀態_('⚠️ 未確認正式存檔：'+(e.message||e),false);
         if (!silent) alert('尚未確認正式存檔：' + (e.message || e));
         return false;
     } finally { formalDbBusy = false; }
@@ -11269,8 +11279,9 @@ function renderInput() {
         const wrap = document.createElement('div');
         wrap.className = 'input-row';
         const input = document.createElement('input');
-        input.type = 'text'; input.inputMode = 'text';
-        input.className = 'input-field';
+        input.type = 'text'; input.inputMode = 'decimal';
+        input.className = 'input-field G補正大字輸入';
+        input.setAttribute('aria-label','G補正數值');
         input.placeholder = currentStepObj.placeholder || '例：-0.020';
         input.autocomplete = 'off';
         input.value = '';
@@ -11304,7 +11315,7 @@ function renderInput() {
         inputContainer.appendChild(wrap);
 
         const helper = document.createElement('div');
-        helper.className = 'neg-helper';
+        helper.className = 'neg-helper G補正大按鍵';
 
         const btnNeg = document.createElement('button');
         btnNeg.type = 'button';
@@ -11660,17 +11671,16 @@ function handleSubmission(val, isImage = false) {
         currentStepIndex++;
     } else {
         const stepId = toolFlow[toolStepIndex].id;
-        if (['t_life_register','t_life','t_life_end'].includes(stepId)) {
+        if (['t_life_register','t_life_end'].includes(stepId)) {
             const 文字=String(val==null?'':val).trim();
             if(文字 && (!/^\d+$/.test(文字)||Number(文字)>999999)){
                 playSound('error');alert('請輸入 0～999999 的整數。');return;
             }
             currentTool[stepId]=文字;
             const 變數=currentTool.t_life_register||'534';
-            const 趟數=currentTool.t_life||'';
-            const 結束=currentTool.t_life_end||趟數;
-            currentTool.t_remark=(趟數||結束)
-                ? '#'+變數+'+1='+(趟數||結束)+' 使用趟數\nTOOL LIFE（結束數量）='+結束 : '';
+            const 結束=currentTool.t_life_end||'';
+            currentTool.t_life='0';
+            currentTool.t_remark='#'+變數+'+1=0 使用趟數\nTOOL LIFE（結束數量）='+結束;
         } else if (stepId === 't_photo') {
             currentTool['t_photo'] = val;
         } else if ((stepId === 't_gx' || stepId === 't_gz') && val !== '') {
