@@ -32,8 +32,9 @@ const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
  斷言.equal(output(534,300,30),'#534+1=300 使用趟數\nTOOL LIFE（結束數量）=30');
 });
 測試('三視圖位於預覽頂欄，能拍攝、重拍及放大',()=>{
- for(const id of ['out-workpiece-views-a4','out-workpiece-views-a3','工件三視圖對話縮圖','工件三視圖視窗','工件三視圖大圖視窗','工件三視圖大圖圖片'])
+ for(const id of ['out-workpiece-views-a4','out-workpiece-views-a3','工件三視圖視窗','工件三視圖大圖視窗','工件三視圖大圖圖片'])
   斷言.ok(html.includes('id="'+id+'"'),id);
+ 斷言.ok(html.includes("grid.id='工件三視圖對話縮圖'"),'對話縮圖由程式動態建立');
  for(const view of ['正視圖','俯視圖','側視圖']){
   斷言.ok(html.includes('id="工件三視圖檔案-'+view+'"'));
   斷言.ok(html.includes('id="工件三視圖照片-'+view+'"'));
