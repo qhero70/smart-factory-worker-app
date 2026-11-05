@@ -51,7 +51,7 @@ function 驗證圖檔(檔名,預期尺寸){
   斷言.equal(設定.display,'standalone');
 });
 測試('離線快取更新並包含三款圖示',()=>{
-  斷言.ok(離線.includes('殼層-r16'));
+  斷言.ok(離線.includes('殼層-r17'));
   for(const n of ['180','192','512']){
     斷言.ok(離線.includes('粉紅刀具圖示-'+n+'.png?圖示版本=20261105A'));
   }
