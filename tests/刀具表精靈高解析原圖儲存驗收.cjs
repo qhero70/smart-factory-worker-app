@@ -26,6 +26,6 @@ const style=fs.readFileSync(path.join(base,'刀具表精靈_介面優化.css'),'
 測試('大數字補正及新原圖管理檔案有離線快取',()=>{
  斷言.ok(html.includes("input.className = 'input-field G補正大字輸入'"));
  斷言.ok(style.includes('.G補正大字輸入'));
- 斷言.ok(sw.includes('殼層-r16'));
- 斷言.ok(sw.includes('工件高解析雲端管理.js?版本=239'));
+ 斷言.ok(sw.includes('殼層-r17'));
+ 斷言.ok(sw.includes('工件高解析雲端管理.js?版本=240'));
 });
