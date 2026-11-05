@@ -56,7 +56,7 @@ function 原圖雲端提交_(api,values,timeoutMs=120000){
    error?reject(error):resolve(data);
   };
   const receive=event=>{
-   if(event.source!==frame.contentWindow)return;
+   // GAS HtmlService 可能位於第二層 Google 沙箱；以 Google 來源＋隨機請求碼驗證，不只看 iframe source。
    const origin=String(event.origin||'');
    if(!/^https:\/\/(?:script\.google\.com|(?:[a-z0-9-]+\.)*script\.googleusercontent\.com)$/i.test(origin))return;
    const data=event.data;

@@ -192,8 +192,10 @@ function 刀具三視圖_回傳頁_(結果, 請求碼) {
   var safe = JSON.stringify(response)
     .replace(/</g,'\\u003c').replace(/>/g,'\\u003e')
     .replace(/&/g,'\\u0026').replace(/\u2028/g,'\\u2028').replace(/\u2029/g,'\\u2029');
-  var js = 'window.parent.postMessage(' + safe + ',' +
-    JSON.stringify(刀具三視圖_官方來源_) + ');';
+  // HtmlService 的 Google 安全沙箱可能多包一層 iframe；雙層傳送同一請求碼。
+  var 目標 = JSON.stringify(刀具三視圖_官方來源_);
+  var js = 'window.parent.postMessage(' + safe + ',' + 目標 + ');' +
+    'if(window.top!==window.parent)window.top.postMessage(' + safe + ',' + 目標 + ');';
   return HtmlService.createHtmlOutput(
     '<!DOCTYPE html><html lang="zh-TW"><head><meta charset="UTF-8"></head><body>' +
     '<script>' + js + '</script><p>刀具表精靈照片傳輸完成，可以返回原畫面。</p></body></html>')
