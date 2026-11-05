@@ -399,3 +399,79 @@
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
 }
+
+/* v2.3.7｜工件三視圖、放大檢視、H 值原生滾輪 */
+#preview-container .workpiece-a4-head {
+ display:flex;align-items:center;gap:10px;height:100px;padding:4px 8px;box-sizing:border-box;
+}
+#preview-container .workpiece-a3-head {
+ display:flex;align-items:center;gap:8px;min-height:48px;padding:3px 6px;box-sizing:border-box;
+}
+#preview-container .工件三視圖頂欄 {
+ flex:0 0 170px;width:170px;height:90px;padding:4px;box-sizing:border-box;
+ display:grid;grid-template-rows:18px minmax(0,1fr);
+ border:1.5px solid #111827;background:#f8fbff;border-radius:6px;overflow:hidden;
+}
+#preview-container .workpiece-a3-head .工件三視圖頂欄 {
+ flex-basis:130px;width:130px;height:44px;padding:2px;grid-template-rows:14px 1fr;
+}
+#preview-container .工件三視圖編輯鈕 {
+ border:0;background:transparent;color:#0f172a;text-align:center;font-size:10px!important;font-weight:900;
+ line-height:1;padding:0;cursor:pointer;
+}
+#preview-container .workpiece-a3-head .工件三視圖編輯鈕 {font-size:8px!important;}
+#preview-container .工件三視圖標題區 {
+ min-width:0;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+}
+#preview-container .workpiece-a3-head .工件三視圖標題區 {
+ flex-direction:row;gap:12px;flex-wrap:wrap;
+}
+.工件三視圖報表縮圖 {
+ display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;min-height:0;
+}
+.工件三視圖縮圖 {
+ box-sizing:border-box;display:flex;align-items:center;justify-content:center;min-width:0;min-height:0;
+ padding:0;border:1px solid #94a3b8;border-radius:3px;background:#eff6ff;color:#475569;
+ font-size:10px!important;font-weight:800;overflow:hidden;cursor:zoom-in;
+}
+.工件三視圖縮圖 img {display:block;width:100%;height:100%;object-fit:cover;}
+#preview-container .workpiece-a4-head .工件三視圖縮圖 {height:57px;}
+#preview-container .workpiece-a3-head .工件三視圖縮圖 {height:23px;}
+.工件三視圖對話 {display:grid;gap:9px;width:100%;padding:7px;}
+.工件三視圖對話 p {font-size:13px;color:#475569;font-weight:700;}
+.工件三視圖對話格 {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;}
+.工件三視圖對話格 .工件三視圖縮圖 {height:96px;border:2px dashed #93c5fd;border-radius:11px;font-size:18px!important;}
+#工件三視圖視窗.show {z-index:12000!important;padding:env(safe-area-inset-top,0px) 10px env(safe-area-inset-bottom,0px);}
+#工件三視圖大圖視窗.show {z-index:12100!important;padding:env(safe-area-inset-top,0px) 8px env(safe-area-inset-bottom,0px);}
+.工件三視圖面板 {width:min(96vw,820px);max-height:calc(100dvh - 16px);overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.工件三視圖提示 {margin:8px 16px;font-size:13px!important;color:#475569;line-height:1.5;}
+.工件三視圖編輯格 {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:12px;}
+.工件三視圖卡 {border:1px solid #cbd5e1;border-radius:15px;padding:9px;background:#f8fafc;min-width:0;}
+.工件三視圖卡 h3 {font-size:15px!important;font-weight:900;color:#0f172a;margin:3px 0 9px;}
+.工件三視圖照片 {
+ display:flex;align-items:center;justify-content:center;box-sizing:border-box;width:100%;aspect-ratio:1.3;
+ background:#e2ecff;border:2px dashed #93c5fd;border-radius:12px;padding:0;
+ font-weight:800;font-size:12px!important;color:#1e40af;overflow:hidden;cursor:zoom-in;
+}
+.工件三視圖照片 img {display:block;width:100%;height:100%;object-fit:contain;}
+.工件三視圖操作 {display:flex;flex-direction:column;gap:7px;margin-top:9px;}
+.工件三視圖操作 button {min-height:44px;border:1px solid #94b6e8;border-radius:10px;padding:8px 4px;font-weight:800;font-size:12px!important;background:#fff;color:#164e91;}
+.工件三視圖操作 button:first-child {background:#dbeafe;color:#174ea6;}
+.工件三視圖底列 {padding:8px 12px 14px;}
+#工件三視圖狀態 {font-size:12px!important;color:#475569;font-weight:700;text-align:center;padding:5px 12px;}
+.工件三視圖大圖面板 {display:flex;flex-direction:column;align-items:center;width:min(98vw,1050px);max-height:calc(100dvh - 12px);overflow:auto;padding-bottom:12px;}
+.工件三視圖大圖面板 .modal-head {width:100%;}
+#工件三視圖大圖圖片 {display:block;max-width:100%;max-height:70dvh;object-fit:contain;touch-action:pinch-zoom;}
+.工件三視圖大圖面板 p {font-size:12px;color:#64748b;}
+.工件數字滾輪 {min-height:52px!important;font-size:18px!important;width:100%;}
+@media(max-width:570px){
+ .工件三視圖編輯格 {grid-template-columns:1fr;gap:8px;}
+ .工件三視圖卡 {display:grid;grid-template-columns:1fr 2fr;gap:4px 9px;align-items:center;}
+ .工件三視圖卡 h3 {grid-column:1 / -1;}
+ .工件三視圖操作 {margin-top:0;}
+ .工件三視圖照片 {max-height:125px;}
+}
+@media print {
+ #preview-container .工件三視圖頂欄 {border-radius:0;break-inside:avoid;}
+ #preview-container .工件三視圖編輯鈕 {color:#111!important;}
+}
