@@ -4725,7 +4725,7 @@ html, body {
 }
 
 </style>
-<link rel="stylesheet" href="./刀具表精靈_介面優化.css?版本=236">
+<link rel="stylesheet" href="./刀具表精靈_介面優化.css?版本=237">
 </head>
 <body class="mobile-view-chat">
 <div id="tool-action-toast" role="status" aria-live="off" aria-hidden="true">
@@ -5345,13 +5345,19 @@ html, body {
         <div id="a4-wrapper" style="padding-bottom:26px;">
             <div class="a4-preview top-accent border-heavy p-0 font-sans" id="a4-document">
 
-                <div class="text-center py-4 border-b-4 border-black bg-white flex flex-col justify-center h-[100px] shrink-0">
+                <div class="workpiece-a4-head text-center border-b-4 border-black bg-white shrink-0">
+                    <div class="工件三視圖頂欄">
+                        <button class="工件三視圖編輯鈕" type="button" onclick="開啟工件三視圖編輯_()">📷 工件三視圖</button>
+                        <div id="out-workpiece-views-a4" class="工件三視圖報表縮圖"></div>
+                    </div>
+                    <div class="工件三視圖標題區">
                     <h1 class="text-[2.35rem] font-black tracking-widest m-0 leading-none">
                         <span id="out-title"></span>
                     </h1>
                     <div class="mt-2 flex items-center justify-center gap-5 flex-wrap">
                         <span id="out-subtitle" class="text-lg font-bold"></span>
                         <span class="text-lg font-black">M/C：<span id="out-machine-no"></span></span>
+                    </div>
                     </div>
                 </div>
 
@@ -5432,9 +5438,15 @@ html, body {
         <div id="a3-wrapper" class="hidden" style="padding-bottom:26px;">
             <div class="a3-preview" id="a3-document">
 
-                <div class="text-center py-2 bg-[#E8F0FE] border-b-[3px] border-black shrink-0 flex items-center justify-center gap-4 px-2">
-                    <span id="out3-headerTitle" class="text-[1.8rem] font-black tracking-wider leading-none"></span>
-                    <span id="out3-headerSubtitle" class="text-base font-bold leading-tight text-gray-800"></span>
+                <div class="workpiece-a3-head text-center bg-[#E8F0FE] border-b-[3px] border-black shrink-0">
+                    <div class="工件三視圖頂欄">
+                        <button type="button" class="工件三視圖編輯鈕" onclick="開啟工件三視圖編輯_()">📷 三視圖</button>
+                        <div id="out-workpiece-views-a3" class="工件三視圖報表縮圖"></div>
+                    </div>
+                    <div class="工件三視圖標題區">
+                        <span id="out3-headerTitle" class="text-[1.8rem] font-black tracking-wider leading-none"></span>
+                        <span id="out3-headerSubtitle" class="text-base font-bold leading-tight text-gray-800"></span>
+                    </div>
                 </div>
 
                 <div class="flex shrink-0" style="height:168mm;">
@@ -6224,6 +6236,28 @@ html, body {
 <!-- ============================================================
      彈窗：頭像選擇
      ============================================================ -->
+<!-- 工件三視圖：A3／A4 共用照片管理及全螢幕查看 -->
+<div id="工件三視圖視窗" class="modal-backdrop" role="dialog" aria-modal="true" aria-label="工件三視圖" onclick="if(event.target===this)關閉工件三視圖編輯_()">
+ <div class="modal-panel 工件三視圖面板">
+  <div class="modal-head"><h2>📸 工件三視圖</h2><button type="button" class="modal-close" aria-label="關閉三視圖" onclick="關閉工件三視圖編輯_()">×</button></div>
+  <p class="工件三視圖提示">依序拍攝正視圖、俯視圖、側視圖；點照片可放大，重拍可直接替換。</p>
+  <div class="工件三視圖編輯格">
+    <section class="工件三視圖卡"><h3>① 正視圖</h3><button type="button" id="工件三視圖照片-正視圖" class="工件三視圖照片" onclick="開啟工件三視圖大圖_('正視圖')">＋ 拍攝正視圖</button><input hidden type="file" accept="image/*" capture="environment" id="工件三視圖檔案-正視圖" onchange="接收工件三視圖_(this,'正視圖')"><div class="工件三視圖操作"><button type="button" onclick="選擇工件三視圖照片_('正視圖')">📷 拍攝／重拍</button><button type="button" onclick="移除工件三視圖_('正視圖')">移除</button></div></section>
+    <section class="工件三視圖卡"><h3>② 俯視圖</h3><button type="button" id="工件三視圖照片-俯視圖" class="工件三視圖照片" onclick="開啟工件三視圖大圖_('俯視圖')">＋ 拍攝俯視圖</button><input hidden type="file" accept="image/*" capture="environment" id="工件三視圖檔案-俯視圖" onchange="接收工件三視圖_(this,'俯視圖')"><div class="工件三視圖操作"><button type="button" onclick="選擇工件三視圖照片_('俯視圖')">📷 拍攝／重拍</button><button type="button" onclick="移除工件三視圖_('俯視圖')">移除</button></div></section>
+    <section class="工件三視圖卡"><h3>③ 側視圖</h3><button type="button" id="工件三視圖照片-側視圖" class="工件三視圖照片" onclick="開啟工件三視圖大圖_('側視圖')">＋ 拍攝側視圖</button><input hidden type="file" accept="image/*" capture="environment" id="工件三視圖檔案-側視圖" onchange="接收工件三視圖_(this,'側視圖')"><div class="工件三視圖操作"><button type="button" onclick="選擇工件三視圖照片_('側視圖')">📷 拍攝／重拍</button><button type="button" onclick="移除工件三視圖_('側視圖')">移除</button></div></section>
+  </div>
+  <p id="工件三視圖狀態" role="status" aria-live="polite"></p>
+  <div class="工件三視圖底列"><button class="btn btn-green" onclick="關閉工件三視圖編輯_()">✅ 完成，返回刀具表</button></div>
+ </div>
+</div>
+<div id="工件三視圖大圖視窗" class="modal-backdrop" role="dialog" aria-modal="true" aria-label="放大工件照片" onclick="if(event.target===this)關閉工件三視圖大圖_()">
+ <div class="modal-panel 工件三視圖大圖面板">
+  <div class="modal-head"><h2 id="工件三視圖大圖標題">工件照片</h2><button type="button" class="modal-close" onclick="關閉工件三視圖大圖_()" aria-label="關閉照片">×</button></div>
+  <img id="工件三視圖大圖圖片" alt="工件照片放大檢視">
+  <p>可雙指縮放，關閉後返回原刀具表。</p>
+  <button class="btn btn-ghost" onclick="關閉工件三視圖大圖_()">關閉大圖</button>
+ </div>
+</div>
 <div id="avatar-picker" class="modal-backdrop" onclick="if(event.target===this) closeAvatarPicker()">
     <div class="modal-panel" style="max-width:520px;padding:12px 20px calc(22px + env(safe-area-inset-bottom,0px));">
         <div class="modal-handle"></div>
@@ -6729,6 +6763,7 @@ function makeEmptyAppData(type) {
         programSide1: '', programSide2: '', programSide3: '', programSide4: '',
         machineTips: '',
         machineQrContent: '',
+        工件三視圖: {正視圖:'',俯視圖:'',側視圖:''},
         tools2: []
     };
 }
@@ -7000,6 +7035,7 @@ const A4_TOOL_TYPES = [
 ];
 
 const flowType1 = [
+    { id:'工件三視圖',type:'workpiece3',q:'第一項【工件三視圖】\n請拍攝工件正視圖、俯視圖、側視圖各一張；可點縮圖放大，也可先略過。',optional:true },
     { id: 'partName', type: 'text', q: '請輸入【品名 / Part Name】\n品名會自動帶入主題與下方品名欄。\n例：PISTON', placeholder: 'PISTON' },
     { id: 'processCode', type: 'prefix', prefix: 'OP', q: '請輸入【工序 / Process】\n只填 OP 後面的工序編號，系統會自動加上 OP。\n例：輸入 110 → 顯示 OP110', placeholder: '110' },
     { id: 'machineNo', type: 'text', q: '請輸入【機器號碼 / Machine No.】\n請直接填寫機器號碼。\n例：M-01', placeholder: 'M-01' },
@@ -7021,14 +7057,17 @@ const toolFlowType1 = [
     { id: 't_seq', type: 'select', q: '請選擇【刀序 / N工序 / N Process】\n共 20 個選項，N10 ～ N200。', placeholder: '請選擇 / Select', options: A4_N_PROCESSES },
     { id: 't_type', type: 'select', q: '請選擇【刀具形式 / Tool Type】\n共 11 種車刀形式。', placeholder: '請選擇 / Select', options: A4_TOOL_TYPES },
     { id: 't_no', type: 'select', q: '請選擇【刀號 / Tool No.】\n共 24 個選項，T01 ～ T24。', placeholder: '請選擇刀號 / Select Tool No.', options: A4_TOOL_NUMBERS },
-    { id: 't_h', type: 'text', q: '請輸入【H值 / H Offset】\n例：01', placeholder: '01', optional: true },
+    { id: 't_h', type: 'wheel', q: '請滾動選擇【H值】\n手機可用滾輪從 01～300 選值。', optional: true },
     { id: 't_gx', type: 'signed', q: '請輸入【G補正 X軸 / G Offset X】\n只填數字，系統會自動加上 X。\n★ 可使用下方「+ / −」按鈕切換正負號\n例：-0.020 → 顯示 X-0.020', placeholder: '-0.020', optional: true },
     { id: 't_gz', type: 'signed', q: '請輸入【G補正 Z軸 / G Offset Z】\n只填數字，系統會自動加上 Z。\n★ 可使用下方「+ / −」按鈕切換正負號\n例：-0.030 → 顯示 Z-0.030', placeholder: '-0.030', optional: true },
-    { id: 't_life', type: 'number', q: '請輸入【刀具壽命數字 / Tool Life Number】\n只需填數字，系統會自動生成完整格式。\n例：輸入 30 → 自動生成 #534+1=30 使用趟數 / TOOL LIFE（結束數量）=30', placeholder: '30', optional: true, step: '1' },
+    { id:'t_life_register',type:'number',q:'請對話輸入【刀具壽命 # 變數編號】\n例如 534，會顯示 #534；不填採預設 534。',placeholder:'534',prefill:'534',optional:true,step:'1' },
+    { id:'t_life',type:'number',q:'請輸入【使用趟數】\n例如 300，會顯示 #534+1=300 使用趟數。',placeholder:'300',optional:true,step:'1' },
+    { id:'t_life_end',type:'number',q:'請輸入【TOOL LIFE 結束數量】\n可與使用趟數不同，例如 30。',placeholder:'30',optional:true,step:'1' },
     { id: 't_photo', type: 'photo', q: '請上傳或拍攝【刀具照片 / Tool Photo】\n可選擇拍照或從相簿上傳圖片。', optional: true }
 ];
 
 const flowType2 = [
+    { id:'工件三視圖',type:'workpiece3',q:'第一項【工件三視圖】\n請拍攝工件正視圖、俯視圖、側視圖各一張；可點縮圖放大，也可先略過。',optional:true },
     { id: 'headerTitle', type: 'text', q: '歡迎使用【A3 橫式版型】！\n請輸入【主題：品名 / 工序】\n例：BOX OP110', placeholder: 'BOX OP110' },
     { id: 'headerSubtitle', type: 'text', q: '請輸入【副標題 / 主頁程式 / 加工程式】\n例：加工程式O0001 刀具O0009', placeholder: '加工程式O0001 刀具O0009', optional: true },
     { id: 'date', type: 'date', q: '請確認【製表日期 / Date】' },
@@ -7055,11 +7094,13 @@ const toolFlowType2 = [
     { id: 't_type', type: 'text', q: '請輸入【刀具形式 / Tool Type】（主標題 / Main）\n例：D63-MILL', placeholder: 'D63-MILL' },
     { id: 't_typeDesc', type: 'text', q: '請輸入【刀具形式描述 / Tool Description】（副標題）\n例：銑大面.平底度5條', placeholder: '銑大面.平底度5條', optional: true },
     { id: 't_no', type: 'text', q: '請輸入【刀號 / Tool No.】\n例：T01', placeholder: 'T01' },
-    { id: 't_h', type: 'text', q: '請輸入【H值 / H Offset】\n例：01', placeholder: '01', optional: true },
+    { id: 't_h', type: 'wheel', q: '請滾動選擇【H值】\n手機可用滾輪從 01～300 選值。', optional: true },
     { id: 't_len', type: 'text', q: '請輸入【刀長 / Tool Length】\n例：99.95', placeholder: '99.95', optional: true },
     { id: 't_gx', type: 'signed', q: '請輸入此 N工序的【G補正 X軸 / G Offset X】\n★ 可使用下方「+ / −」按鈕切換正負號\n例：-0.02 → 顯示 X-0.02', placeholder: '-0.02', optional: true },
     { id: 't_gz', type: 'signed', q: '請輸入此 N工序的【G補正 Z軸 / G Offset Z】\n★ 可使用下方「+ / −」按鈕切換正負號\n例：+0.03 → 顯示 Z+0.03', placeholder: '+0.03', optional: true },
-    { id: 't_life', type: 'number', q: '請輸入【刀具壽命數字 / Tool Life Number】\n只需填數字，系統會自動生成完整格式。\n例：輸入 30 → 自動生成 #534+1=30 使用趟數 / TOOL LIFE（結束數量）=30', placeholder: '30', optional: true, step: '1' },
+    { id:'t_life_register',type:'number',q:'請對話輸入【刀具壽命 # 變數編號】\n例如 534，會顯示 #534；不填採預設 534。',placeholder:'534',prefill:'534',optional:true,step:'1' },
+    { id:'t_life',type:'number',q:'請輸入【使用趟數】\n例如 300，會顯示 #534+1=300 使用趟數。',placeholder:'300',optional:true,step:'1' },
+    { id:'t_life_end',type:'number',q:'請輸入【TOOL LIFE 結束數量】\n可與使用趟數不同，例如 30。',placeholder:'30',optional:true,step:'1' },
     { id: 't_photo', type: 'photo', q: '請上傳或拍攝【刀具照片 / Tool Photo】\n可選擇拍照或從相簿上傳圖片。', optional: true }
 ];
 
@@ -7929,10 +7970,10 @@ function esc(s) {
 function hasMeaningfulData() {
     if (appData.type === 2) {
         return !!(appData.headerTitle || appData.productName || appData.productNo
-            || (appData.tools2 && appData.tools2.length));
+            || (appData.tools2 && appData.tools2.length) || 有工件三視圖_());
     }
     return !!(appData.title || appData.partName || appData.partNo
-        || (appData.tools && appData.tools.length));
+        || (appData.tools && appData.tools.length) || 有工件三視圖_());
 }
 
 function showWelcome() {
@@ -9592,6 +9633,7 @@ function formalSanitizedData_() {
             if ('t_image' in t) t.t_image = '';
         });
     });
+    if(JSON.stringify(d).length>47000)throw Error('刀具表快照含三視圖照片超過試算表單格安全長度；本機資料已保留，請縮小照片後再儲存。');
     return d;
 }
 
@@ -10106,6 +10148,7 @@ function changeFormat(type) {
     appData = makeEmptyAppData(type);
     appData.date = prev.date || new Date().toISOString().split('T')[0];
     appData.creator = prev.creator || '';
+    appData.工件三視圖=JSON.parse(JSON.stringify(prev.工件三視圖||{正視圖:'',俯視圖:'',側視圖:''}));
 
     const mb1 = document.getElementById('mode-btn-1');
     const mb2 = document.getElementById('mode-btn-2');
@@ -11090,6 +11133,26 @@ function renderInput() {
         };
         inputContainer.appendChild(btn);
     }
+    else if(currentStepObj.type==='workpiece3'){
+        const wrap=document.createElement('div');wrap.className='工件三視圖對話';
+        const hint=document.createElement('p');hint.textContent='正視／俯視／側視：拍照後可在報表左上角點圖放大。';
+        const grid=document.createElement('div');grid.id='工件三視圖對話縮圖';grid.className='工件三視圖對話格';
+        const edit=document.createElement('button');edit.type='button';edit.className='btn btn-blue';edit.textContent='📷 拍攝／管理三視圖';edit.onclick=開啟工件三視圖編輯_;
+        const next=document.createElement('button');next.type='button';next.className='btn btn-green';next.textContent='✅ 完成三視圖，下一題';next.onclick=()=>handleSubmission('工件三視圖已設定');
+        const skip=document.createElement('button');skip.type='button';skip.className='btn btn-skip';skip.textContent='先略過，下一題';skip.onclick=()=>handleSubmission('');
+        wrap.append(hint,grid,edit,next,skip);inputContainer.appendChild(wrap);渲染工件三視圖_();
+    }
+    else if(currentStepObj.type==='wheel'){
+        const row=document.createElement('div');row.className='input-row';
+        const select=document.createElement('select');select.id='H值滾輪';select.className='tool-type-select 工件數字滾輪';
+        select.setAttribute('aria-label','H值 01 至 300');
+        const empty=document.createElement('option');empty.value='';empty.textContent='選擇 H 值 01～300';select.appendChild(empty);
+        for(let i=1;i<=300;i++){const opt=document.createElement('option');opt.value=String(i).padStart(2,'0');opt.textContent=opt.value;select.appendChild(opt);}
+        const confirm=document.createElement('button');confirm.type='button';confirm.className='btn-send';confirm.textContent='確認';
+        confirm.onclick=()=>{if(!select.value){alert('請先選擇 H 值。');return;}handleSubmission(select.value);};
+        row.append(select,confirm);inputContainer.appendChild(row);
+        const skip=document.createElement('button');skip.type='button';skip.className='btn btn-skip';skip.textContent='略過 H 值';skip.onclick=()=>handleSubmission('');inputContainer.appendChild(skip);
+    }
     else if (currentStepObj.type === 'photo') {
         const wrap = document.createElement('div');
         wrap.style.cssText = 'display:flex; flex-direction:column; gap:10px; align-items:center;';
@@ -11448,6 +11511,95 @@ function renderInput() {
     }
 }
 
+
+/* 工件三視圖共用模型：資料隨刀具表本機存檔與正式試算表快照同步。 */
+const 工件三視圖位置_=['正視圖','俯視圖','側視圖'];
+function 讀取工件三視圖_(){
+    if(!appData.工件三視圖||typeof appData.工件三視圖!=='object'){
+        appData.工件三視圖={正視圖:'',俯視圖:'',側視圖:''};
+    }
+    return appData.工件三視圖;
+}
+function 有工件三視圖_(){const d=讀取工件三視圖_();return 工件三視圖位置_.some(k=>!!d[k]);}
+function 渲染工件三視圖_(){
+    const d=讀取工件三視圖_();
+    ['out-workpiece-views-a4','out-workpiece-views-a3','工件三視圖對話縮圖'].forEach(id=>{
+        const target=document.getElementById(id);if(!target)return;
+        target.replaceChildren();
+        工件三視圖位置_.forEach(k=>{
+            const button=document.createElement('button');button.type='button';button.className='工件三視圖縮圖';
+            button.title=k+(d[k]?' 點擊放大':' 點擊拍照');
+            button.setAttribute('aria-label',button.title);
+            if(d[k]){const img=document.createElement('img');img.src=d[k];img.alt=k;button.appendChild(img);}
+            else {button.classList.add('未拍攝');button.textContent=k.slice(0,1);}
+            button.onclick=e=>{e.stopPropagation();if(d[k])開啟工件三視圖大圖_(k);else 開啟工件三視圖編輯_();};
+            target.appendChild(button);
+        });
+    });
+    工件三視圖位置_.forEach(k=>{
+        const item=document.getElementById('工件三視圖照片-'+k);if(!item)return;
+        item.replaceChildren();
+        if(d[k]){
+            const img=document.createElement('img');img.src=d[k];img.alt=k;item.appendChild(img);
+        }else item.textContent='＋ 拍攝'+k;
+    });
+}
+function 開啟工件三視圖編輯_(){
+    const modal=document.getElementById('工件三視圖視窗');if(!modal)return;
+    渲染工件三視圖_();
+    const status=document.getElementById('工件三視圖狀態');
+    if(status)status.textContent='已拍攝 '+工件三視圖位置_.filter(k=>!!讀取工件三視圖_()[k]).length+'／3 張';
+    modal.classList.add('show');
+}
+function 關閉工件三視圖編輯_(){document.getElementById('工件三視圖視窗')?.classList.remove('show');}
+function 選擇工件三視圖照片_(key){
+    if(!工件三視圖位置_.includes(key))return;
+    document.getElementById('工件三視圖檔案-'+key)?.click();
+}
+async function 接收工件三視圖_(input,key){
+    const f=input.files&&input.files[0];input.value='';
+    if(!f||!工件三視圖位置_.includes(key))return;
+    if(!/^image\//i.test(f.type)){alert('請選擇圖片檔。');return;}
+    const originalId=String(store.currentId||'');
+    const message=document.getElementById('工件三視圖狀態');
+    if(message)message.textContent='正在處理 '+key+'…';
+    try{
+        let data='';
+        for(const [px,quality] of [[350,.70],[280,.60],[220,.52],[160,.45],[110,.33]]){
+            data=await compressImage(f,px,quality);
+            if(data.length<=9800)break;
+        }
+        if(data.length>9800)throw Error('照片大小超過可同步的安全範圍，請換一張試試。');
+        if(String(store.currentId||'')!==originalId)throw Error('拍照期間切換了刀具表，未寫入其他表格。');
+        讀取工件三視圖_()[key]=data;
+        saveCurrent(true);
+        updateA4Preview();updateA3Preview();
+        if(message)message.textContent=key+' 已儲存。';
+    }catch(e){
+        if(message)message.textContent='⚠ '+(e.message||e);
+        alert('工件照片尚未保存：'+(e.message||e));
+    }
+}
+function 移除工件三視圖_(key){
+    if(!工件三視圖位置_.includes(key)||!讀取工件三視圖_()[key])return;
+    if(!confirm('確定移除'+key+'嗎？'))return;
+    讀取工件三視圖_()[key]='';saveCurrent(true);updateA4Preview();updateA3Preview();
+}
+function 開啟工件三視圖大圖_(key){
+    if(!工件三視圖位置_.includes(key))return;
+    const src=讀取工件三視圖_()[key];if(!src){開啟工件三視圖編輯_();return;}
+    const modal=document.getElementById('工件三視圖大圖視窗');
+    const img=document.getElementById('工件三視圖大圖圖片');
+    if(!modal||!img)return;
+    img.src=src;img.alt='工件'+key+'放大照片';
+    document.getElementById('工件三視圖大圖標題').textContent='工件'+key+'｜放大檢視';
+    modal.classList.add('show');
+}
+function 關閉工件三視圖大圖_(){
+    document.getElementById('工件三視圖大圖視窗')?.classList.remove('show');
+    document.getElementById('工件三視圖大圖圖片')?.removeAttribute('src');
+}
+
 function compressImage(file, maxSize = 220, quality = 0.7) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -11485,7 +11637,9 @@ function handleSubmission(val, isImage = false) {
         const stepId = flow[currentStepIndex].id;
         if (stepId === 'start_tools') return;
         if (val === '' && flow[currentStepIndex].defaultValue) val = flow[currentStepIndex].defaultValue;
-        if (Number(appData.type) === 1) {
+        if(stepId==='工件三視圖'){
+            appData.工件三視圖=讀取工件三視圖_();
+        } else if (Number(appData.type) === 1) {
             if (stepId === 'partName') appData.partName = String(val || '').trim();
             else if (stepId === 'processCode') appData.processCode = normalizeA4ProcessCode(val);
             else if (stepId === 'machineNo') appData.machineNo = String(val || '').trim();
@@ -11506,13 +11660,17 @@ function handleSubmission(val, isImage = false) {
         currentStepIndex++;
     } else {
         const stepId = toolFlow[toolStepIndex].id;
-        if (stepId === 't_life') {
-            if (val.trim() !== '' && /^\d+$/.test(val.trim())) {
-                const num = parseInt(val.trim(), 10);
-                currentTool['t_remark'] = `#534+1=${num} 使用趟數\nTOOL LIFE（結束數量）=${num}`;
-            } else {
-                currentTool['t_remark'] = val;
+        if (['t_life_register','t_life','t_life_end'].includes(stepId)) {
+            const 文字=String(val==null?'':val).trim();
+            if(文字 && (!/^\d+$/.test(文字)||Number(文字)>999999)){
+                playSound('error');alert('請輸入 0～999999 的整數。');return;
             }
+            currentTool[stepId]=文字;
+            const 變數=currentTool.t_life_register||'534';
+            const 趟數=currentTool.t_life||'';
+            const 結束=currentTool.t_life_end||趟數;
+            currentTool.t_remark=(趟數||結束)
+                ? '#'+變數+'+1='+(趟數||結束)+' 使用趟數\nTOOL LIFE（結束數量）='+結束 : '';
         } else if (stepId === 't_photo') {
             currentTool['t_photo'] = val;
         } else if ((stepId === 't_gx' || stepId === 't_gz') && val !== '') {
@@ -11851,6 +12009,7 @@ function editQrContent(which) {
 }
 
 function updateA4Preview() {
+    渲染工件三視圖_();
     syncA4DerivedFields();
     document.getElementById('out-title').textContent = appData.title || '';
     document.getElementById('out-subtitle').textContent = appData.subtitle || '';
@@ -11934,6 +12093,7 @@ function updateA4Preview() {
 }
 
 function updateA3Preview() {
+    渲染工件三視圖_();
     document.getElementById('out3-headerTitle').textContent = appData.headerTitle || '';
     document.getElementById('out3-headerSubtitle').textContent = appData.headerSubtitle || '';
     document.getElementById('out3-productName').textContent = appData.productName || '';
