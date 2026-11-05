@@ -18,6 +18,11 @@ function 刀具表正式接收_(請求, 方法) {
   var 參數 = 請求 && 請求.parameter || {};
   var 動作 = String(參數.api || '').trim();
   if (動作.indexOf('刀具表_') !== 0) return null;
+  // 三視圖照片使用同一個 Web App；只接手專用動作，不更動正式主庫與 LINE 路由。
+  if (動作.indexOf('刀具表_照片') === 0) {
+    if (typeof 刀具三視圖_接收請求_ !== 'function') throw new Error('尚未部署工件三視圖照片後端');
+    return 刀具三視圖_接收請求_(請求, 方法);
+  }
   var 結果;
   try {
     if (參數.callback && !/^[A-Za-z_$][A-Za-z0-9_$]{0,119}$/.test(String(參數.callback))) throw new Error('回呼名稱不合法');
