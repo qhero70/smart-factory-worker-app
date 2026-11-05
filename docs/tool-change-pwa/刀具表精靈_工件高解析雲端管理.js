@@ -228,6 +228,7 @@ window.接收工件三視圖_=async function(input,key){
   if(String(store.currentId||'')!==originId)throw Error('拍照過程已切換刀具表，避免寫入錯誤表單');
   讀取工件三視圖_()[key]=thumb;
   正式雲端檔案_()[key]=null;
+  雲端欄()[key]='';
   saveCurrent(true);
   const tableId=String(store.currentId||'');
   if(!tableId)throw Error('刀具表尚未取得識別碼');
@@ -244,7 +245,7 @@ window.移除工件三視圖_=function(key){
  const id=String(store.currentId||'');const was=!!讀取工件三視圖_()[key];
  舊移除(key);
  if(was&&!讀取工件三視圖_()[key]){
-  正式雲端檔案_()[key]=null;saveCurrent(true);
+  正式雲端檔案_()[key]=null;雲端欄()[key]='';saveCurrent(true);
   刪除原圖(id,key).catch(e=>console.warn(e));
  }
 };

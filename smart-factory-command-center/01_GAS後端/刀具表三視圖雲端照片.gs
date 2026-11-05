@@ -199,3 +199,20 @@ function 刀具三視圖_回傳頁_(結果, 請求碼) {
     '<script>' + js + '</script><p>刀具表精靈照片傳輸完成，可以返回原畫面。</p></body></html>')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
+
+
+/**
+ * 照片庫管理員手動執行一次的授權碼初始化功能。
+ * 必須使用 qhero1982@gmail.com 開啟既有正式 GAS 專案執行。
+ * 管理密鑰僅保存 SHA-256 雜湊；明文授權碼只在本次執行紀錄顯示一次。
+ */
+function 管理員_產生工件三視圖授權碼_() {
+  var email = String(Session.getEffectiveUser().getEmail() || '').toLowerCase();
+  if (email !== 刀具三視圖_資料夾預期擁有者_)
+    throw new Error('僅允許照片庫擁有者 qhero1982@gmail.com 初始化授權碼');
+  var code = (Utilities.getUuid() + Utilities.getUuid()).replace(/-/g,'');
+  PropertiesService.getScriptProperties().setProperty(
+    刀具三視圖_授權屬性_, 刀具三視圖_雜湊_(code));
+  console.log('工件照片授權碼（僅此一次，請安全保存）：' + code);
+  return '授權碼已建立；請立即在本次執行紀錄查看並安全保存';
+}
