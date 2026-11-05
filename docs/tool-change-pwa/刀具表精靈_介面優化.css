@@ -485,3 +485,14 @@
 #預覽正式儲存狀態 {font-size:12px!important;color:#334155;text-align:center;line-height:1.4;}
 #預覽正式儲存狀態[data-success="1"] {color:#08753a;font-weight:800;}
 @media print {.預覽正式儲存列{display:none!important;}}
+
+/* v239 工件原圖本機高解析與雲端分享功能 */
+.工件三視圖雲端入口 {display:grid;gap:6px;margin:8px 12px;padding:10px;border-radius:12px;border:1px solid #a6c9f1;background:#ecf6ff;}
+.工件三視圖雲端入口 a {display:block;min-height:44px;box-sizing:border-box;padding:12px;border-radius:10px;background:#1d62c9;color:#fff!important;text-align:center;font-size:14px!important;font-weight:900;text-decoration:none;}
+.工件三視圖雲端入口 small {font-size:12px!important;color:#475569;line-height:1.4;font-weight:700;}
+.工件三視圖雲端操作 {display:grid;gap:6px;margin-top:9px;}
+.工件三視圖雲端操作 button {padding:9px;min-height:44px;border-radius:9px;border:1px solid #b8d7ff;color:#154a85;background:#f1f8ff;font-size:12px!important;font-weight:800;}
+.工件三視圖雲端操作 input {box-sizing:border-box;width:100%;min-height:44px;padding:10px;border:1px solid #c5d8ef;border-radius:9px;font-size:16px!important;color:#0f2947;background:white;}
+.工件三視圖雲端跳轉 {min-height:44px;border:1px solid #b8d7ff;border-radius:10px;background:#e4f0ff;color:#164a85;padding:9px 16px;font-size:14px!important;font-weight:800;}
+.G補正大字輸入 {font-size:clamp(34px,8vw,54px)!important;min-height:82px!important;font-weight:900!important;font-variant-numeric:tabular-nums!important;color:#12365b!important;}
+.預覽正式儲存列 {position:relative;z-index:3;}

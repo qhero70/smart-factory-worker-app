@@ -4725,7 +4725,7 @@ html, body {
 }
 
 </style>
-<link rel="stylesheet" href="./刀具表精靈_介面優化.css?版本=238">
+<link rel="stylesheet" href="./刀具表精靈_介面優化.css?版本=239">
 </head>
 <body class="mobile-view-chat">
 <div id="tool-action-toast" role="status" aria-live="off" aria-hidden="true">
@@ -6244,11 +6244,12 @@ html, body {
 <div id="工件三視圖視窗" class="modal-backdrop" role="dialog" aria-modal="true" aria-label="工件三視圖" onclick="if(event.target===this)關閉工件三視圖編輯_()">
  <div class="modal-panel 工件三視圖面板">
   <div class="modal-head"><h2>📸 工件三視圖</h2><button type="button" class="modal-close" aria-label="關閉三視圖" onclick="關閉工件三視圖編輯_()">×</button></div>
-  <p class="工件三視圖提示">依序拍攝正視圖、俯視圖、側視圖；點照片可放大，重拍可直接替換。</p>
+  <p class="工件三視圖提示">拍照後保留未縮小的高解析原圖在本機相簿，報表只顯示縮圖。分享高解析照片至 Google 雲端硬碟後，請貼回該照片連結以便電腦查看。</p>
+<div class="工件三視圖雲端入口"><a href="https://drive.google.com/drive/folders/1au_lydLX3NAEwEs8lzLF58iJ5uzKveYQ" target="_blank" rel="noopener noreferrer">☁️ 開啟工件三視圖照片庫</a><small>提醒：分享／下載不代表已自動存到 Google Drive，請自行確認檔案已上傳。</small></div>
   <div class="工件三視圖編輯格">
-    <section class="工件三視圖卡"><h3>① 正視圖</h3><button type="button" id="工件三視圖照片-正視圖" class="工件三視圖照片" onclick="開啟工件三視圖大圖_('正視圖')">＋ 拍攝正視圖</button><input hidden type="file" accept="image/*" capture="environment" id="工件三視圖檔案-正視圖" onchange="接收工件三視圖_(this,'正視圖')"><div class="工件三視圖操作"><button type="button" onclick="選擇工件三視圖照片_('正視圖')">📷 拍攝／重拍</button><button type="button" onclick="移除工件三視圖_('正視圖')">移除</button></div></section>
-    <section class="工件三視圖卡"><h3>② 俯視圖</h3><button type="button" id="工件三視圖照片-俯視圖" class="工件三視圖照片" onclick="開啟工件三視圖大圖_('俯視圖')">＋ 拍攝俯視圖</button><input hidden type="file" accept="image/*" capture="environment" id="工件三視圖檔案-俯視圖" onchange="接收工件三視圖_(this,'俯視圖')"><div class="工件三視圖操作"><button type="button" onclick="選擇工件三視圖照片_('俯視圖')">📷 拍攝／重拍</button><button type="button" onclick="移除工件三視圖_('俯視圖')">移除</button></div></section>
-    <section class="工件三視圖卡"><h3>③ 側視圖</h3><button type="button" id="工件三視圖照片-側視圖" class="工件三視圖照片" onclick="開啟工件三視圖大圖_('側視圖')">＋ 拍攝側視圖</button><input hidden type="file" accept="image/*" capture="environment" id="工件三視圖檔案-側視圖" onchange="接收工件三視圖_(this,'側視圖')"><div class="工件三視圖操作"><button type="button" onclick="選擇工件三視圖照片_('側視圖')">📷 拍攝／重拍</button><button type="button" onclick="移除工件三視圖_('側視圖')">移除</button></div></section>
+    <section class="工件三視圖卡"><h3>① 正視圖</h3><button type="button" id="工件三視圖照片-正視圖" class="工件三視圖照片" onclick="開啟工件三視圖大圖_('正視圖')">＋ 拍攝正視圖</button><input hidden type="file" accept="image/*" capture="environment" id="工件三視圖檔案-正視圖" onchange="接收工件三視圖_(this,'正視圖')"><div class="工件三視圖操作"><button type="button" onclick="選擇工件三視圖照片_('正視圖')">📷 拍攝／重拍</button><button type="button" onclick="移除工件三視圖_('正視圖')">移除</button></div><div class="工件三視圖雲端操作"><button type="button" onclick="分享三視圖原圖_('正視圖')">☁️ 分享原圖到雲端</button><input type="url" id="工件三視圖雲端連結-正視圖" placeholder="上傳後貼上 Google Drive 原圖連結" aria-label="正視圖雲端原圖連結" onchange="保存三視圖雲端連結_(this,'正視圖')"><button type="button" onclick="開啟三視圖雲端原圖_('正視圖')">↗ 開啟原圖</button></div></section>
+    <section class="工件三視圖卡"><h3>② 俯視圖</h3><button type="button" id="工件三視圖照片-俯視圖" class="工件三視圖照片" onclick="開啟工件三視圖大圖_('俯視圖')">＋ 拍攝俯視圖</button><input hidden type="file" accept="image/*" capture="environment" id="工件三視圖檔案-俯視圖" onchange="接收工件三視圖_(this,'俯視圖')"><div class="工件三視圖操作"><button type="button" onclick="選擇工件三視圖照片_('俯視圖')">📷 拍攝／重拍</button><button type="button" onclick="移除工件三視圖_('俯視圖')">移除</button></div><div class="工件三視圖雲端操作"><button type="button" onclick="分享三視圖原圖_('俯視圖')">☁️ 分享原圖到雲端</button><input type="url" id="工件三視圖雲端連結-俯視圖" placeholder="上傳後貼上 Google Drive 原圖連結" aria-label="俯視圖雲端原圖連結" onchange="保存三視圖雲端連結_(this,'俯視圖')"><button type="button" onclick="開啟三視圖雲端原圖_('俯視圖')">↗ 開啟原圖</button></div></section>
+    <section class="工件三視圖卡"><h3>③ 側視圖</h3><button type="button" id="工件三視圖照片-側視圖" class="工件三視圖照片" onclick="開啟工件三視圖大圖_('側視圖')">＋ 拍攝側視圖</button><input hidden type="file" accept="image/*" capture="environment" id="工件三視圖檔案-側視圖" onchange="接收工件三視圖_(this,'側視圖')"><div class="工件三視圖操作"><button type="button" onclick="選擇工件三視圖照片_('側視圖')">📷 拍攝／重拍</button><button type="button" onclick="移除工件三視圖_('側視圖')">移除</button></div><div class="工件三視圖雲端操作"><button type="button" onclick="分享三視圖原圖_('側視圖')">☁️ 分享原圖到雲端</button><input type="url" id="工件三視圖雲端連結-側視圖" placeholder="上傳後貼上 Google Drive 原圖連結" aria-label="側視圖雲端原圖連結" onchange="保存三視圖雲端連結_(this,'側視圖')"><button type="button" onclick="開啟三視圖雲端原圖_('側視圖')">↗ 開啟原圖</button></div></section>
   </div>
   <p id="工件三視圖狀態" role="status" aria-live="polite"></p>
   <div class="工件三視圖底列"><button class="btn btn-green" onclick="關閉工件三視圖編輯_()">✅ 完成，返回刀具表</button></div>
@@ -6258,7 +6259,7 @@ html, body {
  <div class="modal-panel 工件三視圖大圖面板">
   <div class="modal-head"><h2 id="工件三視圖大圖標題">工件照片</h2><button type="button" class="modal-close" onclick="關閉工件三視圖大圖_()" aria-label="關閉照片">×</button></div>
   <img id="工件三視圖大圖圖片" alt="工件照片放大檢視">
-  <p>可雙指縮放，關閉後返回原刀具表。</p>
+  <p>本機原圖保留完整解析度；其他裝置若有已儲存雲端連結可開啟 Google Drive 原圖。</p><button id="工件三視圖大圖雲端鈕" class="工件三視圖雲端跳轉" type="button" hidden>↗ 開啟雲端原圖</button>
   <button class="btn btn-ghost" onclick="關閉工件三視圖大圖_()">關閉大圖</button>
  </div>
 </div>
@@ -9690,6 +9691,7 @@ function formalToolRows_(data) {
 
 async function saveCurrentToFormalSheets(silent = true) {
     if (formalDbBusy) return false;
+    if(document.activeElement?.isContentEditable)document.activeElement.blur();
     saveCurrent(true);
     if (!hasMeaningfulData()) { if (!silent) alert('目前刀具表沒有可儲存的資料。'); return false; }
     formalDbBusy = true;
@@ -9699,7 +9701,7 @@ async function saveCurrentToFormalSheets(silent = true) {
         const 儲存開始表ID = String(store.currentId || '');
         const data = formalSanitizedData_();
         const tableId = formalTableId_();
-        const sheetName = formalSheetNameFromData_(data);
+        const sheetName = (data._formalTableId && data._formalSheetName) ? String(data._formalSheetName) : formalSheetNameFromData_(data);
         data._formalTableId = tableId;
         data._formalRevision = Date.now().toString(36) + Math.random().toString(36).slice(2);
         const tools = formalToolRows_(appData);
@@ -9719,6 +9721,7 @@ async function saveCurrentToFormalSheets(silent = true) {
         if (!confirmed) throw new Error('尚未讀回同一修訂的完整主檔與刀具明細，本機資料已保留');
         if (String(store.currentId || '') !== 儲存開始表ID) throw new Error('正式儲存已寫入但期間已切換表格，禁止把上一張表 ID 套到新表；請重新整理清單確認');
         appData._formalTableId = tableId;
+        appData._formalSheetName = sheetName;
         formalDbLastSavedId = tableId;
         saveCurrent(true);
         formalDbStatus_('ok', '正式存檔與讀回核對完成：' + sheetName);
@@ -10159,6 +10162,7 @@ function changeFormat(type) {
     appData.date = prev.date || new Date().toISOString().split('T')[0];
     appData.creator = prev.creator || '';
     appData.工件三視圖=JSON.parse(JSON.stringify(prev.工件三視圖||{正視圖:'',俯視圖:'',側視圖:''}));
+    appData.工件三視圖雲端=JSON.parse(JSON.stringify(prev.工件三視圖雲端||{正視圖:'',俯視圖:'',側視圖:''}));
 
     const mb1 = document.getElementById('mode-btn-1');
     const mb2 = document.getElementById('mode-btn-2');
@@ -12430,6 +12434,7 @@ document.querySelectorAll('.os-group-title, .os-subgroup-title').forEach(標題 
     });
 });
 </script>
+<script src="./刀具表精靈_工件高解析雲端管理.js?版本=239"></script>
 </body>
 </html>
 
