@@ -4725,7 +4725,7 @@ html, body {
 }
 
 </style>
-<link rel="stylesheet" href="./刀具表精靈_介面優化.css?版本=239">
+<link rel="stylesheet" href="./刀具表精靈_介面優化.css?版本=240">
 </head>
 <body class="mobile-view-chat">
 <div id="tool-action-toast" role="status" aria-live="off" aria-hidden="true">
@@ -6245,11 +6245,19 @@ html, body {
  <div class="modal-panel 工件三視圖面板">
   <div class="modal-head"><h2>📸 工件三視圖</h2><button type="button" class="modal-close" aria-label="關閉三視圖" onclick="關閉工件三視圖編輯_()">×</button></div>
   <p class="工件三視圖提示">拍照後保留未縮小的高解析原圖在本機相簿，報表只顯示縮圖。分享高解析照片至 Google 雲端硬碟後，請貼回該照片連結以便電腦查看。</p>
+  <div class="工件高清雲端設定">
+    <strong id="工件高清服務狀態" role="status" aria-live="polite">☁️ 正在檢查高解析照片安全上傳服務…</strong>
+    <div class="工件高清授權行">
+      <input id="工件高清授權碼" type="password" autocomplete="off" placeholder="管理員提供的照片雲端授權碼" aria-label="照片雲端授權碼">
+      <button type="button" onclick="設定照片雲端授權碼_()">🔐 設定本次授權碼</button>
+    </div>
+    <small>照片授權碼不存入試算表；GAS 未部署或資料夾仍公開時自動上傳停用，照片先保存在手機原圖庫。</small>
+  </div>
 <div class="工件三視圖雲端入口"><a href="https://drive.google.com/drive/folders/1au_lydLX3NAEwEs8lzLF58iJ5uzKveYQ" target="_blank" rel="noopener noreferrer">☁️ 開啟工件三視圖照片庫</a><small>提醒：分享／下載不代表已自動存到 Google Drive，請自行確認檔案已上傳。</small></div>
   <div class="工件三視圖編輯格">
-    <section class="工件三視圖卡"><h3>① 正視圖</h3><button type="button" id="工件三視圖照片-正視圖" class="工件三視圖照片" onclick="開啟工件三視圖大圖_('正視圖')">＋ 拍攝正視圖</button><input hidden type="file" accept="image/*" capture="environment" id="工件三視圖檔案-正視圖" onchange="接收工件三視圖_(this,'正視圖')"><div class="工件三視圖操作"><button type="button" onclick="選擇工件三視圖照片_('正視圖')">📷 拍攝／重拍</button><button type="button" onclick="移除工件三視圖_('正視圖')">移除</button></div><div class="工件三視圖雲端操作"><button type="button" onclick="分享三視圖原圖_('正視圖')">☁️ 分享原圖到雲端</button><input type="url" id="工件三視圖雲端連結-正視圖" placeholder="上傳後貼上 Google Drive 原圖連結" aria-label="正視圖雲端原圖連結" onchange="保存三視圖雲端連結_(this,'正視圖')"><button type="button" onclick="開啟三視圖雲端原圖_('正視圖')">↗ 開啟原圖</button></div></section>
-    <section class="工件三視圖卡"><h3>② 俯視圖</h3><button type="button" id="工件三視圖照片-俯視圖" class="工件三視圖照片" onclick="開啟工件三視圖大圖_('俯視圖')">＋ 拍攝俯視圖</button><input hidden type="file" accept="image/*" capture="environment" id="工件三視圖檔案-俯視圖" onchange="接收工件三視圖_(this,'俯視圖')"><div class="工件三視圖操作"><button type="button" onclick="選擇工件三視圖照片_('俯視圖')">📷 拍攝／重拍</button><button type="button" onclick="移除工件三視圖_('俯視圖')">移除</button></div><div class="工件三視圖雲端操作"><button type="button" onclick="分享三視圖原圖_('俯視圖')">☁️ 分享原圖到雲端</button><input type="url" id="工件三視圖雲端連結-俯視圖" placeholder="上傳後貼上 Google Drive 原圖連結" aria-label="俯視圖雲端原圖連結" onchange="保存三視圖雲端連結_(this,'俯視圖')"><button type="button" onclick="開啟三視圖雲端原圖_('俯視圖')">↗ 開啟原圖</button></div></section>
-    <section class="工件三視圖卡"><h3>③ 側視圖</h3><button type="button" id="工件三視圖照片-側視圖" class="工件三視圖照片" onclick="開啟工件三視圖大圖_('側視圖')">＋ 拍攝側視圖</button><input hidden type="file" accept="image/*" capture="environment" id="工件三視圖檔案-側視圖" onchange="接收工件三視圖_(this,'側視圖')"><div class="工件三視圖操作"><button type="button" onclick="選擇工件三視圖照片_('側視圖')">📷 拍攝／重拍</button><button type="button" onclick="移除工件三視圖_('側視圖')">移除</button></div><div class="工件三視圖雲端操作"><button type="button" onclick="分享三視圖原圖_('側視圖')">☁️ 分享原圖到雲端</button><input type="url" id="工件三視圖雲端連結-側視圖" placeholder="上傳後貼上 Google Drive 原圖連結" aria-label="側視圖雲端原圖連結" onchange="保存三視圖雲端連結_(this,'側視圖')"><button type="button" onclick="開啟三視圖雲端原圖_('側視圖')">↗ 開啟原圖</button></div></section>
+    <section class="工件三視圖卡"><h3>① 正視圖</h3><button type="button" id="工件三視圖照片-正視圖" class="工件三視圖照片" onclick="開啟工件三視圖大圖_('正視圖')">＋ 拍攝正視圖</button><input hidden type="file" accept="image/*" capture="environment" id="工件三視圖檔案-正視圖" onchange="接收工件三視圖_(this,'正視圖')"><div class="工件三視圖操作"><button type="button" onclick="選擇工件三視圖照片_('正視圖')">📷 拍攝／重拍</button><button type="button" onclick="移除工件三視圖_('正視圖')">移除</button></div><div class="工件三視圖雲端操作"><button type="button" onclick="正式照片上傳_('正視圖')">🔒 自動上傳私有 Drive</button><button type="button" onclick="分享三視圖原圖_('正視圖')">☁️ 分享原圖到雲端</button><input type="url" id="工件三視圖雲端連結-正視圖" placeholder="上傳後貼上 Google Drive 原圖連結" aria-label="正視圖雲端原圖連結" onchange="保存三視圖雲端連結_(this,'正視圖')"><button type="button" onclick="開啟三視圖雲端原圖_('正視圖')">↗ 開啟原圖</button></div></section>
+    <section class="工件三視圖卡"><h3>② 俯視圖</h3><button type="button" id="工件三視圖照片-俯視圖" class="工件三視圖照片" onclick="開啟工件三視圖大圖_('俯視圖')">＋ 拍攝俯視圖</button><input hidden type="file" accept="image/*" capture="environment" id="工件三視圖檔案-俯視圖" onchange="接收工件三視圖_(this,'俯視圖')"><div class="工件三視圖操作"><button type="button" onclick="選擇工件三視圖照片_('俯視圖')">📷 拍攝／重拍</button><button type="button" onclick="移除工件三視圖_('俯視圖')">移除</button></div><div class="工件三視圖雲端操作"><button type="button" onclick="正式照片上傳_('俯視圖')">🔒 自動上傳私有 Drive</button><button type="button" onclick="分享三視圖原圖_('俯視圖')">☁️ 分享原圖到雲端</button><input type="url" id="工件三視圖雲端連結-俯視圖" placeholder="上傳後貼上 Google Drive 原圖連結" aria-label="俯視圖雲端原圖連結" onchange="保存三視圖雲端連結_(this,'俯視圖')"><button type="button" onclick="開啟三視圖雲端原圖_('俯視圖')">↗ 開啟原圖</button></div></section>
+    <section class="工件三視圖卡"><h3>③ 側視圖</h3><button type="button" id="工件三視圖照片-側視圖" class="工件三視圖照片" onclick="開啟工件三視圖大圖_('側視圖')">＋ 拍攝側視圖</button><input hidden type="file" accept="image/*" capture="environment" id="工件三視圖檔案-側視圖" onchange="接收工件三視圖_(this,'側視圖')"><div class="工件三視圖操作"><button type="button" onclick="選擇工件三視圖照片_('側視圖')">📷 拍攝／重拍</button><button type="button" onclick="移除工件三視圖_('側視圖')">移除</button></div><div class="工件三視圖雲端操作"><button type="button" onclick="正式照片上傳_('側視圖')">🔒 自動上傳私有 Drive</button><button type="button" onclick="分享三視圖原圖_('側視圖')">☁️ 分享原圖到雲端</button><input type="url" id="工件三視圖雲端連結-側視圖" placeholder="上傳後貼上 Google Drive 原圖連結" aria-label="側視圖雲端原圖連結" onchange="保存三視圖雲端連結_(this,'側視圖')"><button type="button" onclick="開啟三視圖雲端原圖_('側視圖')">↗ 開啟原圖</button></div></section>
   </div>
   <p id="工件三視圖狀態" role="status" aria-live="polite"></p>
   <div class="工件三視圖底列"><button class="btn btn-green" onclick="關閉工件三視圖編輯_()">✅ 完成，返回刀具表</button></div>
@@ -12434,7 +12442,7 @@ document.querySelectorAll('.os-group-title, .os-subgroup-title').forEach(標題 
     });
 });
 </script>
-<script src="./刀具表精靈_工件高解析雲端管理.js?版本=239"></script>
+<script src="./刀具表精靈_工件高解析雲端管理.js?版本=240"></script>
 </body>
 </html>
 

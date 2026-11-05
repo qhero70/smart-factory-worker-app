@@ -3,6 +3,126 @@
 'use strict';
 const 資料庫名稱='刀具精靈_工件三視圖原圖_v1';
 const 可用視圖=['正視圖','俯視圖','側視圖'];
+
+/* 私有 Google Drive 高解析照片 API：在原本 GAS 完成部署及權限驗證前，不會顯示成功。 */
+let 正式照片服務可用_=false;
+let 本次照片授權碼_='';
+let 照片上傳執行中_=false;
+const 原圖雲端根ID_='1au_lydLX3NAEwEs8lzLF58iJ5uzKveYQ';
+function 正式雲端檔案_(){
+ if(!appData.工件三視圖雲端檔案||typeof appData.工件三視圖雲端檔案!=='object')
+   appData.工件三視圖雲端檔案={正視圖:null,俯視圖:null,側視圖:null};
+ return appData.工件三視圖雲端檔案;
+}
+function 高解析雲端訊息_(message,warning=false){
+ const el=document.getElementById('工件高清服務狀態');
+ if(el){el.textContent=message;el.dataset.warning=warning?'1':'0';}
+ 訊息(message);
+}
+async function 核對工件雲端服務_(){
+ try{
+  const r=await formalJsonp_({api:'刀具表_照片設定'});
+  正式照片服務可用_=!!(r?.成功&&r.照片功能版本==='1.0'&&r.正式照片庫ID===原圖雲端根ID_&&r.可上傳);
+  高解析雲端訊息_(正式照片服務可用_?'☁️ 雲端 API 已啟用，輸入授權碼即可上傳。':'⚠️ 雲端尚未啟用：'+(r?.訊息||'照片資料夾權限尚未符合安全要求'),!正式照片服務可用_);
+ }catch(e){
+  正式照片服務可用_=false;
+  高解析雲端訊息_('⚠️ 照片雲端 API 尚未部署。原圖先留在本機，不會顯示假上傳成功。',true);
+ }
+ return 正式照片服務可用_;
+}
+window.設定照片雲端授權碼_=function(){
+ const field=document.getElementById('工件高清授權碼');
+ const code=String(field?.value||'').trim();
+ if(code.length<24){高解析雲端訊息_('請輸入管理員提供的完整照片授權碼（至少 24 字）。',true);return;}
+ 本次照片授權碼_=code;
+ if(field)field.value='';
+ 高解析雲端訊息_(正式照片服務可用_?'✅ 本次授權碼已設定，可以上傳。':'⚠️ 已暫存授權碼，但後端尚未啟用。',!正式照片服務可用_);
+};
+function 原圖雲端提交_(api,values,timeoutMs=120000){
+ return new Promise((resolve,reject)=>{
+  const nonce=typeof crypto!=='undefined'&&crypto.randomUUID?crypto.randomUUID():'R'+Date.now()+'-'+Math.random().toString(36).slice(2).padEnd(22,'0');
+  const frame=document.createElement('iframe'),form=document.createElement('form');
+  frame.hidden=true;frame.name='工件照片_'+nonce;
+  form.hidden=true;form.method='POST';form.action=FORMAL_GAS_API_URL;form.target=frame.name;
+  const fields=Object.assign({},values,{api,請求碼:nonce,授權碼:本次照片授權碼_});
+  Object.entries(fields).forEach(([key,value])=>{
+   const input=document.createElement('input');input.type='hidden';input.name=key;input.value=String(value??'');form.appendChild(input);
+  });
+  let completed=false,timer=null;
+  const clean=(error,data)=>{
+   if(completed)return;
+   completed=true;clearTimeout(timer);window.removeEventListener('message',receive);
+   setTimeout(()=>{form.remove();frame.remove();},150);
+   error?reject(error):resolve(data);
+  };
+  const receive=event=>{
+   if(event.source!==frame.contentWindow)return;
+   const origin=String(event.origin||'');
+   if(!/^https:\/\/(?:script\.google\.com|(?:[a-z0-9-]+\.)*script\.googleusercontent\.com)$/i.test(origin))return;
+   const data=event.data;
+   if(!data||data.來源!=='刀具表精靈照片服務'||data.請求碼!==nonce)return;
+   if(data.成功!==true)clean(new Error(data.訊息||'照片後端未完成'));
+   else clean(null,data);
+  };
+  window.addEventListener('message',receive);
+  document.body.append(frame,form);
+  timer=setTimeout(()=>clean(new Error('照片雲端逾時；本機原始照片仍保留')),timeoutMs);
+  try{form.submit();}catch(e){clean(e);}
+ });
+}
+function 讀取檔案為資料網址_(file) {
+ return new Promise((resolve,reject)=>{
+  const reader=new FileReader();
+  reader.onload=()=>resolve(String(reader.result||''));
+  reader.onerror=()=>reject(new Error('照片讀取失敗'));
+  reader.readAsDataURL(file);
+ });
+}
+async function 正式照片上傳_(key){
+ if(!可用視圖.includes(key))return false;
+ if(照片上傳執行中_){高解析雲端訊息_('上一張照片仍在上傳中。',true);return false;}
+ if(!await 核對工件雲端服務_())return false;
+ if(!本次照片授權碼_){高解析雲端訊息_('請先輸入照片雲端授權碼。',true);return false;}
+ const id=String(store.currentId||'');
+ if(!id){高解析雲端訊息_('請先建立刀具表。',true);return false;}
+ const data=await 讀取原圖(id,key).catch(()=>null);
+ if(!data?.檔案){高解析雲端訊息_('此手機找不到這張高解析原圖，請重新拍照。',true);return false;}
+ 照片上傳執行中_=true;
+ try{
+  高解析雲端訊息_(key+' 正在傳送 Google Drive 高解析照片…');
+  let image=await 讀取檔案為資料網址_(data.檔案);
+  let mime=String(data.類型||'');
+  if(image.length>5_500_000||!/^image\/(?:jpeg|png|webp)$/.test(mime)){
+   image='';
+   for(const [size,q] of [[2560,.9],[2200,.85],[1920,.80],[1600,.72],[1280,.65]]){
+    image=await compressImage(data.檔案,size,q);
+    if(image.length<=5_500_000)break;
+   }
+   mime='image/jpeg';
+  }
+  if(!image||image.length>5_500_000)throw Error('照片超出上傳上限，請降低解析度');
+  const result=await 原圖雲端提交_('刀具表_照片上傳',{刀具表ID:id,視圖:key,圖片類型:mime,圖片資料:image});
+  if(String(store.currentId||'')!==id)throw Error('儲存時切換刀具表；不將回應寫到另一張表');
+  if(!result.檔案ID)throw Error('沒有取得雲端檔案 ID');
+  const check=await 原圖雲端提交_('刀具表_照片查核',{檔案ID:result.檔案ID});
+  if(check.檔案ID!==result.檔案ID||Number(check.容量)!==Number(result.容量))throw Error('上傳讀回核對失敗');
+  正式雲端檔案_()[key]={
+   檔案ID:result.檔案ID,檔案名稱:result.檔案名稱,容量:result.容量,
+   圖片類型:result.圖片類型,雲端網址:result.雲端網址,
+   儲存時間:result.儲存時間,已核對:true
+  };
+  雲端欄()[key]=result.雲端網址;
+  saveCurrent(true);
+  window.渲染工件三視圖_();
+  高解析雲端訊息_('✅ '+key+' 已存入私有 Google Drive，且已讀回核對；正式試算表快照會保存照片 ID。');
+  return true;
+ }catch(e){
+  高解析雲端訊息_('⚠️ 雲端照片尚未確認：'+(e.message||e)+'；本機原圖仍保留。',true);return false;
+ }finally{照片上傳執行中_=false;}
+}
+window.正式照片上傳_=正式照片上傳_;
+window.確認工件照片服務_=核對工件雲端服務_;
+
 let 大圖網址=null;
 function 開庫(){
  return new Promise((resolve,reject)=>{
@@ -82,6 +202,8 @@ window.分享三視圖原圖_=async function(key){
  訊息('已下載原圖，請開啟上方雲端資料夾上傳，並貼回照片連結。');
  alert('此瀏覽器不支援直接分享原圖，已改下載。請自行上傳到 Google Drive。');
 };
+const 舊開啟管理=window.開啟工件三視圖編輯_;
+window.開啟工件三視圖編輯_=function(){const result=舊開啟管理.apply(this,arguments);核對工件雲端服務_().catch(()=>{});return result;};
 const 舊渲染=window.渲染工件三視圖_;
 window.渲染工件三視圖_=function(){
  舊渲染();
@@ -105,6 +227,7 @@ window.接收工件三視圖_=async function(input,key){
   if(thumb.length>9800)throw Error('照片無法製作適合試算表的縮圖');
   if(String(store.currentId||'')!==originId)throw Error('拍照過程已切換刀具表，避免寫入錯誤表單');
   讀取工件三視圖_()[key]=thumb;
+  正式雲端檔案_()[key]=null;
   saveCurrent(true);
   const tableId=String(store.currentId||'');
   if(!tableId)throw Error('刀具表尚未取得識別碼');
@@ -113,13 +236,17 @@ window.接收工件三視圖_=async function(input,key){
   updateA4Preview();updateA3Preview();
   訊息(highResOk?key+' 原圖已保留在本機，縮圖已保存。請分享原圖到 Google Drive 取得跨裝置連結。':key+' 縮圖已存，但原圖未能保存，請確認裝置容量並備份原始照片。');
   if(!highResOk)alert('高解析原圖未能保存；請將相機原始照片另外備份至 Google Drive。');
+  if(highResOk&&本次照片授權碼_&&正式照片服務可用_)正式照片上傳_(key).catch(()=>{});
  }catch(e){訊息('照片保存未完成：'+(e.message||e));alert('工件照片保存失敗：'+(e.message||e));}
 };
 const 舊移除=window.移除工件三視圖_;
 window.移除工件三視圖_=function(key){
  const id=String(store.currentId||'');const was=!!讀取工件三視圖_()[key];
  舊移除(key);
- if(was&&!讀取工件三視圖_()[key])刪除原圖(id,key).catch(e=>console.warn(e));
+ if(was&&!讀取工件三視圖_()[key]){
+  正式雲端檔案_()[key]=null;saveCurrent(true);
+  刪除原圖(id,key).catch(e=>console.warn(e));
+ }
 };
 window.開啟工件三視圖大圖_=async function(key){
  if(!可用視圖.includes(key))return;
@@ -142,7 +269,26 @@ window.開啟工件三視圖大圖_=async function(key){
    if(大圖網址)URL.revokeObjectURL(大圖網址);
    大圖網址=URL.createObjectURL(full.檔案);img.src=大圖網址;
    if(title)title.textContent='工件'+key+'｜原始解析度';
-  }else if(title)title.textContent='工件'+key+'｜只有縮圖，請查看雲端原圖';
+  }else {
+   const remote=正式雲端檔案_()[key];
+   if(!remote?.檔案ID||!本次照片授權碼_||!await 核對工件雲端服務_()){
+    if(title)title.textContent='工件'+key+'｜僅有縮圖，雲端原圖需授權';
+   }else{
+    try{
+     if(title)title.textContent='工件'+key+'｜正在讀回雲端高解析照片';
+     const out=await 原圖雲端提交_('刀具表_照片讀取',{檔案ID:remote.檔案ID});
+     if(!modal.classList.contains('show')||String(store.currentId||'')!==id)return;
+     if(out.檔案ID!==remote.檔案ID||!out.圖片資料)throw Error('照片讀回缺少資料');
+     const uri='data:'+out.圖片類型+';base64,'+out.圖片資料;
+     img.src=uri;
+     if(title)title.textContent='工件'+key+'｜Drive 高解析照片';
+     高解析雲端訊息_('✅ '+key+' 已從 Drive 安全讀回高解析原圖');
+    }catch(err){
+     if(title)title.textContent='工件'+key+'｜雲端讀取失敗，縮圖仍可使用';
+     高解析雲端訊息_('⚠️ 雲端原圖未讀回：'+(err.message||err),true);
+    }
+   }
+  }
  }catch(e){if(title)title.textContent='工件'+key+'｜原圖讀取失敗';}
 };
 window.關閉工件三視圖大圖_=function(){

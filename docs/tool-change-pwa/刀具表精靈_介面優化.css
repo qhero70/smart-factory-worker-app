@@ -496,3 +496,13 @@
 .工件三視圖雲端跳轉 {min-height:44px;border:1px solid #b8d7ff;border-radius:10px;background:#e4f0ff;color:#164a85;padding:9px 16px;font-size:14px!important;font-weight:800;}
 .G補正大字輸入 {font-size:clamp(34px,8vw,54px)!important;min-height:82px!important;font-weight:900!important;font-variant-numeric:tabular-nums!important;color:#12365b!important;}
 .預覽正式儲存列 {position:relative;z-index:3;}
+
+/* v240 工件照片私有雲端 API 授權與狀態 */
+.工件高清雲端設定 {margin:8px 12px;padding:12px;border:1px solid #a9caed;background:#eff6ff;border-radius:13px;}
+#工件高清服務狀態 {display:block;font-size:14px!important;line-height:1.45;font-weight:900;color:#176b43;}
+#工件高清服務狀態[data-warning="1"] {color:#b91c1c;}
+.工件高清授權行 {display:flex;gap:8px;margin:10px 0;}
+#工件高清授權碼 {flex:1;min-width:0;padding:10px 12px;border:1px solid #93b6f0;border-radius:10px;background:white;font-size:16px!important;}
+.工件高清授權行 button {flex:none;border:0;border-radius:10px;background:#2563eb;color:#fff;padding:10px 12px;font-size:14px!important;font-weight:800;min-height:48px;}
+.工件高清雲端設定 small {display:block;color:#475569;line-height:1.5;font-size:12px!important;}
+@media(max-width:420px){.工件高清授權行{flex-direction:column;}.工件高清授權行 button{width:100%;}}
