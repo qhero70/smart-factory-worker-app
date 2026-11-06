@@ -17,3 +17,7 @@ const html=fs.readFileSync('docs/tool-change-pwa/index.html','utf8');
   let 攔截=false;處理.fetch({request:{method:'GET',url:'https://'+host+'/test'},respondWith(){攔截=true;}});斷言.equal(攔截,false);
  }
 });
+測試('舊正式 GAS 數字轉型可以核對，空值、不同數值及文字不可冒充成功',()=>{
+ const c={};vm.createContext(c);vm.runInContext(html.slice(html.indexOf('function 正式欄位一致_('),html.indexOf('async function saveCurrentToFormalSheets(')),c);
+ for(const [k,a,b,ok] of [['H值','011',11,true],['H值','012',11,false],['H值','',0,false],['G補正X軸','0.020',0.02,true],['刀號','011',11,false],['照片URL','a','b',false]])斷言.equal(c.正式欄位一致_(k,a,b),ok);
+});

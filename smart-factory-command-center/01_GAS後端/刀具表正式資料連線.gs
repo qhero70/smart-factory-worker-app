@@ -129,7 +129,7 @@ function 刀具表正式讀取_(動作,參數) {
 /* 文字以純文字入庫，防止 =、+、-、@ 被試算表當成公式。 */
 function 刀具表純文字_(值) {
   if (值 === null || 值 === undefined) return '';
-  if (typeof 值 === 'string' && /^[=+@-]/.test(值)) return "'" + 值;
+  if (typeof 值 === 'string' && (/^[=+@-]/.test(值) || /^0[0-9]/.test(值))) return "'" + 值;
   return 值;
 }
 

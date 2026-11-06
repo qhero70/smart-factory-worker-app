@@ -9692,6 +9692,15 @@ function formalToolRows_(data) {
     }));
 }
 
+// 舊正式 GAS 會把 011、0.020 儲存成數字；僅數值欄位採等值核對，文字與照片仍完全比對。
+function 正式欄位一致_(欄位, 左值, 右值) {
+    const 左 = String(左值 ?? ''), 右 = String(右值 ?? '');
+    if (左 === 右) return true;
+    if (!['H值','G補正X軸','G補正Z軸'].includes(欄位)) return false;
+    const 數值格式 = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/;
+    return 數值格式.test(左) && 數值格式.test(右) && Number.isFinite(Number(左)) && Number(左) === Number(右);
+}
+
 async function saveCurrentToFormalSheets(silent = true) {
     if (formalDbBusy) return false;
     if(document.activeElement?.isContentEditable)document.activeElement.blur();
@@ -9736,7 +9745,7 @@ async function saveCurrentToFormalSheets(silent = true) {
                 const 主檔 = verify.rows.find(r => String(r.刀具表ID) === tableId && r.資料類型 === '主檔');
                 const 明細 = verify.rows.filter(r => String(r.刀具表ID) === tableId && r.資料類型 === '刀具');
                 confirmed = !!主檔 && String(主檔.JSON資料) === JSON.stringify(data) && 明細.length === tools.length &&
-                    tools.every((t,i) => ['N工序','刀具形式','刀號','H值','G補正X軸','G補正Z軸','刀具壽命','照片URL','照片檔名'].every(k => String(明細[i][k] ?? '') === String(t[k] ?? '')));
+                    tools.every((t,i) => ['N工序','刀具形式','刀號','H值','G補正X軸','G補正Z軸','刀具壽命','照片URL','照片檔名','備註'].every(k => 正式欄位一致_(k,明細[i][k],t[k])));
                 if (confirmed) break;
             } catch (讀回錯誤) { if (次數 === 11 || /版本衝突|同名|識別不符|請重新載入/.test(讀回錯誤.message)) throw 讀回錯誤; }
         }
