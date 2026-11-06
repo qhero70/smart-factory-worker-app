@@ -9585,26 +9585,21 @@ function formalJsonp_(params, timeoutMs = 15000) {
 }
 
 /* 跨來源 POST 僅負責傳送；必須另行讀回相同修訂碼才宣告儲存成功。 */
-function 送出正式刀具表_(資料, timeoutMs = 15000) {
-    return new Promise(resolve => {
-        const iframe = document.createElement('iframe');
-        const form = document.createElement('form');
-        iframe.name = 'toolSheetPost_' + Date.now();
-        iframe.hidden = true; form.hidden = true;
-        form.method = 'POST'; form.action = FORMAL_GAS_API_URL; form.target = iframe.name;
-        [['api','刀具表_儲存'],['資料',JSON.stringify(資料)]].forEach(([名稱,值]) => {
-            const input = document.createElement('input'); input.type = 'hidden';
-            input.name = 名稱; input.value = 值; form.appendChild(input);
-        });
-        let settled = false, submitted = false;
-        const finish = () => {
-            if (settled) return; settled = true;
-            setTimeout(() => { form.remove(); iframe.remove(); }, 50); resolve();
-        };
-        iframe.onload = () => { if (submitted) finish(); };
-        document.body.appendChild(iframe); document.body.appendChild(form);
-        submitted = true; form.submit(); setTimeout(finish,timeoutMs);
+function 送出正式刀具表_(資料) {
+    // 空白 iframe 的 load 不是 GAS 回執。保留傳送視窗直到讀回結束，避免取消 POST。
+    const iframe = document.createElement('iframe');
+    const form = document.createElement('form');
+    iframe.name = 'toolSheetPost_' + crypto.randomUUID();
+    iframe.hidden = true; form.hidden = true;
+    form.method = 'POST'; form.action = FORMAL_GAS_API_URL; form.target = iframe.name;
+    [['api','刀具表_儲存'],['資料',JSON.stringify(資料)]].forEach(([名稱,值]) => {
+        const input = document.createElement('input'); input.type = 'hidden';
+        input.name = 名稱; input.value = 值; form.appendChild(input);
     });
+    document.body.appendChild(iframe); document.body.appendChild(form);
+    const 清理 = () => { form.remove(); iframe.remove(); };
+    try { form.submit(); } catch (錯誤) { 清理(); throw 錯誤; }
+    return 清理;
 }
 
 function sleep_(ms) { return new Promise(r => setTimeout(r, ms)); }
@@ -9649,7 +9644,7 @@ function formalSanitizedData_() {
             if ('t_image' in t) t.t_image = '';
         });
     });
-    if(JSON.stringify(d).length>47000)throw Error('刀具表快照含三視圖照片超過試算表單格安全長度；本機資料已保留，請縮小照片後再儲存。');
+    if(JSON.stringify(d).length>45000)throw Error('刀具表快照含三視圖照片超過試算表單格安全長度；本機資料已保留，請縮小照片後再儲存。');
     return d;
 }
 
@@ -9705,30 +9700,50 @@ async function saveCurrentToFormalSheets(silent = true) {
     formalDbBusy = true;
     formalDbStatus_('busy', '正在儲存正式刀具表，完成後將讀回核對…');
     更新預覽正式儲存狀態_('正在儲存與讀回核對…',false);
+    let 清理傳送 = null;
     try {
+        if (navigator.onLine === false) throw new Error('網路中斷，待同步');
         const 儲存開始表ID = String(store.currentId || '');
         const data = formalSanitizedData_();
         const tableId = formalTableId_();
         const sheetName = (data._formalTableId && data._formalSheetName) ? String(data._formalSheetName) : formalSheetNameFromData_(data);
+        const tools = formalToolRows_(appData);
+        const 送出來源 = formalSource_();
+        const 基準修訂 = String(data._formalRevision || '');
+        const 狀態 = await formalJsonp_({api:'刀具表_狀態'});
+        const 儲存前索引 = await formalJsonp_({api:'刀具表_清單'});
+        if (儲存前索引.rows.some(r => String(r.刀具表ID) === tableId && String(r.分頁名稱) !== sheetName)) {
+            throw new Error('刀具表ID已綁定其他分頁，請重新載入原表；新增表格請使用新增刀具表');
+        }
         data._formalTableId = tableId;
         data._formalRevision = Date.now().toString(36) + Math.random().toString(36).slice(2);
-        const tools = formalToolRows_(appData);
-        await 送出正式刀具表_({刀具表ID:tableId,分頁名稱:sheetName,快照:data,明細:tools,基本:formalBasicInfo_(data),來源:formalSource_()});
+        清理傳送 = 送出正式刀具表_({基準修訂,刀具表ID:tableId,分頁名稱:sheetName,快照:data,明細:tools,基本:formalBasicInfo_(data),來源:送出來源});
         let confirmed = false;
-        for (let 次數 = 0; 次數 < 4; 次數++) {
+        for (let 次數 = 0; 次數 < 12; 次數++) {
             await sleep_(700 + 次數 * 500);
             try {
+                if (狀態.儲存回執 === true) {
+                    const 回執 = await formalJsonp_({api:'刀具表_儲存結果',請求碼:data._formalRevision});
+                    if (回執.待處理) continue;
+                    if (回執.刀具表ID !== tableId || 回執.修訂 !== data._formalRevision) throw new Error('儲存回執識別不符');
+                }
+                const 索引 = await formalJsonp_({api:'刀具表_清單'});
+                if (索引.rows.filter(r => String(r.刀具表ID) === tableId && String(r.分頁名稱) === sheetName).length !== 1) {
+                    if (次數 < 11) continue;
+                    throw new Error('正式索引尚未完成唯一登記');
+                }
                 const verify = await formalJsonp_({action:'readSheet',sheet:sheetName});
                 const 主檔 = verify.rows.find(r => String(r.刀具表ID) === tableId && r.資料類型 === '主檔');
                 const 明細 = verify.rows.filter(r => String(r.刀具表ID) === tableId && r.資料類型 === '刀具');
                 confirmed = !!主檔 && String(主檔.JSON資料) === JSON.stringify(data) && 明細.length === tools.length &&
                     tools.every((t,i) => ['N工序','刀具形式','刀號','H值','G補正X軸','G補正Z軸','刀具壽命','照片URL','照片檔名'].every(k => String(明細[i][k] ?? '') === String(t[k] ?? '')));
                 if (confirmed) break;
-            } catch (讀回錯誤) { if (次數 === 3) throw 讀回錯誤; }
+            } catch (讀回錯誤) { if (次數 === 11 || /版本衝突|同名|識別不符|請重新載入/.test(讀回錯誤.message)) throw 讀回錯誤; }
         }
         if (!confirmed) throw new Error('尚未讀回同一修訂的完整主檔與刀具明細，本機資料已保留');
         if (String(store.currentId || '') !== 儲存開始表ID) throw new Error('正式儲存已寫入但期間已切換表格，禁止把上一張表 ID 套到新表；請重新整理清單確認');
         appData._formalTableId = tableId;
+        appData._formalRevision = data._formalRevision;
         appData._formalSheetName = sheetName;
         formalDbLastSavedId = tableId;
         saveCurrent(true);
@@ -9738,11 +9753,11 @@ async function saveCurrentToFormalSheets(silent = true) {
         if (!silent) { playSound('success'); alert('✅ 正式試算表已儲存並讀回核對\n分頁：' + sheetName); }
         return true;
     } catch (e) {
-        formalDbStatus_('error', '尚未確認正式存檔：' + (e.message || e) + '。本機資料保留。');
+        formalDbStatus_('error', '待同步，尚未確認正式存檔：' + (e.message || e) + '。本機資料保留。');
         更新預覽正式儲存狀態_('⚠️ 未確認正式存檔：'+(e.message||e),false);
         if (!silent) alert('尚未確認正式存檔：' + (e.message || e));
         return false;
-    } finally { formalDbBusy = false; }
+    } finally { if (清理傳送) 清理傳送(); formalDbBusy = false; }
 }
 
 /* v2.2.4｜在同一個選單列出本機與正式試算表，保留資料來源及獨立識別。 */

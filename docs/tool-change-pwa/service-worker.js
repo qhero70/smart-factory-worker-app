@@ -3,7 +3,7 @@
  * 原則：不修改既有 UI / UX / 功能，只提供殼層快取與外部資源執行期快取。
  */
 const 快取版本 = '刀具表精靈-pwa-v2.2.9';
-const 殼層快取 = `${快取版本}-殼層-r17`;
+const 殼層快取 = `${快取版本}-殼層-r18`;
 const 外部快取 = `${快取版本}-外部`;
 
 const 必備檔案 = [
@@ -65,6 +65,9 @@ self.addEventListener('fetch', (事件) => {
 
   const 網址 = new URL(請求.url);
   const 同來源 = 網址.origin === self.location.origin;
+  // 正式 API 與私人照片永遠走網路；離線不得回傳舊成功收據。
+  if (網址.hostname === 'script.google.com' || 網址.hostname === 'script.googleusercontent.com' ||
+      網址.hostname === 'drive.google.com') return;
 
   if (請求.mode === 'navigate') {
     事件.respondWith(

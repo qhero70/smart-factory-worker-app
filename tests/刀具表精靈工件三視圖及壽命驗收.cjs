@@ -49,11 +49,11 @@ const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
 });
 測試('三視圖寫入刀具表快照且對 Google 試算表有長度限制',()=>{
  斷言.ok(html.includes("工件三視圖: {正視圖:'',俯視圖:'',側視圖:''}"));
- 斷言.ok(html.includes('JSON.stringify(d).length>47000'));
+ 斷言.ok(html.includes('JSON.stringify(d).length>45000'));
  斷言.ok(html.includes('data.length>9800'));
  斷言.ok(html.includes("String(store.currentId||'')!==originalId"));
  斷言.ok(html.includes('appData.工件三視圖=JSON.parse(JSON.stringify(prev.工件三視圖'));
  斷言.ok(html.includes('渲染工件三視圖_();'));
- 斷言.ok(sw.includes('殼層-r17'));
+ 斷言.ok(sw.includes('殼層-r18'));
  斷言.ok(sw.includes('介面優化.css?版本=240'));
 });

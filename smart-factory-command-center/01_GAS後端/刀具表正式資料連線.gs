@@ -1,5 +1,5 @@
 /** 化新精密｜刀具表正式資料連線 v2.2.7；沿用唯一主庫及原 Web App。 */
-var 刀具表連線版本_ = '2.2.9';
+var 刀具表連線版本_ = '2.3.0';
 var 刀具表正式庫_ = '19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8';
 var 刀具表索引欄位_ = ['刀具表ID','分頁名稱','表格格式','品名','工序','機器號碼','客戶品號','產品編號','主程式','加工程式','夾持壓力','夾持高壓','夾持低壓','注意事項','加工時間','每日數量','QR內容','製表者','製表日期','來源','LINE_USER_ID','建立時間','更新時間'];
 var 刀具表明細欄位_ = ['刀具表ID','分頁名稱','排序','N工序','刀具形式','刀號','H值','G補正X軸','G補正Z軸','刀具壽命','照片URL','照片檔名','備註','建立時間','更新時間'];
@@ -32,14 +32,25 @@ function 刀具表正式接收_(請求, 方法) {
     } else if (動作 === '刀具表_刪除結果') {
       var 收據 = PropertiesService.getScriptProperties().getProperty('刀具刪除收據_' + String(參數.請求碼 || ''));
       結果 = 收據 ? JSON.parse(收據) : {成功:false,訊息:'尚未完成刪除，或密碼錯誤'};
+    } else if (動作 === '刀具表_儲存結果') {
+      var 請求碼 = String(參數.請求碼 || '');
+      if (方法 !== 'GET' || !/^[A-Za-z0-9_.:-]{1,120}$/.test(請求碼)) throw new Error('儲存請求碼不合法');
+      var 已存回執 = CacheService.getScriptCache().get('刀具儲存_' + 請求碼);
+      結果 = 已存回執 ? JSON.parse(已存回執) : {成功:true,待處理:true};
     } else if (動作 === '刀具表_儲存') {
       if (方法 !== 'POST') throw new Error('儲存只接受 POST');
-      結果 = 刀具表正式儲存_(JSON.parse(String(參數.資料 || '{}')));
+      var 儲存資料 = JSON.parse(String(參數.資料 || '{}'));
+      var 修訂碼 = String(儲存資料.快照 && 儲存資料.快照._formalRevision || '');
+      if (!/^[A-Za-z0-9_.:-]{1,120}$/.test(修訂碼)) throw new Error('儲存修訂碼不合法');
+      try { 結果 = 刀具表正式儲存_(儲存資料); }
+      catch (儲存錯誤) { 結果 = {成功:false,訊息:String(儲存錯誤.message || 儲存錯誤)}; }
+      結果.修訂 = 修訂碼;
+      CacheService.getScriptCache().put('刀具儲存_' + 修訂碼,JSON.stringify(結果),600);
     } else {
       if (方法 !== 'GET') throw new Error('讀取只接受 GET');
       if (動作 === '刀具表_狀態') {
         var 主庫 = SpreadsheetApp.openById(刀具表正式庫_);
-        結果 = {成功:!!主庫.getSheetByName('刀具表_索引') && !!主庫.getSheetByName('刀具表_明細')};
+        結果 = {成功:!!主庫.getSheetByName('刀具表_索引') && !!主庫.getSheetByName('刀具表_明細'),儲存回執:true,版本檢查:true};
       } else if (動作 === '刀具表_清單' || 動作 === '刀具表_載入') {
         var 鎖 = LockService.getScriptLock();
         if (!鎖.tryLock(15000)) throw new Error('刀具表正在儲存，請稍後重試');
@@ -159,11 +170,31 @@ function 刀具表正式儲存_(資料) {
     var 索引 = 刀具表讀表_(索引表), 所有明細 = 刀具表讀表_(明細表);
     var 同名 = 索引.filter(function(列){return String(列.分頁名稱) === 名稱 && String(列.刀具表ID) !== 編號;});
     if (同名.length) throw new Error('同名刀具表已存在，請先載入該分頁再編輯');
+    var 同ID = 索引.filter(function(列){return String(列.刀具表ID) === 編號;});
+    if (同ID.length > 1 || 同ID.some(function(列){return String(列.分頁名稱) !== 名稱;})) throw new Error('刀具表ID已綁定其他分頁，請重新載入原表');
     var 產品表 = 主庫.getSheetByName(名稱);
     if (產品表) {
       var 表頭 = 產品表.getRange(1,1,1,Math.min(產品表.getLastColumn(),25)).getValues()[0];
       var 既有產品 = 刀具表讀表_(產品表);
       if (表頭[0] !== '資料類型' || 表頭[1] !== '刀具表ID' || 既有產品.some(function(列){return String(列.刀具表ID) !== 編號;})) throw new Error('同名工作表不是這張刀具表，已阻止覆寫');
+      if (!同ID.length) throw new Error('既有分頁尚未登記索引，須先由管理員比對補登，禁止覆寫');
+      var 原主檔 = 既有產品.filter(function(列){return 列.資料類型 === '主檔';});
+      if (原主檔.length !== 1) throw new Error('主檔數量異常，禁止覆寫');
+      var 原快照 = JSON.parse(String(原主檔[0].JSON資料 || '{}'));
+      var 新修訂 = String(快照._formalRevision || '');
+      var 原修訂 = String(原快照._formalRevision || '');
+      var 原明細 = 既有產品.filter(function(列){return 列.資料類型 === '刀具';});
+      if (新修訂 && 新修訂 === 原修訂) {
+        var 相同明細 = 原明細.length === 明細.length && 明細.every(function(列,序){
+          return 刀具表明細欄位_.filter(function(欄){return !['刀具表ID','分頁名稱','排序','建立時間','更新時間'].includes(欄);})
+            .every(function(欄){return String(列[欄] || '') === String(原明細[序][欄] || '');});
+        });
+        if (String(原主檔[0].JSON資料) !== 快照文字 || !相同明細) throw new Error('重送修訂碼對應不同資料，拒絕覆寫');
+        return {成功:true,重送:true,刀具表ID:編號,分頁名稱:名稱,明細筆數:明細.length};
+      }
+      if (!Object.prototype.hasOwnProperty.call(資料,'基準修訂') || String(資料.基準修訂) !== 原修訂) {
+        throw new Error('版本衝突：其他裝置已更新或本機缺少基準，請重新載入正式刀具表');
+      }
     }
     [索引表,明細表].concat(產品表 ? [產品表] : []).forEach(function(表){備份.push({表:表,值:表.getDataRange().getValues()});});
     if (!產品表) {產品表 = 主庫.insertSheet(名稱); 新表 = 產品表;}
@@ -177,6 +208,9 @@ function 刀具表正式儲存_(資料) {
     刀具表寫整表_(產品表,刀具表產品欄位_,產品列);
     刀具表寫整表_(索引表,刀具表索引欄位_,索引.filter(function(列){return String(列.刀具表ID) !== 編號;}).concat([索引列]));
     SpreadsheetApp.flush();
+    var 讀回索引 = 刀具表讀表_(索引表).filter(function(列){return String(列.刀具表ID) === 編號 && String(列.分頁名稱) === 名稱;});
+    var 讀回主檔 = 刀具表讀表_(產品表).filter(function(列){return 列.資料類型 === '主檔';});
+    if (讀回索引.length !== 1 || 讀回主檔.length !== 1 || String(讀回主檔[0].JSON資料) !== 快照文字) throw new Error('正式寫入讀回不一致');
     return {成功:true,刀具表ID:編號,分頁名稱:名稱,更新時間:現在,明細筆數:新明細.length};
   } catch (錯誤) {
     /* 跨分頁異常時在同一把鎖內還原；不刪除任何既有產品分頁。 */
