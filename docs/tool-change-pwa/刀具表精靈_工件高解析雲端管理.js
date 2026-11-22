@@ -58,7 +58,8 @@ function 原圖雲端提交_(api,values,timeoutMs=120000){
   const receive=event=>{
    // GAS HtmlService 可能位於第二層 Google 沙箱；以 Google 來源＋隨機請求碼驗證，不只看 iframe source。
    const origin=String(event.origin||'');
-   if(!/^https:\/\/(?:script\.google\.com|(?:[a-z0-9-]+\.)*script\.googleusercontent\.com)$/i.test(origin))return;
+   // GAS HtmlService 亦可能使用 n-xxxx-script.googleusercontent.com 格式。
+   if(!/^https:\/\/(?:script\.google\.com|(?:[a-z0-9-]+\.)*script\.googleusercontent\.com|[a-z0-9-]+-script\.googleusercontent\.com)$/i.test(origin))return;
    const data=event.data;
    if(!data||data.來源!=='刀具表精靈照片服務'||data.請求碼!==nonce)return;
    if(data.成功!==true)clean(new Error(data.訊息||'照片後端未完成'));
@@ -85,6 +86,11 @@ async function 正式照片上傳_(key){
  if(!本次照片授權碼_){高解析雲端訊息_('請先輸入照片雲端授權碼。',true);return false;}
  const id=String(store.currentId||'');
  if(!id){高解析雲端訊息_('請先建立刀具表。',true);return false;}
+ // 跨裝置重新載入後 store.currentId 為此手機暫存 ID；Drive 必須以正式刀具表 ID 歸檔。
+ const 正式刀具表ID=String(appData?._formalTableId||id);
+ if(!/^[A-Za-z0-9_-]{8,100}$/.test(正式刀具表ID)){
+  高解析雲端訊息_('正式刀具表識別碼不合法，未上傳照片。',true);return false;
+ }
  const data=await 讀取原圖(id,key).catch(()=>null);
  if(!data?.檔案){高解析雲端訊息_('此手機找不到這張高解析原圖，請重新拍照。',true);return false;}
  照片上傳執行中_=true;
@@ -101,11 +107,11 @@ async function 正式照片上傳_(key){
    mime='image/jpeg';
   }
   if(!image||image.length>5_500_000)throw Error('照片超出上傳上限，請降低解析度');
-  const result=await 原圖雲端提交_('刀具表_照片上傳',{刀具表ID:id,視圖:key,圖片類型:mime,圖片資料:image});
+  const result=await 原圖雲端提交_('刀具表_照片上傳',{刀具表ID:正式刀具表ID,視圖:key,圖片類型:mime,圖片資料:image});
   if(String(store.currentId||'')!==id)throw Error('儲存時切換刀具表；不將回應寫到另一張表');
-  if(!result.檔案ID)throw Error('沒有取得雲端檔案 ID');
+  if(!result.檔案ID||result.刀具表ID!==正式刀具表ID||result.視圖!==key)throw Error('雲端照片識別不符');
   const check=await 原圖雲端提交_('刀具表_照片查核',{檔案ID:result.檔案ID});
-  if(check.檔案ID!==result.檔案ID||Number(check.容量)!==Number(result.容量))throw Error('上傳讀回核對失敗');
+  if(check.檔案ID!==result.檔案ID||Number(check.容量)!==Number(result.容量)||check.圖片類型!==result.圖片類型)throw Error('上傳讀回核對失敗');
   正式雲端檔案_()[key]={
    檔案ID:result.檔案ID,檔案名稱:result.檔案名稱,容量:result.容量,
    圖片類型:result.圖片類型,雲端網址:result.雲端網址,
@@ -279,7 +285,7 @@ window.開啟工件三視圖大圖_=async function(key){
      if(title)title.textContent='工件'+key+'｜正在讀回雲端高解析照片';
      const out=await 原圖雲端提交_('刀具表_照片讀取',{檔案ID:remote.檔案ID});
      if(!modal.classList.contains('show')||String(store.currentId||'')!==id)return;
-     if(out.檔案ID!==remote.檔案ID||!out.圖片資料)throw Error('照片讀回缺少資料');
+     if(out.檔案ID!==remote.檔案ID||!out.圖片資料||Number(out.容量)!==Number(remote.容量)||out.圖片類型!==remote.圖片類型)throw Error('雲端高解析照片身分、容量或格式核對失敗');
      const uri='data:'+out.圖片類型+';base64,'+out.圖片資料;
      img.src=uri;
      if(title)title.textContent='工件'+key+'｜Drive 高解析照片';
