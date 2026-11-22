@@ -21,3 +21,20 @@ const html=fs.readFileSync('docs/tool-change-pwa/index.html','utf8');
  const c={};vm.createContext(c);vm.runInContext(html.slice(html.indexOf('function 正式欄位一致_('),html.indexOf('async function saveCurrentToFormalSheets(')),c);
  for(const [k,a,b,ok] of [['H值','011',11,true],['H值','012',11,false],['H值','',0,false],['G補正X軸','0.020',0.02,true],['刀號','011',11,false],['照片URL','a','b',false]])斷言.equal(c.正式欄位一致_(k,a,b),ok);
 });
+
+測試('正式快照保留 H 前導零與 G 補正小數精度，數值真的改變才使用明細',()=>{
+ const 開始=html.indexOf('function 還原正式數值格式_(');
+ const 結束=html.indexOf('async function loadSelectedFormalSheet(',開始);
+ 斷言.ok(開始>=0&&結束>開始,'找不到正式精度還原函式');
+ const c={};vm.createContext(c);vm.runInContext(html.slice(開始,結束),c);
+ for(const [原始,明細,預期] of [
+  ['011',11,'011'],['0.020',0.02,'0.020'],['-0.010',-0.01,'-0.010'],
+  ['0.000',0,'0.000'],['012',11,'11'],['',0,'0'],['0.020',0.03,'0.03'],
+  ['AB','AC','AC']
+ ])斷言.equal(c.還原正式數值格式_(原始,明細),預期,原始+' / '+明細);
+ for(const 欄 of [
+  't.t_h = 還原正式數值格式_(t.t_h, r.H值)',
+  't.t_gx = 還原正式數值格式_(t.t_gx, r.G補正X軸)',
+  't.t_gz = 還原正式數值格式_(t.t_gz, r.G補正Z軸)'
+ ])斷言.ok(html.includes(欄),欄);
+});
