@@ -9920,7 +9920,7 @@ function 還原正式數值格式_(快照原值, 明細讀回值) {
     const 快照 = String(快照原值 ?? '');
     const 明細 = String(明細讀回值 ?? '');
     if (快照 === 明細) return 快照;
-    const 格式 = /^[+-]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)$/;
+    const 格式 = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/;
     if (快照 && 明細 && 格式.test(快照) && 格式.test(明細) &&
         Number.isFinite(Number(快照)) && Number(快照) === Number(明細)) return 快照;
     return 明細;
