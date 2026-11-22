@@ -20,7 +20,7 @@ jobs:
         run: |
           import json, urllib.parse, urllib.request
           base='https://script.google.com/macros/s/AKfycbzFuaDkPpXRxNltlU2IL7N2iGnFKDIbBvWlUX0dxJCo7IyMSZGD4DrUoXgvWiYczKCX/exec'
-          for api in ['刀具表_狀態','刀具表_清單']:
+          for api in ['刀具表_狀態','刀具表_清單','刀具表_照片設定']:
               callback='__toolSheetReadOnlyCheck'
               url=base+'?'+urllib.parse.urlencode({'api':api,'callback':callback})
               with urllib.request.urlopen(url,timeout=90) as response:
@@ -30,6 +30,11 @@ jobs:
               if not body.startswith(prefix) or not body.endswith(');'):
                   raise SystemExit('FAIL: 正式端點未回傳指定JSONP；不輸出HTML或敏感原文')
               data=json.loads(body[len(prefix):-2])
-              if status!=200 or data.get('成功') is not True or data.get('版本')!='2.2.9' or data.get('主庫ID')!='19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8':
+              if status!=200 or data.get('成功') is not True or data.get('版本')!='2.3.0' or data.get('主庫ID')!='19osmTlQQ9obDmVvmv5uphFHRwCtd2pkFhe6p3pYMSn8':
                   raise SystemExit('FAIL: 正式回應旗標／版本／主庫識別不符')
-              print(api+': PASS；版本='+data['版本']+'；筆數='+str(len(data.get('資料',[]))))
+              if api=='刀具表_照片設定':
+                  if data.get('照片功能版本')!='1.0' or data.get('正式照片庫ID')!='1au_lydLX3NAEwEs8lzLF58iJ5uzKveYQ':
+                      raise SystemExit('FAIL: 照片API版本／私人資料夾識別不符')
+                  print('照片 API：PASS（路由已接通）；授權狀態='+('已啟用' if data.get('可上傳') else '未啟用，維持禁止上傳'))
+              else:
+                  print(api+': PASS；版本='+data['版本']+'；筆數='+str(len(data.get('資料',[]))))
