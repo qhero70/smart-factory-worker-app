@@ -127,15 +127,18 @@ function 刀具表正式讀取_(動作,參數) {
 }
 
 /* 文字以純文字入庫，防止 =、+、-、@ 被試算表當成公式。 */
-function 刀具表純文字_(值) {
+function 刀具表純文字_(值, 欄位) {
   if (值 === null || 值 === undefined) return '';
-  if (typeof 值 === 'string' && (/^[=+@-]/.test(值) || /^0[0-9]/.test(值))) return "'" + 值;
+  // H 與 G 補正屬於輸入原文：含 011、0.020、1.2300 都不可被 Sheets 轉成數值。
+  var 精度文字欄位 = ['H值','G補正X軸','G補正Z軸'].indexOf(String(欄位 || '')) >= 0;
+  if (typeof 值 === 'string' && 值 !== '' &&
+      (精度文字欄位 || /^[=+@-]/.test(值) || /^0[0-9]/.test(值))) return "'" + 值;
   return 值;
 }
 
 function 刀具表寫整表_(表,欄,資料) {
   var 原列數 = 表.getLastRow();
-  var 新值 = [欄].concat(資料.map(function(物件){return 欄.map(function(鍵){return 刀具表純文字_(物件[鍵]);});}));
+  var 新值 = [欄].concat(資料.map(function(物件){return 欄.map(function(鍵){return 刀具表純文字_(物件[鍵], 鍵);});}));
   if (表.getMaxRows() < 新值.length) 表.insertRowsAfter(表.getMaxRows(), 新值.length-表.getMaxRows());
   if (表.getMaxColumns() < 欄.length) 表.insertColumnsAfter(表.getMaxColumns(),欄.length-表.getMaxColumns());
   表.getRange(1,1,新值.length,欄.length).setValues(新值);
