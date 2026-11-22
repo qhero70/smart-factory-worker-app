@@ -29,3 +29,29 @@ const style=fs.readFileSync(path.join(base,'刀具表精靈_介面優化.css'),'
  斷言.ok(sw.includes('殼層-r20'));
  斷言.ok(sw.includes('工件高解析雲端管理.js?版本=241'));
 });
+
+測試('GAS 雙層安全沙箱來源：允許官方腳本網域但拒絕偽冒來源',()=>{
+ const 來源行=photo.match(/if\(!(.+?)\.test\(origin\)\)return;/);
+ 斷言.ok(來源行,'找不到照片 postMessage 來源核對');
+ const 允許=require('node:vm').runInNewContext(來源行[1]);
+ for(const 網址 of [
+  'https://script.google.com','https://script.googleusercontent.com',
+  'https://n-abc123-script.googleusercontent.com',
+  'https://n-abc123.script.googleusercontent.com'
+ ])斷言.equal(允許.test(網址),true,網址);
+ for(const 網址 of [
+  'https://script.google.com.evil.example','https://evil.example',
+  'https://n-abc123-script.googleusercontent.com.evil.example','null'
+ ])斷言.equal(允許.test(網址),false,網址);
+ 斷言.ok(photo.includes("data.請求碼!==nonce"),'需使用隨機請求碼防偽');
+});
+測試('高解析照片跨裝置使用正式刀具表ID且核對容量及MIME',()=>{
+ for(const 項目 of [
+  "const 正式刀具表ID=String(appData?._formalTableId||id)",
+  "刀具表ID:正式刀具表ID",
+  "result.刀具表ID!==正式刀具表ID",
+  "check.圖片類型!==result.圖片類型",
+  "Number(out.容量)!==Number(remote.容量)",
+  "out.圖片類型!==remote.圖片類型"
+ ])斷言.ok(photo.includes(項目),項目);
+});
