@@ -9911,6 +9911,21 @@ function applyFormalAppData_(data, sheetName) {
     updatePreviewIdentity_();
 }
 
+/**
+ * 正式試算表可能將 0.020 數值化為 0.02；快照與明細數值相同時，
+ * 以使用者實際填寫的字串為準，保留前導零與小數尾零。
+ * 若明細確實不同則以明細為準，避免掩蓋實際修改。
+ */
+function 還原正式數值格式_(快照原值, 明細讀回值) {
+    const 快照 = String(快照原值 ?? '');
+    const 明細 = String(明細讀回值 ?? '');
+    if (快照 === 明細) return 快照;
+    const 格式 = /^[+-]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)$/;
+    if (快照 && 明細 && 格式.test(快照) && 格式.test(明細) &&
+        Number.isFinite(Number(快照)) && Number(快照) === Number(明細)) return 快照;
+    return 明細;
+}
+
 async function loadSelectedFormalSheet() {
     const select = document.getElementById('formal-sheet-select');
     const selected = String(select && select.value || '').trim();
@@ -9962,9 +9977,9 @@ async function loadSelectedFormalSheet() {
             if (r.N工序 !== undefined) t.t_seq = r.N工序 || '';
             if (r.刀具形式 !== undefined && !t.t_type) t.t_type = r.刀具形式 || '';
             if (r.刀號 !== undefined) t.t_no = r.刀號 || '';
-            if (r.H值 !== undefined) t.t_h = r.H值 || '';
-            if (r.G補正X軸 !== undefined) t.t_gx = r.G補正X軸 || '';
-            if (r.G補正Z軸 !== undefined) t.t_gz = r.G補正Z軸 || '';
+            if (r.H值 !== undefined) t.t_h = 還原正式數值格式_(t.t_h, r.H值);
+            if (r.G補正X軸 !== undefined) t.t_gx = 還原正式數值格式_(t.t_gx, r.G補正X軸);
+            if (r.G補正Z軸 !== undefined) t.t_gz = 還原正式數值格式_(t.t_gz, r.G補正Z軸);
             if (r.刀具壽命 !== undefined) t.t_remark = r.刀具壽命 || '';
             if (r.照片URL) t.t_photo = r.照片URL;
             if (r.照片檔名) t.t_imageName = r.照片檔名;
@@ -12466,7 +12481,7 @@ document.querySelectorAll('.os-group-title, .os-subgroup-title').forEach(標題 
     });
 });
 </script>
-<script src="./刀具表精靈_工件高解析雲端管理.js?版本=240"></script>
+<script src="./刀具表精靈_工件高解析雲端管理.js?版本=241"></script>
 </body>
 </html>
 
